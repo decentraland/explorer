@@ -278,14 +278,14 @@ namespace DCL.Huds.QuestsPanel
                 {
                     id = "fakeReward0",
                     name = "fake reward 0",
-                    status = QuestsLiterals.RewardStatus.OK,
+                    status = QuestsLiterals.RewardStatus.NOT_GIVEN,
                     imageUrl = "https://picsum.photos/200/300"
                 },
                 new QuestReward
                 {
                     id = "fakeReward1",
                     name = "fake reward 1",
-                    status = QuestsLiterals.RewardStatus.OK,
+                    status = QuestsLiterals.RewardStatus.NOT_GIVEN,
                     imageUrl = "https://picsum.photos/200/301"
                 }
             }
@@ -339,8 +339,8 @@ namespace DCL.Huds.QuestsPanel
                     currentFakeQuest.sections[1].tasks[0].progress = 1;
                     currentFakeQuest.sections[1].tasks[0].payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = true });
                     currentFakeQuest.status = QuestsLiterals.Status.COMPLETED;
-                    currentFakeQuest.rewards[0].status = QuestsLiterals.RewardStatus.ALREADY_GIVEN;
-                    currentFakeQuest.rewards[1].status = QuestsLiterals.RewardStatus.ALREADY_GIVEN;
+                    currentFakeQuest.rewards[0].status = QuestsLiterals.RewardStatus.OK;
+                    currentFakeQuest.rewards[1].status = QuestsLiterals.RewardStatus.OK;
                     currentFakeQuest.sections[1].progress = 1;
                     break;
             }

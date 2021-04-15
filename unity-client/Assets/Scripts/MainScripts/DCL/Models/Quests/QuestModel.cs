@@ -15,6 +15,7 @@ public static class QuestsLiterals
 
     public static class RewardStatus
     {
+        public static string NOT_GIVEN = "not_given";
         public static string OK = "ok";
         public static string ALREADY_GIVEN = "already_given";
         public static string TASK_ALREADY_COMPLETED = "task_already_completed";
