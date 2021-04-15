@@ -61,8 +61,9 @@ namespace DCL.Huds.QuestsTracker
 
         public IEnumerator ProgressAndCompleteSequence()
         {
-            progressBarIncrementAudioEvent.Play();
             Vector3 scale = progress.transform.localScale;
+            if (Math.Abs(scale.x - progressTarget) > Mathf.Epsilon)
+                progressBarIncrementAudioEvent.Play();
             while (scale.x < progressTarget)
             {
                 scale.x = Mathf.MoveTowards(scale.x, progressTarget, Time.deltaTime);
