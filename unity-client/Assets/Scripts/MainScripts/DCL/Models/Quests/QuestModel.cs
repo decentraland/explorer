@@ -48,7 +48,7 @@ public class QuestModel : BaseModel
 
     public bool TryGetReward(string rewardId, out QuestReward reward)
     {
-        reward = rewards.FirstOrDefault(x => x.id == rewardId);
+        reward = rewards?.FirstOrDefault(x => x.id == rewardId);
         return reward != null;
     }
 

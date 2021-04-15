@@ -90,6 +90,9 @@ namespace DCL.QuestsController
             quests[progressedQuest.id] = progressedQuest;
             progressedQuest.oldProgress = oldQuest.progress;
 
+            if (!HasProgressed(progressedQuest, oldQuest))
+                return;
+
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
                 QuestSection newQuestSection = progressedQuest.sections[index];
@@ -118,6 +121,9 @@ namespace DCL.QuestsController
             OnQuestProgressed?.Invoke(progressedQuest.id);
             if (!oldQuest.isCompleted && progressedQuest.isCompleted)
                 OnQuestCompleted?.Invoke(progressedQuest.id);
+
+            if (progressedQuest.rewards == null)
+                progressedQuest.rewards = new QuestReward[0];
 
             for (int index = 0; index < progressedQuest.rewards.Length; index++)
             {
@@ -155,6 +161,31 @@ namespace DCL.QuestsController
         {
             pinnedQuests.OnAdded -= OnPinnedQuestUpdated;
             pinnedQuests.OnRemoved -= OnPinnedQuestUpdated;
+        }
+
+        private bool HasProgressed(QuestModel newQuest, QuestModel oldQuest)
+        {
+            if (newQuest.rewards != null)
+            {
+                foreach (QuestReward newQuestReward in newQuest.rewards)
+                {
+                    if (!oldQuest.TryGetReward(newQuestReward.id, out var oldReward))
+                        continue;
+
+                    if (newQuestReward.status != oldReward.status)
+                        return true;
+                }
+            }
+
+            foreach (QuestSection newQuestSection in newQuest.sections)
+            {
+                if (!oldQuest.TryGetSection(newQuestSection.id, out var oldSection))
+                    continue;
+
+                if (Math.Abs(newQuestSection.progress - oldSection.progress) > Mathf.Epsilon)
+                    return true;
+            }
+            return false;
         }
     }
 }
