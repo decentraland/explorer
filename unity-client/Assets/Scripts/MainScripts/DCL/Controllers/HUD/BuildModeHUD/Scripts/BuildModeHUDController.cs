@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using DCL.Controllers;
 using System;
 using System.Collections;
@@ -7,11 +8,6 @@ using UnityEngine.EventSystems;
 
 public class BuildModeHUDController : IHUD
 {
-    private const string PUBLISH_MODAL_TITLE = "Publish Scene";
-    private const string PUBLISH_MODAL_SUBTITLE = "Are you sure you want to publish your scene to this Land?";
-    private const string PUBLISH_MODAL_CONFIRM_BUTTON = "PUBLISH";
-    private const string PUBLISH_MODAL_CANCEL_BUTTON = "CANCEL";
-
     public event Action OnChangeModeAction;
     public event Action OnTranslateSelectedAction;
     public event Action OnRotateSelectedAction;
@@ -185,10 +181,10 @@ public class BuildModeHUDController : IHUD
     public void PublishStart()
     {
         controllers.buildModeConfirmationModalController.Configure(
-            PUBLISH_MODAL_TITLE,
-            PUBLISH_MODAL_SUBTITLE,
-            PUBLISH_MODAL_CANCEL_BUTTON,
-            PUBLISH_MODAL_CONFIRM_BUTTON);
+            BuilderInWorldSettings.PUBLISH_MODAL_TITLE,
+            BuilderInWorldSettings.PUBLISH_MODAL_SUBTITLE,
+            BuilderInWorldSettings.PUBLISH_MODAL_CANCEL_BUTTON,
+            BuilderInWorldSettings.PUBLISH_MODAL_CONFIRM_BUTTON);
         controllers.buildModeConfirmationModalController.SetActive(true, BuildModeModalType.PUBLISH);
     }
 
