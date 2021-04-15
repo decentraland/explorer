@@ -1,6 +1,7 @@
 import { KernelConfigForRenderer } from 'shared/types'
-import { commConfigurations, ENABLE_BUILDER_IN_WORLD, getDefaultTLD, WSS_ENABLED, parcelLimits } from 'config'
+import { commConfigurations, ENABLE_BUILDER_IN_WORLD, getDefaultTLD, WSS_ENABLED } from 'config'
 import { nameValidCharacterRegex, nameValidRegex } from 'shared/profiles/utils/names'
+import { getWorld } from '@dcl/schemas'
 
 export function kernelConfigForRenderer(): KernelConfigForRenderer {
   return {
@@ -19,6 +20,6 @@ export function kernelConfigForRenderer(): KernelConfigForRenderer {
       // tslint:disable-next-line
       typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function' && !WSS_ENABLED,
     tld: getDefaultTLD(),
-    validWorldRanges: parcelLimits.validWorldRanges
+    validWorldRanges: getWorld().validWorldRanges
   }
 }

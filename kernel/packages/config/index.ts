@@ -1,5 +1,6 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
+import { getWorld } from '@dcl/schemas'
 
 export const NETWORK_HZ = 10
 
@@ -55,35 +56,7 @@ export namespace parcelLimits {
   export const minParcelX = -150
   export const minParcelZ = -150
 
-  // TODO(Mateo): Move to decentraland/common-schemas
-  export const validWorldRanges = [
-    {
-      xMin: -150,
-      yMin: -150,
-      xMax: 150,
-      yMax: 150
-    },
-    {
-      xMin: 62,
-      yMin: 151,
-      xMax: 162,
-      yMax: 158
-    },
-    {
-      xMin: 151,
-      yMin: 144,
-      xMax: 162,
-      yMax: 150
-    },
-    {
-      xMin: 151,
-      yMin: 59,
-      xMax: 163,
-      yMax: 143
-    }
-  ]
-
-  export const descriptiveValidWorldRanges = validWorldRanges
+  export const descriptiveValidWorldRanges = getWorld().validWorldRanges
     .map((range) => `(X from ${range.xMin} to ${range.xMax}, and Y from ${range.yMin} to ${range.yMax})`)
     .join(' or ')
 }
