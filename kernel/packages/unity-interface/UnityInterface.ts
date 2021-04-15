@@ -28,7 +28,7 @@ import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
-import { QuestForRenderer } from '@dcl/ecs-quests'
+import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
 const MINIMAP_CHUNK_SIZE = 100
