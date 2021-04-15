@@ -28,17 +28,9 @@ public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
         initialLoadingView.OnCancelLoading -= CancelLoading;
     }
 
-    public void Show()
-    {
-        initialLoadingView.Show();
-        SetPercentage(0f);
-    }
+    public void Show() { initialLoadingView.Show(); }
 
-    public void Hide(bool forzeHidding = false)
-    {
-        initialLoadingView.Hide(forzeHidding);
-        SetPercentage(100f);
-    }
+    public void Hide(bool forzeHidding = false) { initialLoadingView.Hide(forzeHidding); }
 
     public void CancelLoading() { OnCancelLoading?.Invoke(); }
 

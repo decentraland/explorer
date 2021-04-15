@@ -77,6 +77,11 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (sceneToEdit != null)
+            sceneToEdit.OnLoadingStateUpdated -= UpdateSceneLoadingProgress;
+
+        Environment.i.world.sceneController.OnReadyScene -= NewSceneReady;
+
         KernelConfig.i.OnChange -= OnKernelConfigChanged;
 
         if (HUDController.i.builderInWorldInititalHud != null)
@@ -316,11 +321,12 @@ public class BuilderInWorldController : MonoBehaviour
         return voxelEntityHit;
     }
 
-    public void NewSceneReady(string id)
+    private void NewSceneReady(string id)
     {
         if (sceneToEditId != id)
             return;
 
+        sceneToEdit.OnLoadingStateUpdated -= UpdateSceneLoadingProgress;
         Environment.i.world.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         sceneReady = true;
@@ -369,6 +375,7 @@ public class BuilderInWorldController : MonoBehaviour
         }
 
         initialLoadingController.Show();
+        initialLoadingController.SetPercentage(0f);
 
         //Note (Adrian) this should handle different when we have the full flow of the feature
         if (activateCamera)
@@ -383,11 +390,12 @@ public class BuilderInWorldController : MonoBehaviour
         if (sceneToEdit == null)
             return;
 
-        initialLoadingController.SetPercentage(50f);
-
         sceneToEditId = sceneToEdit.sceneData.id;
         inputController.isInputActive = false;
 
+        // In this point we're sure that the catalog loading (the first half of our progress bar) has already finished
+        initialLoadingController.SetPercentage(50f);
+        sceneToEdit.OnLoadingStateUpdated += UpdateSceneLoadingProgress;
         Environment.i.world.sceneController.OnReadyScene += NewSceneReady;
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
@@ -421,6 +429,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         StartBiwControllers();
         Environment.i.world.sceneController.ActivateBuilderInWorldEditScene();
+
+        initialLoadingController.SetPercentage(100f);
 
         if (IsNewScene())
         {
@@ -529,8 +539,11 @@ public class BuilderInWorldController : MonoBehaviour
                 if (sceneToEdit != null && sceneToEdit != scene)
                     actionController.Clear();
                 sceneToEdit = scene;
+
                 break;
             }
         }
     }
+
+    private void UpdateSceneLoadingProgress(float sceneLoadingProgress) { initialLoadingController.SetPercentage(50f + (sceneLoadingProgress / 2)); }
 }

@@ -25,7 +25,6 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             builderInWorldLoadingController.initialLoadingView.Received(1).Show();
-            builderInWorldLoadingController.initialLoadingView.Received(1).SetPercentage(0f);
         }
 
         [Test]
@@ -36,7 +35,6 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             builderInWorldLoadingController.initialLoadingView.Received(1).Hide();
-            builderInWorldLoadingController.initialLoadingView.Received(1).SetPercentage(100f);
         }
 
         [Test]

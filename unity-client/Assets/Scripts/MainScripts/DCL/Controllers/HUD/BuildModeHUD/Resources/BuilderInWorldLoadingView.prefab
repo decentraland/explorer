@@ -532,7 +532,7 @@ MonoBehaviour:
   animationTipsTransitionTime: 0.7
   cancelLoadingInputAction: {fileID: 11400000, guid: 4f763868020343f469cebb00aaf01960,
     type: 2}
-  minVisibilityTime: 2
+  minVisibilityTime: 1.5
   loadingBar: {fileID: 6092272806727738318}
 --- !u!1 &4751698209270518852
 GameObject:
