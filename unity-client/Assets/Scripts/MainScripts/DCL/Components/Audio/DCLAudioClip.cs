@@ -78,7 +78,7 @@ namespace DCL.Components
             }
         }
 
-        void TryToLoad()
+        IEnumerator TryToLoad()
         {
             if (loadingState != LoadState.LOADING_IN_PROGRESS
                 && loadingState != LoadState.LOADING_COMPLETED)
@@ -87,7 +87,7 @@ namespace DCL.Components
                 Model model = (Model) this.model;
                 if (scene.contentProvider.HasContentsUrl(model.url))
                 {
-                    Utils.FetchAudioClip(
+                    yield return Utils.FetchAudioClip(
                         scene.contentProvider.GetContentsUrl(model.url),
                         Utils.GetAudioTypeFromUrlName(model.url),
                         OnComplete,
@@ -121,7 +121,7 @@ namespace DCL.Components
             {
                 if (model.shouldTryToLoad && audioClip == null)
                 {
-                    TryToLoad();
+                    yield return TryToLoad();
                 }
                 else if (!model.shouldTryToLoad && audioClip != null)
                 {
