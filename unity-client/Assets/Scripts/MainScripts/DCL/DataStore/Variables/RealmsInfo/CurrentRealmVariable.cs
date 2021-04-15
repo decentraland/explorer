@@ -20,7 +20,7 @@ namespace Variables.RealmsInfo
     {
         public string layer;
         public string serverName;
-        public string domain;
+        public string domain = string.Empty;
 
         public bool Equals(CurrentRealmModel other)
         {
