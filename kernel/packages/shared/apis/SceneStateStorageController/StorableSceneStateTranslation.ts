@@ -82,8 +82,9 @@ export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneSt
     let components: Component[] = []
     for (let componentId of entity.components.values()) {
       if (componentMap.has(componentId)) {
+
         let component: Component = {
-          componentId: fromHumanReadableType(componentMap.get(componentId)?.type),
+          componentId: fromHumanReadableType(componentMap.get(componentId)!.type),
           data: componentMap.get(componentId)?.data
         }
         components.push(component)
