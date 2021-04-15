@@ -1,28 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &202661292419868652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 57064608651725385}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19e7434f0c30cd34ab81edae8ab53843, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  instantiateEvents: 0
-  audioMixerGroup: {fileID: -1579567457705484468, guid: 97507d628c02bcf47859b9f108ab1823,
-    type: 2}
-  spatialBlend: 0
-  overrideDefaults: 0
-  dopplerLevel: 1
-  minDistance: 1
-  maxDistance: 500
-  audioEvents:
-    array:
-    - {fileID: 11400000, guid: ce6bf664fc1d9124bab9ccb368cdb5ea, type: 2}
 --- !u!1 &163805072857999107
 GameObject:
   m_ObjectHideFlags: 0
@@ -2841,11 +2818,6 @@ PrefabInstance:
       propertyPath: builderInWorldModesParent
       value: 
       objectReference: {fileID: 1208871512899340007}
-    - target: {fileID: 4501830319568291384, guid: 0d9a89d47f96fbe47930f8c6b1e14fd0,
-        type: 3}
-      propertyPath: audioEvents.array.Array.size
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 5263035319998155755, guid: 0d9a89d47f96fbe47930f8c6b1e14fd0,
         type: 3}
       propertyPath: m_Name
@@ -2853,12 +2825,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d9a89d47f96fbe47930f8c6b1e14fd0, type: 3}
---- !u!1 &57064608651725385 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5263035319998155755, guid: 0d9a89d47f96fbe47930f8c6b1e14fd0,
-    type: 3}
-  m_PrefabInstance: {fileID: 5314446884079518114}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8676664512545622555 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3578392682826353593, guid: 0d9a89d47f96fbe47930f8c6b1e14fd0,

@@ -25,7 +25,7 @@ public class BuilderInWorldMode : MonoBehaviour
 
     public event Action OnInputDone;
     public event Action<BuildInWorldCompleteAction> OnActionGenerated;
-    public event Action<bool> OnEntityDeselected;
+    public event Action<DCLBuilderInWorldEntity, bool> OnEntityDeselected;
     public event Action OnEntitySelected;
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
@@ -137,7 +137,7 @@ public class BuilderInWorldMode : MonoBehaviour
             actionController.CreateActionEntityCreated(entityDeselected.rootEntity);
         }
 
-        OnEntityDeselected?.Invoke(isNewObjectPlaced);
+        OnEntityDeselected?.Invoke(entityDeselected, isNewObjectPlaced);
 
         isNewObjectPlaced = false;
     }

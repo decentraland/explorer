@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3578392682826353593}
   - component: {fileID: 4409442262483845632}
   - component: {fileID: 4501830319568291384}
+  - component: {fileID: 202661292419868652}
   m_Layer: 0
   m_Name: Audio
   m_TagString: Untagged
@@ -51,6 +52,10 @@ MonoBehaviour:
   modeController: {fileID: 0}
   eventAssetSpawn: {fileID: 11400000, guid: 50ff649965aff034aa8227fa845ff804, type: 2}
   eventAssetPlace: {fileID: 11400000, guid: 6be02392848c7b84e84edb760304a42a, type: 2}
+  eventBuilderOutOfBounds: {fileID: 11400000, guid: eacaa70b6f0bdfd4999a434fb8931f9e,
+    type: 2}
+  eventBuilderOutOfBoundsPlaced: {fileID: 11400000, guid: 87e6a13e11e0b0d4bac2f20b117b7d1e,
+    type: 2}
   eventAssetDelete: {fileID: 11400000, guid: 0426caa2d686a4943baa16e374f9b6bd, type: 2}
   eventBuilderExit: {fileID: 11400000, guid: 43c277932af173344857f28888a953d0, type: 2}
   eventBuilderMusic: {fileID: 11400000, guid: ce6bf664fc1d9124bab9ccb368cdb5ea, type: 2}
@@ -79,5 +84,28 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 6be02392848c7b84e84edb760304a42a, type: 2}
     - {fileID: 11400000, guid: 50ff649965aff034aa8227fa845ff804, type: 2}
     - {fileID: 11400000, guid: 0426caa2d686a4943baa16e374f9b6bd, type: 2}
-    - {fileID: 11400000, guid: 43c277932af173344857f28888a953d0, type: 2}
+    - {fileID: 11400000, guid: eacaa70b6f0bdfd4999a434fb8931f9e, type: 2}
+    - {fileID: 11400000, guid: 87e6a13e11e0b0d4bac2f20b117b7d1e, type: 2}
+--- !u!114 &202661292419868652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5263035319998155755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19e7434f0c30cd34ab81edae8ab53843, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  instantiateEvents: 0
+  audioMixerGroup: {fileID: -1579567457705484468, guid: 97507d628c02bcf47859b9f108ab1823,
+    type: 2}
+  spatialBlend: 0
+  overrideDefaults: 0
+  dopplerLevel: 1
+  minDistance: 1
+  maxDistance: 500
+  audioEvents:
+    array:
     - {fileID: 11400000, guid: ce6bf664fc1d9124bab9ccb368cdb5ea, type: 2}
