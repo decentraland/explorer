@@ -3,6 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "FadeDithering.hlsl"
+#include "../Includes/DCLConstants.hlsl"
 
 #if (defined(_NORMALMAP) || (defined(_PARALLAXMAP) && !defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR))) || defined(_DETAIL)
 #define REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR
@@ -177,7 +178,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
     {
         // We divide by 5 to correct the * 5 multiplication that takes place 
         // in the emission calculation of LitInput.hlsl
-        color.a *= max( 0, surfaceData.emission / 5 );
+        color.a *= max( 0, surfaceData.emission / DCL_EMISSION_MULTIPLIER );
     }
     
     color.a = OutputAlpha(color.a, _Surface);    
