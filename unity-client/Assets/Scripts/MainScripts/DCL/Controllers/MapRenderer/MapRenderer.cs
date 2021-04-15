@@ -263,16 +263,15 @@ namespace DCL
 
         private void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
         {
-            Debug.Log("OnKernelConfigChanged");
-
-            validWorldRanges = current.validWorldRanges;;
+            validWorldRanges = current.validWorldRanges;
         }
 
         bool CoordinatesAreInsideTheWorld(int xCoord, int yCoord)
         {
             foreach(WorldRange worldRange in validWorldRanges)
             {
-                if (worldRange.Contains(xCoord, yCoord)) {
+                if (worldRange.Contains(xCoord, yCoord))
+                {
                     return true;
                 }
             }
