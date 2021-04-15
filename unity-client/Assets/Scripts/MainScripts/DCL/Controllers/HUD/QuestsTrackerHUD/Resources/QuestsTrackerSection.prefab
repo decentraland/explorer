@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8847829376464232581}
   - component: {fileID: 96834568558246069}
   - component: {fileID: 4282177340119590620}
+  - component: {fileID: 3097722856485008739}
   m_Layer: 5
   m_Name: SectionTitleContainer
   m_TagString: Untagged
@@ -77,6 +78,21 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &3097722856485008739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886540667047884569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c67778c03e2cdf4b98268b406743e04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioEvents:
+  - {fileID: 11400000, guid: f6a9e6bc666e5ee45b6dbbf68a03b703, type: 2}
+  - {fileID: 11400000, guid: d4003092dce40b14b9291b5a7be6e54d, type: 2}
 --- !u!1 &2742595357919532778
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,3 +403,7 @@ MonoBehaviour:
     type: 3}
   animator: {fileID: 4282177340119590620}
   newTaskAudioEvent: {fileID: 11400000, guid: 41fb5bacf995f6e45918f20e2387749d, type: 2}
+  sectionTitleSwishInAudioEvent: {fileID: 11400000, guid: f6a9e6bc666e5ee45b6dbbf68a03b703,
+    type: 2}
+  sectionTitleSwishOutAudioEvent: {fileID: 11400000, guid: d4003092dce40b14b9291b5a7be6e54d,
+    type: 2}

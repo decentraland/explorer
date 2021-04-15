@@ -120,6 +120,8 @@ namespace DCL.Huds.QuestsTracker
             OnLayoutRebuildRequested?.Invoke();
 
             sequenceState = SequenceState.ShowingNewTasks;
+
+            //Play "new task" sound
             if (newTasks.Count > 0)
                 newTaskAudioEvent.Play();
 
