@@ -451,18 +451,18 @@ namespace DCL.ABConverter
         {
             List<WearableItem> result = new List<WearableItem>();
 
-            WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(url: url, disposeOnCompleted: false);
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
 
-            while (!asyncOp.isDone) { }
+            while (!w.isDone) { }
 
-            if (!asyncOp.isSucceded)
+            if (!w.WebRequestSucceded())
             {
-                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {asyncOp.webRequest.error}");
+                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
                 return null;
             }
 
-            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + asyncOp.webRequest.downloadHandler.text + "}");
-            asyncOp.Dispose();
+            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
 
             foreach (var collection in avatarApiData.data)
             {

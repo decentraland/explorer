@@ -52,9 +52,9 @@ namespace DCL.ABConverter
             foreach (GameObject go in gltfs)
             {
                 go.SetActive(true);
-                
+
                 yield return TakeObjectSnapshot(go, $"ABConverter_{go.name}.png");
-                
+
                 go.SetActive(false);
             }
 
@@ -82,7 +82,7 @@ namespace DCL.ABConverter
                 go.SetActive(true);
 
                 yield return TakeObjectSnapshot(go, testName);
-                
+
                 bool result = VisualTestHelpers.TestSnapshot(
                     VisualTestHelpers.baselineImagesPath + testName,
                     VisualTestHelpers.testImagesPath + testName,
@@ -122,7 +122,7 @@ namespace DCL.ABConverter
         {
             Vector3 originalScale = targetGO.transform.localScale;
             var renderers = targetGO.GetComponentsInChildren<Renderer>();
-            
+
             // unify all child renderer bounds and use that to position the snapshot camera
             var mergedBounds = Helpers.Utils.BuildMergedBounds(renderers);
 
@@ -132,16 +132,16 @@ namespace DCL.ABConverter
                 targetGO.transform.localScale *= 100;
                 mergedBounds = Helpers.Utils.BuildMergedBounds(renderers);
             }
-            
+
             Vector3 offset = mergedBounds.extents;
             offset.x = Mathf.Max(1, offset.x);
             offset.y = Mathf.Max(1, offset.y);
             offset.z = Mathf.Max(1, offset.z);
-                
+
             Vector3 cameraPosition = new Vector3(mergedBounds.min.x - offset.x, mergedBounds.max.y + offset.y, mergedBounds.min.z - offset.z);
 
             yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
-            
+
             targetGO.transform.localScale = originalScale;
         }
 
@@ -159,9 +159,9 @@ namespace DCL.ABConverter
                 GameObject gltf = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
                 var importedGLTF = Object.Instantiate(gltf);
                 importedGLTF.name = importedGLTF.name.Replace("(Clone)", "");
-                
+
                 PatchSkeletonlessSkinnedMeshRenderer(importedGLTF.gameObject.GetComponentInChildren<SkinnedMeshRenderer>());
-                
+
                 importedGLTFs.Add(importedGLTF);
             }
 
@@ -211,24 +211,24 @@ namespace DCL.ABConverter
             foreach (var hash in dependencyAbs)
             {
                 string path = abPath + hash;
+                var req = UnityWebRequestAssetBundle.GetAssetBundle(path);
 
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
-                    path = path.Replace("http://localhost", "file:///");
+                    req.url = req.url.Replace("http://localhost", "file:///");
 
-                var reqOp = WebRequestController.i.GetAssetBundle(url: path, disposeOnCompleted: false);
+                req.SendWebRequest();
 
-                while (!reqOp.isDone) { }
+                while (!req.isDone) { }
 
-                if (!reqOp.isSucceded)
+                if (req.isHttpError || req.isNetworkError)
                 {
                     Debug.Log("Visual Test Detection: Failed to download dependency asset: " + hash);
                     continue;
                 }
 
-                var assetBundle = DownloadHandlerAssetBundle.GetContent(reqOp.webRequest);
+                var assetBundle = DownloadHandlerAssetBundle.GetContent(req);
                 assetBundle.LoadAllAssets();
                 loadedAbs.Add(assetBundle);
-                reqOp.Dispose();
             }
 
             List<GameObject> results = new List<GameObject>();
@@ -236,24 +236,24 @@ namespace DCL.ABConverter
             foreach (var hash in mainAbs)
             {
                 string path = abPath + hash;
+                var req = UnityWebRequestAssetBundle.GetAssetBundle(path);
 
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
-                    path = path.Replace("http://localhost", "file:///");
+                    req.url = req.url.Replace("http://localhost", "file:///");
 
-                var reqOp = WebRequestController.i.GetAssetBundle(url: path, disposeOnCompleted: false);
+                req.SendWebRequest();
 
-                while (!reqOp.isDone) { }
+                while (!req.isDone) { }
 
-                if (!reqOp.isSucceded)
+                if (req.isHttpError || req.isNetworkError)
                 {
                     Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
                     skippedAssets++;
                     continue;
                 }
 
-                var assetBundle = DownloadHandlerAssetBundle.GetContent(reqOp.webRequest);
+                var assetBundle = DownloadHandlerAssetBundle.GetContent(req);
                 Object[] assets = assetBundle.LoadAllAssets();
-                reqOp.Dispose();
 
                 foreach (Object asset in assets)
                 {
@@ -265,9 +265,9 @@ namespace DCL.ABConverter
                     if (asset is GameObject assetAsGameObject)
                     {
                         GameObject instance = Object.Instantiate(assetAsGameObject);
-                        
+
                         PatchSkeletonlessSkinnedMeshRenderer(instance.GetComponentInChildren<SkinnedMeshRenderer>());
-                        
+
                         results.Add(instance);
                         instance.name = instance.name.Replace("(Clone)", "");
                     }
@@ -283,7 +283,7 @@ namespace DCL.ABConverter
 
             return results.ToArray();
         }
-        
+
         /// <summary>
         /// Wearables that are not body-shapes are optimized getting rid of the skeleton, so if this
         /// SkinnedMeshRenderer is missing its root bone, we replace the renderer to make it rendereable
@@ -294,10 +294,10 @@ namespace DCL.ABConverter
         {
             if (skinnedMeshRenderer == null || skinnedMeshRenderer.rootBone != null)
                 return;
-            
+
             MeshRenderer meshRenderer = skinnedMeshRenderer.gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterials = skinnedMeshRenderer.sharedMaterials;
-                
+
             Object.DestroyImmediate(skinnedMeshRenderer);
         }
     }
