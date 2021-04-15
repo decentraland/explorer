@@ -63,7 +63,7 @@ public static class DependencyMapLoadHelper
         }
 
         downloadingDepmap.Add(hash);
-        WebRequestController.i.Get(
+        yield return WebRequestController.i.Get(
             url: url,
             OnSuccess: (depmapRequest) =>
             {
