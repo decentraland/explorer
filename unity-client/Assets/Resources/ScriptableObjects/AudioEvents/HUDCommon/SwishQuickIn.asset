@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9988baed5dc8ecd469322b1c7d95b381, type: 3}
-  m_Name: QuestSwishIn
+  m_Name: SwishQuickIn
   m_EditorClassIdentifier: 
   loop: 0
   initialVolume: 1
@@ -19,5 +19,5 @@ MonoBehaviour:
   cooldownSeconds: 0
   clips:
     array:
-    - {fileID: 8300000, guid: 1ce88f124ef86ca468dfcfbf7496409d, type: 3}
+    - {fileID: 8300000, guid: adfacd0073045ff489a5bdda66df1fb6, type: 3}
   source: {fileID: 0}

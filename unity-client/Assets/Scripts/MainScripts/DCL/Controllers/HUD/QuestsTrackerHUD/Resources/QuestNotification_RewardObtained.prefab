@@ -75,7 +75,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 201326591
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -223,6 +223,7 @@ GameObject:
   - component: {fileID: 171642825017654992}
   - component: {fileID: 1697021063380696040}
   - component: {fileID: 417963785382909262}
+  - component: {fileID: 1404106006801635166}
   m_Layer: 5
   m_Name: QuestNotification_RewardObtained
   m_TagString: Untagged
@@ -327,6 +328,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &1404106006801635166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658646231584508166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c67778c03e2cdf4b98268b406743e04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2580958548383122365
 GameObject:
   m_ObjectHideFlags: 0
