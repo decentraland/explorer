@@ -24,6 +24,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal RectTransform taskContainer;
         [SerializeField] internal GameObject taskPrefab;
         [SerializeField] internal Animator animator;
+        [SerializeField] internal AudioEvent newTaskAudioEvent;
 
         public event Action OnLayoutRebuildRequested;
         public event Action<string> OnDestroyed;
@@ -119,6 +120,9 @@ namespace DCL.Huds.QuestsTracker
             OnLayoutRebuildRequested?.Invoke();
 
             sequenceState = SequenceState.ShowingNewTasks;
+            if (newTasks.Count > 0)
+                newTaskAudioEvent.Play();
+
             //Show and progress of new tasks
             for (int i = 0; i < newTasks.Count; i++)
             {
@@ -126,6 +130,7 @@ namespace DCL.Huds.QuestsTracker
                 tasksRoutines.Add(StartCoroutine(newTasks[i].ProgressAndCompleteSequence()));
             }
             OnLayoutRebuildRequested?.Invoke();
+
             yield return WaitForTaskRoutines();
 
             if (taskEntries.Count == 0)

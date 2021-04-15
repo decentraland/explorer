@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 8900000, guid: b4f78c510a8526547ab9c9946449480e, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.10252202, g: 0.24458984, b: 0.36489132, a: 1}
+  m_IndirectSpecularColor: {r: 0.00076876703, g: 0.8351885, b: 0.8361403, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1105,12 +1105,12 @@ MonoBehaviour:
   cameraController: {fileID: 1608366483}
   bridgesGameObject: {fileID: 287244851}
   wssServerUrl: ws://localhost:4999/
-  openBrowserWhenStart: 0
+  openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
   baseUrlCustom: https://explorer.decentraland.zone/?
-  environment: 4
+  environment: 2
   startInCoords: {x: 150, y: 150}
   forceLocalComms: 0
   allWearables: 0
@@ -1118,7 +1118,7 @@ MonoBehaviour:
   enableTutorial: 0
   builderInWorld: 0
   soloScene: 1
-  questsEnabled: 0
+  questsEnabled: 1
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:

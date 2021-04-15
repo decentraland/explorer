@@ -5,6 +5,7 @@ public class TaskbarNewQuestTooltip : MonoBehaviour
 {
     private static readonly int ANIM_STATE_TRIGGER = Animator.StringToHash("ShowDisabledTooltip");
     [SerializeField] private Animator animator;
+    [SerializeField] private AudioEvent newQuestAudioEvent;
 
     private void Awake() { DataStore.i.Quests.quests.OnAdded += OnQuestsAdded; }
 
@@ -12,7 +13,7 @@ public class TaskbarNewQuestTooltip : MonoBehaviour
     {
         if (!model.isCompleted) {
             animator?.SetTrigger(ANIM_STATE_TRIGGER);
-            AudioScriptableObjects.tooltipPopup.Play();
+            newQuestAudioEvent.Play();
         }
     }
 }

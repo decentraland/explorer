@@ -57,8 +57,9 @@ MonoBehaviour:
   maxDistance: 500
   audioEvents:
     array:
-    - {fileID: 11400000, guid: 763dc080ad3f97340b8e0c8bdafcf9f7, type: 2}
-    - {fileID: 11400000, guid: ebec2628c58727248879816724adf52b, type: 2}
-    - {fileID: 11400000, guid: e985a6d6b4e6ae74b8cfb76996e22ab7, type: 2}
+    - {fileID: 11400000, guid: c26789a3bbd8cb44b81243307567c1b9, type: 2}
+    - {fileID: 11400000, guid: 41fb5bacf995f6e45918f20e2387749d, type: 2}
     - {fileID: 11400000, guid: 93e652556837dff4c823de2b001577dd, type: 2}
+    - {fileID: 11400000, guid: e985a6d6b4e6ae74b8cfb76996e22ab7, type: 2}
+    - {fileID: 11400000, guid: 763dc080ad3f97340b8e0c8bdafcf9f7, type: 2}
     - {fileID: 11400000, guid: 96e59e41f230539488ccb8445f1c1631, type: 2}
