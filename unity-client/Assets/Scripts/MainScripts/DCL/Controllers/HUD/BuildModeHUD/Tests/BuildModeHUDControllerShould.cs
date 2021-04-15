@@ -137,11 +137,14 @@ namespace Tests.BuildModeHUDControllers
         [TestCase(false)]
         public void PublishEndCorrectly(bool isOk)
         {
+            // Arrange
+            string testErrorMessage = "Test text";
+
             // Act
-            buildModeHUDController.PublishEnd(isOk);
+            buildModeHUDController.PublishEnd(isOk, testErrorMessage);
 
             // Assert
-            buildModeHUDController.controllers.publishPopupController.Received(1).PublishEnd(isOk);
+            buildModeHUDController.controllers.publishPopupController.Received(1).PublishEnd(isOk, testErrorMessage);
         }
 
         [Test]

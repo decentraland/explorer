@@ -7,7 +7,7 @@ public interface IPublishPopupView
     public float currentProgress { get; }
 
     void PublishStart();
-    void PublishEnd(bool isOk);
+    void PublishEnd(bool isOk, string message);
     void SetPercentage(float newValue);
 }
 
@@ -24,6 +24,7 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
 
     [SerializeField] internal TMP_Text titleText;
     [SerializeField] internal TMP_Text resultText;
+    [SerializeField] internal TMP_Text errorDetailsText;
     [SerializeField] internal LoadingBar loadingBar;
     [SerializeField] internal Button closeButton;
 
@@ -45,14 +46,17 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
         loadingBar.SetActive(true);
         resultText.gameObject.SetActive(false);
         closeButton.gameObject.SetActive(false);
+        errorDetailsText.gameObject.SetActive(false);
         titleText.text = TITLE_INITIAL_MESSAGE;
     }
 
-    public void PublishEnd(bool isOk)
+    public void PublishEnd(bool isOk, string message)
     {
         loadingBar.SetActive(false);
         titleText.text = isOk ? SUCCESS_TITLE_MESSAGE : FAIL_TITLE_MESSAGE;
         resultText.text = isOk ? SUCCESS_MESSAGE : FAIL_MESSAGE;
+        errorDetailsText.gameObject.SetActive(!isOk);
+        errorDetailsText.text = isOk ? "" : message;
         resultText.gameObject.SetActive(true);
         closeButton.gameObject.SetActive(true);
     }

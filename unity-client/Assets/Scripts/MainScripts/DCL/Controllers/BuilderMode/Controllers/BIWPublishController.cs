@@ -16,7 +16,7 @@ public class BIWPublishController : BIWController
     {
         if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.builderInWorldMainHud.OnPublishAction += PublishScene;
+            HUDController.i.builderInWorldMainHud.OnPublishAction += StartPublishFlow;
             HUDController.i.builderInWorldMainHud.OnConfirmPublishAction += ConfirmPublishScene;
         }
     }
@@ -39,7 +39,7 @@ public class BIWPublishController : BIWController
     {
         if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.builderInWorldMainHud.OnPublishAction -= PublishScene;
+            HUDController.i.builderInWorldMainHud.OnPublishAction -= StartPublishFlow;
             HUDController.i.builderInWorldMainHud.OnConfirmPublishAction -= ConfirmPublishScene;
         }
     }
@@ -62,7 +62,7 @@ public class BIWPublishController : BIWController
         HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(CanPublish());
     }
 
-    void PublishScene()
+    void StartPublishFlow()
     {
         if (!CanPublish())
             return;
