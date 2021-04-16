@@ -89,26 +89,6 @@ namespace DCL.Huds.QuestsTracker
             Destroy(gameObject);
         }
 
-        private void Update()
-        {
-            return;
-            if (task == null || task.progress < 1)
-                return;
-            AnimatorClipInfo[] currentAnimatorClipInfo = animator.GetCurrentAnimatorClipInfo(0);
-            AnimatorStateInfo currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            bool found = false;
-            for (int i = 0; i < currentAnimatorClipInfo.Length; i++)
-            {
-                AnimatorClipInfo animatorClipInfo = currentAnimatorClipInfo[i];
-                if (animatorClipInfo.clip.name == "QuestTrackerTaskCompleted")
-                    found = true;
-            }
-            if (!found)
-                return;
-            Debug.Log($"{currentAnimatorStateInfo.normalizedTime}");
-            Debug.Log($"----------------------------------------------");
-        }
-
         internal void SetProgressText(float current, float end) { progressText.text = $"{current}/{end}"; }
 
         public void SetExpandedStatus(bool active)
