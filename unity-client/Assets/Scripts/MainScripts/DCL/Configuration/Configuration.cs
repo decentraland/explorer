@@ -4,13 +4,13 @@ namespace DCL.Configuration
 {
     public static class BuilderInWorldSettings
     {
-        public static string BASE_URL_CATALOG = "https://builder-api.decentraland.org/v1/storage/contents/";
-        public static string BASE_URL_ASSETS_PACK = "https://builder-api.decentraland.org/v1/assetPacks";
-        public static string BASE_URL_ASSETS_PACK_CONTENT = "https://builder-api.decentraland.org/v1/storage/assetPacks/";
+        public const string BASE_URL_CATALOG = "https://builder-api.decentraland.org/v1/storage/contents/";
+        public const string BASE_URL_ASSETS_PACK = "https://builder-api.decentraland.org/v1/assetPacks";
+        public const string BASE_URL_ASSETS_PACK_CONTENT = "https://builder-api.decentraland.org/v1/storage/assetPacks/";
 
-        public static int SELECTION_LAYER = LayerMask.NameToLayer("Selection");
-        public static int DEFAULT_LAYER = LayerMask.NameToLayer("Default");
-        public static int COLLIDER_SELECTION_LAYER = LayerMask.NameToLayer("OnBuilderPointerClick");
+        public static readonly int SELECTION_LAYER = LayerMask.NameToLayer("Selection");
+        public static readonly int DEFAULT_LAYER = LayerMask.NameToLayer("Default");
+        public static readonly int COLLIDER_SELECTION_LAYER = LayerMask.NameToLayer("OnBuilderPointerClick");
 
         public const string VOXEL_ASSETS_PACK_ID = "b51e5e7c-c56b-4ad9-b9d2-1dc1c6546169";
         public const string FLOOR_CATEGORY = "ground";
@@ -25,6 +25,7 @@ namespace DCL.Configuration
         public const string STATE_EVENT_NAME = "stateEvent";
         public const string SCENE_EVENT_NAME = "SceneEvent";
         public static float ENTITY_POSITION_REPORTING_DELAY = 0.1f; // In seconds
+        public static float ENTITY_POSITION_POSITION_THRESHOLD = 0.04f; // In meters
 
         //Floor Scene Object
         public const string FLOOR_ID = "da1fed3c954172146414a66adfa134f7a5e1cb49c902713481bf2fe94180c2cf";

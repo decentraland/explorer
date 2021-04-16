@@ -27,7 +27,8 @@ namespace Tests.BuildModeHUDViews
                 catalogBtnController = Substitute.For<ICatalogBtnController>(),
                 inspectorController = Substitute.For<IInspectorController>(),
                 buildModeConfirmationModalController = Substitute.For<IBuildModeConfirmationModalController>(),
-                topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
+                topActionsButtonsController = Substitute.For<ITopActionsButtonsController>(),
+                saveHUDController =  Substitute.For<ISaveHUDController>()
             };
 
             buildModeHUDView = BuildModeHUDView.Create();
@@ -69,6 +70,9 @@ namespace Tests.BuildModeHUDViews
             testControllers.topActionsButtonsController.Received(1).Initialize(buildModeHUDView.topActionsButtonsView, testControllers.tooltipController, testControllers.buildModeConfirmationModalController);
             Assert.AreEqual(testControllers.buildModeConfirmationModalController, buildModeHUDView.controllers.buildModeConfirmationModalController, "The buildModeConfirmationModalController does not match!");
             testControllers.buildModeConfirmationModalController.Received(1).Initialize(buildModeHUDView.buildModeConfirmationModalView);
+            testControllers.topActionsButtonsController.Received(1).Initialize(buildModeHUDView.topActionsButtonsView, testControllers.tooltipController, testControllers.buildModeConfirmationModalController);
+            Assert.AreEqual(testControllers.saveHUDController, buildModeHUDView.controllers.saveHUDController, "The SaveHUDController does not match!");
+            testControllers.saveHUDController.Received(1).Initialize(buildModeHUDView.saveView);
         }
 
         [Test]

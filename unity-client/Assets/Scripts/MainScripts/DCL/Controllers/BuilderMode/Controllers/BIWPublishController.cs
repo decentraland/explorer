@@ -7,6 +7,7 @@ public class BIWPublishController : BIWController
 {
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BuilderInWorldBridge builderInWorldBridge;
+    public BIWSaveController biwSaveController;
 
     private int checkerSceneLimitsOptimizationCounter = 0;
 
@@ -41,10 +42,10 @@ public class BIWPublishController : BIWController
     public bool CanPublish()
     {
         if (!sceneToEdit.metricsController.IsInsideTheLimits())
-            return false;     
+            return false;
 
         if (!builderInWorldEntityHandler.AreAllEntitiesInsideBoundaries())
-            return false;        
+            return false;
         return true;
     }
 
@@ -62,5 +63,6 @@ public class BIWPublishController : BIWController
             return;
         builderInWorldBridge.PublishScene(sceneToEdit);
         HUDController.i.builderInWorldMainHud.PublishStart();
+        biwSaveController.ForceSave();
     }
 }

@@ -101,10 +101,10 @@ export class BuilderServerAPIManager {
       const response = await fetch(urlToFecth, params)
       const data = await response.json()
 
-      if (data.data === false) {
+      if (data.data.length === 0) {
         return undefined
       }
-      const manifest: BuilderManifest = data.data
+      const manifest: BuilderManifest = data.data[0]
 
       //If this manifest contains assets, we add them so we don't need to fetch them
       this.addAssetsFromManifest(manifest)
