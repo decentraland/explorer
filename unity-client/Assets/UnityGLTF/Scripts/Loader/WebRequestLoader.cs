@@ -1,3 +1,4 @@
+using DCL;
 using System;
 using System.Collections;
 using System.IO;
@@ -20,11 +21,13 @@ namespace UnityGLTF.Loader
 
         string _rootURI;
         bool VERBOSE = false;
+        IWebRequestController webRequestController;
 
-        public WebRequestLoader(string rootURI)
+        public WebRequestLoader(string rootURI, IWebRequestController webRequestController)
         {
             _rootURI = rootURI;
             HasSyncLoadMethod = false;
+            this.webRequestController = webRequestController;
         }
 
         public IEnumerator LoadStream(string filePath)
@@ -61,7 +64,7 @@ namespace UnityGLTF.Loader
                 finalUrl = Path.Combine(rootUri, httpRequestPath);
             }
 
-            return DCL.WebRequestController.i.Get(
+            return webRequestController.Get(
                 url: finalUrl,
                 downloadHandler: new DownloadHandlerBuffer(),
                 OnSuccess: (webRequestResult) =>
