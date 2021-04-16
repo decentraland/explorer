@@ -79,7 +79,7 @@ public static class DependencyMapLoadHelper
                     SavePersistentCache();
                 }
             },
-            OnFail: (errorMsg) =>
+            OnFail: (depmapRequest) =>
             {
                 failedRequests.Add(hash);
                 downloadingDepmap.Remove(hash);

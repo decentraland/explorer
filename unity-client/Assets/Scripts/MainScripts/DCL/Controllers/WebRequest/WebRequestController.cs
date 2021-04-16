@@ -37,7 +37,7 @@ namespace DCL
             string url,
             DownloadHandler downloadHandler = null,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true);
@@ -54,7 +54,7 @@ namespace DCL
         WebRequestAsyncOperation GetAssetBundle(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true);
@@ -71,7 +71,7 @@ namespace DCL
         WebRequestAsyncOperation GetTexture(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true);
@@ -90,7 +90,7 @@ namespace DCL
             string url,
             AudioType audioType,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true);
@@ -142,7 +142,7 @@ namespace DCL
             string url,
             DownloadHandler downloadHandler = null,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true)
@@ -153,7 +153,7 @@ namespace DCL
         public WebRequestAsyncOperation GetAssetBundle(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true)
@@ -165,7 +165,7 @@ namespace DCL
             string url,
             Hash128 hash,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true)
@@ -177,7 +177,7 @@ namespace DCL
         public WebRequestAsyncOperation GetTexture(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true)
@@ -189,7 +189,7 @@ namespace DCL
             string url,
             AudioType audioType,
             Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
+            Action<UnityWebRequest> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0,
             bool disposeOnCompleted = true)
@@ -203,7 +203,7 @@ namespace DCL
             string url,
             DownloadHandler downloadHandler,
             Action<UnityWebRequest> OnSuccess,
-            Action<string> OnFail,
+            Action<UnityWebRequest> OnFail,
             int requestAttemps,
             int timeout,
             bool disposeOnCompleted) where T : IWebRequest
@@ -241,13 +241,13 @@ namespace DCL
                         }
                         else
                         {
-                            OnFail?.Invoke(resultOp.webRequest.error);
+                            OnFail?.Invoke(resultOp.webRequest);
                             resultOp.SetAsCompleted(false);
                         }
                     }
                     else
                     {
-                        OnFail?.Invoke(resultOp.webRequest.error);
+                        OnFail?.Invoke(resultOp.webRequest);
                         resultOp.SetAsCompleted(false);
                     }
                 }

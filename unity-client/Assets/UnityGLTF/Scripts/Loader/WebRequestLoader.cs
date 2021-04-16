@@ -79,9 +79,9 @@ namespace UnityGLTF.Loader
                         LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
                     }
                 },
-                OnFail: (errorMsg) =>
+                OnFail: (webRequestResult) =>
                 {
-                    Debug.LogError($"{errorMsg} - {finalUrl}");
+                    Debug.LogError($"{webRequestResult.error} - {finalUrl}");
                 },
                 timeout: 5000);
 

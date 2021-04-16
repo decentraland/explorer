@@ -320,9 +320,9 @@ public static partial class BuilderInWorldUtils
                     functionToCall?.Invoke(result);
                 }
             },
-            OnFail: (errorMsg) =>
+            OnFail: (webRequestResult) =>
             {
-                Debug.Log(errorMsg);
+                Debug.Log(webRequestResult.error);
             });
     }
 

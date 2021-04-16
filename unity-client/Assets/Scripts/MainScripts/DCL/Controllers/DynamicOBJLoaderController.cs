@@ -58,9 +58,9 @@ public class DynamicOBJLoaderController : MonoBehaviour
                     OnFinishedLoadingAsset?.Invoke();
                     alreadyLoadedAsset = true;
                 },
-                OnFail: (errorMsg) =>
+                OnFail: (webRequestResult) =>
                 {
-                    Debug.Log("Couldn't get OBJ, error: " + errorMsg + " ... " + OBJUrl);
+                    Debug.Log("Couldn't get OBJ, error: " + webRequestResult.error + " ... " + OBJUrl);
                 });
         }
         else

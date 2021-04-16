@@ -231,12 +231,12 @@ namespace DCL.Helpers
                     }
                 };
 
-            Action<string> OnFailInternal =
-                (error) =>
+            Action<UnityWebRequest> OnFailInternal =
+                (request) =>
                 {
                     if (OnFail != null)
                     {
-                        OnFail.Invoke(error);
+                        OnFail.Invoke(request.error);
                     }
                 };
 
@@ -247,7 +247,7 @@ namespace DCL.Helpers
                 OnFail: OnFailInternal);
         }
 
-        public static WebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
+        public static WebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<UnityWebRequest> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             void SuccessInternal(UnityWebRequest request)
@@ -588,11 +588,7 @@ namespace DCL.Helpers
             return new Vector3(x, y, z);
         }
 
-        public static bool CompareFloats( float a, float b, float precision = 0.1f )
-        {
-            return Mathf.Abs(a - b) < precision;
-        }
-
+        public static bool CompareFloats( float a, float b, float precision = 0.1f ) { return Mathf.Abs(a - b) < precision; }
 
         public static void Deconstruct<T1, T2>(this KeyValuePair<T1, T2> tuple, out T1 key, out T2 value)
         {

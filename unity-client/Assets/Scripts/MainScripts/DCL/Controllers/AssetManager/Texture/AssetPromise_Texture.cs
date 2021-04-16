@@ -68,7 +68,7 @@ namespace DCL
                             OnFail?.Invoke();
                         }
                     },
-                    OnFail: (errorMsg) =>
+                    OnFail: (webRequestResult) =>
                     {
                         OnFail?.Invoke();
                     });
