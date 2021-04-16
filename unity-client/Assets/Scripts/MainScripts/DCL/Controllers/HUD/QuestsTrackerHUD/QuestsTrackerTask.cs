@@ -1,6 +1,7 @@
 using DCL.Interface;
 using System;
 using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -73,14 +74,39 @@ namespace DCL.Huds.QuestsTracker
             if (progressTarget < 1)
                 yield break;
 
-            yield return WaitForSecondsCache.Get(0.5f);
-            animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
-            taskCompleteAudioEvent.Play();
+            //Dont play completed animation if is already playing
+            if (animator.GetCurrentAnimatorClipInfo(0).All(x => x.clip.name != "QuestTrackerTaskCompleted"))
+            {
+                yield return WaitForSecondsCache.Get(0.5f);
+                animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
+                taskCompleteAudioEvent.Play();
+                yield return null; // Wait for the animator to update its clipInfo
+            }
 
-            yield return WaitForSecondsCache.Get(2.9f);
+            yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.95f);
 
             OnDestroyed?.Invoke(task.id);
             Destroy(gameObject);
+        }
+
+        private void Update()
+        {
+            return;
+            if (task == null || task.progress < 1)
+                return;
+            AnimatorClipInfo[] currentAnimatorClipInfo = animator.GetCurrentAnimatorClipInfo(0);
+            AnimatorStateInfo currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            bool found = false;
+            for (int i = 0; i < currentAnimatorClipInfo.Length; i++)
+            {
+                AnimatorClipInfo animatorClipInfo = currentAnimatorClipInfo[i];
+                if (animatorClipInfo.clip.name == "QuestTrackerTaskCompleted")
+                    found = true;
+            }
+            if (!found)
+                return;
+            Debug.Log($"{currentAnimatorStateInfo.normalizedTime}");
+            Debug.Log($"----------------------------------------------");
         }
 
         internal void SetProgressText(float current, float end) { progressText.text = $"{current}/{end}"; }
