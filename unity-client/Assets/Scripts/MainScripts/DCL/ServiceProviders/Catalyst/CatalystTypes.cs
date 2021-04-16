@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public static class CatalystEntitiesType
 {
@@ -107,24 +108,35 @@ public class DeploymentSceneMetadata
     [Serializable]
     public class SpawnPoint
     {
-        [Serializable]
-        public class Vector3
-        {
-            public float x;
-            public float y;
-            public float z;
-        }
-
         public string name;
         public bool @default;
         public Vector3 position;
         public Vector3 cameraTarget;
     }
 
+    [Serializable]
+    public class Source
+    {
+        [Serializable]
+        public class Layout
+        {
+            public string rows;
+            public string cols;
+        }
+        
+        public int version;
+        public string origin;
+        public string projectId;
+        public Vector2Int point;
+        public string rotation;
+        public Layout layout;
+    }
+
     public Display display;
     public Contact contact;
     public Scene scene;
     public Policy policy;
+    public Source source;
     public SpawnPoint[] spawnPoints;
     public string owner;
     public string[] tags;

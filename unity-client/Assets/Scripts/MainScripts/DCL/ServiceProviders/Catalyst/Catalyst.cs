@@ -8,6 +8,7 @@ using Variables.RealmsInfo;
 
 public interface ICatalyst : IDisposable
 {
+    public string contentUrl { get; }
     Promise<SceneDeploymentPayload> GetDeployedScenes(string[] parcels, bool onlyCurrentlyPointed = true, string sortBy = null, string sortOrder = null);
     Promise<string> GetDeployments(DeploymentOptions deploymentOptions);
     Promise<string> Get(string url);
@@ -17,7 +18,9 @@ public class Catalyst : ICatalyst
 {
     private const int CACHE_TIME_MSECS = 5 * 60 * 1000;
 
-    internal string realmDomain;
+    public string contentUrl => realmDomain;
+
+    private string realmDomain;
 
     private readonly Dictionary<string, string> cache = new Dictionary<string, string>();
     private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -51,14 +54,21 @@ public class Catalyst : ICatalyst
             })
             .Then(json =>
             {
+                SceneDeploymentPayload parsedValue = null;
+                bool hasException = false;
                 try
                 {
-                    var parsedValue = Utils.SafeFromJson<SceneDeploymentPayload>(json);
-                    promise.Resolve(parsedValue);
+                    parsedValue = Utils.SafeFromJson<SceneDeploymentPayload>(json);
                 }
                 catch (Exception e)
                 {
                     promise.Reject(e.Message);
+                    hasException = true;
+                }
+                finally
+                {
+                    if (!hasException)
+                        promise.Resolve(parsedValue);
                 }
             })
             .Catch(error => promise.Reject(error));
