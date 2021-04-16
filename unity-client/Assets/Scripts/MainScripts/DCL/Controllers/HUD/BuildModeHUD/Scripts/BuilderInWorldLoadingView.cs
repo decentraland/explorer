@@ -40,6 +40,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     internal Coroutine hideCoroutine;
     internal float showTime = 0f;
     internal int currentTipIndex = 0;
+    internal float currentFinalNormalizedPos;
 
     internal static BuilderInWorldLoadingView Create()
     {
@@ -106,6 +107,8 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 
         CoroutineStarter.Stop(tipsCoroutine);
         tipsCoroutine = null;
+
+        ForzeToEndCurrentTipsAnimation();
     }
 
     internal IEnumerator TryToHideCoroutine(bool forzeHidding, Action onHideAction)
@@ -128,16 +131,20 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         {
             yield return new WaitForSeconds(timeBetweenTips);
             yield return RunTipsAnimationCoroutine();
+            IncrementTipIndex();
+        }
+    }
 
-            currentTipIndex++;
-            if (currentTipIndex >= loadingTips.Count - 1)
-            {
-                currentTipIndex = 0;
-                loadingTipsScroll.horizontalNormalizedPosition = 0f;
+    private void IncrementTipIndex()
+    {
+        currentTipIndex++;
+        if (currentTipIndex >= loadingTips.Count - 1)
+        {
+            currentTipIndex = 0;
+            loadingTipsScroll.horizontalNormalizedPosition = 0f;
 
-                // Moving the last tip game object to the first position in the hierarchy, we make the carousel cyclical.
-                loadingTipsContainer.GetChild(loadingTipsContainer.childCount - 1).SetAsFirstSibling();
-            }
+            // Moving the last tip game object to the first position in the hierarchy, we make the carousel cyclical.
+            loadingTipsContainer.GetChild(loadingTipsContainer.childCount - 1).SetAsFirstSibling();
         }
     }
 
@@ -145,19 +152,25 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     {
         float currentAnimationTime = 0f;
         float initialNormalizedPos = loadingTipsScroll.horizontalNormalizedPosition;
-        float finalNormalizedPos = initialNormalizedPos + (1f / (loadingTips.Count - 1));
+        currentFinalNormalizedPos = initialNormalizedPos + (1f / (loadingTips.Count - 1));
 
         while (currentAnimationTime <= animationTipsTransitionTime)
         {
             loadingTipsScroll.horizontalNormalizedPosition = Mathf.Lerp(
                 initialNormalizedPos,
-                finalNormalizedPos,
+                currentFinalNormalizedPos,
                 animationTipsCurve.Evaluate(currentAnimationTime / animationTipsTransitionTime));
 
             currentAnimationTime += Time.deltaTime;
 
             yield return null;
         }
+    }
+
+    internal void ForzeToEndCurrentTipsAnimation()
+    {
+        loadingTipsScroll.horizontalNormalizedPosition = currentFinalNormalizedPos;
+        IncrementTipIndex();
     }
 
     public void CancelLoading(DCLAction_Trigger action)
