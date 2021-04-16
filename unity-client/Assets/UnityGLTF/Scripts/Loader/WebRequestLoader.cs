@@ -73,13 +73,15 @@ namespace UnityGLTF.Loader
                     {
                         Debug.LogError("Stream is too big for a byte array");
                     }
-                    else if (webRequestResult.downloadHandler.data != null)
+                    else
                     {
                         //NOTE(Brian): Caution, webRequestResult.downloadHandler.data returns a COPY of the data, if accessed twice,
                         //             2 copies will be performed for the entire file (and then discarded by GC, introducing hiccups).
                         //             The correct fix is by using DownloadHandler.ReceiveData. But this is in version > 2019.3.
                         byte[] data = webRequestResult.downloadHandler.data;
-                        LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
+
+                        if (data != null)
+                            LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
                     }
                 },
                 OnFail: (webRequestResult) =>
