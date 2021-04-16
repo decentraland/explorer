@@ -220,7 +220,7 @@ namespace DCL.ABConverter
 
                 while (!req.isDone) { }
 
-                if (req.isHttpError || req.isNetworkError)
+                if (!req.WebRequestSucceded())
                 {
                     Debug.Log("Visual Test Detection: Failed to download dependency asset: " + hash);
                     continue;
@@ -245,7 +245,7 @@ namespace DCL.ABConverter
 
                 while (!req.isDone) { }
 
-                if (req.isHttpError || req.isNetworkError)
+                if (!req.WebRequestSucceded())
                 {
                     Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
                     skippedAssets++;

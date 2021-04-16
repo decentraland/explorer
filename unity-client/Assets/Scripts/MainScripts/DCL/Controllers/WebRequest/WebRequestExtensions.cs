@@ -1,4 +1,4 @@
-﻿using UnityEngine.Networking;
+using UnityEngine.Networking;
 
 namespace DCL
 {
@@ -7,8 +7,7 @@ namespace DCL
         public static bool WebRequestSucceded(this UnityWebRequest request)
         {
             return request != null &&
-                   !request.isNetworkError &&
-                   !request.isHttpError;
+                   request.result == UnityWebRequest.Result.Success;
         }
 
         public static bool WebRequestServerError(this UnityWebRequest request)
@@ -21,8 +20,8 @@ namespace DCL
         public static bool WebRequestAborted(this UnityWebRequest request)
         {
             return request != null &&
-                   request.isNetworkError &&
-                   request.isHttpError &&
+                   request.result == UnityWebRequest.Result.ConnectionError &&
+                   request.result == UnityWebRequest.Result.ProtocolError &&
                    !string.IsNullOrEmpty(request.error) &&
                    request.error.ToLower().Contains("aborted");
         }
