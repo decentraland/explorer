@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,7 @@ public interface IBuilderInWorldLoadingView
     event System.Action OnCancelLoading;
 
     void Show();
-    void Hide(bool forzeHidding = false);
+    void Hide(bool forzeHidding = false, Action onHideAction = null);
     void StartTipsCarousel();
     void StopTipsCarousel();
     void CancelLoading(DCLAction_Trigger action);
@@ -84,12 +85,12 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         }
     }
 
-    public void Hide(bool forzeHidding = false)
+    public void Hide(bool forzeHidding = false, Action onHideAction = null)
     {
         if (hideCoroutine != null)
             CoroutineStarter.Stop(hideCoroutine);
 
-        hideCoroutine = CoroutineStarter.Start(TryToHideCoroutine(forzeHidding));
+        hideCoroutine = CoroutineStarter.Start(TryToHideCoroutine(forzeHidding, onHideAction));
     }
 
     public void StartTipsCarousel()
@@ -107,7 +108,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         tipsCoroutine = null;
     }
 
-    internal IEnumerator TryToHideCoroutine(bool forzeHidding)
+    internal IEnumerator TryToHideCoroutine(bool forzeHidding, Action onHideAction)
     {
         while (!forzeHidding && (Time.realtimeSinceStartup - showTime) < minVisibilityTime)
         {
@@ -116,6 +117,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 
         StopTipsCarousel();
         gameObject.SetActive(false);
+        onHideAction?.Invoke();
     }
 
     internal IEnumerator RunTipsCarouselCoroutine()

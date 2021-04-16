@@ -52,18 +52,15 @@ public class BuilderInWorldController : MonoBehaviour
     private GameObject undoGO;
     private GameObject snapGO;
     private GameObject freeMovementGO;
-
     private int checkerInsideSceneOptimizationCounter = 0;
-
     private string sceneToEditId;
-
     private const float RAYCAST_MAX_DISTANCE = 10000f;
-
     private bool catalogAdded = false;
     private bool sceneReady = false;
     private bool isInit = false;
     private Material previousSkyBoxMaterial;
     private Vector3 parcelUnityMiddlePoint;
+    private bool previousAllUIHidden;
 
     internal IBuilderInWorldLoadingController initialLoadingController;
 
@@ -374,6 +371,9 @@ public class BuilderInWorldController : MonoBehaviour
             return;
         }
 
+        previousAllUIHidden = CommonScriptableObjects.allUIHidden.Get();
+        CommonScriptableObjects.allUIHidden.Set(true);
+        inputController.inputTypeMode = InputTypeMode.BUILD_MODE_LOADING;
         initialLoadingController.Show();
         initialLoadingController.SetPercentage(0f);
 
@@ -391,7 +391,6 @@ public class BuilderInWorldController : MonoBehaviour
             return;
 
         sceneToEditId = sceneToEdit.sceneData.id;
-        inputController.isInputActive = false;
 
         // In this point we're sure that the catalog loading (the first half of our progress bar) has already finished
         initialLoadingController.SetPercentage(50f);
@@ -407,8 +406,6 @@ public class BuilderInWorldController : MonoBehaviour
 
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
-        inputController.isBuildModeActivate = true;
-
         FindSceneToEdit();
 
         sceneToEdit.SetEditMode(true);
@@ -417,7 +414,6 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.builderInWorldMainHud.SetVisibility(true);
             HUDController.i.builderInWorldMainHud.SetParcelScene(sceneToEdit);
             HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
             HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
@@ -440,8 +436,12 @@ public class BuilderInWorldController : MonoBehaviour
         }
         else
         {
-            initialLoadingController.Hide();
-            inputController.isInputActive = true;
+            initialLoadingController.Hide(onHideAction: () =>
+            {
+                inputController.inputTypeMode = InputTypeMode.BUILD_MODE;
+                HUDController.i.builderInWorldMainHud.SetVisibility(true);
+                CommonScriptableObjects.allUIHidden.Set(previousAllUIHidden);
+            });
         }
 
         isBuilderInWorldActivated = true;
@@ -457,19 +457,23 @@ public class BuilderInWorldController : MonoBehaviour
     private void OnAllParcelsFloorLoaded()
     {
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
-        initialLoadingController.Hide();
-        inputController.isInputActive = true;
+        initialLoadingController.Hide(onHideAction: () =>
+        {
+            inputController.inputTypeMode = InputTypeMode.BUILD_MODE;
+            HUDController.i.builderInWorldMainHud.SetVisibility(true);
+            CommonScriptableObjects.allUIHidden.Set(previousAllUIHidden);
+        });
     }
 
     public void ExitEditMode()
     {
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
         initialLoadingController.Hide(true);
+        inputController.inputTypeMode = InputTypeMode.GENERAL;
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
+        CommonScriptableObjects.allUIHidden.Set(previousAllUIHidden);
 
-        inputController.isInputActive = true;
-        inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
 
         ParcelSettings.VISUAL_LOADING_ENABLED = true;

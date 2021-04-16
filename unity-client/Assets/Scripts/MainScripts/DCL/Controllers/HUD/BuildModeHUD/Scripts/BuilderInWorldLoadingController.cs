@@ -1,3 +1,5 @@
+using System;
+
 public interface IBuilderInWorldLoadingController
 {
     event System.Action OnCancelLoading;
@@ -5,7 +7,7 @@ public interface IBuilderInWorldLoadingController
     void Initialize(IBuilderInWorldLoadingView initialLoadingView);
     void Dispose();
     void Show();
-    void Hide(bool forzeHidding = false);
+    void Hide(bool forzeHidding = false, Action onHideAction = null);
     void CancelLoading();
     void SetPercentage(float newValue);
 }
@@ -30,7 +32,7 @@ public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
 
     public void Show() { initialLoadingView.Show(); }
 
-    public void Hide(bool forzeHidding = false) { initialLoadingView.Hide(forzeHidding); }
+    public void Hide(bool forzeHidding = false, Action onHideAction = null) { initialLoadingView.Hide(forzeHidding, onHideAction); }
 
     public void CancelLoading() { OnCancelLoading?.Invoke(); }
 
