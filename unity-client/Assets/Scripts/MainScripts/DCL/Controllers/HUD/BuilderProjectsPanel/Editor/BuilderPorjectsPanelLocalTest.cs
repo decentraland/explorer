@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DCL;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class BuilderPorjectsPanelLocalTest : MonoBehaviour
@@ -8,6 +9,8 @@ public class BuilderPorjectsPanelLocalTest : MonoBehaviour
     
     void Awake()
     {
+        WebRequestController.Create();
+        
         controller = new BuilderProjectsPanelController();
         
         if (BuilderProjectsPanelBridge.i == null)

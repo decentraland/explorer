@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using DCL;
+using DCL.Helpers;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -24,7 +26,20 @@ namespace Tests
             scenesViewController = Substitute.For<IScenesViewController>();
             landsController = Substitute.For<ILandController>();
 
-            controller.Initialize(bridge, sectionsController, scenesViewController, landsController);
+            ITheGraph theGraph = Substitute.For<ITheGraph>();
+            theGraph.Query(Arg.Any<string>(), Arg.Any<string>()).Returns(new Promise<string>());
+            theGraph.Query(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<QueryVariablesBase>()).Returns(new Promise<string>());
+            theGraph.QueryLands(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<TheGraphCache>()).Returns(new Promise<List<Land>>());
+            
+            ICatalyst catalyst = Substitute.For<ICatalyst>();
+            catalyst.contentUrl.Returns(string.Empty);
+            catalyst.Get(Arg.Any<string>()).Returns(new Promise<string>());
+            catalyst.GetDeployments(Arg.Any<DeploymentOptions>()).Returns(new Promise<string>());
+            catalyst.GetDeployedScenes(Arg.Any<string[]>(), Arg.Any<bool>(), Arg.Any<string>(), Arg.Any<string>())
+                    .Returns(new Promise<SceneDeploymentPayload>());
+
+            controller.Initialize(bridge, sectionsController, scenesViewController, 
+                landsController, theGraph, catalyst);
         }
 
         [TearDown]

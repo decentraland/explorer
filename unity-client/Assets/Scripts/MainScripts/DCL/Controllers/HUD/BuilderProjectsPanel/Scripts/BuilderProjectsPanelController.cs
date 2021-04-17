@@ -1,9 +1,16 @@
-﻿using DCL;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using DCL;
+using DCL.Helpers;
 using UnityEngine;
+using Environment = DCL.Environment;
 using Object = UnityEngine.Object;
 
 public class BuilderProjectsPanelController : IHUD
 {
+    private const string TESTING_ETH_ADDRESS = "0x2fa1859029A483DEFbB664bB6026D682f55e2fcD";
+    
     internal readonly IBuilderProjectsPanelView view;
 
     private ISectionsController sectionsController;
@@ -16,7 +23,11 @@ public class BuilderProjectsPanelController : IHUD
     private LeftMenuSettingsViewHandler leftMenuSettingsViewHandler;
     private BridgeHandler bridgeHandler;
 
+    private ITheGraph theGraph;
+    private ICatalyst catalyst;
+
     private bool isInitialized = false;
+    private Promise<LandWithAccess[]> fetchLandPromise = null;
 
     public BuilderProjectsPanelController() : this(
         Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel"))) { }
@@ -31,6 +42,8 @@ public class BuilderProjectsPanelController : IHUD
     {
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange -= OnVisibilityChanged;
         view.OnClosePressed -= OnClose;
+        
+        fetchLandPromise?.Dispose();
 
         leftMenuSettingsViewHandler?.Dispose();
         sectionsHandler?.Dispose();
@@ -40,7 +53,6 @@ public class BuilderProjectsPanelController : IHUD
 
         sectionsController?.Dispose();
         scenesViewController?.Dispose();
-        landsController?.Dispose();
 
         view.Dispose();
     }
@@ -50,11 +62,13 @@ public class BuilderProjectsPanelController : IHUD
         Initialize(BuilderProjectsPanelBridge.i,
             new SectionsController(view.GetSectionContainer()),
             new ScenesViewController(view.GetCardViewPrefab(), view.GetTransform()),
-            new LandController(Environment.i.platform.serviceProviders.theGraph));
+            new LandController(),
+            Environment.i.platform.serviceProviders.theGraph,
+            Environment.i.platform.serviceProviders.catalyst);
     }
 
     internal void Initialize(IBuilderProjectsPanelBridge bridge, ISectionsController sectionsController, 
-        IScenesViewController scenesViewController, ILandController landController)
+        IScenesViewController scenesViewController, ILandController landController, ITheGraph theGraph, ICatalyst catalyst)
     {
         if (isInitialized)
             return;
@@ -64,6 +78,9 @@ public class BuilderProjectsPanelController : IHUD
         this.sectionsController = sectionsController;
         this.scenesViewController = scenesViewController;
         this.landsController = landController;
+
+        this.theGraph = theGraph;
+        this.catalyst = catalyst;
 
         // set listeners for sections, setup searchbar for section, handle request for opening a new section
         sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, landsController, view.GetSearchBar());
@@ -97,7 +114,7 @@ public class BuilderProjectsPanelController : IHUD
         
         if (isVisible)
         {
-            landsController.FetchLands();
+            FetchLandsAndScenes();
             sectionsController.OpenSection(SectionId.SCENES_MAIN);
         }
     }
@@ -111,5 +128,30 @@ public class BuilderProjectsPanelController : IHUD
     {
         scenesViewController.AddListener((IDeployedSceneListener) view);
         scenesViewController.AddListener((IProjectSceneListener) view);
+    }
+
+    private void FetchLandsAndScenes()
+    {
+        var address = UserProfile.GetOwnUserProfile().ethAddress;
+
+#if UNITY_EDITOR
+        // NOTE: to be able to test in editor without getting a profile we hardcode an address here
+        address = !string.IsNullOrEmpty(address) ? address : TESTING_ETH_ADDRESS;
+#endif
+        
+        fetchLandPromise = DeployedScenesFetcher.FetchLandsFromOwner(catalyst, theGraph, address, KernelConfig.i.Get().tld);
+        fetchLandPromise
+            .Then(lands =>
+            {
+                List<ISceneData> scenes = new List<ISceneData>();
+                for (int i = 0; i < lands.Length; i++)
+                {
+                    var landScenes = lands[i].scenes.Select(scene => new SceneData(scene));
+                    scenes.AddRange(landScenes);
+                }
+                landsController.SetLands(lands.ToList());
+                scenesViewController.SetScenes(scenes.ToArray());
+            })
+            .Catch(Debug.LogError);
     }
 }

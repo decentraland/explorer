@@ -64,20 +64,20 @@ namespace Tests
         {
             SectionLandController controller = new SectionLandController(view);
             ILandsListener landsListener = controller;
-            
-            landsListener.OnSetLands(new List<Land>(){ new Land(){id = "1"}, new Land(){id = "2"}});
+
+            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1"), CreateLandData("2") });
             Assert.AreEqual(2, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsTrue(view.contentContainer.activeSelf);
-            
-            landsListener.OnSetLands(new List<Land>(){ new Land(){id = "1"}});
+
+            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1") });
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsTrue(view.contentContainer.activeSelf);
-            
-            landsListener.OnSetLands(new List<Land>(){});
+
+            landsListener.OnSetLands(new List<LandWithAccess>() { });
             Assert.AreEqual(0, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsFalse(view.contentContainer.activeSelf);
             Assert.IsTrue(view.emptyContainer.activeSelf);
-            
+
             controller.Dispose();
         }
 
@@ -86,28 +86,20 @@ namespace Tests
         {
             const string startingName = "Temptation";
             const string updatedName = "New Temptation";
-            
+
             SectionLandController controller = new SectionLandController(view);
             ILandsListener landsListener = controller;
             LandElementView landElementView = view.GetLandElementeBaseView();
-            
-            landsListener.OnSetLands(new List<Land>(){ new Land()
-            {
-                id = "1",
-                name = startingName
-            }});
+
+            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1", startingName) });
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.AreEqual(startingName, landElementView.landName.text);
-            
-            landsListener.OnSetLands(new List<Land>(){ new Land()
-            {
-                id = "1",
-                name = updatedName
-            }});
+
+            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1", updatedName) });
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.AreEqual(updatedName, landElementView.landName.text);
-            
-            
+
+
             controller.Dispose();
         }
 
@@ -115,5 +107,28 @@ namespace Tests
         {
             return parent.Cast<Transform>().Count(child => child.gameObject.activeSelf);
         }
+
+        private LandWithAccess CreateLandData(string id)
+        {
+            return new LandWithAccess(
+                new Land()
+                {
+                    id = id,
+                    parcels = new List<Parcel>()
+                }
+            );
+        }
+        
+        private LandWithAccess CreateLandData(string id, string name)
+        {
+            return new LandWithAccess(
+                new Land()
+                {
+                    id = id,
+                    name = name,
+                    parcels = new List<Parcel>()
+                }
+            );
+        }        
     }
 }

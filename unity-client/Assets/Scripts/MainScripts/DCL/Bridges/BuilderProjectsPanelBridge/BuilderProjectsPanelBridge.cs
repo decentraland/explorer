@@ -6,7 +6,7 @@ public class BuilderProjectsPanelBridge : MonoBehaviour, IBuilderProjectsPanelBr
     public event Action<string> OnProjectsSet;
     
     public static BuilderProjectsPanelBridge i { get; private set; }
-    public static readonly bool mockData = true;
+    public static readonly bool mockData = false;
 
     private BuilderProjectsPanelDataMock dataMocker = null;
 

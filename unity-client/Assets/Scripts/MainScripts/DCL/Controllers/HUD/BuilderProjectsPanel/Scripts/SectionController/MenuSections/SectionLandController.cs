@@ -48,7 +48,7 @@ internal class SectionLandController : SectionBase, ILandsListener
         view.SetActive(false);
     }
 
-    void ILandsListener.OnSetLands(List<Land> lands)
+    void ILandsListener.OnSetLands(List<LandWithAccess> lands)
     {
         view.SetEmpty(lands == null || lands.Count == 0);
         
@@ -76,7 +76,7 @@ internal class SectionLandController : SectionBase, ILandsListener
             bool isEstate = lands[i].type == LandType.ESTATE;
             landElementView.SetId(lands[i].id);
             landElementView.SetName(lands[i].name);
-            landElementView.SetCoords(lands[i].x, lands[i].y);
+            landElementView.SetCoords(lands[i].@base.x, lands[i].@base.y);
             landElementView.SetSize(lands[i].size);
             landElementView.SetRole(lands[i].role == LandRole.OWNER);
             landElementView.SetThumbnail(GetLandThumbnailUrl(lands[i], isEstate));
@@ -131,7 +131,7 @@ internal class SectionLandController : SectionBase, ILandsListener
         return landView;
     }
 
-    private string GetLandThumbnailUrl(Land land, bool isEstate)
+    private string GetLandThumbnailUrl(LandWithAccess land, bool isEstate)
     {
         const int width = 100;
         const int height = 100;
@@ -140,9 +140,9 @@ internal class SectionLandController : SectionBase, ILandsListener
         
         if (!isEstate)
         {
-            return MapUtils.GetMarketPlaceThumbnailUrl(new[] { new Vector2Int(land.x, land.y) }, width, height, sizeFactorParcel);
+            return MapUtils.GetMarketPlaceThumbnailUrl(new[] { land.@base }, width, height, sizeFactorParcel);
         }
 
-        return MapUtils.GetMarketPlaceThumbnailUrl(land.parcels.Select(p => new Vector2Int(p.x, p.y)).ToArray(), width, height, sizeFactorEstate);
+        return MapUtils.GetMarketPlaceThumbnailUrl(land.parcels, width, height, sizeFactorEstate);
     }
 }
