@@ -140,4 +140,5 @@ public class DeploymentSceneMetadata
     public SpawnPoint[] spawnPoints;
     public string owner;
     public string[] tags;
+    public string[] requiredPermissions;
 }

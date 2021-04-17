@@ -88,6 +88,7 @@ public static class DeployedScenesFetcher
             DeployedScene sceneInParcel = scenes.FirstOrDefault(scene => scene.parcels.Contains(result.parcels[i]) && !scenesInLand.Contains(scene));
             if (sceneInParcel != null)
             {
+                sceneInParcel.sceneLand = result;
                 scenesInLand.Add(sceneInParcel);
             }
         }
@@ -125,12 +126,17 @@ public class DeployedScene
 
     public string title => metadata.display.title;
     public string description => metadata.display.description;
+    public string author => metadata.contact.name;
     public string navmapThumbnail => thumbnail;
     public Vector2Int @base => baseCoord;
     public Vector2Int[] parcels => parcelsCoord;
     public string id => entityId;
-
     public Source source => deploymentSource;
+    public LandWithAccess land => sceneLand;
+    public string[] requiredPermissions => metadata.requiredPermissions;
+    public string contentRating => metadata.policy?.contentRating;
+    public bool voiceEnabled => metadata.policy?.voiceEnabled ?? false;
+    public string[] bannedUsers => metadata.policy?.blacklist;
 
     private DeploymentSceneMetadata metadata;
     private Source deploymentSource;
@@ -138,6 +144,8 @@ public class DeployedScene
     private Vector2Int[] parcelsCoord;
     private string thumbnail;
     private string entityId;
+
+    internal LandWithAccess sceneLand;
 
     public DeployedScene() { }
 

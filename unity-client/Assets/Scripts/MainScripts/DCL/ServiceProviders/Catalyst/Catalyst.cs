@@ -20,14 +20,17 @@ public class Catalyst : ICatalyst
 
     public string contentUrl => realmDomain;
 
-    private string realmDomain;
+    private string realmDomain = "https://peer.decentraland.org";
 
     private readonly Dictionary<string, string> cache = new Dictionary<string, string>();
     private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
     public Catalyst()
     {
-        realmDomain = DataStore.i.playerRealm.Get()?.domain;
+        if (DataStore.i.playerRealm.Get() != null)
+        {
+            realmDomain = DataStore.i.playerRealm.Get().domain;
+        }
         DataStore.i.playerRealm.OnChange += PlayerRealmOnOnChange;
     }
 
