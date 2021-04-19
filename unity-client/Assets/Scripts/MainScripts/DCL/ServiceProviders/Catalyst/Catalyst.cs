@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DCL;
 using DCL.Helpers;
+using UnityEngine;
 using Variables.RealmsInfo;
 
 public interface ICatalyst : IDisposable
@@ -119,10 +120,12 @@ public class Catalyst : ICatalyst
         cache[url] = result;
 
         // NOTE: remove from cache after CACHE_TIME_MSECS time passed
+        Debug.Log("PATO: CACHE ADDED");
         Task.Delay(CACHE_TIME_MSECS)
             .ContinueWith((task) =>
             {
                 cache.Remove(url);
+                Debug.Log("PATO: CACHE REMOVED");
             }, cancellationTokenSource.Token);
     }
 }
