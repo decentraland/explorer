@@ -129,6 +129,7 @@ namespace DCL.Huds.QuestsTracker
             for (int i = 0; i < newTasks.Count; i++)
             {
                 newTasks[i].gameObject.SetActive(true);
+                newTasks[i].SetIsNew(true);
                 tasksRoutines.Add(StartCoroutine(newTasks[i].ProgressAndCompleteSequence()));
             }
             OnLayoutRebuildRequested?.Invoke();

@@ -12,7 +12,8 @@ namespace DCL.Huds.QuestsTracker
     {
         private static readonly int EXPAND_ANIMATOR_TRIGGER = Animator.StringToHash("Expand");
         private static readonly int COLLAPSE_ANIMATOR_TRIGGER = Animator.StringToHash("Collapse");
-        private static readonly int ANIMATION_TRIGGER_COMPLETED = Animator.StringToHash("Completed");
+        private static readonly int COMPLETED_ANIMATOR_TRIGGER = Animator.StringToHash("Completed");
+        private static readonly int NEW_ANIMATOR_TRIGGER = Animator.StringToHash("New");
 
         public event Action<string> OnDestroyed;
 
@@ -31,6 +32,8 @@ namespace DCL.Huds.QuestsTracker
         private Action jumpInDelegate;
 
         public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
+
+        public void SetIsNew(bool isNew) { animator.SetBool(NEW_ANIMATOR_TRIGGER, isNew); }
 
         public void Populate(QuestTask newTask)
         {
@@ -78,7 +81,7 @@ namespace DCL.Huds.QuestsTracker
             if (animator.GetCurrentAnimatorClipInfo(0).All(x => x.clip.name != "QuestTrackerTaskCompleted"))
             {
                 yield return WaitForSecondsCache.Get(0.5f);
-                animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
+                animator.SetTrigger(COMPLETED_ANIMATOR_TRIGGER);
                 taskCompleteAudioEvent.Play();
                 yield return null; // Wait for the animator to update its clipInfo
             }
