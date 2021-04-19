@@ -97,7 +97,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
       //Unity handles this, so only 1 entitty will contain the "ground" category. We can safely assume that we can search it and assign
       Object.entries(builderManifest.scene.assets).forEach(([assetId, asset]) => {
-        if (asset.category === 'ground') {
+        if (asset?.category === 'ground') {
           builderManifest.scene.ground.assetId = assetId
           Object.entries(builderManifest.scene.components).forEach(([componentId, component]) => {
             if (component.data.assetId === assetId) builderManifest.scene.ground.componentId = componentId
@@ -278,3 +278,4 @@ function blobToBuffer(blob: Blob): Promise<Buffer> {
     })
   })
 }
+
