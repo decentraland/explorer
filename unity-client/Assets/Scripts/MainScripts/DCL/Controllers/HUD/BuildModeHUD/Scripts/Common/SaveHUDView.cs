@@ -10,6 +10,7 @@ public interface ISaveHUDView
     void SetGodModeView();
     void SceneStateSaved();
     void StopAnimation();
+    void SetViewByEntityListOpen(bool isOpen);
 }
 
 public class SaveHUDView : MonoBehaviour, ISaveHUDView
@@ -23,7 +24,9 @@ public class SaveHUDView : MonoBehaviour, ISaveHUDView
     [Header("References")]
     [SerializeField] internal Image saveImg;
     [SerializeField] internal RectTransform godModePosition;
+    [SerializeField] internal RectTransform godModeEntityListOpenPosition;
     [SerializeField] internal RectTransform firstPersonModePosition;
+    [SerializeField] internal InspectorView inspectorView;
 
     private Coroutine animationCourutine;
 
@@ -43,7 +46,9 @@ public class SaveHUDView : MonoBehaviour, ISaveHUDView
 
     public void SetFirstPersonView() { saveImg.rectTransform.anchoredPosition = firstPersonModePosition.anchoredPosition; }
 
-    public void SetGodModeView() { saveImg.rectTransform.anchoredPosition = godModePosition.anchoredPosition;  }
+    public void SetGodModeView() { SetViewByEntityListOpen(inspectorView.IsActive()); }
+
+    public void SetViewByEntityListOpen(bool isOpen) { saveImg.rectTransform.anchoredPosition = isOpen ? godModeEntityListOpenPosition.anchoredPosition : godModePosition.anchoredPosition; }
 
     IEnumerator SceneStateSaveAnimation()
     {

@@ -8,6 +8,7 @@ public interface ISaveHUDController
     void Dispose();
     void SceneStateSave();
     void StopAnimation();
+    void SetSaveViewByEntityListOpen(bool isOpen);
 }
 
 public class SaveHUDController : ISaveHUDController
@@ -19,4 +20,6 @@ public class SaveHUDController : ISaveHUDController
     public void Dispose() { }
     public void SceneStateSave() { view.SceneStateSaved(); }
     public void StopAnimation() { view.StopAnimation(); }
+
+    public void SetSaveViewByEntityListOpen(bool isOpen) { view.SetViewByEntityListOpen(isOpen); }
 }
