@@ -104,12 +104,20 @@ namespace DCL.Huds.QuestsPanel
 
             thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
-            thumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading quest panel popup thumbnail: {thumbnailURL}"); };
+            thumbnailPromise.OnFailEvent += x =>
+            {
+                thumbnailImage.gameObject.SetActive(false);
+                Debug.Log($"Error downloading quest panel popup thumbnail: {thumbnailURL}");
+            };
 
             AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
         }
 
-        private void OnThumbnailReady(Asset_Texture assetTexture) { thumbnailImage.texture = assetTexture.texture; }
+        private void OnThumbnailReady(Asset_Texture assetTexture)
+        {
+            thumbnailImage.gameObject.SetActive(true);
+            thumbnailImage.texture = assetTexture.texture;
+        }
 
         internal void CreateSection() { sections.Add(Instantiate(sectionPrefab, sectionsContainer).GetComponent<QuestsPanelSection>()); }
 

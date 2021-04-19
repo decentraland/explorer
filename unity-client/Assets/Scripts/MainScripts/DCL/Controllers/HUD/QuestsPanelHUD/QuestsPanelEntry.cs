@@ -142,6 +142,7 @@ namespace DCL.Huds.QuestsPanel
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
             thumbnailPromise.OnFailEvent += x =>
             {
+                thumbnailImage.gameObject.SetActive(false);
                 animator.SetTrigger(LOADED_ANIM_TRIGGER);
                 Debug.LogError($"Error downloading quest panel entry thumbnail: {currentThumbnail}");
             };
@@ -151,6 +152,7 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnThumbnailReady(Asset_Texture assetTexture)
         {
+            thumbnailImage.gameObject.SetActive(true);
             thumbnailImage.texture = assetTexture.texture;
             animator.SetTrigger(LOADED_ANIM_TRIGGER);
         }

@@ -151,8 +151,16 @@ namespace DCL.Huds.QuestsTracker
                 return;
 
             iconPromise = new AssetPromise_Texture(iconURL);
-            iconPromise.OnSuccessEvent += assetTexture => iconImage.texture = assetTexture.texture;
-            iconPromise.OnFailEvent += assetTexture => { Debug.Log($"Error downloading quest tracker entry icon: {iconURL}"); };
+            iconPromise.OnSuccessEvent += assetTexture =>
+            {
+                iconImage.gameObject.SetActive(true);
+                iconImage.texture = assetTexture.texture;
+            };
+            iconPromise.OnFailEvent += assetTexture =>
+            {
+                iconImage.gameObject.SetActive(false);
+                Debug.Log($"Error downloading quest tracker entry icon: {iconURL}");
+            };
 
             AssetPromiseKeeper_Texture.i.Keep(iconPromise);
         }
