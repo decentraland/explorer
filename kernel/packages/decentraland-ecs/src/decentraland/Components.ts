@@ -513,6 +513,8 @@ export class Animator extends Shape {
     clip.onChange(() => {
       this.dirty = true
     })
+
+    clip.owner = this
     return this
   }
 
@@ -531,6 +533,26 @@ export class Animator extends Shape {
     const newClip = new AnimationState(clipName)
     this.addClip(newClip)
     return newClip
+  }
+
+  /**
+   * Adds an AnimationState to the animation lists.
+   */
+  stop() {
+    for (let i = 0; i < this.states.length; i++) {
+      const clip = this.states[i]
+      clip.stop()
+    }
+  }
+
+  // @internal
+  pauseLayer(layer: number) {
+    for (let i = 0; i < this.states.length; i++) {
+      const clip = this.states[i]
+      if (clip.layer === layer) {
+        clip.pause()
+      }
+    }
   }
 }
 
