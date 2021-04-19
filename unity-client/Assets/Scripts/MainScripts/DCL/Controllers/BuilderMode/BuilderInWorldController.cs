@@ -377,7 +377,9 @@ public class BuilderInWorldController : MonoBehaviour
         }
 
         previousAllUIHidden = CommonScriptableObjects.allUIHidden.Get();
+        NotificationsController.i.allowNotifications = false;
         CommonScriptableObjects.allUIHidden.Set(true);
+        NotificationsController.i.allowNotifications = true;
         inputController.inputTypeMode = InputTypeMode.BUILD_MODE_LOADING;
         initialLoadingController.Show();
         initialLoadingController.SetPercentage(0f);
