@@ -14,14 +14,12 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController = new TopActionsButtonsController();
             topActionsButtonsController.Initialize(
                 Substitute.For<ITopActionsButtonsView>(),
-                Substitute.For<ITooltipController>());
+                Substitute.For<ITooltipController>(),
+                Substitute.For<IBuildModeConfirmationModalController>());
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            topActionsButtonsController.Dispose();
-        }
+        public void TearDown() { topActionsButtonsController.Dispose(); }
 
         [Test]
         public void ClickOnChangeModeCorrectly()
@@ -136,14 +134,40 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void ClickOnLogoutCorrectly()
+        public void HideLogoutConfirmationCorrectly()
+        {
+            // Act
+            topActionsButtonsController.HideLogoutConfirmation(BuildModeModalType.EXIT);
+
+            // Assert
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(false, BuildModeModalType.EXIT);
+        }
+
+        [Test]
+        public void ShowLogoutConfirmationCorrectly()
+        {
+            // Act
+            topActionsButtonsController.ShowLogoutConfirmation();
+
+            // Assert
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1)
+                                       .Configure(
+                                           Arg.Any<string>(),
+                                           Arg.Any<string>(),
+                                           Arg.Any<string>(),
+                                           Arg.Any<string>());
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.EXIT);
+        }
+
+        [Test]
+        public void ConfirmLogoutCorrectly()
         {
             // Arrange
             bool clicked = false;
             topActionsButtonsController.OnLogOutClick += () => { clicked = true; };
 
             // Act
-            topActionsButtonsController.LogOutClicked();
+            topActionsButtonsController.ConfirmLogout(BuildModeModalType.EXIT);
 
             // Assert
             Assert.IsTrue(clicked, "The clicked is false!");

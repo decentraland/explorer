@@ -6,7 +6,8 @@ Shader "DCL/Universal Render Pipeline/Lit"
         [HideInInspector] _WorkflowMode("WorkflowMode", Float) = 1.0
 
         [MainTexture] _BaseMap("Albedo", 2D) = "white" {}
-        [MainColor] _BaseColor("Color", Color) = (1,1,1,1)
+        [MainColor] _BaseColor("Color", Color) = (0.5,0.5,0.5,1)
+        _AlphaTexture("Alpha Texture", 2D) = "white" {}
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
@@ -65,7 +66,7 @@ Shader "DCL/Universal Render Pipeline/Lit"
 
         // ObsoleteProperties
         [HideInInspector] _MainTex("BaseMap", 2D) = "white" {}
-        [HideInInspector] _Color("Base Color", Color) = (1, 1, 1, 1)
+        [HideInInspector] _Color("Base Color", Color) = (0.5, 0.5, 0.5, 1)
         [HideInInspector] _GlossMapScale("Smoothness", Float) = 0.0
         [HideInInspector] _Glossiness("Smoothness", Float) = 0.0
         [HideInInspector] _GlossyReflections("EnvironmentReflections", Float) = 0.0
@@ -115,15 +116,12 @@ Shader "DCL/Universal Render Pipeline/Lit"
 
             // -------------------------------------
             // Material Keywords
+            #define _EMISSION
             #pragma shader_feature_local _NORMALMAP
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature_local_fragment _EMISSION
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma shader_feature_local_fragment _OCCLUSIONMAP
-            #pragma shader_feature_local _PARALLAXMAP
-            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
             #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
             #pragma shader_feature_local_fragment _SPECULAR_SETUP
@@ -206,12 +204,12 @@ Shader "DCL/Universal Render Pipeline/Lit"
             #pragma exclude_renderers gles gles3 glcore
             #pragma target 4.5
 
+            #define _EMISSION
             // -------------------------------------
             // Material Keywords
             #pragma shader_feature_local _NORMALMAP
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             //#pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature_local_fragment _EMISSION
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature_local_fragment _OCCLUSIONMAP
@@ -326,11 +324,11 @@ Shader "DCL/Universal Render Pipeline/Lit"
             #pragma exclude_renderers gles gles3 glcore
             #pragma target 4.5
 
+            #define _EMISSION
             #pragma vertex UniversalVertexMeta
             #pragma fragment UniversalFragmentMeta
 
             #pragma shader_feature_local_fragment _SPECULAR_SETUP
-            #pragma shader_feature_local_fragment _EMISSION
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
@@ -401,7 +399,7 @@ Shader "DCL/Universal Render Pipeline/Lit"
             #pragma shader_feature_local _NORMALMAP
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature_local_fragment _EMISSION
+            #define _EMISSION
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature_local_fragment _OCCLUSIONMAP
@@ -546,7 +544,7 @@ Shader "DCL/Universal Render Pipeline/Lit"
             #pragma fragment UniversalFragmentMeta
 
             #pragma shader_feature_local_fragment _SPECULAR_SETUP
-            #pragma shader_feature_local_fragment _EMISSION
+            #define _EMISSION
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
@@ -584,5 +582,5 @@ Shader "DCL/Universal Render Pipeline/Lit"
     }
 
     FallBack "Hidden/Universal Render Pipeline/FallbackError"
-    CustomEditor "UnityEditor.Rendering.Universal.ShaderGUI.LitShader"
+    //CustomEditor "UnityEditor.Rendering.Universal.ShaderGUI.LitShader"
 }
