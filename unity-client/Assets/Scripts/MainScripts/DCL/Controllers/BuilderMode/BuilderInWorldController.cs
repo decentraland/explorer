@@ -259,9 +259,14 @@ public class BuilderInWorldController : MonoBehaviour
             return;
 
         if (isBuilderInWorldActivated)
-            ExitEditMode();
+        {
+            if (!initialLoadingController.isActive)
+                HUDController.i.builderInWorldMainHud.ExitStart();
+        }
         else
+        {
             TryStartEnterEditMode();
+        }
     }
 
     public DCLBuilderInWorldEntity GetEntityOnPointer()

@@ -6,7 +6,9 @@ using UnityEngine.UI;
 
 public interface IBuilderInWorldLoadingView
 {
-    event System.Action OnCancelLoading;
+    event Action OnCancelLoading;
+
+    bool isActive { get; }
 
     void Show();
     void Hide(bool forzeHidding = false, Action onHideAction = null);
@@ -34,7 +36,9 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     [SerializeField] internal float minVisibilityTime = 1.5f;
     [SerializeField] internal LoadingBar loadingBar;
 
-    public event System.Action OnCancelLoading;
+    public event Action OnCancelLoading;
+
+    public bool isActive => gameObject.activeInHierarchy;
 
     internal Coroutine tipsCoroutine;
     internal Coroutine hideCoroutine;

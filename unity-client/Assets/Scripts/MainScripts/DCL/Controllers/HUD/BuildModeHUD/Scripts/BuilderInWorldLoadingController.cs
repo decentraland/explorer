@@ -2,7 +2,9 @@ using System;
 
 public interface IBuilderInWorldLoadingController
 {
-    event System.Action OnCancelLoading;
+    event Action OnCancelLoading;
+
+    bool isActive { get; }
 
     void Initialize(IBuilderInWorldLoadingView initialLoadingView);
     void Dispose();
@@ -14,7 +16,9 @@ public interface IBuilderInWorldLoadingController
 
 public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
 {
-    public event System.Action OnCancelLoading;
+    public event Action OnCancelLoading;
+
+    public bool isActive => initialLoadingView.isActive;
 
     internal IBuilderInWorldLoadingView initialLoadingView;
 
