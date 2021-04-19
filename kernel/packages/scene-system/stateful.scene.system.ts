@@ -39,7 +39,6 @@ class StatefulWebWorkerScene extends Script {
   }
 
   async systemDidEnable(): Promise<void> {
-    const currentRealm = await this.environmentAPI.getCurrentRealm()
     this.devToolsAdapter = new DevToolsAdapter(this.devTools)
     const { cid: sceneId, land: land } = await this.parcelIdentity.getParcel()
     this.rendererActor = new RendererStatefulActor(this.engine, sceneId)
@@ -58,11 +57,6 @@ class StatefulWebWorkerScene extends Script {
     this.rendererActor.sendInitFinished()
     this.log('Sent initial load')
 
-    // Listen to scene state events
-    this.listenToEvents(sceneId)
-  }
-
-  private listenToEvents(sceneId: string): void {
     // Listen to scene state events
     this.listenToEvents(sceneId)
   }
