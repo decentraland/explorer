@@ -1,4 +1,5 @@
 using System.Collections;
+using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,7 +48,9 @@ namespace DCL.Huds.QuestsTracker
         {
             gameObject.SetActive(true);
             rewardObtainedAudioEvent.Play();
+            Utils.UnlockCursor();
         }
+
         public void Dispose() { Destroy(gameObject); }
         public IEnumerator Waiter() { yield return new WaitUntil(() => okPressed); }
     }
