@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Internal;
 using DCL.Helpers;
 using UnityEngine;
 
@@ -201,7 +200,7 @@ public class DeployedScene
 
         if (isThumbnailFileDeployed && pointerData.content != null)
         {
-            string thumbnailHash = pointerData.content.Find(content => content.key == thumbnail)?.hash;
+            string thumbnailHash = pointerData.content.FirstOrDefault(content => content.key == thumbnail)?.hash;
             if (!string.IsNullOrEmpty(thumbnailHash))
             {
                 return string.Format(contentDownloadUrlFormat, contentUrl, thumbnailHash);
