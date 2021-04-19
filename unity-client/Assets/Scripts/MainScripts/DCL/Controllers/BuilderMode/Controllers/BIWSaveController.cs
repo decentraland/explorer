@@ -18,7 +18,8 @@ public class BIWSaveController : BIWController
     public override void Init()
     {
         base.Init();
-        builderInWorldBridge.OnKernelUpdated += TryToSave;
+        if (builderInWorldBridge != null)
+            builderInWorldBridge.OnKernelUpdated += TryToSave;
     }
 
     public void ResetSaveTime() { nextTimeToSave = 0; }
