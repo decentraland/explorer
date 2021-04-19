@@ -22,6 +22,12 @@ export const getContentWhitelist = (store: RootMetaState): string[] => {
   return config.servers.contentWhitelist
 }
 
+export const getMinCatalystVersion = (store: RootMetaState): string | undefined => {
+  const { config } = store.meta
+
+  return config.minCatalystVersion
+}
+
 export const isMetaConfigurationInitiazed = (store: RootMetaState): boolean => store.meta.initialized
 
 export const getPois = (store: RootMetaState): Vector2Component[] => store.meta.config.world?.pois || []
@@ -43,7 +49,7 @@ export const isFeatureEnabled = (store: RootMetaState, featureName: FeatureFlags
   } else if (location.search.includes(`ENABLE_${queryParamFlag}`)) {
     return true
   } else {
-    const featureFlag = store.meta.config?.featureFlags?.[`explorer-${featureName}`]
+    const featureFlag = store?.meta.config?.featureFlags?.[`explorer-${featureName}`]
     return featureFlag ?? ifNotSet
   }
 }

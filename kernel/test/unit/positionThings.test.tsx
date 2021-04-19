@@ -1,8 +1,9 @@
 import { expect } from 'chai'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
 import { gridToWorld } from '../../packages/atomicHelpers/parcelScenePositions'
+import { isInsideWorldLimits } from '@dcl/schemas'
 
-describe('pickWorldSpawnPoint unit tests', function() {
+describe('pickWorldSpawnPoint unit tests', function () {
   it('picks a spawn point from the defined ones when no default', () => {
     const land: any = {
       sceneJsonData: {
@@ -97,4 +98,21 @@ describe('pickWorldSpawnPoint unit tests', function() {
       cameraTarget: undefined
     })
   })
+
+})
+
+describe('isInsideWorldLimits unit tests', function () {
+
+  it('valid positions outside main region are recognized properly', () => {
+    expect(isInsideWorldLimits(63, 155)).to.be.true
+    expect(isInsideWorldLimits(160, 147)).to.be.true
+    expect(isInsideWorldLimits(163, 70)).to.be.true
+  })
+
+  it('invalid positions outside main region are recognized properly', () => {
+    expect(isInsideWorldLimits(50, 155)).to.be.false
+    expect(isInsideWorldLimits(160, 10)).to.be.false
+    expect(isInsideWorldLimits(163, 40)).to.be.false
+  })
+
 })

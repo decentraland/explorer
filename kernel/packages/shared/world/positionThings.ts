@@ -15,7 +15,8 @@ import {
   parseParcelPosition,
   isWorldPositionInsideParcels
 } from 'atomicHelpers/parcelScenePositions'
-import { DEBUG, parcelLimits } from "../../config"
+import { DEBUG } from "../../config"
+import { isInsideWorldLimits } from '@dcl/schemas'
 
 declare var location: any
 declare var history: any
@@ -216,13 +217,4 @@ export function getLandBase(land: ILand): { x: number; y: number } {
   } else {
     return parseParcelPosition(land.mappingsResponse.parcel_id)
   }
-}
-
-export function isInsideWorldLimits(x: number, y: number) {
-  return (
-    x > parcelLimits.minLandCoordinateX &&
-    x <= parcelLimits.maxLandCoordinateX &&
-    y > parcelLimits.minLandCoordinateY &&
-    y <= parcelLimits.maxLandCoordinateY
-  )
 }

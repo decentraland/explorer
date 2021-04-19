@@ -1,6 +1,7 @@
 import { parcelLimits } from 'config'
+import { isInsideWorldLimits } from '@dcl/schemas'
 
-import { lastPlayerPosition, teleportObservable, isInsideWorldLimits } from 'shared/world/positionThings'
+import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { POIs } from 'shared/comms/POIs'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
@@ -70,6 +71,7 @@ export const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -109, y: -89 }
 ]
 
+// TODO: don't do classess if it holds no state. Use namespaces or functions instead.
 export class TeleportController {
   public static ensureTeleportAnimation() {
     if (
@@ -85,7 +87,7 @@ export class TeleportController {
       Html.hideTeleportAnimation()
       if (WORLD_EXPLORER) {
         ensureUnityInterface()
-          .then((unity) => unity.ShowWelcomeNotification())
+          .then((unity) => unity.unityInterface.ShowWelcomeNotification())
           .catch(defaultLogger.error)
       }
     }
@@ -162,7 +164,7 @@ export class TeleportController {
 
       return { message: tpMessage, success: true }
     } else {
-      const errorMessage = `Coordinates are outside of the boundaries. Limits are from ${parcelLimits.minLandCoordinateX} to ${parcelLimits.maxLandCoordinateX} for X and ${parcelLimits.minLandCoordinateY} to ${parcelLimits.maxLandCoordinateY} for Y`
+      const errorMessage = `Coordinates are outside of the boundaries. Valid ranges are: ${parcelLimits.descriptiveValidWorldRanges}.`
       return { message: errorMessage, success: false }
     }
   }
