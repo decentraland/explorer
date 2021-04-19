@@ -38,24 +38,15 @@ public class UserProfileController : MonoBehaviour
         var model = JsonUtility.FromJson<UserProfileModel>(payload);
 
         CatalogController.RequestBaseWearables()
-            .Then((baseWearables) =>
-            {
-                CatalogController.RequestOwnedWearables(model.userId)
-                    .Then((ownedWearables) =>
-                    {
-                        ownUserProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
-                        ownUserProfile.UpdateData(model);
-                        userProfilesCatalog.Add(model.userId, ownUserProfile);
-                    })
-                    .Catch((error) => Debug.LogError(error));
-            })
-            .Catch((error) => Debug.LogError(error));
+                         .Then((baseWearables) =>
+                         {
+                             ownUserProfile.UpdateData(model);
+                             userProfilesCatalog.Add(model.userId, ownUserProfile);
+                         })
+                         .Catch((error) => Debug.LogError(error));
     }
 
-    public void AddUserProfileToCatalog(string payload)
-    {
-        AddUserProfileToCatalog(JsonUtility.FromJson<UserProfileModel>(payload));
-    }
+    public void AddUserProfileToCatalog(string payload) { AddUserProfileToCatalog(JsonUtility.FromJson<UserProfileModel>(payload)); }
 
     public void AddUserProfilesToCatalog(string payload)
     {
@@ -96,14 +87,12 @@ public class UserProfileController : MonoBehaviour
 
     public void RemoveUserProfileFromCatalog(UserProfile userProfile)
     {
-        if (userProfile == null) return;
+        if (userProfile == null)
+            return;
 
         userProfilesCatalog.Remove(userProfile.userId);
         Destroy(userProfile);
     }
 
-    public void ClearProfilesCatalog()
-    {
-        userProfilesCatalog?.Clear();
-    }
+    public void ClearProfilesCatalog() { userProfilesCatalog?.Clear(); }
 }
