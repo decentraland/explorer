@@ -347,7 +347,7 @@ public class BuildModeHUDController : IHUD
     public void ChangeVisibilityOfEntityList()
     {
         isEntityListVisible = !isEntityListVisible;
-        controllers.saveHUDController.SetSaveViewByEntityListOpen(isEntityListVisible);
+        controllers.saveHUDController?.SetSaveViewByEntityListOpen(isEntityListVisible);
         if (isEntityListVisible)
         {
             OnEntityListVisible?.Invoke();
