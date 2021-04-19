@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class BIWSaveController : BIWController
 {
-
     [SerializeField]
     private float msBetweenSaves = 5000f;
 
