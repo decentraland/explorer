@@ -472,6 +472,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void ExitEditMode()
     {
+        builderInWorldBridge.SaveSceneState(sceneToEdit);
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
         initialLoadingController.Hide(true);
         inputController.inputTypeMode = InputTypeMode.GENERAL;
