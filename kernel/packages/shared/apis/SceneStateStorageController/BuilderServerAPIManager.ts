@@ -15,9 +15,8 @@ export type Asset = {
 }
 
 const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
-const BASE_ASSET_URL = 'https://builder-api.decentraland.org/v1/assets'
-const BASE_PROJECT_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/projects/'
-const BASE_PROJECT_URL = 'https://builder-api.decentraland.org/v1/projects/'
+const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'
+const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
 
 export class BuilderServerAPIManager {
   private readonly assets: Map<AssetId, BuilderAsset> = new Map()
@@ -26,10 +25,10 @@ export class BuilderServerAPIManager {
     const unknownAssets = assetIds.filter((assetId) => !this.assets.has(assetId))
     // TODO: If there are too many assets, we might end up over the url limit, so we might need to send multiple requests
     if (unknownAssets.length > 0) {
-      const queryParams = 'id=' + unknownAssets.join('&id=')
+      const queryParams = 'assets?id=' + unknownAssets.join('&id=')
       try {
         // Fetch unknown assets
-        const response = await fetch(`${BASE_ASSET_URL}?${queryParams}`)
+        const response = await fetch(`${this.getBaseUrl()}${queryParams}`)
         const { data }: { data: BuilderAsset[] } = await response.json()
         data.map((builderAsset) => builderAsset).forEach((asset) => this.assets.set(asset.id, asset))
       } catch (e) {
@@ -64,11 +63,11 @@ export class BuilderServerAPIManager {
   ): Promise<BuilderManifest | undefined> {
     try {
       // Fetch builder manifest by ID
-      const queryParams = projectId + '/manifest'
+      const queryParams = 'projects/' + projectId + '/manifest'
       const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
       let params: RequestInit = {
-        headers: this.authorize(identity, 'get', '/projects/' + queryParams)
+        headers: this.authorize(identity, 'get', '/' + queryParams)
       }
 
       const response = await fetch(urlToFecth, params)
@@ -91,11 +90,11 @@ export class BuilderServerAPIManager {
   ): Promise<BuilderManifest | undefined> {
     try {
       // Fetch builder manifest by lands coordinates
-      const queryParams = land + '/manifestFromCoordinates'
+      const queryParams = 'manifests?' + 'creation_coords_eq=' + land
       const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
       let params: RequestInit = {
-        headers: this.authorize(identity, 'get', '/projects/' + queryParams)
+        headers: this.authorize(identity, 'get', '/' + queryParams)
       }
 
       const response = await fetch(urlToFecth, params)
@@ -126,7 +125,7 @@ export class BuilderServerAPIManager {
   }
 
   async createProjectWithCoords(coordinates: string, identity: ExplorerIdentity): Promise<BuilderManifest> {
-    var builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
+    const builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
     try {
       this.setManifestOnServer(builderManifest, identity)
     } catch (e) {
@@ -136,11 +135,11 @@ export class BuilderServerAPIManager {
   }
 
   private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
-    const queryParams = builderManifest.project.id + '/manifest'
+    const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
     const body = JSON.stringify({ manifest: builderManifest })
-    const headers = this.authorize(identity, 'put', '/projects/' + queryParams)
+    const headers = this.authorize(identity, 'put', '/' + queryParams)
     headers['Content-Type'] = 'application/json'
 
     let params: RequestInit = {
@@ -155,8 +154,8 @@ export class BuilderServerAPIManager {
   }
 
   private getBaseUrl(): string {
-    if (getDefaultTLD() === 'org') return BASE_PROJECT_URL
-    else return BASE_PROJECT_URL_ROPSTEN
+    if (getDefaultTLD() === 'org') return BASE_BUILDER_SERVER_URL
+    else return BASE_BUILDER_SERVER_URL_ROPSTEN
   }
 
   private addAssetsFromManifest(manifest: BuilderManifest) {

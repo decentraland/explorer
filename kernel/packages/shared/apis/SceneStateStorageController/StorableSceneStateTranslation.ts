@@ -30,7 +30,6 @@ export function toBuilderFromStateDefinitionFormat(
 
   // Iterate every entity to get the components for builder
   for (const [entityId, components] of scene.getState().entries()) {
-
     let builderComponentsIds: string[] = []
 
     //Iterate the entity components to transform them to the builder format
@@ -75,22 +74,20 @@ export function toBuilderFromStateDefinitionFormat(
 }
 
 export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneStateDefinition {
-  var sceneState = new SceneStateDefinition()
+  const sceneState = new SceneStateDefinition()
 
-  const entitiesMap = new Map(Object.entries(scene.entities))
   const componentMap = new Map(Object.entries(scene.components))
 
-  for (let entity of entitiesMap.values()) {
+  for (let entity of Object.values(scene.entities)) {
     let components: Component[] = []
     for (let componentId of entity.components.values()) {
-      for (let builderComponent of componentMap.values()) {
-        if (builderComponent.id === componentId) {
-          let component: Component = {
-            componentId: fromHumanReadableType(builderComponent.type),
-            data: builderComponent.data
-          }
-          components.push(component)
+      if (componentMap.has(componentId)) {
+
+        let component: Component = {
+          componentId: fromHumanReadableType(componentMap.get(componentId)!.type),
+          data: componentMap.get(componentId)?.data
         }
+        components.push(component)
       }
     }
 

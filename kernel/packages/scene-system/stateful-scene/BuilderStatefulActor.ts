@@ -6,7 +6,6 @@ import { ISceneStateStorageController } from 'shared/apis/SceneStateStorageContr
 export class BuilderStatefulActor {
   constructor(
     protected readonly land: ILand,
-    protected readonly realmDomain: string,
     private readonly sceneStorage: ISceneStateStorageController
   ) {}
 
