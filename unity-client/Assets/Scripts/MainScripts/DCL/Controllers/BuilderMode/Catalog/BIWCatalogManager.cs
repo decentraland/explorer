@@ -102,7 +102,10 @@ public static class BIWCatalogManager
             return;
 
         CatalogItem catalogItem = CreateCatalogItem(sceneObject);
-        DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
+
+        //TODO: SmartItems disabled until kernel has them implemented
+        if (!catalogItem.IsSmartItem())
+            DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
     }
 
     public static void AddSceneAssetPack(SceneAssetPack sceneAssetPack)
@@ -111,7 +114,9 @@ public static class BIWCatalogManager
             return;
 
         CatalogItemPack catalogItemPack = CreateCatalogItemPack(sceneAssetPack);
-        DataStore.i.builderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
+        //TODO: SmartItems disabled until kernel has them implemented
+        if (catalogItemPack.assets.Count != 0)
+            DataStore.i.builderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
     }
 
     public static void ConvertCollectiblesPack(List<NFTInfo> nftList)
@@ -170,7 +175,9 @@ public static class BIWCatalogManager
 
         foreach (SceneObject sceneObject in sceneAssetPack.assets)
         {
-            catalogItemPack.assets.Add(CreateCatalogItem(sceneObject));
+            //TODO: SmartItems disabled until kernel has them implemented
+            if (!sceneObject.IsSmartItem())
+                catalogItemPack.assets.Add(CreateCatalogItem(sceneObject));
         }
 
         return catalogItemPack;
