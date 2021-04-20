@@ -27,7 +27,8 @@ public class AvatarEditorHUDController : IHUD
     private ColorList eyeColorList;
     private ColorList hairColorList;
     private bool prevMouseLockState = false;
-    private bool ownedWearablesAlreadyLoaded = false;
+    private bool ownedWearablesAlreadyRequested = false;
+    internal bool ownedWearablesAlreadyLoaded = false;
 
     public AvatarEditorHUDView view;
 
@@ -74,16 +75,18 @@ public class AvatarEditorHUDController : IHUD
 
     private void LoadUserProfile(UserProfile userProfile)
     {
-        if (!ownedWearablesAlreadyLoaded)
+        if (!ownedWearablesAlreadyRequested && !string.IsNullOrEmpty(userProfile.userId))
         {
             CatalogController.RequestOwnedWearables(userProfile.userId)
                              .Then((ownedWearables) =>
                              {
-                                 this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
                                  ownedWearablesAlreadyLoaded = true;
+                                 this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
                                  LoadUserProfile(userProfile, true);
                              })
                              .Catch((error) => Debug.LogError(error));
+
+            ownedWearablesAlreadyRequested = true;
         }
 
         LoadUserProfile(userProfile, false);

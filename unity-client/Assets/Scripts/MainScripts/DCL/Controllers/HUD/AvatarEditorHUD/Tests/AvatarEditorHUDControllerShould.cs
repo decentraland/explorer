@@ -40,6 +40,7 @@ namespace AvatarEditorHUD_Tests
             controller = new AvatarEditorHUDController_Mock();
             controller.Initialize(userProfile, catalog);
             controller.SetVisibility(true);
+            controller.ownedWearablesAlreadyLoaded = true;
 
             userProfile.UpdateData(new UserProfileModel()
             {
