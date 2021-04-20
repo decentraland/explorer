@@ -142,10 +142,10 @@ namespace DCL
             if (!tex)
                 return true;
 
-            byte[] png1 = (tex as Texture2D).EncodeToPNG();
-
-            if (png1.Length != questionMarkPNG.Length)
+            if (tex.width * tex.height != questionMarkPNG.Length )
                 return false;
+
+            byte[] png1 = (tex as Texture2D).EncodeToPNG();
             for (int i = 0; i < questionMarkPNG.Length; i++)
                 if (!png1[i].Equals(questionMarkPNG[i]))
                     return false;
