@@ -75,7 +75,7 @@ import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'sha
 import { getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
 import { Profile, ProfileType, Snapshots } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
-import { queueTrackingEvent } from 'shared/analytics'
+import { trackEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
@@ -1116,9 +1116,9 @@ async function doStartCommunications(context: Context) {
         connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map((it) => it.slice(-6))
 
         if (connectionAnalytics) {
-          queueTrackingEvent('Comms Status v2', connectionAnalytics)
+          trackEvent('Comms Status v2', connectionAnalytics)
         }
-      }, 30000)
+      }, 60000) // Once per minute
     }
 
     context.worldRunningObserver = renderStateObservable.add((isRunning) => {
