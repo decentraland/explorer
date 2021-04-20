@@ -133,6 +133,9 @@ internal class SectionLandController : SectionBase, ILandsListener
 
     private string GetLandThumbnailUrl(LandWithAccess land, bool isEstate)
     {
+        if (land == null)
+            return null;
+        
         const int width = 100;
         const int height = 100;
         const int sizeFactorParcel = 15;
