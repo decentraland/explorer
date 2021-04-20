@@ -4,7 +4,7 @@ import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } fro
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import { LOGIN_COMPLETED, USER_AUTHENTIFIED } from 'shared/session/actions'
 import { web3initialized } from 'shared/dao/actions'
-import { queueTrackingEvent } from '../analytics'
+import { trackEvent } from '../analytics'
 import { lastPlayerPosition } from '../world/positionThings'
 
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
@@ -59,7 +59,7 @@ export function* trackLoadTime(action: SceneLoad): any {
   })
   const userId = yield select(getCurrentUserId)
   const position = lastPlayerPosition
-  queueTrackingEvent('SceneLoadTimes', {
+  trackEvent('SceneLoadTimes', {
     position: { ...position },
     elapsed: new Date().getTime() - start,
     success: !!result.start,
