@@ -1,10 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using DCL;
 using DCL.Helpers;
+using UnityEngine;
 using Variables.RealmsInfo;
 
 public interface ICatalyst : IDisposable
@@ -17,7 +17,7 @@ public interface ICatalyst : IDisposable
 
 public class Catalyst : ICatalyst
 {
-    private const int CACHE_TIME_MSECS = 5 * 60 * 1000;
+    private const float CACHE_TIME = 5 * 60;
 
     public string contentUrl => realmContentServerUrl;
 
@@ -25,7 +25,6 @@ public class Catalyst : ICatalyst
     private string realmContentServerUrl = "https://peer.decentraland.org/content";
 
     private readonly Dictionary<string, string> cache = new Dictionary<string, string>();
-    private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
     public Catalyst()
     {
@@ -40,7 +39,6 @@ public class Catalyst : ICatalyst
     public void Dispose()
     {
         DataStore.i.playerRealm.OnChange -= PlayerRealmOnOnChange;
-        cancellationTokenSource.Cancel();
     }
 
     public Promise<CatalystSceneEntityPayload[]> GetDeployedScenes(string[] parcels)
@@ -109,11 +107,13 @@ public class Catalyst : ICatalyst
     {
         cache[url] = result;
 
-        // NOTE: remove from cache after CACHE_TIME_MSECS time passed
-        Task.Delay(CACHE_TIME_MSECS)
-            .ContinueWith((task) =>
-            {
-                cache.Remove(url);
-            }, cancellationTokenSource.Token);
+        // NOTE: remove from cache after CACHE_TIME time passed
+        CoroutineStarter.Start(RemoveCache(url, CACHE_TIME));
+    }
+
+    private IEnumerator RemoveCache(string url, float delay)
+    {
+        yield return WaitForSecondsCache.Get(delay);
+        cache?.Remove(url);
     }
 }
