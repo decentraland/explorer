@@ -5,18 +5,13 @@ using UnityEngine;
 
 public static class DeployedScenesFetcher
 {
-    public static Promise<SceneDeploymentPayload> FetchRawScenes(ICatalyst catalyst, string[] parcels)
-    {
-        return catalyst.GetDeployedScenes(parcels);
-    }
-
     public static Promise<DeployedScene[]> FetchScenes(ICatalyst catalyst, string[] parcels)
     {
         Promise<DeployedScene[]> promise = new Promise<DeployedScene[]>();
         catalyst.GetDeployedScenes(parcels)
                 .Then(result =>
                 {
-                    promise.Resolve(result.deployments.Select(deployment => new DeployedScene(deployment, catalyst.contentUrl)).ToArray());
+                    promise.Resolve(result.Select(deployment => new DeployedScene(deployment, catalyst.contentUrl)).ToArray());
                 })
                 .Catch(err => promise.Reject(err));
         return promise;
@@ -137,7 +132,7 @@ public class DeployedScene
     public bool voiceEnabled => metadata.policy?.voiceEnabled ?? false;
     public string[] bannedUsers => metadata.policy?.blacklist;
 
-    private DeploymentSceneMetadata metadata;
+    private CatalystSceneEntityMetadata metadata;
     private Source deploymentSource;
     private Vector2Int baseCoord;
     private Vector2Int[] parcelsCoord;
@@ -148,17 +143,17 @@ public class DeployedScene
 
     public DeployedScene() { }
 
-    public DeployedScene(DeploymentScene pointerData, string contentUrl)
+    public DeployedScene(CatalystSceneEntityPayload pointerData, string contentUrl)
     {
         const string builderInWorldStateJson = "scene-state-definition.json";
         const string builderSourceName = "builder";
 
         metadata = pointerData.metadata;
-        entityId = pointerData.entityId;
+        entityId = pointerData.id;
 
         deploymentSource = Source.SDK;
 
-        if (pointerData.content != null && pointerData.content.Any(content => content.key == builderInWorldStateJson))
+        if (pointerData.content != null && pointerData.content.Any(content => content.file == builderInWorldStateJson))
         {
             deploymentSource = Source.BUILDER_IN_WORLD;
         }
@@ -182,10 +177,9 @@ public class DeployedScene
         return Vector2Int.zero;
     }
 
-    static string GetNavmapThumbnailUrl(DeploymentScene pointerData, string contentUrl)
+    static string GetNavmapThumbnailUrl(CatalystSceneEntityPayload pointerData, string contentUrl)
     {
-        //TODO: --> contentDownloadUrlFormat
-        const string contentDownloadUrlFormat = "{0}/content/contents/{1}";
+        const string contentDownloadUrlFormat = "{0}/contents/{1}";
         const string builderUrlFormat = "https://builder-api.decentraland.org/v1/projects/{0}/media/preview.png";
 
         string thumbnail = pointerData.metadata.display.navmapThumbnail;
@@ -200,7 +194,7 @@ public class DeployedScene
 
         if (isThumbnailFileDeployed && pointerData.content != null)
         {
-            string thumbnailHash = pointerData.content.FirstOrDefault(content => content.key == thumbnail)?.hash;
+            string thumbnailHash = pointerData.content.FirstOrDefault(content => content.file == thumbnail)?.hash;
             if (!string.IsNullOrEmpty(thumbnailHash))
             {
                 return string.Format(contentDownloadUrlFormat, contentUrl, thumbnailHash);
