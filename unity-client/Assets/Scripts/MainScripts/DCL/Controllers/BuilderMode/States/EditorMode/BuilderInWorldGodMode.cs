@@ -518,8 +518,13 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     public void LookAtEntity(IDCLEntity entity)
     {
+        if (entity.meshRootGameObject == null
+            || entity.meshesInfo == null
+            || BuilderInWorldUtils.IsBoundInsideCamera(entity.meshesInfo.mergedBounds))
+            return;
+
         Vector3 pointToLook = entity.gameObject.transform.position;
-        if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+        if (entity.meshesInfo.renderers.Length > 0)
         {
             Vector3 midPointFromEntityMesh = Vector3.zero;
             foreach (Renderer render in entity.renderers)
