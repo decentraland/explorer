@@ -25,6 +25,11 @@ namespace DCL
         public bool isDone { get; private set; }
 
         /// <summary>
+        /// Returns true if the request was successfully finished.
+        /// </summary>
+        public bool isSucceded { get; private set; }
+
+        /// <summary>
         /// Returns true if webRequest has been disposed (webRequest = null).
         /// </summary>
         public bool isDisposed { get { return webRequest == null; } }
@@ -32,23 +37,27 @@ namespace DCL
         /// <summary>
         /// Set to true for disposing the request just after it has been completed.
         /// </summary>
-        public bool disposeOnCompleted { get; set; } = false;
+        public bool disposeOnCompleted { get; set; }
 
-        public override bool keepWaiting { get { return webRequest != null && !webRequest.isDone; } }
+        public override bool keepWaiting { get { return !isDone; } }
 
         public WebRequestAsyncOperation(UnityWebRequest webRequest)
         {
             this.webRequest = webRequest;
             isDone = false;
+            isSucceded = false;
+            disposeOnCompleted = true;
         }
 
         /// <summary>
         /// Mark the request as completed and throw the corresponding event.
         /// </summary>
-        internal void SetAsCompleted()
+        /// <param name="success">True if the request was successfully ended.</param>
+        internal void SetAsCompleted(bool success)
         {
-            isDone = true;
             completed?.Invoke(this);
+            isDone = true;
+            isSucceded = success;
 
             if (disposeOnCompleted)
                 Dispose();
