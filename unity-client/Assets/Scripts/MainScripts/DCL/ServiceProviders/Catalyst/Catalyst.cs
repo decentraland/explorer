@@ -66,11 +66,11 @@ public class Catalyst : ICatalyst
     
     public Promise<string> GetEntities(string entityType, string[] pointers)
     {
-        string deploymentsUrl = $"content/entities/{entityType}?";
+        string deploymentsUrl = $"content/entities/{entityType}";
         string urlParams = "";
         urlParams = pointers.Aggregate(urlParams, (current, pointer) => current + $"&pointer={pointer}");
         
-        string url = $"{realmDomain}/{deploymentsUrl}/?{urlParams}";
+        string url = $"{realmDomain}/{deploymentsUrl}?{urlParams}";
 
         return Get(url);
     }
