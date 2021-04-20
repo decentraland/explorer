@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using DCL;
 using UnityEngine;
 
@@ -17,6 +17,8 @@ public class PlayerAvatarController : MonoBehaviour
 
     private void Start()
     {
+        DataStore.i.isPlayerRendererLoaded.Set(false);
+
         //NOTE(Brian): We must wait for loading to finish before deactivating the renderer, or the GLTF Loader won't finish.
         avatarRenderer.OnSuccessEvent -= OnAvatarRendererReady;
         avatarRenderer.OnFailEvent -= OnAvatarRendererReady;
@@ -34,6 +36,7 @@ public class PlayerAvatarController : MonoBehaviour
         CommonScriptableObjects.rendererState.RemoveLock(this);
         avatarRenderer.OnSuccessEvent -= OnAvatarRendererReady;
         avatarRenderer.OnFailEvent -= OnAvatarRendererReady;
+        DataStore.i.isPlayerRendererLoaded.Set(true);
     }
 
     private void Update()
@@ -53,10 +56,7 @@ public class PlayerAvatarController : MonoBehaviour
         avatarVisibility.SetVisibility("PLAYER_AVATAR_CONTROLLER", shouldBeVisible);
     }
 
-    public void SetAvatarVisibility(bool isVisible)
-    {
-        avatarRenderer.SetVisibility(isVisible);
-    }
+    public void SetAvatarVisibility(bool isVisible) { avatarRenderer.SetVisibility(isVisible); }
 
     private void OnEnable()
     {
@@ -64,15 +64,9 @@ public class PlayerAvatarController : MonoBehaviour
         userProfile.OnAvatarExpressionSet += OnAvatarExpression;
     }
 
-    private void OnAvatarExpression(string id, long timestamp)
-    {
-        avatarRenderer.UpdateExpressions(id, timestamp);
-    }
+    private void OnAvatarExpression(string id, long timestamp) { avatarRenderer.UpdateExpressions(id, timestamp); }
 
-    private void OnUserProfileOnUpdate(UserProfile profile)
-    {
-        avatarRenderer.ApplyModel(profile.avatar, null, null);
-    }
+    private void OnUserProfileOnUpdate(UserProfile profile) { avatarRenderer.ApplyModel(profile.avatar, null, null); }
 
     private void OnDisable()
     {

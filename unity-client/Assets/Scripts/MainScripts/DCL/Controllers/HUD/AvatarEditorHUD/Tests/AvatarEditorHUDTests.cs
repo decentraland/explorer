@@ -1,4 +1,5 @@
 using AvatarShape_Tests;
+using DCL;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace AvatarEditorHUD_Tests
             catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             controller = new AvatarEditorHUDController_Mock();
             controller.Initialize(userProfile, catalog);
-            controller.ownedWearablesAlreadyLoaded = true;
+            DataStore.i.isPlayerRendererLoaded.Set(true);
         }
 
         [UnityTearDown]

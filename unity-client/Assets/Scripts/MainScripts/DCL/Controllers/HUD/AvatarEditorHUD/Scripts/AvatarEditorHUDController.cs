@@ -20,6 +20,7 @@ public class AvatarEditorHUDController : IHUD
     private UserProfile userProfile;
     private BaseDictionary<string, WearableItem> catalog;
     bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+    bool isPlayerRendererLoaded => DataStore.i.isPlayerRendererLoaded.Get();
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
     protected readonly AvatarEditorHUDModel model = new AvatarEditorHUDModel();
 
@@ -28,7 +29,6 @@ public class AvatarEditorHUDController : IHUD
     private ColorList hairColorList;
     private bool prevMouseLockState = false;
     private bool ownedWearablesAlreadyRequested = false;
-    internal bool ownedWearablesAlreadyLoaded = false;
 
     public AvatarEditorHUDView view;
 
@@ -56,6 +56,7 @@ public class AvatarEditorHUDController : IHUD
 
         LoadUserProfile(userProfile, true);
         this.userProfile.OnUpdate += LoadUserProfile;
+        DataStore.i.isPlayerRendererLoaded.OnChange += PlayerRendererLoaded;
     }
 
     public void SetCatalog(BaseDictionary<string, WearableItem> catalog)
@@ -80,7 +81,6 @@ public class AvatarEditorHUDController : IHUD
             CatalogController.RequestOwnedWearables(userProfile.userId)
                              .Then((ownedWearables) =>
                              {
-                                 ownedWearablesAlreadyLoaded = true;
                                  this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
                                  LoadUserProfile(userProfile, true);
                              })
@@ -90,6 +90,16 @@ public class AvatarEditorHUDController : IHUD
         }
 
         LoadUserProfile(userProfile, false);
+    }
+
+    private void PlayerRendererLoaded(bool current, bool previous)
+    {
+        if (!current)
+            return;
+
+        LoadUserProfile(userProfile, true);
+        DataStore.i.isPlayerRendererLoaded.OnChange -= PlayerRendererLoaded;
+
     }
 
     public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
@@ -129,7 +139,7 @@ public class AvatarEditorHUDController : IHUD
 
         int wearablesCount = userProfile.avatar.wearables.Count;
 
-        if (ownedWearablesAlreadyLoaded)
+        if (isPlayerRendererLoaded)
         {
             for (var i = 0; i < wearablesCount; i++)
             {
@@ -505,6 +515,7 @@ public class AvatarEditorHUDController : IHUD
         this.userProfile.OnUpdate -= LoadUserProfile;
         this.catalog.OnAdded -= AddWearable;
         this.catalog.OnRemoved -= RemoveWearable;
+        DataStore.i.isPlayerRendererLoaded.OnChange -= PlayerRendererLoaded;
     }
 
     public void SetConfiguration(HUDConfiguration configuration) { SetVisibility(configuration.active); }
