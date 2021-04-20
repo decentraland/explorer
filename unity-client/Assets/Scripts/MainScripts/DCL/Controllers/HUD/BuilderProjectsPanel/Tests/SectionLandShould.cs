@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DCL;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -14,12 +15,14 @@ namespace Tests
         {
             var prefab = Resources.Load<SectionLandView>(SectionLandController.VIEW_PREFAB_PATH);
             view = Object.Instantiate(prefab);
+            WebRequestController.Create();
         }
 
         [TearDown]
         public void TearDown()
         {
             Object.Destroy(view.gameObject);
+            WebRequestController.i.Dispose();
         }
 
         [Test]

@@ -34,9 +34,8 @@ namespace Tests
             ICatalyst catalyst = Substitute.For<ICatalyst>();
             catalyst.contentUrl.Returns(string.Empty);
             catalyst.Get(Arg.Any<string>()).Returns(new Promise<string>());
-            catalyst.GetDeployments(Arg.Any<DeploymentOptions>()).Returns(new Promise<string>());
-            catalyst.GetDeployedScenes(Arg.Any<string[]>(), Arg.Any<bool>(), Arg.Any<string>(), Arg.Any<string>())
-                    .Returns(new Promise<SceneDeploymentPayload>());
+            catalyst.GetEntities(Arg.Any<string>(), Arg.Any<string[]>()).Returns(new Promise<string>());
+            catalyst.GetDeployedScenes(Arg.Any<string[]>()).Returns(new Promise<CatalystSceneEntityPayload[]>());
 
             controller.Initialize(bridge, sectionsController, scenesViewController, 
                 landsController, theGraph, catalyst);
