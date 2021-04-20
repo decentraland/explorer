@@ -1,5 +1,5 @@
 import { takeEvery } from 'redux-saga/effects'
-import { queueTrackingEvent } from '../analytics'
+import { trackEvent } from '../analytics'
 import { SAVE_PROFILE_SUCCESS, SaveProfileSuccess } from '../profiles/actions'
 import {
   NETWORK_MISMATCH,
@@ -65,11 +65,11 @@ export function* metricSaga() {
   for (const event of ExecutionLifecycleEventsList) {
     yield takeEvery(event, (action) => {
       const _action: any = action
-      queueTrackingEvent('lifecycle event', toTrackingEvent(event, _action.payload))
+      trackEvent('lifecycle event', toTrackingEvent(event, _action.payload))
     })
   }
   yield takeEvery(SAVE_PROFILE_SUCCESS, (action: SaveProfileSuccess) =>
-    queueTrackingEvent('avatar_edit_success', toAvatarEditSuccess(action.payload))
+    trackEvent('avatar_edit_success', toAvatarEditSuccess(action.payload))
   )
 }
 
