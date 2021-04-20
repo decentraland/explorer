@@ -1,5 +1,6 @@
 {
     "name": "ABConverter",
+    "rootNamespace": "",
     "references": [
         "GUID:478a2357cc57436488a56e564b08d223",
         "GUID:b1087c5731ff68448a0a9c625bb7e52d",

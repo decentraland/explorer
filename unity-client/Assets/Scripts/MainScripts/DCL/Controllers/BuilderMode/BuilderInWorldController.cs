@@ -174,7 +174,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
-        CoroutineStarter.Start(BuilderInWorldUtils.MakeGetCall(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived));
+        BuilderInWorldUtils.MakeGetCall(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
         BuilderInWorldNFTController.i.Initialize();
         BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
     }

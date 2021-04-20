@@ -307,44 +307,23 @@ public static partial class BuilderInWorldUtils
         original.pivot = rectTransformToCopy.pivot;
     }
 
-    public static IEnumerator MakeGetCall(string url, Action<string> functionToCall)
+    public static void MakeGetCall(string url, Action<string> functionToCall)
     {
-        UnityWebRequest www = UnityWebRequest.Get(url);
-        UnityWebRequestAsyncOperation www2 = www.SendWebRequest();
-
-        bool retry = true;
-        int retryCont = 0;
-        while (retry)
-        {
-            retry = false;
-            while (!www2.isDone)
-            {
-                yield return null;
-            }
-
-            if (www.isNetworkError || www.isHttpError)
-            {
-                Debug.Log(www.error);
-                if (retryCont < BuilderInWorldSettings.RETRY_AMOUNTS)
-                {
-                    retry = true;
-                    retryCont++;
-                }
-                else
-                {
-                    yield break;
-                }
-            }
-            else
+        Environment.i.platform.webRequest.Get(
+            url: url,
+            OnSuccess: (webRequestResult) =>
             {
                 if (functionToCall != null)
                 {
-                    byte[] byteArray = www.downloadHandler.data;
+                    byte[] byteArray = webRequestResult.downloadHandler.data;
                     string result = System.Text.Encoding.UTF8.GetString(byteArray);
                     functionToCall?.Invoke(result);
                 }
-            }
-        }
+            },
+            OnFail: (webRequestResult) =>
+            {
+                Debug.Log(webRequestResult.error);
+            });
     }
 
     public static void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
