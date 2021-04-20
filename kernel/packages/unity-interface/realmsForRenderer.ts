@@ -1,6 +1,6 @@
 import { StoreContainer } from '../shared/store/rootTypes'
-import { getExploreRealmsService, getRealm } from '../shared/dao/selectors'
-import { RealmsInfoForRenderer } from '../shared/types'
+import { getExploreRealmsService, getFetchContentServer, getRealm } from '../shared/dao/selectors'
+import { CurrentRealmInfoForRenderer, RealmsInfoForRenderer } from '../shared/types'
 import { observeRealmChange } from '../shared/dao'
 import { Realm } from '../shared/dao/types'
 import { unityInterface } from './UnityInterface'
@@ -18,11 +18,11 @@ export function startRealmsReportToRenderer() {
 
     const realm = getRealm(globalThis.globalStore.getState())
     if (realm) {
-      reportToRenderer({ current: convertRealmType(realm) })
+      reportToRenderer({ current: convertCurrentRealmType(realm) })
     }
 
     observeRealmChange(globalThis.globalStore, (previous, current) => {
-      reportToRenderer({ current: convertRealmType(current) })
+      reportToRenderer({ current: convertCurrentRealmType(current) })
     })
 
     fetchAndReportRealmsInfo().catch((e) => defaultLogger.log(e))
@@ -50,6 +50,12 @@ function reportToRenderer(info: Partial<RealmsInfoForRenderer>) {
   unityInterface.UpdateRealmsInfo(info)
 }
 
-function convertRealmType(realm: Realm): { serverName: string; layer: string; domain: string } {
-  return { serverName: realm.catalystName, layer: realm.layer, domain: realm.domain }
+function convertCurrentRealmType(realm: Realm): CurrentRealmInfoForRenderer {
+  const contentServerUrl = getFetchContentServer(globalThis.globalStore.getState())
+  return {
+    serverName: realm.catalystName,
+    layer: realm.layer,
+    domain: realm.domain,
+    contentServerUrl: contentServerUrl
+  }
 }
