@@ -142,7 +142,7 @@ namespace DCL
             if (!tex)
                 return true;
 
-            if (tex.width * tex.height != questionMarkPNG.Length )
+            if (tex.width != 8 || tex.height != 8)
                 return false;
 
             byte[] png1 = (tex as Texture2D).EncodeToPNG();
