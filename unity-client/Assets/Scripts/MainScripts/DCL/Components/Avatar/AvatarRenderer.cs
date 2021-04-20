@@ -145,17 +145,17 @@ namespace DCL
                 }
             }
 
-            if (!model.wearables.Contains(eyebrowsController.wearableId))
+            if (eyebrowsController != null && !model.wearables.Contains(eyebrowsController.wearableId))
             {
                 eyebrowsController.CleanUp();
             }
 
-            if (!model.wearables.Contains(eyesController.wearableId))
+            if (eyesController != null && !model.wearables.Contains(eyesController.wearableId))
             {
                 eyesController.CleanUp();
             }
 
-            if (!model.wearables.Contains(mouthController.wearableId))
+            if (mouthController != null && !model.wearables.Contains(mouthController.wearableId))
             {
                 mouthController.CleanUp();
             }
@@ -315,11 +315,14 @@ namespace DCL
             yield return new WaitUntil(() => bodyShapeController.isReady && wearableControllers.Values.All(x => x.isReady));
 
 
-            eyesController.Load(bodyShapeController, model.eyeColor);
-            eyebrowsController.Load(bodyShapeController, model.hairColor);
-            mouthController.Load(bodyShapeController, model.skinColor);
+            eyesController?.Load(bodyShapeController, model.eyeColor);
+            eyebrowsController?.Load(bodyShapeController, model.hairColor);
+            mouthController?.Load(bodyShapeController, model.skinColor);
 
-            yield return new WaitUntil(() => eyebrowsController.isReady && eyesController.isReady && mouthController.isReady);
+            yield return new WaitUntil(() =>
+                (eyebrowsController == null || (eyebrowsController != null && eyebrowsController.isReady)) &&
+                (eyesController == null || (eyesController != null && eyesController.isReady)) &&
+                (mouthController == null || (mouthController != null && mouthController.isReady)));
 
             if (useFx && (bodyIsDirty || wearablesIsDirty))
             {

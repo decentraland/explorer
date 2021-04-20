@@ -30,20 +30,14 @@ public class UserProfileController : MonoBehaviour
 
     public void LoadProfile(string payload)
     {
+        CatalogController.RequestBaseWearables().Catch((error) => Debug.LogError(error));
+
         if (payload == null)
-        {
             return;
-        }
 
         var model = JsonUtility.FromJson<UserProfileModel>(payload);
-
-        CatalogController.RequestBaseWearables()
-                         .Then((baseWearables) =>
-                         {
-                             ownUserProfile.UpdateData(model);
-                             userProfilesCatalog.Add(model.userId, ownUserProfile);
-                         })
-                         .Catch((error) => Debug.LogError(error));
+        ownUserProfile.UpdateData(model);
+        userProfilesCatalog.Add(model.userId, ownUserProfile);
     }
 
     public void AddUserProfileToCatalog(string payload) { AddUserProfileToCatalog(JsonUtility.FromJson<UserProfileModel>(payload)); }
