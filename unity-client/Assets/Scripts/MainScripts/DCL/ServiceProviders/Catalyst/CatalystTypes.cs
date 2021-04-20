@@ -8,72 +8,31 @@ public static class CatalystEntitiesType
     public static readonly string WEARABLE = "wearable";
 }
 
-public static class CatalystSortingField
-{
-    public static readonly string LOCAL_TIMESTAMP = "local_timestamp";
-    public static readonly string ENTITY_TIMESTAMP = "entity_timestamp";
-}
-
-public static class CatalystSortingOrder
-{
-    public static readonly string ASCENDING = "ASC";
-    public static readonly string DESCENDING = "DESC";
-}
-
 [Serializable]
-public class DeploymentFilters
+public class CatalystEntityContent
 {
-    public bool onlyCurrentlyPointed;
-    public string[] pointers;
-    public string[] entityIds;
-    public string[] entityTypes;
-    public string[] deployedBy;
-}
-
-[Serializable]
-public class DeploymentOptions 
-{
-    public DeploymentFilters filters;
-    public string sortBy;
-    public string sortOrder;
-    public int? offset;
-    public int? limit;
-    public string lastId;
-}
-
-[Serializable]
-public class SceneDeploymentPayload
-{
-    public DeploymentScene[] deployments;
-    public DeploymentFilters filters;
-}
-
-[Serializable]
-public class DeploymentBase
-{
-    public string entityType;
-    public string entityId;
-    public ulong entityTimestamp;
-    public string deployedBy;
-    public string[] pointers;
-    public DeploymentContent[] content;
-}
-
-[Serializable]
-public class DeploymentContent
-{
-    public string key;
+    public string file;
     public string hash;
 }
 
 [Serializable]
-public class DeploymentScene : DeploymentBase
+public class CatalystEntityBase
 {
-    public DeploymentSceneMetadata metadata;
+    public string id;
+    public string type;
+    public long timestamp;
+    public string[] pointers;
+    public CatalystEntityContent[] content;
 }
 
 [Serializable]
-public class DeploymentSceneMetadata
+public class CatalystSceneEntityPayload : CatalystEntityBase
+{
+    public CatalystSceneEntityMetadata metadata;
+}
+
+[Serializable]
+public class CatalystSceneEntityMetadata
 {
     [Serializable]
     public class Display

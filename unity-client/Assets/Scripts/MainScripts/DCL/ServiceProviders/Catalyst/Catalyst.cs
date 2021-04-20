@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DCL;
 using DCL.Helpers;
-using UnityEngine;
 using Variables.RealmsInfo;
 
 public interface ICatalyst : IDisposable
 {
     public string contentUrl { get; }
-    Promise<SceneDeploymentPayload> GetDeployedScenes(string[] parcels, bool onlyCurrentlyPointed = true, string sortBy = null, string sortOrder = null);
-    Promise<string> GetDeployments(DeploymentOptions deploymentOptions);
+    Promise<CatalystSceneEntityPayload[]> GetDeployedScenes(string[] parcels);
+    Promise<string> GetEntities(string entityType, string[] pointers);
     Promise<string> Get(string url);
 }
 
@@ -19,9 +19,10 @@ public class Catalyst : ICatalyst
 {
     private const int CACHE_TIME_MSECS = 5 * 60 * 1000;
 
-    public string contentUrl => realmDomain;
+    public string contentUrl => realmContentServerUrl;
 
     private string realmDomain = "https://peer.decentraland.org";
+    private string realmContentServerUrl = "https://peer.decentraland.org/content";
 
     private readonly Dictionary<string, string> cache = new Dictionary<string, string>();
     private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -31,6 +32,7 @@ public class Catalyst : ICatalyst
         if (DataStore.i.playerRealm.Get() != null)
         {
             realmDomain = DataStore.i.playerRealm.Get().domain;
+            realmContentServerUrl = DataStore.i.playerRealm.Get().contentServerUrl;
         }
         DataStore.i.playerRealm.OnChange += PlayerRealmOnOnChange;
     }
@@ -41,28 +43,18 @@ public class Catalyst : ICatalyst
         cancellationTokenSource.Cancel();
     }
 
-    public Promise<SceneDeploymentPayload> GetDeployedScenes(string[] parcels, bool onlyCurrentlyPointed = true, string sortBy = null, string sortOrder = null)
+    public Promise<CatalystSceneEntityPayload[]> GetDeployedScenes(string[] parcels)
     {
-        var promise = new Promise<SceneDeploymentPayload>();
+        var promise = new Promise<CatalystSceneEntityPayload[]>();
 
-        GetDeployments(new DeploymentOptions()
-            {
-                filters = new DeploymentFilters()
-                {
-                    pointers = parcels,
-                    onlyCurrentlyPointed = onlyCurrentlyPointed,
-                    entityTypes = new [] { CatalystEntitiesType.SCENE }
-                },
-                sortBy = sortBy,
-                sortOrder = sortOrder
-            })
+        GetEntities(CatalystEntitiesType.SCENE, parcels)
             .Then(json =>
             {
-                SceneDeploymentPayload parsedValue = null;
+                CatalystSceneEntityPayload[] parsedValue = null;
                 bool hasException = false;
                 try
                 {
-                    parsedValue = Utils.SafeFromJson<SceneDeploymentPayload>(json);
+                    parsedValue = Utils.ParseJsonArray<CatalystSceneEntityPayload[]>(json);
                 }
                 catch (Exception e)
                 {
@@ -79,11 +71,14 @@ public class Catalyst : ICatalyst
 
         return promise;
     }
-
-    public Promise<string> GetDeployments(DeploymentOptions deploymentOptions)
+    
+    public Promise<string> GetEntities(string entityType, string[] pointers)
     {
-        const string deploymentsUrl = "content/deployments";
-        string url = $"{realmDomain}/{deploymentsUrl}/?{CatalystHelper.ToUrlParam(deploymentOptions)}";
+        string deploymentsUrl = $"content/entities/{entityType}?";
+        string urlParams = "";
+        urlParams = pointers.Aggregate(urlParams, (current, pointer) => current + $"&pointer={pointer}");
+        
+        string url = $"{realmDomain}/{deploymentsUrl}/?{urlParams}";
 
         return Get(url);
     }
@@ -98,13 +93,13 @@ public class Catalyst : ICatalyst
             return promise;
         }
 
-        WebRequestController.i.Get(url, request =>
+        WebRequestController.i.Get(url, null ,request =>
         {
             AddToCache(url, request.downloadHandler.text);
             promise.Resolve(request.downloadHandler.text);
-        }, error =>
+        }, request =>
         {
-            promise.Reject($"{error} at url {url}");
+            promise.Reject($"{request.error} {request.downloadHandler.text} at url {url}");
         });
 
         return promise;
@@ -113,6 +108,7 @@ public class Catalyst : ICatalyst
     private void PlayerRealmOnOnChange(CurrentRealmModel current, CurrentRealmModel previous)
     {
         realmDomain = current.domain;
+        realmContentServerUrl = DataStore.i.playerRealm.Get().contentServerUrl;
     }
 
     private void AddToCache(string url, string result)
