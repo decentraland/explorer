@@ -99,7 +99,8 @@ public class CatalogController : MonoBehaviour
     {
         WearablesRequestFailed requestFailedResponse = JsonUtility.FromJson<WearablesRequestFailed>(payload);
 
-        if (!string.IsNullOrEmpty(requestFailedResponse.context))
+        if (requestFailedResponse.context == BASE_WEARABLES_CONTEXT ||
+            requestFailedResponse.context == OWNED_WEARABLES_CONTEXT)
         {
             ResolvePendingWearablesByContextPromise(
                 requestFailedResponse.context,
@@ -108,7 +109,14 @@ public class CatalogController : MonoBehaviour
         }
         else
         {
-            Debug.LogError(requestFailedResponse.error);
+            string[] failedWearablesIds = requestFailedResponse.context.Split(',');
+            for (int i = 0; i < failedWearablesIds.Length; i++)
+            {
+                ResolvePendingWearablePromise(
+                    failedWearablesIds[i],
+                    null,
+                    $"The request for the wearable '{failedWearablesIds[i]}' has failed: {requestFailedResponse.error}");
+            }
         }
     }
 
@@ -266,7 +274,7 @@ public class CatalogController : MonoBehaviour
                 ownedByUser: null,
                 wearableIds: pendingRequestsToSend.ToArray(),
                 collectionIds: null,
-                context: null
+                context: string.Join(",", pendingRequestsToSend.ToArray())
             );
 
             pendingRequestsToSend.Clear();
