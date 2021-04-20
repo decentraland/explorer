@@ -64,7 +64,7 @@ namespace DCL
                     if (success)
                     {
                         asset.texture = DownloadHandlerTexture.GetContent(webRequest);
-                        if(IsQuestionMarkPNG(asset.texture))
+                        if (IsQuestionMarkPNG(asset.texture))
                             OnFail?.Invoke();
                         else
                             OnSuccess?.Invoke();
