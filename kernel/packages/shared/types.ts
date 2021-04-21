@@ -561,17 +561,13 @@ export type KernelConfigForRenderer = {
   features: {
     enableBuilderInWorld: boolean
   }
-  gifSupported: boolean,
-  tld: string,
+  gifSupported: boolean
+  tld: string
   validWorldRanges: Object
 }
 
 export type RealmsInfoForRenderer = {
-  current: {
-    layer: string
-    serverName: string
-    domain: string
-  }
+  current: CurrentRealmInfoForRenderer
   realms: {
     layer: string
     serverName: string
@@ -580,4 +576,11 @@ export type RealmsInfoForRenderer = {
     usersMax: number
     userParcels: [number, number][]
   }[]
+}
+
+export type CurrentRealmInfoForRenderer = {
+  layer: string
+  serverName: string
+  domain: string
+  contentServerUrl: string
 }

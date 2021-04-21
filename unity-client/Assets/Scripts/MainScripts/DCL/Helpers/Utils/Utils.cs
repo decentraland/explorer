@@ -210,65 +210,7 @@ namespace DCL.Helpers
             return component;
         }
 
-        public static bool WebRequestSucceded(this UnityWebRequest request)
-        {
-            return request != null &&
-                   !request.isNetworkError &&
-                   !request.isHttpError;
-        }
-
-        public static bool WebRequestServerError(this UnityWebRequest request)
-        {
-            return request != null &&
-                   request.responseCode >= 500 &&
-                   request.responseCode < 600;
-        }
-
-        public static bool WebRequestAborted(this UnityWebRequest request)
-        {
-            return request != null &&
-                   request.isNetworkError &&
-                   request.isHttpError &&
-                   !string.IsNullOrEmpty(request.error) &&
-                   request.error.ToLower().Contains("aborted");
-        }
-
-        public static IEnumerator FetchAsset(string url, UnityWebRequest request,
-            System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                using (var webRequest = request)
-                {
-                    yield return webRequest.SendWebRequest();
-
-                    if (!WebRequestSucceded(request))
-                    {
-                        Debug.Log(
-                            string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
-
-                        if (OnFail != null)
-                        {
-                            OnFail.Invoke(webRequest.error);
-                        }
-                    }
-                    else
-                    {
-                        if (OnSuccess != null)
-                        {
-                            OnSuccess.Invoke(webRequest);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                Debug.Log(string.Format("Can't fetch asset as the url is empty!"));
-            }
-        }
-
-        public static IEnumerator FetchAudioClip(string url, AudioType audioType, Action<AudioClip> OnSuccess,
-            Action<string> OnFail)
+        public static WebRequestAsyncOperation FetchAudioClip(string url, AudioType audioType, Action<AudioClip> OnSuccess, Action<string> OnFail)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             Action<UnityWebRequest> OnSuccessInternal =
@@ -289,22 +231,23 @@ namespace DCL.Helpers
                     }
                 };
 
-            Action<string> OnFailInternal =
-                (error) =>
+            Action<UnityWebRequest> OnFailInternal =
+                (request) =>
                 {
                     if (OnFail != null)
                     {
-                        OnFail.Invoke(error);
+                        OnFail.Invoke(request.error);
                     }
                 };
 
-            var req = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
-
-            yield return FetchAsset(url, req, OnSuccessInternal,
-                OnFailInternal);
+            return WebRequestController.i.GetAudioClip(
+                url: url,
+                audioType: audioType,
+                OnSuccess: OnSuccessInternal,
+                OnFail: OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
+        public static WebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<UnityWebRequest> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             void SuccessInternal(UnityWebRequest request)
@@ -313,7 +256,10 @@ namespace DCL.Helpers
                 OnSuccess?.Invoke(texture);
             }
 
-            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), SuccessInternal, OnFail);
+            return WebRequestController.i.GetTexture(
+                url: textureURL,
+                OnSuccess: SuccessInternal,
+                OnFail: OnFail);
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
@@ -642,11 +588,7 @@ namespace DCL.Helpers
             return new Vector3(x, y, z);
         }
 
-        public static bool CompareFloats( float a, float b, float precision = 0.1f )
-        {
-            return Mathf.Abs(a - b) < precision;
-        }
-
+        public static bool CompareFloats( float a, float b, float precision = 0.1f ) { return Mathf.Abs(a - b) < precision; }
 
         public static void Deconstruct<T1, T2>(this KeyValuePair<T1, T2> tuple, out T1 key, out T2 value)
         {

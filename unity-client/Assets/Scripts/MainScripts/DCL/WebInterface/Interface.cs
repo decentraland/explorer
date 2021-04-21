@@ -376,6 +376,9 @@ namespace DCL.Interface
         {
             public string samples;
             public bool fpsIsCapped;
+            public int hiccupsInThousandFrames;
+            public float hiccupsTime;
+            public float totalTime;
         }
 
         [System.Serializable]
@@ -895,19 +898,12 @@ namespace DCL.Interface
 
         public static void SaveUserTutorialStep(int newTutorialStep) { SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep }); }
 
-        public static void SendPerformanceReport(string encodedFrameTimesInMS, bool usingFPSCap)
+        public static void SendPerformanceReport(string encodedFrameTimesInMS, bool usingFPSCap, int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
         {
             SendMessage("PerformanceReport", new PerformanceReportPayload()
             {
                 samples = encodedFrameTimesInMS,
-                fpsIsCapped = usingFPSCap
-            });
-        }
-
-        public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
-        {
-            SendMessage("PerformanceHiccupReport", new PerformanceHiccupPayload()
-            {
+                fpsIsCapped = usingFPSCap,
                 hiccupsInThousandFrames = hiccupsInThousandFrames,
                 hiccupsTime = hiccupsTime,
                 totalTime = totalTime
