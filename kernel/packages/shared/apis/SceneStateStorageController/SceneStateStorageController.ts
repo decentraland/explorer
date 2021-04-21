@@ -95,14 +95,27 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       builderManifest.scene.assets = await this.builderApiManager.getAssets(idArray)
 
       //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
-      //Unity handles this, so only 1 entitty will contain the "ground" category. We can safely assume that we can search it and assign
+      //Unity handles this, so we will find only the same "ground" category. We can safely assume that we can search it and assign
+      let groundComponentId: string
       Object.entries(builderManifest.scene.assets).forEach(([assetId, asset]) => {
         if (asset?.category === 'ground') {
           builderManifest.scene.ground.assetId = assetId
           Object.entries(builderManifest.scene.components).forEach(([componentId, component]) => {
-            if (component.data.assetId === assetId) builderManifest.scene.ground.componentId = componentId
+            if (component.data.assetId === assetId){ 
+              builderManifest.scene.ground.componentId = componentId
+              groundComponentId = componentId
+            }
           })
         }
+      })
+
+      //We should disable the gizmos of the floor in the builder
+      Object.values(builderManifest.scene.entities).forEach(entity => {
+        Object.keys(entity.components).forEach((componentId) => {
+          if (componentId === groundComponentId){ 
+            entity.disableGizmos = true
+          }
+        })
       })
 
       //Update the manifest

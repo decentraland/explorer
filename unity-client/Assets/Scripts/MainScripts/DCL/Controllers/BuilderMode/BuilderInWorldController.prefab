@@ -541,6 +541,7 @@ MonoBehaviour:
   snapScaleFactor: 0.25
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
+  biwSaveController: {fileID: 6802675824613373767}
   actionController: {fileID: 1208871512032110241}
   scaleSpeed: 0.25
   rotationSpeed: 0.5
@@ -1611,6 +1612,7 @@ MonoBehaviour:
   snapScaleFactor: 0.5
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
+  biwSaveController: {fileID: 6802675824613373767}
   actionController: {fileID: 1208871512032110241}
   distanceEagleCamera: 20
   snapDragFactor: 0.5
@@ -2570,7 +2572,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duplicateOffset: 2
-  msBetweenTransformUpdates: 2000
   outlinerController: {fileID: 4993453681677180110}
   buildModeController: {fileID: 1208871511274338203}
   biwModeController: {fileID: 4364144288841107711}

@@ -54,6 +54,7 @@ export type BuilderScene = {
 export type BuilderEntity = {
   id: string
   components: string[]
+  disableGizmos: boolean
 }
 
 export type BuilderComponent = {

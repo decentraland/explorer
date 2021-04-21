@@ -76,7 +76,7 @@ export class BuilderServerAPIManager {
       const manifest: BuilderManifest = data.data
 
       //If this manifest contains assets, we add them so we don't need to fetch them
-      this.addAssetsFromManifest(manifest)
+      if (manifest) this.addAssetsFromManifest(manifest)
       return manifest
     } catch (e) {
       console.trace(e)
@@ -106,7 +106,8 @@ export class BuilderServerAPIManager {
       const manifest: BuilderManifest = data.data[0]
 
       //If this manifest contains assets, we add them so we don't need to fetch them
-      this.addAssetsFromManifest(manifest)
+      if(manifest)
+         this.addAssetsFromManifest(manifest)
 
       return manifest
     } catch (e) {
@@ -186,8 +187,49 @@ export class BuilderServerAPIManager {
 
     let builderScene: BuilderScene = {
       id: sceneId,
-      entities: {},
-      components: {},
+      entities: {
+        
+        "29d657c1-95cf-4e17-b424-fe252d43ced5": {
+          id: "29d657c1-95cf-4e17-b424-fe252d43ced5",
+          components: [
+            "14708436-ffd4-44d6-8a28-48d8fcb65917",
+            "47924b6e-27ba-41a3-8bd9-c025cd092a48"
+          ],
+          disableGizmos: true,
+        }
+      
+      },
+      components: {       
+        "14708436-ffd4-44d6-8a28-48d8fcb65917": {
+          id: "14708436-ffd4-44d6-8a28-48d8fcb65917",
+          type: "GLTFShape",
+          data: {
+            "assetId": "da1fed3c954172146414a66adfa134f7a5e1cb49c902713481bf2fe94180c2cf"
+          }
+        },
+        "47924b6e-27ba-41a3-8bd9-c025cd092a48": {
+          id: "47924b6e-27ba-41a3-8bd9-c025cd092a48",
+          type: "Transform",
+          data: {
+            "position": {
+              "x": 8,
+              "y": 0,
+              "z": 8
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          }
+        }
+      },
       assets: {},
       metrics: {
         textures: 0,
@@ -229,7 +271,7 @@ export class BuilderServerAPIManager {
     return headers
   }
 
-  authorize (identity: ExplorerIdentity, method: string = 'get', path: string = '')  {
+  authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
     const headers: Record<string, string> = {}
 
     if (identity) {
