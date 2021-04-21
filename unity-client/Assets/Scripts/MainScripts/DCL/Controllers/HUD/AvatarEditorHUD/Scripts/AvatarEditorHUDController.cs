@@ -12,7 +12,7 @@ using Categories = WearableLiterals.Categories;
 public class AvatarEditorHUDController : IHUD
 {
     private const int LOADING_OWNED_WEARABLES_RETRIES = 3;
-    private const string LOADING_OWNED_WEARABLES_ERROR_MESSAGE = "There was a problem loading your collectibles.";
+    private const string LOADING_OWNED_WEARABLES_ERROR_MESSAGE = "There was a problem loading your collectibles";
 
     protected static readonly string[] categoriesThatMustHaveSelection = { Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH };
     protected static readonly string[] categoriesToRandomize = { Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET };

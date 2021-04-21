@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerAvatarController : MonoBehaviour
 {
+    private const string LOADING_WEARABLES_ERROR_MESSAGE = "There was a problem loading some of your wearables";
+
     public AvatarRenderer avatarRenderer;
     public Collider avatarCollider;
     public AvatarVisibility avatarVisibility;
@@ -21,9 +23,9 @@ public class PlayerAvatarController : MonoBehaviour
 
         //NOTE(Brian): We must wait for loading to finish before deactivating the renderer, or the GLTF Loader won't finish.
         avatarRenderer.OnSuccessEvent -= OnAvatarRendererReady;
-        avatarRenderer.OnFailEvent -= OnAvatarRendererReady;
+        avatarRenderer.OnFailEvent -= OnAvatarRendererFail;
         avatarRenderer.OnSuccessEvent += OnAvatarRendererReady;
-        avatarRenderer.OnFailEvent += OnAvatarRendererReady;
+        avatarRenderer.OnFailEvent += OnAvatarRendererFail;
         CommonScriptableObjects.rendererState.AddLock(this);
 
         mainCamera = Camera.main;
@@ -35,8 +37,21 @@ public class PlayerAvatarController : MonoBehaviour
         avatarCollider.gameObject.SetActive(true);
         CommonScriptableObjects.rendererState.RemoveLock(this);
         avatarRenderer.OnSuccessEvent -= OnAvatarRendererReady;
-        avatarRenderer.OnFailEvent -= OnAvatarRendererReady;
+        avatarRenderer.OnFailEvent -= OnAvatarRendererFail;
         DataStore.i.isPlayerRendererLoaded.Set(true);
+    }
+
+    private void OnAvatarRendererFail()
+    {
+        NotificationsController.i.ShowNotification(new Notification.Model
+        {
+            message = LOADING_WEARABLES_ERROR_MESSAGE,
+            type = NotificationFactory.Type.WARNING,
+            timer = 5f,
+            destroyOnFinish = true
+        });
+
+        OnAvatarRendererReady();
     }
 
     private void Update()
