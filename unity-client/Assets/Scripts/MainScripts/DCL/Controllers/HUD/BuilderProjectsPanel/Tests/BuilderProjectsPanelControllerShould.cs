@@ -119,8 +119,8 @@ namespace Tests
         public void CallOpenSectionWhenSceneSelected()
         {
             var cardView = UnityEngine.Object.Instantiate(controller.view.GetCardViewPrefab());
-            cardView.Setup(new SceneData());
-            scenesViewController.OnSceneSelected += Raise.Event<Action<SceneCardView>>(cardView);
+            ((ISceneCardView)cardView).Setup(new SceneData());
+            scenesViewController.OnSceneSelected += Raise.Event<Action<ISceneCardView>>(cardView);
             sectionsController.Received(1).OpenSection(Arg.Any<SectionId>());
             UnityEngine.Object.DestroyImmediate(cardView.gameObject);
         }
@@ -149,13 +149,13 @@ namespace Tests
             const string author = "Temptation Creator";
 
             var cardView = UnityEngine.Object.Instantiate(controller.view.GetCardViewPrefab());
-            cardView.Setup(new SceneData()
+            ((ISceneCardView)cardView).Setup(new SceneData()
             {
                 isDeployed = true,
                 coords = coords,
                 authorName = author
             });
-            scenesViewController.OnSceneSelected += Raise.Event<Action<SceneCardView>>(cardView);
+            scenesViewController.OnSceneSelected += Raise.Event<Action<ISceneCardView>>(cardView);
 
             LeftMenuSettingsViewReferences viewReferences = controller.view.GetSettingsViewReferences();
 

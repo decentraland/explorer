@@ -15,7 +15,7 @@ internal class SectionProjectScenesController : SectionBase, IProjectSceneListen
     private readonly SectionProjectScenesView view;
 
     private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
-    private Dictionary<string, SceneCardView> scenesViews;
+    private Dictionary<string, ISceneCardView> scenesViews;
 
     public SectionProjectScenesController() : this(
         Object.Instantiate(Resources.Load<SectionProjectScenesView>(VIEW_PREFAB_PATH))
@@ -52,22 +52,22 @@ internal class SectionProjectScenesController : SectionBase, IProjectSceneListen
         view.SetActive(false);
     }
 
-    void IProjectSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
+    void IProjectSceneListener.OnSetScenes(Dictionary<string, ISceneCardView> scenes)
     {
-        scenesViews = new Dictionary<string, SceneCardView>(scenes);
+        scenesViews = new Dictionary<string, ISceneCardView>(scenes);
         sceneSearchHandler.SetSearchableList(scenes.Values.Select(scene => scene.searchInfo).ToList());
     }
 
-    void IProjectSceneListener.OnSceneAdded(SceneCardView scene)
+    void IProjectSceneListener.OnSceneAdded(ISceneCardView scene)
     {
         scenesViews.Add(scene.sceneData.id, scene);
         sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
-    void IProjectSceneListener.OnSceneRemoved(SceneCardView scene)
+    void IProjectSceneListener.OnSceneRemoved(ISceneCardView scene)
     {
         scenesViews.Remove(scene.sceneData.id);
-        scene.gameObject.SetActive(false);
+        scene.SetActive(false);
     }
 
     private void OnSearchResult(List<SceneSearchInfo> searchInfoScenes)
@@ -80,17 +80,17 @@ internal class SectionProjectScenesController : SectionBase, IProjectSceneListen
             while (iterator.MoveNext())
             {
                 iterator.Current.Value.SetParent(view.scenesCardContainer);
-                iterator.Current.Value.gameObject.SetActive(false);
+                iterator.Current.Value.SetActive(false);
             }
         }
 
         for (int i = 0; i < searchInfoScenes.Count; i++)
         {
-            if (!scenesViews.TryGetValue(searchInfoScenes[i].id, out SceneCardView cardView))
+            if (!scenesViews.TryGetValue(searchInfoScenes[i].id, out ISceneCardView cardView))
                 continue;
             
-            cardView.gameObject.SetActive(true);
-            cardView.transform.SetSiblingIndex(i);
+            cardView.SetActive(true);
+            cardView.SetSiblingIndex(i);
         }
         view.ResetScrollRect();
     }

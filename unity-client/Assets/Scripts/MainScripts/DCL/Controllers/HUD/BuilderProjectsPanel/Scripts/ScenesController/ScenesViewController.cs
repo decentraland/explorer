@@ -5,13 +5,16 @@ using Object = UnityEngine.Object;
 
 internal interface IScenesViewController : IDisposable
 {
-    event Action<Dictionary<string, SceneCardView>> OnDeployedScenesSet;
-    event Action<SceneCardView> OnDeployedSceneAdded;
-    event Action<SceneCardView> OnDeployedSceneRemoved;
-    event Action<Dictionary<string, SceneCardView>> OnProjectScenesSet;
-    event Action<SceneCardView> OnProjectSceneAdded;
-    event Action<SceneCardView> OnProjectSceneRemoved;
-    event Action<SceneCardView> OnSceneSelected;
+    event Action<Dictionary<string, ISceneCardView>> OnDeployedScenesSet;
+    event Action<ISceneCardView> OnDeployedSceneAdded;
+    event Action<ISceneCardView> OnDeployedSceneRemoved;
+    event Action<Dictionary<string, ISceneCardView>> OnProjectScenesSet;
+    event Action<ISceneCardView> OnProjectSceneAdded;
+    event Action<ISceneCardView> OnProjectSceneRemoved;
+    event Action<ISceneCardView> OnSceneSelected;
+    event Action<ISceneData> OnJumpInPressed;
+    event Action<ISceneData> OnEditorPressed;
+    event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
     void SetScenes(ISceneData[] scenesData);
     void SelectScene(string id);
     void AddListener(IDeployedSceneListener listener);
@@ -31,18 +34,21 @@ internal interface IScenesViewController : IDisposable
 /// </summary>
 internal class ScenesViewController : IScenesViewController
 {
-    public event Action<Dictionary<string, SceneCardView>> OnDeployedScenesSet;
-    public event Action<SceneCardView> OnDeployedSceneAdded;
-    public event Action<SceneCardView> OnDeployedSceneRemoved;
-    public event Action<Dictionary<string, SceneCardView>> OnProjectScenesSet;
-    public event Action<SceneCardView> OnProjectSceneAdded;
-    public event Action<SceneCardView> OnProjectSceneRemoved;
-    public event Action<SceneCardView> OnSceneSelected; 
+    public event Action<Dictionary<string, ISceneCardView>> OnDeployedScenesSet;
+    public event Action<ISceneCardView> OnDeployedSceneAdded;
+    public event Action<ISceneCardView> OnDeployedSceneRemoved;
+    public event Action<Dictionary<string, ISceneCardView>> OnProjectScenesSet;
+    public event Action<ISceneCardView> OnProjectSceneAdded;
+    public event Action<ISceneCardView> OnProjectSceneRemoved;
+    public event Action<ISceneCardView> OnSceneSelected;
+    public event Action<ISceneData> OnJumpInPressed;
+    public event Action<ISceneData> OnEditorPressed;
+    public event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
 
-    private Dictionary<string, SceneCardView> deployedScenes = new Dictionary<string, SceneCardView>();
-    private Dictionary<string, SceneCardView> projectScenes = new Dictionary<string, SceneCardView>();
+    private Dictionary<string, ISceneCardView> deployedScenes = new Dictionary<string, ISceneCardView>();
+    private Dictionary<string, ISceneCardView> projectScenes = new Dictionary<string, ISceneCardView>();
 
-    private SceneCardView selectedScene;
+    private ISceneCardView selectedScene;
 
     private readonly ScenesRefreshHelper scenesRefreshHelper = new ScenesRefreshHelper();
     private readonly SceneCardView sceneCardViewPrefab;
@@ -67,8 +73,8 @@ internal class ScenesViewController : IScenesViewController
     {
         scenesRefreshHelper.Set(deployedScenes, projectScenes);
 
-        deployedScenes = new Dictionary<string, SceneCardView>();
-        projectScenes = new Dictionary<string, SceneCardView>();
+        deployedScenes = new Dictionary<string, ISceneCardView>();
+        projectScenes = new Dictionary<string, ISceneCardView>();
 
         // update or create new scenes view
         for (int i = 0; i < scenesData.Length; i++)
@@ -120,12 +126,12 @@ internal class ScenesViewController : IScenesViewController
     /// <param name="id">scene id</param>
     void IScenesViewController.SelectScene(string id)
     {
-        SceneCardView sceneCardView = null;
-        if (deployedScenes.TryGetValue(id, out SceneCardView deployedSceneCardView))
+        ISceneCardView sceneCardView = null;
+        if (deployedScenes.TryGetValue(id, out ISceneCardView deployedSceneCardView))
         {
             sceneCardView = deployedSceneCardView;
         }
-        else if (projectScenes.TryGetValue(id, out SceneCardView projectSceneCardView))
+        else if (projectScenes.TryGetValue(id, out ISceneCardView projectSceneCardView))
         {
             sceneCardView = projectSceneCardView;
         }
@@ -183,7 +189,7 @@ internal class ScenesViewController : IScenesViewController
         {
             while (iterator.MoveNext())
             {
-                Object.Destroy(iterator.Current.Value.gameObject);
+                iterator.Current.Value.Dispose();
             }
         }
 
@@ -193,7 +199,7 @@ internal class ScenesViewController : IScenesViewController
         {
             while (iterator.MoveNext())
             {
-                Object.Destroy(iterator.Current.Value.gameObject);
+                iterator.Current.Value.Dispose();
             }
         }
 
@@ -240,12 +246,12 @@ internal class ScenesViewController : IScenesViewController
         AddScene(sceneData, cardView, shouldNotifyAdd);
     }
 
-    private SceneCardView RemoveScene(ISceneData sceneData, bool notify)
+    private ISceneCardView RemoveScene(ISceneData sceneData, bool notify)
     {
         bool wasDeployed = scenesRefreshHelper.WasDeployedScene(sceneData);
         var dictionary = wasDeployed ? scenesRefreshHelper.oldDeployedScenes : scenesRefreshHelper.oldProjectsScenes;
 
-        if (dictionary.TryGetValue(sceneData.id, out SceneCardView sceneCardView))
+        if (dictionary.TryGetValue(sceneData.id, out ISceneCardView sceneCardView))
         {
             dictionary.Remove(sceneData.id);
 
@@ -263,7 +269,7 @@ internal class ScenesViewController : IScenesViewController
         return null;
     }
 
-    private void AddScene(ISceneData sceneData, SceneCardView sceneCardView, bool notify)
+    private void AddScene(ISceneData sceneData, ISceneCardView sceneCardView, bool notify)
     {
         var dictionary = sceneData.isDeployed ? deployedScenes : projectScenes;
         dictionary.Add(sceneData.id, sceneCardView);
@@ -277,16 +283,29 @@ internal class ScenesViewController : IScenesViewController
         }
     }
 
-    private SceneCardView CreateCardView()
+    private ISceneCardView CreateCardView()
     {
         SceneCardView sceneCardView = Object.Instantiate(sceneCardViewPrefab);
-        sceneCardView.gameObject.SetActive(false);
-        sceneCardView.SetParent(defaultParent);
-        return sceneCardView;
+        ISceneCardView view = sceneCardView;
+        
+        view.SetActive(false);
+        view.ConfigureDefaultParent(defaultParent);
+        view.SetToDefaultParent();
+        
+        view.OnEditorPressed += OnEditorPressed;
+        view.OnContextMenuPressed += OnContextMenuPressed;
+        view.OnJumpInPressed += OnJumpInPressed;
+        
+        return view;
     }
 
-    private void DestroyCardView(SceneCardView sceneCardView)
+    private void DestroyCardView(ISceneCardView sceneCardView)
     {
-        Object.Destroy(sceneCardView.gameObject);
+        // NOTE: there is actually no need to unsubscribe here, but, just in case...
+        sceneCardView.OnEditorPressed -= OnEditorPressed;
+        sceneCardView.OnContextMenuPressed -= OnContextMenuPressed;
+        sceneCardView.OnJumpInPressed -= OnJumpInPressed;
+        
+        sceneCardView.Dispose();
     }
 }

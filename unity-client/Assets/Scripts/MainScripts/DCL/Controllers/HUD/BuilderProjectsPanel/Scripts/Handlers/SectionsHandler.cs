@@ -76,7 +76,7 @@ internal class SectionsHandler : IDisposable
         searchBarView.SetSearchBar(null, null);
     }
     
-    void OnSelectScene(SceneCardView sceneCardView)
+    void OnSelectScene(ISceneCardView sceneCardView)
     {
         sectionsController.OpenSection(SectionId.SETTINGS_PROJECT_GENERAL);
     }

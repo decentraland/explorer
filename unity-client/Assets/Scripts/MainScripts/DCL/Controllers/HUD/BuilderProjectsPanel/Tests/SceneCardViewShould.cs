@@ -26,7 +26,7 @@ namespace Tests
         [Test]
         public void DisplayCorrectlyWhenSceneIsDeployed()
         {
-            cardView.Setup(new SceneData()
+            ((ISceneCardView)cardView).Setup(new SceneData()
             {
                 id = "",
                 isDeployed = true,
@@ -53,7 +53,7 @@ namespace Tests
         [Test]
         public void DisplayCorrectlyWhenSceneIsNotDeployed()
         {
-            cardView.Setup(new SceneData()
+            ((ISceneCardView)cardView).Setup(new SceneData()
             {
                 id = "",
                 isDeployed = false,

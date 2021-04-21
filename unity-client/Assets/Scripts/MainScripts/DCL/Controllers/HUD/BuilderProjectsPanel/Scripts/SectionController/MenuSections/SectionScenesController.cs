@@ -25,8 +25,8 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
 
     private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
 
-    internal Dictionary<string, SceneCardView> deployedViews;
-    internal Dictionary<string, SceneCardView> projectViews;
+    internal Dictionary<string, ISceneCardView> deployedViews;
+    internal Dictionary<string, ISceneCardView> projectViews;
     private List<SceneSearchInfo> searchList = new List<SceneSearchInfo>();
 
     public SectionScenesController()
@@ -76,42 +76,42 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         view.projectsContainer.SetActive(hasProjectScenes);
     }
 
-    void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
+    void IDeployedSceneListener.OnSetScenes(Dictionary<string, ISceneCardView> scenes)
     {
         UpdateDictionary(ref deployedViews, scenes);
         searchList.AddRange(scenes.Values.Select(scene => scene.searchInfo));
         sceneSearchHandler.SetSearchableList(searchList);
     }
 
-    void IProjectSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
+    void IProjectSceneListener.OnSetScenes(Dictionary<string, ISceneCardView> scenes)
     {
         UpdateDictionary(ref projectViews, scenes);
         searchList.AddRange(scenes.Values.Select(scene => scene.searchInfo));
         sceneSearchHandler.SetSearchableList(searchList);
     }
 
-    void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)
+    void IDeployedSceneListener.OnSceneAdded(ISceneCardView scene)
     {
         deployedViews.Add(scene.sceneData.id, scene);
         sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
-    void IProjectSceneListener.OnSceneAdded(SceneCardView scene)
+    void IProjectSceneListener.OnSceneAdded(ISceneCardView scene)
     {
         projectViews.Add(scene.sceneData.id, scene);
         sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
-    void IDeployedSceneListener.OnSceneRemoved(SceneCardView scene)
+    void IDeployedSceneListener.OnSceneRemoved(ISceneCardView scene)
     {
-        scene.SetParent(null);
+        scene.SetToDefaultParent();
         deployedViews.Remove(scene.sceneData.id);
         sceneSearchHandler.RemoveItem(scene.searchInfo);
     }
 
-    void IProjectSceneListener.OnSceneRemoved(SceneCardView scene)
+    void IProjectSceneListener.OnSceneRemoved(ISceneCardView scene)
     {
-        scene.SetParent(null);
+        scene.SetToDefaultParent();
         projectViews.Remove(scene.sceneData.id);
         sceneSearchHandler.RemoveItem(scene.searchInfo);
     }
@@ -127,21 +127,21 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         ViewDirty();
     }
 
-    private void SetResult(Dictionary<string, SceneCardView> scenesViews, List<SceneSearchInfo> searchInfoScenes,
+    private void SetResult(Dictionary<string, ISceneCardView> scenesViews, List<SceneSearchInfo> searchInfoScenes,
         Transform parent)
     {
         int count = 0;
 
         for (int i = 0; i < searchInfoScenes.Count; i++)
         {
-            if (!scenesViews.TryGetValue(searchInfoScenes[i].id, out SceneCardView sceneView))
+            if (!scenesViews.TryGetValue(searchInfoScenes[i].id, out ISceneCardView sceneView))
             {
                 continue;
             }
 
             sceneView.SetParent(parent);
-            sceneView.transform.SetSiblingIndex(count);
-            sceneView.gameObject.SetActive(false);
+            sceneView.SetSiblingIndex(count);
+            sceneView.SetActive(false);
             count++;
         }
 
@@ -151,14 +151,14 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         }
     }
 
-    private void UpdateDictionary(ref Dictionary<string, SceneCardView> target, Dictionary<string, SceneCardView> newData)
+    private void UpdateDictionary(ref Dictionary<string, ISceneCardView> target, Dictionary<string, ISceneCardView> newData)
     {
         if (newData.Count == 0)
             return;
 
         if (target == null)
         {
-            target = new Dictionary<string, SceneCardView>(newData);
+            target = new Dictionary<string, ISceneCardView>(newData);
             return;
         }
 

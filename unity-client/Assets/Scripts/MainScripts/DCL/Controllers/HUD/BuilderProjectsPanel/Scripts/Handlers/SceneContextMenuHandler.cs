@@ -17,7 +17,7 @@ internal class SceneContextMenuHandler : IDisposable
 
         sectionsController.OnRequestContextMenuHide += OnRequestContextMenuHide;
 
-        SceneCardView.OnContextMenuPressed += OnContextMenuOpen;
+        scenesViewController.OnContextMenuPressed += OnContextMenuOpen;
 
         contextMenu.OnSettingsPressed += OnContextMenuSettingsPressed;
         contextMenu.OnDuplicatePressed += OnContextMenuDuplicatePressed;
@@ -32,7 +32,7 @@ internal class SceneContextMenuHandler : IDisposable
     {
         sectionsController.OnRequestContextMenuHide -= OnRequestContextMenuHide;
 
-        SceneCardView.OnContextMenuPressed -= OnContextMenuOpen;
+        scenesViewController.OnContextMenuPressed -= OnContextMenuOpen;
 
         contextMenu.OnSettingsPressed -= OnContextMenuSettingsPressed;
         contextMenu.OnDuplicatePressed -= OnContextMenuDuplicatePressed;
@@ -43,9 +43,9 @@ internal class SceneContextMenuHandler : IDisposable
         contextMenu.OnQuitContributorPressed -= OnContextMenuQuitContributorPressed;
     }
 
-    void OnContextMenuOpen(ISceneData sceneData, SceneCardView sceneCard)
+    void OnContextMenuOpen(ISceneData sceneData, ISceneCardView sceneCard)
     {
-        contextMenu.transform.position = sceneCard.contextMenuButton.transform.position;
+        contextMenu.transform.position = sceneCard.contextMenuButtonPosition;
         contextMenu.Show(sceneData.id, sceneData.isDeployed,
             sceneData.isOwner || sceneData.isOperator, sceneData.isContributor);
     }
