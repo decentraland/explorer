@@ -48,9 +48,9 @@ internal class SectionLandController : SectionBase, ILandsListener
         view.SetActive(false);
     }
 
-    void ILandsListener.OnSetLands(List<LandWithAccess> lands)
+    void ILandsListener.OnSetLands(LandWithAccess[] lands)
     {
-        view.SetEmpty(lands == null || lands.Count == 0);
+        view.SetEmpty(lands == null || lands.Length == 0);
         
         if (lands == null)
             return;
@@ -65,7 +65,7 @@ internal class SectionLandController : SectionBase, ILandsListener
             PoolView(toRemove[i]);
         }
         
-        for (int i = 0; i < lands.Count; i++)
+        for (int i = 0; i < lands.Length; i++)
         {
             if (!landElementViews.TryGetValue(lands[i].id, out LandElementView landElementView))
             {

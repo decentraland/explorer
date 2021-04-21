@@ -144,11 +144,11 @@ public class BuilderProjectsPanelController : IHUD
             .Then(lands =>
             {
                 var scenes = lands.Where(land => land.scenes != null && land.scenes.Count > 0)
-                                  .Select(land => land.scenes.Select(scene => new SceneData(scene)))
+                                  .Select(land => land.scenes.Select(scene => (ISceneData)new SceneData(scene)))
                                   .Aggregate((i, j) => i.Concat(j))
                                   .ToArray();
     
-                landsController.SetLands(lands.ToList());
+                landsController.SetLands(lands);
                 scenesViewController.SetScenes(scenes);
             })
             .Catch(Debug.LogError);

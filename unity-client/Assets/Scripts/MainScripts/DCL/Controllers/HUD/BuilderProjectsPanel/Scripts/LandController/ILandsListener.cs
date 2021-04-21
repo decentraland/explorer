@@ -2,5 +2,5 @@ using System.Collections.Generic;
 
 internal interface ILandsListener
 {
-    void OnSetLands(List<LandWithAccess> lands);
+    void OnSetLands(LandWithAccess[] lands);
 }

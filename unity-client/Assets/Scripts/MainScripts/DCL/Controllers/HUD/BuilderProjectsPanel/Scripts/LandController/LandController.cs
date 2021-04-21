@@ -5,19 +5,19 @@ using UnityEngine;
 
 internal interface ILandController
 { 
-    event Action<List<LandWithAccess>> OnLandsSet;
-    void SetLands(List<LandWithAccess> lands);
+    event Action<LandWithAccess[]> OnLandsSet;
+    void SetLands(LandWithAccess[] lands);
     void AddListener(ILandsListener listener);
     void RemoveListener(ILandsListener listener);
 }
 
 internal class LandController : ILandController
 {
-    public event Action<List<LandWithAccess>> OnLandsSet;
+    public event Action<LandWithAccess[]> OnLandsSet;
 
-    private List<LandWithAccess> userLands = null;
+    private LandWithAccess[] userLands = null;
 
-    void ILandController.SetLands(List<LandWithAccess> lands)
+    void ILandController.SetLands(LandWithAccess[] lands)
     {
         userLands = lands;
         OnLandsSet?.Invoke(lands);

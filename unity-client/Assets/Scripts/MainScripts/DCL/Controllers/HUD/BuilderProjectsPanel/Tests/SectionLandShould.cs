@@ -68,15 +68,15 @@ namespace Tests
             SectionLandController controller = new SectionLandController(view);
             ILandsListener landsListener = controller;
 
-            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1"), CreateLandData("2") });
+            landsListener.OnSetLands(new [] { CreateLandData("1"), CreateLandData("2") });
             Assert.AreEqual(2, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsTrue(view.contentContainer.activeSelf);
 
-            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1") });
+            landsListener.OnSetLands(new [] { CreateLandData("1") });
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsTrue(view.contentContainer.activeSelf);
 
-            landsListener.OnSetLands(new List<LandWithAccess>() { });
+            landsListener.OnSetLands(new LandWithAccess[] { });
             Assert.AreEqual(0, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsFalse(view.contentContainer.activeSelf);
             Assert.IsTrue(view.emptyContainer.activeSelf);
@@ -94,11 +94,11 @@ namespace Tests
             ILandsListener landsListener = controller;
             LandElementView landElementView = view.GetLandElementeBaseView();
 
-            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1", startingName) });
+            landsListener.OnSetLands(new [] { CreateLandData("1", startingName) });
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.AreEqual(startingName, landElementView.landName.text);
 
-            landsListener.OnSetLands(new List<LandWithAccess>() { CreateLandData("1", updatedName) });
+            landsListener.OnSetLands(new [] { CreateLandData("1", updatedName) });
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.AreEqual(updatedName, landElementView.landName.text);
 
