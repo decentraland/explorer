@@ -1,7 +1,7 @@
 import { initParcelSceneWorker } from 'decentraland-loader/lifecycle/manager'
 import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
-import { queueTrackingEvent } from '../analytics'
+import { trackEvent } from '../analytics'
 import { globalSignalSceneFail, globalSignalSceneLoad, globalSignalSceneStart } from '../loading/actions'
 import { clearForegroundTimeout, setForegroundTimeout } from '../timers/index'
 import { EnvironmentData, ILand, InstancedSpawnPoint, LoadableParcelScene } from '../types'
@@ -151,7 +151,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
   })
 
   ret.on('Event.track', (event: { name: string; data: any }) => {
-    queueTrackingEvent(event.name, event.data)
+    trackEvent(event.name, event.data)
   })
 
   teleportObservable.add((position: { x: number; y: number }) => {

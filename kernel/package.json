@@ -93,6 +93,7 @@
     "web3x-codegen": "^4.0.6"
   },
   "dependencies": {
+    "@dcl/ecs-quests": "^1.2.2-20210416153605.commit-3b53b1d",
     "@dcl/schemas": "^1.2.0",
     "@dcl/urn-resolver": "^1.1.0",
     "bignumber.js": "^9.0.0",
@@ -101,7 +102,6 @@
     "cids": "^0.7.3",
     "dcl-catalyst-client": "^4.0.5",
     "dcl-crypto": "^2.2.0",
-    "dcl-ecs-quests": "^1.0.0",
     "dcl-quests-client": "^2.0.0",
     "dcl-scene-writer": "^1.1.2",
     "dcl-social-client": "^1.3.13",

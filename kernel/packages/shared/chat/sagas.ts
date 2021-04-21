@@ -13,7 +13,7 @@ import {
 import { uuid } from 'atomicHelpers/math'
 import { ChatMessageType, ChatMessage } from 'shared/types'
 import { EXPERIENCE_STARTED } from 'shared/loading/types'
-import { queueTrackingEvent } from 'shared/analytics'
+import { trackEvent } from 'shared/analytics'
 import { sendPublicChatMessage } from 'shared/comms'
 import { peerMap, avatarMessageObservable } from 'shared/comms/peers'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
@@ -84,12 +84,12 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
   const { type, payload } = action
   switch (type) {
     case MESSAGE_RECEIVED: {
-      queueTrackingEvent('Chat message received', { length: payload.body.length })
+      trackEvent('Chat message received', { length: payload.body.length })
       break
     }
     case SEND_MESSAGE: {
       const { messageId, body } = payload
-      queueTrackingEvent('Send chat message', {
+      trackEvent('Send chat message', {
         messageId,
         length: body.length
       })
