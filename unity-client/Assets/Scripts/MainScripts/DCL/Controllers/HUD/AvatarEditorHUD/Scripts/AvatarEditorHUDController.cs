@@ -11,6 +11,8 @@ using Categories = WearableLiterals.Categories;
 
 public class AvatarEditorHUDController : IHUD
 {
+    private const string LOADING_WEARABLES_ERROR_MESSAGE = "There was a problem loading your collectibles.";
+
     protected static readonly string[] categoriesThatMustHaveSelection = { Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH };
     protected static readonly string[] categoriesToRandomize = { Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET };
 
@@ -90,6 +92,13 @@ public class AvatarEditorHUDController : IHUD
                              })
                              .Catch((error) =>
                              {
+                                 NotificationsController.i.ShowNotification(new Notification.Model
+                                 {
+                                     message = LOADING_WEARABLES_ERROR_MESSAGE,
+                                     type = NotificationFactory.Type.GENERIC_WITHOUT_BUTTON,
+                                     timer = 5f,
+                                     destroyOnFinish = true
+                                 });
                                  view.ShowCollectiblesLoadingSpinner(false);
                                  Debug.LogError(error);
                              });
