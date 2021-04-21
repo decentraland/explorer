@@ -2,7 +2,6 @@ import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 
 import {
   getServerConfigurations,
-  getWearablesSafeURL,
   PIN_CATALYST,
   WSS_ENABLED,
   TEST_WEARABLES_OVERRIDE,
