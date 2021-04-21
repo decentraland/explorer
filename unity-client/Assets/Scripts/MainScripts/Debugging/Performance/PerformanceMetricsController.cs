@@ -8,7 +8,7 @@ namespace DCL
     public class PerformanceMetricsController
     {
         private LinealBufferHiccupCounter tracker = new LinealBufferHiccupCounter();
-        private const int SAMPLES_SIZE = 1000;
+        private const int SAMPLES_SIZE = 1000; // Send performance report every 1000 samples
         private char[] encodedSamples = new char[SAMPLES_SIZE];
         private int currentIndex = 0;
 
@@ -40,18 +40,12 @@ namespace DCL
             {
                 currentIndex = 0;
                 Report(new string(encodedSamples));
-                GenerateHiccupReport();
             }
         }
 
         private void Report(string encodedSamples)
         {
-            WebInterface.SendPerformanceReport(encodedSamples, Settings.i.currentQualitySettings.fpsCap);
-        }
-
-        private void GenerateHiccupReport()
-        {
-            WebInterface.SendPerformanceHiccupReport(tracker.CurrentHiccupCount(), tracker.GetHiccupSum(), tracker.GetTotalSeconds());
+            WebInterface.SendPerformanceReport(encodedSamples, Settings.i.currentQualitySettings.fpsCap, tracker.CurrentHiccupCount(), tracker.GetHiccupSum(), tracker.GetTotalSeconds());
         }
     }
 }
