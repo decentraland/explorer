@@ -29,6 +29,7 @@ public class AvatarEditorHUDController : IHUD
     private ColorList hairColorList;
     private bool prevMouseLockState = false;
     private bool ownedWearablesAlreadyRequested = false;
+    private bool ownedWearablesAlreadyLoaded = false;
 
     public AvatarEditorHUDView view;
 
@@ -81,6 +82,7 @@ public class AvatarEditorHUDController : IHUD
             CatalogController.RequestOwnedWearables(userProfile.userId)
                              .Then((ownedWearables) =>
                              {
+                                 ownedWearablesAlreadyLoaded = true;
                                  this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
                                  LoadUserProfile(userProfile, true);
                              })
@@ -96,6 +98,20 @@ public class AvatarEditorHUDController : IHUD
     {
         if (!current)
             return;
+
+        if (!ownedWearablesAlreadyLoaded)
+        {
+            List<string> equippedOwnedWearables = new List<string>();
+            for (int i = 0; i < userProfile.avatar.wearables.Count; i++)
+            {
+                if (catalog.TryGetValue(userProfile.avatar.wearables[i], out WearableItem wearable) &&
+                    !wearable.tags.Contains("base-wearable"))
+                {
+                    equippedOwnedWearables.Add(userProfile.avatar.wearables[i]);
+                }
+            }
+            userProfile.SetInventory(equippedOwnedWearables.ToArray());
+        }
 
         LoadUserProfile(userProfile, true);
         DataStore.i.isPlayerRendererLoaded.OnChange -= PlayerRendererLoaded;
