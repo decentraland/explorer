@@ -79,14 +79,20 @@ public class AvatarEditorHUDController : IHUD
     {
         if (!ownedWearablesAlreadyRequested && !string.IsNullOrEmpty(userProfile.userId))
         {
+            view.ShowCollectiblesLoadingSpinner(true);
             CatalogController.RequestOwnedWearables(userProfile.userId)
                              .Then((ownedWearables) =>
                              {
                                  ownedWearablesAlreadyLoaded = true;
                                  this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
                                  LoadUserProfile(userProfile, true);
+                                 view.ShowCollectiblesLoadingSpinner(false);
                              })
-                             .Catch((error) => Debug.LogError(error));
+                             .Catch((error) =>
+                             {
+                                 view.ShowCollectiblesLoadingSpinner(false);
+                                 Debug.LogError(error);
+                             });
 
             ownedWearablesAlreadyRequested = true;
         }

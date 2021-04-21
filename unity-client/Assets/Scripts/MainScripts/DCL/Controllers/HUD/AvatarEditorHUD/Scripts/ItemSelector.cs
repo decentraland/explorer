@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [assembly: InternalsVisibleTo("AvatarEditorHUDTests")]
+
 public class ItemSelector : MonoBehaviour
 {
     [SerializeField]
@@ -10,6 +11,9 @@ public class ItemSelector : MonoBehaviour
 
     [SerializeField]
     private RectTransform itemContainer;
+
+    [SerializeField]
+    internal GameObject loadingSpinner;
 
     public event System.Action<string> OnItemClicked;
     public event System.Action<string> OnSellClicked;
@@ -28,8 +32,10 @@ public class ItemSelector : MonoBehaviour
 
     public void AddItemToggle(WearableItem item, int amount)
     {
-        if (item == null) return;
-        if (itemToggles.ContainsKey(item.id)) return;
+        if (item == null)
+            return;
+        if (itemToggles.ContainsKey(item.id))
+            return;
 
         ItemToggle newToggle;
         if (item.IsCollectible())
@@ -53,10 +59,12 @@ public class ItemSelector : MonoBehaviour
 
     public void RemoveItemToggle(string itemID)
     {
-        if (string.IsNullOrEmpty(itemID)) return;
+        if (string.IsNullOrEmpty(itemID))
+            return;
 
         ItemToggle toggle = GetItemToggleByID(itemID);
-        if (toggle == null) return;
+        if (toggle == null)
+            return;
 
         itemToggles.Remove(itemID);
         Destroy(toggle.gameObject);
@@ -77,7 +85,8 @@ public class ItemSelector : MonoBehaviour
 
     public void SetBodyShape(string bodyShape)
     {
-        if (currentBodyShape == bodyShape) return;
+        if (currentBodyShape == bodyShape)
+            return;
 
         currentBodyShape = bodyShape;
         ShowCompatibleWithBodyShape();
@@ -121,19 +130,20 @@ public class ItemSelector : MonoBehaviour
         }
     }
 
-    private void ToggleClicked(ItemToggle toggle)
-    {
-        OnItemClicked?.Invoke(toggle.wearableItem.id);
-    }
+    private void ToggleClicked(ItemToggle toggle) { OnItemClicked?.Invoke(toggle.wearableItem.id); }
 
-    private void SellClicked(ItemToggle toggle)
-    {
-        OnSellClicked?.Invoke(toggle.wearableItem.id);
-    }
+    private void SellClicked(ItemToggle toggle) { OnSellClicked?.Invoke(toggle.wearableItem.id); }
 
     private ItemToggle GetItemToggleByID(string itemID)
     {
-        if (string.IsNullOrEmpty(itemID)) return null;
+        if (string.IsNullOrEmpty(itemID))
+            return null;
         return itemToggles.ContainsKey(itemID) ? itemToggles[itemID] : null;
+    }
+
+    public void ShowLoading(bool isActive)
+    {
+        loadingSpinner.SetActive(isActive);
+        loadingSpinner.transform.SetAsLastSibling();
     }
 }
