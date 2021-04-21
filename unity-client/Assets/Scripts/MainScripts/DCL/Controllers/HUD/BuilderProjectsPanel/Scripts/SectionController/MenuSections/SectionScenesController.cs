@@ -23,11 +23,11 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         showResultLabel = false
     };
 
-    private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
+    private readonly ISectionSearchHandler sceneSearchHandler = new SectionSearchHandler();
 
     internal Dictionary<string, ISceneCardView> deployedViews;
     internal Dictionary<string, ISceneCardView> projectViews;
-    private List<SceneSearchInfo> searchList = new List<SceneSearchInfo>();
+    private List<ISearchInfo> searchList = new List<ISearchInfo>();
 
     public SectionScenesController()
     {
@@ -116,7 +116,7 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         sceneSearchHandler.RemoveItem(scene.searchInfo);
     }
 
-    private void OnSearchResult(List<SceneSearchInfo> searchInfoScenes)
+    private void OnSearchResult(List<ISearchInfo> searchInfoScenes)
     {
         if (deployedViews != null)
             SetResult(deployedViews, searchInfoScenes, view.deployedSceneContainer);
@@ -127,7 +127,7 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         ViewDirty();
     }
 
-    private void SetResult(Dictionary<string, ISceneCardView> scenesViews, List<SceneSearchInfo> searchInfoScenes,
+    private void SetResult(Dictionary<string, ISceneCardView> scenesViews, List<ISearchInfo> searchInfoScenes,
         Transform parent)
     {
         int count = 0;

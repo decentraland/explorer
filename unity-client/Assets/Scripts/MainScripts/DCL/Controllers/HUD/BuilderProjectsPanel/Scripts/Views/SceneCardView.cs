@@ -11,7 +11,7 @@ internal interface ISceneCardView : IDisposable
     event Action<ISceneData> OnEditorPressed;
     event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
     ISceneData sceneData { get; }
-    SceneSearchInfo searchInfo { get; }
+    ISearchInfo searchInfo { get; }
     Vector3 contextMenuButtonPosition { get; }
     void Setup(ISceneData sceneData);
     void SetParent(Transform parent);
@@ -58,7 +58,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     [SerializeField] internal GameObject roleOperatorGO;
     [SerializeField] internal GameObject roleContributorGO;
 
-    SceneSearchInfo ISceneCardView.searchInfo { get; } = new SceneSearchInfo();
+    ISearchInfo ISceneCardView.searchInfo { get; } = new SearchInfo();
     ISceneData ISceneCardView.sceneData => sceneData;
     Vector3 ISceneCardView.contextMenuButtonPosition => contextMenuButton.transform.position;
     
@@ -86,7 +86,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
         thisView.SetDeployed(sceneData.isDeployed);
         thisView.SetUserRole(sceneData.isOwner, sceneData.isOperator, sceneData.isContributor);
         
-        thisView.searchInfo.id = sceneData.id;
+        thisView.searchInfo.SetId(sceneData.id);
     }
 
     void ISceneCardView.SetParent(Transform parent)
@@ -106,13 +106,15 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
 
     void ISceneCardView.SetCoords(Vector2Int coords)
     {
-        coordsText.text = $"{coords.x},{coords.y}";
+        string coordStr = $"{coords.x},{coords.y}";
+        coordsText.text = coordStr;
+        ((ISceneCardView)this).searchInfo.SetCoords(coordStr);
     }
 
     void ISceneCardView.SetSize(Vector2Int size)
     {
         sizeText.text = $"{size.x},{size.y}m";
-        ((ISceneCardView)this).searchInfo.SetSize(size);
+        ((ISceneCardView)this).searchInfo.SetSize(size.x * size.y);
     }
 
     void ISceneCardView.SetThumbnail(string thumbnailUrl)
@@ -153,7 +155,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
         roleOwnerGO.SetActive(false);
         roleOperatorGO.SetActive(false);
         roleContributorGO.SetActive(false);
-        ((ISceneCardView)this).searchInfo.SetRole(isOwner, isOperator, isContributor);
+        ((ISceneCardView)this).searchInfo.SetRole(isOwner);
 
         if (isOwner)
         {

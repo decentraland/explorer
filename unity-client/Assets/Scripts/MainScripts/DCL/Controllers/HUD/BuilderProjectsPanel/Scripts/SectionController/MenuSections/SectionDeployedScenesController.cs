@@ -15,7 +15,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
 
     private readonly SectionDeployedScenesView view;
 
-    private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
+    private readonly ISectionSearchHandler sceneSearchHandler = new SectionSearchHandler();
     private Dictionary<string, ISceneCardView> scenesViews;
 
     public SectionDeployedScenesController(): this(
@@ -71,7 +71,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
         scene.SetActive(false);
     }
 
-    private void OnSearchResult(List<SceneSearchInfo> searchInfoScenes)
+    private void OnSearchResult(List<ISearchInfo> searchInfoScenes)
     {
         if (scenesViews == null)
             return;
