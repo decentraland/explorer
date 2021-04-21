@@ -25,7 +25,6 @@ import {
 } from './actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
 import {
-  Catalog,
   Wearable,
   Collection,
   WearableId,
@@ -383,8 +382,8 @@ export function informRequestFailure(error: string, context: string | undefined)
   globalThis.unityInterface.WearablesRequestFailed(error, context)
 }
 
-export function sendWearablesCatalog(catalog: Catalog, context: string | undefined) {
-  globalThis.unityInterface.AddWearablesToCatalog(catalog, context)
+export function sendWearablesCatalog(wearables: WearableV2[], context: string | undefined) {
+  globalThis.unityInterface.AddWearablesToCatalog(wearables, context)
 }
 
 export function* ensureBaseCatalogs() {
