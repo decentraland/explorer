@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using DCL;
 using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.Networking;

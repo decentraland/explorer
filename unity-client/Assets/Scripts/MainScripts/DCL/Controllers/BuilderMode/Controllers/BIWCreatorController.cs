@@ -12,9 +12,6 @@ using UnityEngine.Serialization;
 
 public class BIWCreatorController : BIWController
 {
-    [Header("Design Variables")]
-    public float secondsToTimeOut = 10f;
-
     [Header("Prefab references")]
     public BIWModeController biwModeController;
 
@@ -203,6 +200,9 @@ public class BIWCreatorController : BIWController
 
     private void AddSmartItemComponent(DCLBuilderInWorldEntity entity)
     {
+        //Note (Adrian): This will disable the smart item component until it is implemented in kernel
+        //TODO: After the implementation in kernel of smart items, we should eliminate this return
+        return;
         SmartItemComponent.Model model = new SmartItemComponent.Model();
         model.values = new Dictionary<object, object>();
 

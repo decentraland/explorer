@@ -14,6 +14,8 @@ public static class NotificationScriptableObjects
 
 public static class AudioScriptableObjects
 {
+    // UI events
+
     private static AudioEvent buttonHoverEvent;
     public static AudioEvent buttonHover => CommonScriptableObjects.GetOrLoad(ref buttonHoverEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
 
@@ -70,6 +72,9 @@ public static class AudioScriptableObjects
 
     private static AudioEvent UIShowEvent;
     public static AudioEvent UIShow => CommonScriptableObjects.GetOrLoad(ref UIShowEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIUnhide");
+
+    private static AudioEvent tooltipPopupEvent;
+    public static AudioEvent tooltipPopup => CommonScriptableObjects.GetOrLoad(ref tooltipPopupEvent, "ScriptableObjects/AudioEvents/HUDCommon/TooltipPopup");
 }
 
 public static class CommonScriptableObjects
