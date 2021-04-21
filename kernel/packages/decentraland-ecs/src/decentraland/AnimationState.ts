@@ -102,16 +102,14 @@ export class AnimationState extends ObservableComponent {
    * Starts the animation
    */
   play(reset: boolean = false) {
-    this.owner?.pauseLayer(this.layer)
-    if (reset) this.reset()
-    this.playing = true
+    this.owner?.play(this, reset)
   }
 
   /**
    * Pauses the animation
    */
   pause() {
-    this.playing = false
+    this.owner?.pause(this)
   }
 
   /**
@@ -125,7 +123,6 @@ export class AnimationState extends ObservableComponent {
    * Resets and pauses the animation
    */
   stop() {
-    this.reset()
-    this.pause()
+    this.owner?.stop(this)
   }
 }
