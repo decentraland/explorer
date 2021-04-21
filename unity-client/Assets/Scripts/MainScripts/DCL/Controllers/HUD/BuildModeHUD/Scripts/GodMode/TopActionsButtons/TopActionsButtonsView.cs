@@ -232,7 +232,8 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        toggleChangeCameraInputAction.OnTriggered += OnChangeModeClick;
+        //TODO: This should be reactivate when we activate the first person camera
+        //  toggleChangeCameraInputAction.OnTriggered += OnChangeModeClick;
         toggleTranslateInputAction.OnTriggered += OnTranslateClick;
         toggleRotateInputAction.OnTriggered += OnRotateClick;
         toggleScaleInputAction.OnTriggered += OnScaleClick;
