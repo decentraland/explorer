@@ -143,14 +143,13 @@ public class BuilderProjectsPanelController : IHUD
         fetchLandPromise
             .Then(lands =>
             {
-                List<ISceneData> scenes = new List<ISceneData>();
-                for (int i = 0; i < lands.Length; i++)
-                {
-                    var landScenes = lands[i].scenes.Select(scene => new SceneData(scene));
-                    scenes.AddRange(landScenes);
-                }
+                var scenes = lands.Where(land => land.scenes != null && land.scenes.Count > 0)
+                                  .Select(land => land.scenes.Select(scene => new SceneData(scene)))
+                                  .Aggregate((i, j) => i.Concat(j))
+                                  .ToArray();
+    
                 landsController.SetLands(lands.ToList());
-                scenesViewController.SetScenes(scenes.ToArray());
+                scenesViewController.SetScenes(scenes);
             })
             .Catch(Debug.LogError);
     }
