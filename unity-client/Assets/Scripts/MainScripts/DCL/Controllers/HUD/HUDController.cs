@@ -1,7 +1,6 @@
 using System;
 using DCL;
 using DCL.HelpAndSupportHUD;
-using DCL.Huds.QuestsNotifications;
 using DCL.Huds.QuestsPanel;
 using DCL.Huds.QuestsTracker;
 using DCL.QuestsController;
@@ -93,28 +92,18 @@ public class HUDController : MonoBehaviour
 
     public QuestsPanelHUDController questsPanelHUD => GetHUDElement(HUDElementID.QUESTS_PANEL) as QuestsPanelHUDController;
     public QuestsTrackerHUDController questsTrackerHUD => GetHUDElement(HUDElementID.QUESTS_TRACKER) as QuestsTrackerHUDController;
-    public QuestsNotificationsHUDController questsNotificationsHUD => GetHUDElement(HUDElementID.QUESTS_NOTIFICATIONS) as QuestsNotificationsHUDController;
     public BuilderProjectsPanelController builderProjectsPanelController => GetHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL) as BuilderProjectsPanelController;
-    
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private BaseDictionary<string, WearableItem> wearableCatalog => CatalogController.wearableCatalog;
 
-    private void ShowAvatarEditor()
-    {
-        avatarEditorHud?.SetVisibility(true);
-    }
+    private void ShowAvatarEditor() { avatarEditorHud?.SetVisibility(true); }
 
-    private void ShowSettings()
-    {
-        settingsPanelHud?.SetVisibility(true);
-    }
+    private void ShowSettings() { settingsPanelHud?.SetVisibility(true); }
 
-    private void ShowControls()
-    {
-        controlsHud?.SetVisibility(true);
-    }
+    private void ShowControls() { controlsHud?.SetVisibility(true); }
 
     private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
     {
@@ -175,9 +164,8 @@ public class HUDController : MonoBehaviour
         BUILDER_IN_WORLD_INITIAL = 25,
         QUESTS_PANEL = 26,
         QUESTS_TRACKER = 27,
-        QUESTS_NOTIFICATIONS = 28,
-        BUILDER_PROJECTS_PANEL = 29,
-        COUNT = 30
+        BUILDER_PROJECTS_PANEL = 28,
+        COUNT = 29
     }
 
     [System.Serializable]
@@ -407,18 +395,13 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.QUESTS_PANEL:
                 CreateHudElement<QuestsPanelHUDController>(configuration, hudElementId);
-                if(configuration.active)
+                if (configuration.active)
                     questsPanelHUD.Initialize(QuestsController.i);
                 break;
             case HUDElementID.QUESTS_TRACKER:
                 CreateHudElement<QuestsTrackerHUDController>(configuration, hudElementId);
-                if(configuration.active)
+                if (configuration.active)
                     questsTrackerHUD.Initialize(QuestsController.i);
-                break;
-            case HUDElementID.QUESTS_NOTIFICATIONS:
-                CreateHudElement<QuestsNotificationsHUDController>(configuration, hudElementId);
-                if(configuration.active)
-                    questsNotificationsHUD.Initialize(QuestsController.i);
                 break;
             case HUDElementID.BUILDER_PROJECTS_PANEL:
                 CreateHudElement<BuilderProjectsPanelController>(configuration, hudElementId);
@@ -436,25 +419,13 @@ public class HUDController : MonoBehaviour
             hudElement.SetVisibility(configuration.active && configuration.visible);
     }
 
-    private void OpenPrivateChatWindow(string targetUserId)
-    {
-        taskbarHud?.OpenPrivateChatTo(targetUserId);
-    }
+    private void OpenPrivateChatWindow(string targetUserId) { taskbarHud?.OpenPrivateChatTo(targetUserId); }
 
-    private void View_OnDeactivatePreview()
-    {
-        playerInfoCardHud?.CloseCard();
-    }
+    private void View_OnDeactivatePreview() { playerInfoCardHud?.CloseCard(); }
 
-    private void PrivateChatWindowHud_OnPressBack()
-    {
-        taskbarHud?.OpenFriendsWindow();
-    }
+    private void PrivateChatWindowHud_OnPressBack() { taskbarHud?.OpenFriendsWindow(); }
 
-    private void TaskbarHud_onAnyTaskbarButtonClicked()
-    {
-        playerInfoCardHud?.CloseCard();
-    }
+    private void TaskbarHud_onAnyTaskbarButtonClicked() { playerInfoCardHud?.CloseCard(); }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
         where T : IHUD, new()
@@ -473,7 +444,8 @@ public class HUDController : MonoBehaviour
     public void UpdateHudElement<T>(HUDConfiguration config, HUDElementID id)
         where T : IHUD, new()
     {
-        if (!hudElements.ContainsKey(id)) return;
+        if (!hudElements.ContainsKey(id))
+            return;
 
         if (VERBOSE)
             Debug.Log($"Updating {id}, type {hudElements[id].GetType().Name}, active: {config.active} visible: {config.visible}");
@@ -481,10 +453,7 @@ public class HUDController : MonoBehaviour
         hudElements[id].SetVisibility(config.visible);
     }
 
-    public void TriggerSelfUserExpression(string id)
-    {
-        UserProfile.GetOwnUserProfile().SetAvatarExpression(id);
-    }
+    public void TriggerSelfUserExpression(string id) { UserProfile.GetOwnUserProfile().SetAvatarExpression(id); }
 
     public void AirdroppingRequest(string payload)
     {
@@ -498,10 +467,7 @@ public class HUDController : MonoBehaviour
         termsOfServiceHud?.ShowTermsOfService(model);
     }
 
-    public void SetPlayerTalking(string talking)
-    {
-        taskbarHud?.SetVoiceChatRecording("true".Equals(talking));
-    }
+    public void SetPlayerTalking(string talking) { taskbarHud?.SetVoiceChatRecording("true".Equals(talking)); }
 
     public void SetVoiceChatEnabledByScene(int enabledPayload)
     {
@@ -521,15 +487,9 @@ public class HUDController : MonoBehaviour
         usersAroundListHud?.SetUsersMuted(model.usersId, model.muted);
     }
 
-    public void RequestTeleport(string teleportDataJson)
-    {
-        teleportHud?.RequestTeleport(teleportDataJson);
-    }
+    public void RequestTeleport(string teleportDataJson) { teleportHud?.RequestTeleport(teleportDataJson); }
 
-    public void UpdateBalanceOfMANA(string balance)
-    {
-        profileHud?.SetManaBalance(balance);
-    }
+    public void UpdateBalanceOfMANA(string balance) { profileHud?.SetManaBalance(balance); }
 
     public void ShowAvatarEditorInSignUp()
     {
@@ -540,10 +500,7 @@ public class HUDController : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        Cleanup();
-    }
+    private void OnDestroy() { Cleanup(); }
 
     public void Cleanup()
     {
@@ -574,7 +531,6 @@ public class HUDController : MonoBehaviour
 
         hudElements.Clear();
     }
-
 
     public IHUD GetHUDElement(HUDElementID id)
     {

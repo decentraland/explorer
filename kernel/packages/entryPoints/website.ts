@@ -114,7 +114,6 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: QUESTS_ENABLED, visible: true })
 
     // NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //              so ensuring meta configuration is initialized in this stage is a must
