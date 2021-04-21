@@ -111,11 +111,11 @@ public class Catalyst : ICatalyst
     {
         Promise<string> promise = new Promise<string>();
         
-        string[][] pointersToFetch;
+        string[][] pointersGroupsToFetch;
 
         if (pointers.Length <= MAX_POINTERS_PER_REQUEST)
         {
-            pointersToFetch = new [] { pointers };
+            pointersGroupsToFetch = new [] { pointers };
         }
         else
         {
@@ -126,26 +126,27 @@ public class Catalyst : ICatalyst
                 group s by num / MAX_POINTERS_PER_REQUEST
                 into g
                 select g.ToArray();
-            pointersToFetch = query.ToArray();
+            pointersGroupsToFetch = query.ToArray();
         }
 
-        if (pointersToFetch.Length == 0)
+        if (pointersGroupsToFetch.Length == 0)
         {
             promise.Reject("error: no pointers to fetch");
             return promise;
         }
 
-        Promise<string>[] splittedPromises = new Promise<string>[pointersToFetch.Length];
+        Promise<string>[] splittedPromises = new Promise<string>[pointersGroupsToFetch.Length];
         
-        for (int i = 0; i < pointersToFetch.Length; i++)
+        for (int i = 0; i < pointersGroupsToFetch.Length; i++)
         {
             string urlParams = "";
-            urlParams = pointersToFetch[i].Aggregate(urlParams, (current, pointer) => current + $"&pointer={pointer}");
+            urlParams = pointersGroupsToFetch[i].Aggregate(urlParams, (current, pointer) => current + $"&pointer={pointer}");
             string url = $"{realmDomain}/content/entities/{entityType}?{urlParams}";
             
             splittedPromises[i] = Get(url);
             splittedPromises[i].Then(value =>
             {
+                // check if all other promises have been resolved
                 for (int j = 0; j < splittedPromises.Length; j++)
                 {
                     if (splittedPromises[j] == null || splittedPromises[j].keepWaiting || !string.IsNullOrEmpty(splittedPromises[j].error))
@@ -198,7 +199,7 @@ public class Catalyst : ICatalyst
     private void PlayerRealmOnOnChange(CurrentRealmModel current, CurrentRealmModel previous)
     {
         realmDomain = current.domain;
-        realmContentServerUrl = DataStore.i.playerRealm.Get().contentServerUrl;
+        realmContentServerUrl = current.contentServerUrl;
     }
 
     private void AddToCache(string url, string result)
