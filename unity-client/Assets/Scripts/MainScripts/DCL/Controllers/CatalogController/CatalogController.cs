@@ -12,7 +12,7 @@ public class CatalogController : MonoBehaviour
     private const string BASE_WEARABLES_CONTEXT = "BaseWearables";
     private const int FRAMES_TO_CHECK_FOR_SENDING_PENDING_REQUESTS = 1;
     private const float TIME_TO_CHECK_FOR_UNUSED_WEARABLES = 10f;
-    private const float REQUESTS_TIME_OUT = 3 * 60;
+    private const float REQUESTS_TIME_OUT = 0.2f * 60;
 
     public static CatalogController i { get; private set; }
 
@@ -238,12 +238,12 @@ public class CatalogController : MonoBehaviour
     {
         if (awaitingWearablePromises.TryGetValue(wearableId, out Promise<WearableItem> promise))
         {
+            awaitingWearablePromises.Remove(wearableId);
+
             if (string.IsNullOrEmpty(errorMessage))
                 promise.Resolve(newWearableAddedIntoCatalog);
             else
                 promise.Reject(errorMessage);
-
-            awaitingWearablePromises.Remove(wearableId);
         }
     }
 
@@ -251,12 +251,12 @@ public class CatalogController : MonoBehaviour
     {
         if (awaitingWearablesByContextPromises.TryGetValue(context, out Promise<WearableItem[]> promise))
         {
+            awaitingWearablesByContextPromises.Remove(context);
+
             if (string.IsNullOrEmpty(errorMessage))
                 promise.Resolve(newWearablesAddedIntoCatalog);
             else
                 promise.Reject(errorMessage);
-
-            awaitingWearablesByContextPromises.Remove(context);
         }
     }
 
@@ -285,22 +285,23 @@ public class CatalogController : MonoBehaviour
     {
         if (pendingWearableRequestedTimes.Count > 0)
         {
-            List<string> expiredRequestedTimes = new List<string>();
+            List<string> expiredRequestes = new List<string>();
             foreach (var promiseRequestedTime in pendingWearableRequestedTimes)
             {
                 if ((Time.realtimeSinceStartup - promiseRequestedTime.Value) > REQUESTS_TIME_OUT)
                 {
-                    ResolvePendingWearablePromise(
-                        promiseRequestedTime.Key,
-                        null,
-                        $"The request for the wearable '{promiseRequestedTime.Key}' has exceed the set timeout!");
-                    expiredRequestedTimes.Add(promiseRequestedTime.Key);
+                    expiredRequestes.Add(promiseRequestedTime.Key);
                 }
             }
 
-            foreach (var expiredTimeToRemove in expiredRequestedTimes)
+            foreach (var expiredRequestToRemove in expiredRequestes)
             {
-                pendingWearableRequestedTimes.Remove(expiredTimeToRemove);
+                pendingWearableRequestedTimes.Remove(expiredRequestToRemove);
+
+                ResolvePendingWearablePromise(
+                    expiredRequestToRemove,
+                    null,
+                    $"The request for the wearable '{expiredRequestToRemove}' has exceed the set timeout!");
             }
         }
     }
@@ -309,22 +310,23 @@ public class CatalogController : MonoBehaviour
     {
         if (pendingWearablesByContextRequestedTimes.Count > 0)
         {
-            List<string> expiredRequestedTimes = new List<string>();
+            List<string> expiredRequests = new List<string>();
             foreach (var promiseByContextRequestedTime in pendingWearablesByContextRequestedTimes)
             {
                 if ((Time.realtimeSinceStartup - promiseByContextRequestedTime.Value) > REQUESTS_TIME_OUT)
                 {
-                    ResolvePendingWearablesByContextPromise(
-                        promiseByContextRequestedTime.Key,
-                        null,
-                        $"The request for the wearable context '{promiseByContextRequestedTime.Key}' has exceed the set timeout!");
-                    expiredRequestedTimes.Add(promiseByContextRequestedTime.Key);
+                    expiredRequests.Add(promiseByContextRequestedTime.Key);
                 }
             }
 
-            foreach (var expiredTimeToRemove in expiredRequestedTimes)
+            foreach (var expiredRquestToRemove in expiredRequests)
             {
-                pendingWearablesByContextRequestedTimes.Remove(expiredTimeToRemove);
+                pendingWearablesByContextRequestedTimes.Remove(expiredRquestToRemove);
+
+                ResolvePendingWearablesByContextPromise(
+                    expiredRquestToRemove,
+                    null,
+                    $"The request for the wearable context '{expiredRquestToRemove}' has exceed the set timeout!");
             }
         }
     }
