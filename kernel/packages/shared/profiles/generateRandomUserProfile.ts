@@ -46,7 +46,7 @@ export function backupProfile(contentServerUrl: string, userId: string) {
     name: '',
     description: '',
     avatar: {
-      bodyShape: 'dcl://base-avatars/BaseFemale',
+      bodyShape: 'urn:decentraland:off-chain:base-avatars:BaseFemale',
       skin: {
         color: {
           r: 0.4901960790157318,
@@ -69,13 +69,13 @@ export function backupProfile(contentServerUrl: string, userId: string) {
         }
       },
       wearables: [
-        'dcl://base-avatars/f_sweater',
-        'dcl://base-avatars/f_jeans',
-        'dcl://base-avatars/bun_shoes',
-        'dcl://base-avatars/standard_hair',
-        'dcl://base-avatars/f_eyes_00',
-        'dcl://base-avatars/f_eyebrows_00',
-        'dcl://base-avatars/f_mouth_00'
+        'urn:decentraland:off-chain:base-avatars:f_sweater',
+        'urn:decentraland:off-chain:base-avatars:f_jeans',
+        'urn:decentraland:off-chain:base-avatars:bun_shoes',
+        'urn:decentraland:off-chain:base-avatars:standard_hair',
+        'urn:decentraland:off-chain:base-avatars:f_eyes_00',
+        'urn:decentraland:off-chain:base-avatars:f_eyebrows_00',
+        'urn:decentraland:off-chain:base-avatars:f_mouth_00'
       ],
       version: -1,
       snapshots: {

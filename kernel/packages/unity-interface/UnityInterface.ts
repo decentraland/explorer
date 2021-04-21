@@ -15,7 +15,6 @@ import {
   UpdateUserStatusMessage,
   RenderProfile,
   BuilderConfiguration,
-  Wearable,
   KernelConfigForRenderer,
   RealmsInfoForRenderer,
   ContentMapping,
@@ -30,6 +29,7 @@ import { DeploymentResult } from '../shared/apis/SceneStateStorageController/typ
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { WearableV2 } from 'shared/catalogs/types'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -228,7 +228,7 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   }
 
-  public AddWearablesToCatalog(wearables: Wearable[], context?: string) {
+  public AddWearablesToCatalog(wearables: WearableV2[], context?: string) {
     this.SendMessageToUnity('Main', 'AddWearablesToCatalog', JSON.stringify({ wearables, context }))
   }
 

@@ -56,8 +56,10 @@ export namespace parcelLimits {
   export const minParcelX = -150
   export const minParcelZ = -150
 
-  export const descriptiveValidWorldRanges = getWorld().validWorldRanges
-    .map((range) => `(X from ${range.xMin} to ${range.xMax}, and Y from ${range.yMin} to ${range.yMax})`)
+  export const descriptiveValidWorldRanges = getWorld()
+    .validWorldRanges.map(
+      (range) => `(X from ${range.xMin} to ${range.xMax}, and Y from ${range.yMin} to ${range.yMax})`
+    )
     .join(' or ')
 }
 export namespace playerConfigurations {
@@ -261,10 +263,6 @@ export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !==
 export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
 export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
-
-export function getWearablesSafeURL() {
-  return 'https://content.decentraland.org'
-}
 
 export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
   if (tld === 'zone') {

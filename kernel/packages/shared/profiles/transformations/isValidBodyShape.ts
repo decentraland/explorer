@@ -1,6 +1,4 @@
 const BODY_SHAPES = [
-  'dcl://base-avatars/BaseFemale',
-  'dcl://base-avatars/BaseMale',
   'urn:decentraland:off-chain:base-avatars:BaseFemale',
   'urn:decentraland:off-chain:base-avatars:BaseMale'
 ]
