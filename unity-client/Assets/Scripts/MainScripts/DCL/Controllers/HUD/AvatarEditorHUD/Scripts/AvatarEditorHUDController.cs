@@ -91,6 +91,7 @@ public class AvatarEditorHUDController : IHUD
             !string.IsNullOrEmpty(userProfile.userId))
         {
             view.ShowCollectiblesLoadingSpinner(true);
+            view.ShowCollectiblesLoadingRetry(false);
             CatalogController.RequestOwnedWearables(userProfile.userId)
                              .Then((ownedWearables) =>
                              {
@@ -118,10 +119,17 @@ public class AvatarEditorHUDController : IHUD
                                      });
 
                                      view.ShowCollectiblesLoadingSpinner(false);
+                                     view.ShowCollectiblesLoadingRetry(true);
                                      Debug.LogError(error);
                                  }
                              });
         }
+    }
+
+    public void RetryLoadOwnedWereables()
+    {
+        ownedWearablesRemainingRequests = LOADING_OWNED_WEARABLES_RETRIES;
+        LoadOwnedWereables(userProfile);
     }
 
     private void PlayerRendererLoaded(bool current, bool previous)

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.UI;
 
 [assembly: InternalsVisibleTo("AvatarEditorHUDTests")]
 
@@ -15,8 +16,15 @@ public class ItemSelector : MonoBehaviour
     [SerializeField]
     internal GameObject loadingSpinner;
 
+    [SerializeField]
+    internal GameObject loadingRetry;
+
+    [SerializeField]
+    internal Button loadingRetryButton;
+
     public event System.Action<string> OnItemClicked;
     public event System.Action<string> OnSellClicked;
+    public event System.Action OnRetryClicked;
 
     internal Dictionary<string, ItemToggle> itemToggles = new Dictionary<string, ItemToggle>();
 
@@ -28,7 +36,11 @@ public class ItemSelector : MonoBehaviour
         {
             OnItemClicked = null;
         };
+
+        loadingRetryButton.onClick.AddListener(RetryLoading);
     }
+
+    private void OnDestroy() { loadingRetryButton.onClick.RemoveListener(RetryLoading); }
 
     public void AddItemToggle(WearableItem item, int amount)
     {
@@ -146,4 +158,12 @@ public class ItemSelector : MonoBehaviour
         loadingSpinner.SetActive(isActive);
         loadingSpinner.transform.SetAsLastSibling();
     }
+
+    public void ShowRetryLoading(bool isActive)
+    {
+        loadingRetry.SetActive(isActive);
+        loadingRetry.transform.SetAsLastSibling();
+    }
+
+    private void RetryLoading() { OnRetryClicked?.Invoke(); }
 }
