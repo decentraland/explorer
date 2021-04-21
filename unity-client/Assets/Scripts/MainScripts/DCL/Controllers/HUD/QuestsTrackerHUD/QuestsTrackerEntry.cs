@@ -91,7 +91,7 @@ namespace DCL.Huds.QuestsTracker
                 if (!hasTasks)
                     continue;
 
-                bool isVisible = section.tasks.Any(x => (x.progress < 1 && !x.justUnlocked) || (x.progress >= 1 && x.justProgressed));
+                bool isVisible = section.tasks.Any(x => x.status != QuestsLiterals.Status.BLOCKED && ((x.progress < 1 && !x.justUnlocked) || (x.progress >= 1 && x.justProgressed)));
 
                 entriesToRemove.Remove(section.id);
                 if (!sectionEntries.TryGetValue(section.id, out QuestsTrackerSection sectionEntry))
