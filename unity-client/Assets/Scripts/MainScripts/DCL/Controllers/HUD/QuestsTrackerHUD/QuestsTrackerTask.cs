@@ -10,6 +10,7 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerTask : MonoBehaviour
     {
+        private const string TASK_COMPLETED_ANIMATION_NAME = "QuestTrackerTaskCompleted";
         private static readonly int EXPAND_ANIMATOR_TRIGGER = Animator.StringToHash("Expand");
         private static readonly int COLLAPSE_ANIMATOR_TRIGGER = Animator.StringToHash("Collapse");
         private static readonly int COMPLETED_ANIMATOR_TRIGGER = Animator.StringToHash("Completed");
@@ -78,7 +79,7 @@ namespace DCL.Huds.QuestsTracker
                 yield break;
 
             //Dont play completed animation if is already playing
-            if (animator.GetCurrentAnimatorClipInfo(0).All(x => x.clip.name != "QuestTrackerTaskCompleted"))
+            if (animator.GetCurrentAnimatorClipInfo(0).All(x => x.clip.name != TASK_COMPLETED_ANIMATION_NAME))
             {
                 yield return WaitForSecondsCache.Get(0.5f);
                 animator.SetTrigger(COMPLETED_ANIMATOR_TRIGGER);

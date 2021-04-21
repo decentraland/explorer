@@ -6,20 +6,20 @@ public static class QuestsLiterals
 {
     public static class Status
     {
-        public static string BLOCKED = "blocked";
-        public static string NOT_STARTED = "not_started";
-        public static string ON_GOING = "on_going";
-        public static string COMPLETED = "completed";
-        public static string FAILED = "failed";
+        public const string BLOCKED = "blocked";
+        public const string NOT_STARTED = "not_started";
+        public const string ON_GOING = "on_going";
+        public const string COMPLETED = "completed";
+        public const string FAILED = "failed";
     }
 
     public static class RewardStatus
     {
-        public static string NOT_GIVEN = "not_given";
-        public static string OK = "ok";
-        public static string ALREADY_GIVEN = "already_given";
-        public static string TASK_ALREADY_COMPLETED = "task_already_completed";
-        public static string FAILED = "failed";
+        public const string NOT_GIVEN = "not_given";
+        public const string OK = "ok";
+        public const string ALREADY_GIVEN = "already_given";
+        public const string TASK_ALREADY_COMPLETED = "task_already_completed";
+        public const string FAILED = "failed";
     }
 }
 
