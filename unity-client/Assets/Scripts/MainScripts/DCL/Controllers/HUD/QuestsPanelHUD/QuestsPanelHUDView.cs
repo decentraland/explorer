@@ -135,9 +135,7 @@ namespace DCL.Huds.QuestsPanel
                 return;
             }
 
-            Vector3 pos = questPopup.transform.position;
-            pos.y = questEntries[questId].readMorePosition.y;
-            questPopup.transform.position = pos;
+            questPopup.SetPositionToReadMoreButton(questEntries[questId].readMorePosition);
 
             currentQuestInPopup = questId;
             questPopup.Populate(quest);
