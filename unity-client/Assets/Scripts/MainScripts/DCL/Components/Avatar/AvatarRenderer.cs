@@ -166,6 +166,7 @@ namespace DCL
             yield return new WaitUntil(() => gameObject.activeSelf);
 
             bool loadSoftFailed = false;
+            bool isFatalError = false;
 
             WearableItem resolvedBody = null;
             Helpers.Promise<WearableItem> avatarBodyPromise = null;
@@ -191,7 +192,6 @@ namespace DCL
 
             // In this point, all the requests related to the avatar's wearables have been collected and sent to the CatalogController to be sent to kernel as a unique request.
             // From here we wait for the response of the requested wearables and process them.
-
             if (avatarBodyPromise != null)
             {
                 yield return avatarBodyPromise;
@@ -200,6 +200,7 @@ namespace DCL
                 {
                     Debug.LogError(avatarBodyPromise.error);
                     loadSoftFailed = true;
+                    isFatalError = true;
                 }
                 else
                 {
@@ -352,7 +353,7 @@ namespace DCL
 
             if (loadSoftFailed)
             {
-                OnFailEvent?.Invoke(false);
+                OnFailEvent?.Invoke(isFatalError);
             }
             else
             {
