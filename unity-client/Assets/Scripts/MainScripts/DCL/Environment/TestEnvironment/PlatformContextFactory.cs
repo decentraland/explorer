@@ -39,11 +39,11 @@ namespace DCL.Tests
 
             return webRequestControllerMock;
         }
-        
+
         private static IServiceProviders GetServiceProvidersMock()
         {
             IServiceProviders serviceProviders = Substitute.For<IServiceProviders>();
-            
+
             ITheGraph theGraph = Substitute.For<ITheGraph>();
             serviceProviders.theGraph.Returns(theGraph);
             
