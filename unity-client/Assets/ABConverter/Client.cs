@@ -10,6 +10,9 @@ namespace DCL.ABConverter
 {
     public static class Client
     {
+        private const string WEARABLES_CONTENT_BASE_URL = "https://peer.decentraland.org/content/contents/";
+        private const string ALL_WEARABLES_FETCH_URL = "https://peer.decentraland.org/content/deployments?entityType=wearable&onlyCurrentlyPointed=true";
+    
         public class Settings
         {
             /// <summary>
@@ -135,7 +138,7 @@ namespace DCL.ABConverter
                         id = wearableData.metadata.id,
                         category = wearableData.metadata.data.category,
                         tags = wearableData.metadata.data.tags,
-                        baseUrl = "https://peer.decentraland.org/content/contents/",
+                        baseUrl = WEARABLES_CONTENT_BASE_URL,
                         thumbnail = wearableData.metadata.thumbnail,
                         hides = wearableData.metadata.data.hides,
                         replaces = wearableData.metadata.data.replaces,
@@ -456,7 +459,7 @@ namespace DCL.ABConverter
         {
             EnsureEnvironment();
             
-            List<WearableItem> avatarItemList = GetAvatarMappingList("https://peer.decentraland.org/content/deployments?entityType=wearable&onlyCurrentlyPointed=true")
+            List<WearableItem> avatarItemList = GetAvatarMappingList(ALL_WEARABLES_FETCH_URL)
                                                 .Where(x => x.category == WearableLiterals.Categories.BODY_SHAPE)
                                                 .ToList();
 
@@ -480,7 +483,7 @@ namespace DCL.ABConverter
             EnsureEnvironment();
 
             // For debugging purposes we can intercept this item list with LinQ for specific wearables
-            List<WearableItem> avatarItemList = GetAvatarMappingList("https://peer.decentraland.org/content/deployments?entityType=wearable&onlyCurrentlyPointed=true")
+            List<WearableItem> avatarItemList = GetAvatarMappingList(ALL_WEARABLES_FETCH_URL)
                                                 .Where(x => x.category != WearableLiterals.Categories.BODY_SHAPE)
                                                 .ToList();
 
