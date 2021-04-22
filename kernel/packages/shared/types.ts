@@ -445,8 +445,7 @@ export enum HUDElementID {
   GRAPHIC_CARD_WARNING = 23,
   BUILD_MODE = 24,
   QUESTS_PANEL = 26,
-  QUESTS_TRACKER = 27,
-  QUESTS_NOTIFICATIONS = 28
+  QUESTS_TRACKER = 27
 }
 
 export type HUDConfiguration = {

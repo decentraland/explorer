@@ -32,19 +32,13 @@ namespace DCL.Huds.QuestsPanel
 
             OnQuestSet(quests.Get());
         }
-        private void OnQuestPanelVisibleChanged(bool current, bool previous)
-        {
-            SetViewActive(current);
-        }
+        private void OnQuestPanelVisibleChanged(bool current, bool previous) { SetViewActive(current); }
 
-        private void OnToggleActionTriggered(DCLAction_Trigger action)
-        {
-            SetVisibility(!DataStore.i.HUDs.questsPanelVisible.Get());
-        }
+        private void OnToggleActionTriggered(DCLAction_Trigger action) { SetVisibility(!DataStore.i.HUDs.questsPanelVisible.Get()); }
 
         private void OnQuestProgressed(string questId)
         {
-            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestLiterals.Status.BLOCKED)
+            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED)
             {
                 view.RemoveQuest(questId);
                 return;
@@ -55,15 +49,12 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnQuestAdded(string questId, QuestModel questModel)
         {
-            if (questModel.status == QuestLiterals.Status.BLOCKED)
+            if (questModel.status == QuestsLiterals.Status.BLOCKED)
                 return;
             view.RequestAddOrUpdateQuest(questId);
         }
 
-        private void OnQuestRemoved(string questId, QuestModel questModel)
-        {
-            view.RemoveQuest(questId);
-        }
+        private void OnQuestRemoved(string questId, QuestModel questModel) { view.RemoveQuest(questId); }
 
         private void OnQuestSet(IEnumerable<KeyValuePair<string, QuestModel>> quests)
         {
@@ -76,7 +67,7 @@ namespace DCL.Huds.QuestsPanel
 
         public void SetVisibility(bool visible)
         {
-            if(visible)
+            if (visible)
                 Utils.UnlockCursor();
             else
                 Utils.LockCursor();
@@ -84,10 +75,7 @@ namespace DCL.Huds.QuestsPanel
             DataStore.i.HUDs.questsPanelVisible.Set(visible);
         }
 
-        private void SetViewActive(bool visible)
-        {
-            view?.SetVisibility(visible);
-        }
+        private void SetViewActive(bool visible) { view?.SetVisibility(visible); }
 
         internal virtual IQuestsPanelHUDView CreateView() => QuestsPanelHUDView.Create();
 
