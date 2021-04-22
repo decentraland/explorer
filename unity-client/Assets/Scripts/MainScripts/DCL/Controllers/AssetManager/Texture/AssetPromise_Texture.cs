@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using UnityEngine;
-using DCL.Helpers;
 using UnityEngine.Networking;
 
 namespace DCL
@@ -21,7 +20,7 @@ namespace DCL
         bool storeDefaultTextureInAdvance = false;
         bool storeTexAsNonReadable = false;
 
-        UnityWebRequest webRequest = null;
+        WebRequestAsyncOperation webRequestOp = null;
 
         public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE, bool storeDefaultTextureInAdvance = false, bool storeTexAsNonReadable = true)
         {
@@ -42,10 +41,8 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
-            if (webRequest != null)
-            {
-                webRequest.Abort();
-            }
+            if (webRequestOp != null)
+                webRequestOp.Dispose();
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
@@ -59,25 +56,27 @@ namespace DCL
 
             if (!url.StartsWith(PLAIN_BASE64_PROTOCOL))
             {
-                webRequest = UnityWebRequestTexture.GetTexture(url);
-                webRequest.SendWebRequest().completed += (asyncOp) =>
-                {
-                    bool success = webRequest != null && webRequest.WebRequestSucceded() && asset != null;
-                    if (success)
+                webRequestOp = WebRequestController.i.GetTexture(
+                    url: url,
+                    OnSuccess: (webRequestResult) =>
                     {
-                        asset.texture = DownloadHandlerTexture.GetContent(webRequest);
-                        if (IsQuestionMarkPNG(asset.texture))
-                            OnFail?.Invoke();
+                        if (asset != null)
+                        {
+                            asset.texture = DownloadHandlerTexture.GetContent(webRequestResult);
+                            if (IsQuestionMarkPNG(asset.texture))
+                                OnFail?.Invoke();
+                            else
+                                OnSuccess?.Invoke();
+                        }
                         else
-                            OnSuccess?.Invoke();
-                    }
-                    else
+                        {
+                            OnFail?.Invoke();
+                        }
+                    },
+                    OnFail: (webRequestResult) =>
                     {
                         OnFail?.Invoke();
-                    }
-                    webRequest?.Dispose();
-                    webRequest = null;
-                };
+                    });
             }
             else
             {

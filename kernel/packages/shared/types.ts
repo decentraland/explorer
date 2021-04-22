@@ -445,8 +445,7 @@ export enum HUDElementID {
   GRAPHIC_CARD_WARNING = 23,
   BUILD_MODE = 24,
   QUESTS_PANEL = 26,
-  QUESTS_TRACKER = 27,
-  QUESTS_NOTIFICATIONS = 28
+  QUESTS_TRACKER = 27
 }
 
 export type HUDConfiguration = {
@@ -562,17 +561,13 @@ export type KernelConfigForRenderer = {
   features: {
     enableBuilderInWorld: boolean
   }
-  gifSupported: boolean,
-  tld: string,
+  gifSupported: boolean
+  tld: string
   validWorldRanges: Object
 }
 
 export type RealmsInfoForRenderer = {
-  current: {
-    layer: string
-    serverName: string
-    domain: string
-  }
+  current: CurrentRealmInfoForRenderer
   realms: {
     layer: string
     serverName: string
@@ -581,4 +576,11 @@ export type RealmsInfoForRenderer = {
     usersMax: number
     userParcels: [number, number][]
   }[]
+}
+
+export type CurrentRealmInfoForRenderer = {
+  layer: string
+  serverName: string
+  domain: string
+  contentServerUrl: string
 }
