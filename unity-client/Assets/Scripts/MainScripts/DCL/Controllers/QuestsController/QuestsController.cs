@@ -106,7 +106,7 @@ namespace DCL.QuestsController
                     {
                         bool oldTaskFound = oldQuestSection.TryGetTask(currentTask.id, out QuestTask oldTask);
                         currentTask.justProgressed = !oldTaskFound || currentTask.progress != oldTask.progress;
-                        currentTask.justUnlocked = !oldTaskFound || (currentTask.status != QuestsLiterals.Status.BLOCKED &&  oldTask.status == QuestsLiterals.Status.BLOCKED);
+                        currentTask.justUnlocked = !oldTaskFound || (currentTask.status != QuestsLiterals.Status.BLOCKED && oldTask.status == QuestsLiterals.Status.BLOCKED);
                         currentTask.oldProgress = oldTaskFound ? oldTask.progress : 0;
                     }
                     else

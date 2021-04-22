@@ -69,7 +69,7 @@ namespace DCL.Huds.QuestsTracker
             Vector3 scale = progress.transform.localScale;
             if (Math.Abs(scale.x - progressTarget) > Mathf.Epsilon)
                 progressBarIncrementAudioEvent.Play();
-            while (scale.x < progressTarget)
+            while (Math.Abs(scale.x - progressTarget) > Mathf.Epsilon)
             {
                 scale.x = Mathf.MoveTowards(scale.x, progressTarget, Time.deltaTime);
                 progress.transform.localScale = scale;
