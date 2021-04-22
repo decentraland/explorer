@@ -28,14 +28,15 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 7603102270806761523}
   - {fileID: 8706501798459642673}
   m_Father: {fileID: 4050086977858157322}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -364.167}
-  m_SizeDelta: {x: -12, y: 270}
+  m_AnchoredPosition: {x: 0, y: -336.98}
+  m_SizeDelta: {x: -12, y: 324.37}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1337858687397498053
 MonoBehaviour:
@@ -55,7 +56,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 5
   m_ChildAlignment: 1
-  m_Spacing: 20
+  m_Spacing: 10
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -721,7 +722,7 @@ RectTransform:
   - {fileID: 4416223942954949436}
   - {fileID: 8207199501176509305}
   m_Father: {fileID: 2579882766890969042}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1122,8 +1123,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -10, y: 7}
-  m_SizeDelta: {x: 22, y: 22}
+  m_AnchoredPosition: {x: -10, y: 10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &4455771414460277237
 MonoBehaviour:
@@ -1474,7 +1475,6 @@ RectTransform:
   - {fileID: 8142179637691477217}
   - {fileID: 6483892348754598885}
   - {fileID: 9056869985831407091}
-  - {fileID: 7603102270806761523}
   - {fileID: 2579882766890969042}
   - {fileID: 6847964442275684568}
   m_Father: {fileID: 0}
@@ -1520,6 +1520,7 @@ GameObject:
   - component: {fileID: 7603102270806761523}
   - component: {fileID: 1315506664860371429}
   - component: {fileID: 8536448808959233715}
+  - component: {fileID: 4120614587024160350}
   m_Layer: 5
   m_Name: RewardPanel
   m_TagString: Untagged
@@ -1541,13 +1542,13 @@ RectTransform:
   - {fileID: 752878885173188633}
   - {fileID: 600635840545947972}
   - {fileID: 1570938260094145736}
-  m_Father: {fileID: 4050086977858157322}
-  m_RootOrder: 3
+  m_Father: {fileID: 2579882766890969042}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 62}
-  m_SizeDelta: {x: -12, y: 42}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1315506664860371429
 CanvasRenderer:
@@ -1570,7 +1571,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8113208, g: 0.8113208, b: 0.8113208, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.05882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1587,6 +1588,26 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4120614587024160350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5689391408450241991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 388
+  m_MinHeight: 40
+  m_PreferredWidth: 388
+  m_PreferredHeight: 40
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &6294098484897154093
 GameObject:
   m_ObjectHideFlags: 0
@@ -2049,7 +2070,7 @@ RectTransform:
   m_Children:
   - {fileID: 2193454043505675203}
   m_Father: {fileID: 4050086977858157322}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -2564,7 +2585,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4222110746550948776}
   m_HandleRect: {fileID: 1008953630158813871}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
