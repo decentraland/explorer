@@ -68,7 +68,7 @@ namespace Tests.QuestsPanelHUD
         [Test]
         public void CallViewWhenQuestBlocked()
         {
-            DataStore.i.Quests.quests[MOCK_QUEST_ID].status = QuestLiterals.Status.BLOCKED;
+            DataStore.i.Quests.quests[MOCK_QUEST_ID].status = QuestsLiterals.Status.BLOCKED;
             hudController.Initialize(questsController);
             questsController.OnQuestProgressed += Raise.Event<QuestProgressed>(MOCK_QUEST_ID);
 
@@ -99,10 +99,7 @@ namespace Tests.QuestsPanelHUD
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            DataStore.Clear();
-        }
+        public void TearDown() { DataStore.Clear(); }
     }
 
 }
