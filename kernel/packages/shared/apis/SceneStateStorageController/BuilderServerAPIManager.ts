@@ -182,7 +182,7 @@ export class BuilderServerAPIManager {
       cols: 1,
       created_at: today,
       updated_at: today,
-      created_location: land
+      creation_coords: land
     }
 
     let builderScene: BuilderScene = {
