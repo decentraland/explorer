@@ -1,5 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: 953b71d67383ad24aa9bc0b59ca1c261
+=======
+<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Bridges/BuilderProjectsPanelBridge/BuilderProjectsPanelDataMock.meta
+guid: 34a772d7fb6e04952967c0f581b29a4e
+=======
+guid: 953b71d67383ad24aa9bc0b59ca1c261
+>>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/QuestsTrackerHUD/Resources/Audio.meta
+>>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

@@ -67,12 +67,20 @@ public class CatalystSceneEntityMetadata
     [Serializable]
     public class SpawnPoint
     {
+        [Serializable]
+        public class Vector3
+        {
+            public float x;
+            public float y;
+            public float z;
+        }
+
         public string name;
         public bool @default;
         public Vector3 position;
         public Vector3 cameraTarget;
     }
-
+    
     [Serializable]
     public class Source
     {
@@ -89,7 +97,7 @@ public class CatalystSceneEntityMetadata
         public Vector2Int point;
         public string rotation;
         public Layout layout;
-    }
+    }    
 
     public Display display;
     public Contact contact;

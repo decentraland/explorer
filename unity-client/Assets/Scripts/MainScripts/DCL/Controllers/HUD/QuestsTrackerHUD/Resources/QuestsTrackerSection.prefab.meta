@@ -1,5 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: b522bc84c9dd3534e8c965f430d5c314
+=======
+<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/QuestsTrackerHUD/Resources/QuestsTrackerAudioHandler.prefab.meta
+guid: 6315466c90043f14a918976fc0c3db5d
+=======
+guid: b522bc84c9dd3534e8c965f430d5c314
+>>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/QuestsTrackerHUD/Resources/QuestsTrackerSection.prefab.meta
+>>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5
 PrefabImporter:
   externalObjects: {}
   userData: 

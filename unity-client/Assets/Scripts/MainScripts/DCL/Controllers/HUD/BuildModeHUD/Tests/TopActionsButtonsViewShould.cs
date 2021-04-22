@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -9,16 +10,10 @@ namespace Tests.BuildModeHUDViews
         private TopActionsButtonsView topActionsButtonsView;
 
         [SetUp]
-        public void SetUp()
-        {
-            topActionsButtonsView = TopActionsButtonsView.Create();
-        }
+        public void SetUp() { topActionsButtonsView = TopActionsButtonsView.Create(); }
 
         [TearDown]
-        public void TearDown()
-        {
-            Object.Destroy(topActionsButtonsView.gameObject);
-        }
+        public void TearDown() { Object.Destroy(topActionsButtonsView.gameObject); }
 
         [Test]
         public void ConfigureExtraActionsCorrectly()
@@ -160,6 +155,51 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             Assert.IsTrue(logoutClicked, "logoutClicked is false!");
+        }
+
+        [Test]
+        public void SetTranslateActiveGizmosCorrectly()
+        {
+            //Arrange
+            string gizmosActive = BuilderInWorldSettings.TRANSLATE_GIZMO_NAME;
+
+            // Act
+            topActionsButtonsView.SetGizmosActive(gizmosActive);
+
+            // Assert
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+        }
+
+        [Test]
+        public void SetRotateActiveGizmosCorrectly()
+        {
+            //Arrange
+            string gizmosActive = BuilderInWorldSettings.ROTATE_GIZMO_NAME;
+
+            // Act
+            topActionsButtonsView.SetGizmosActive(gizmosActive);
+
+            // Assert
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+        }
+
+        [Test]
+        public void SetScaleActiveGizmosCorrectly()
+        {
+            //Arrange
+            string gizmosActive = BuilderInWorldSettings.SCALE_GIZMO_NAME;
+
+            // Act
+            topActionsButtonsView.SetGizmosActive(gizmosActive);
+
+            // Assert
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
         }
     }
 }
