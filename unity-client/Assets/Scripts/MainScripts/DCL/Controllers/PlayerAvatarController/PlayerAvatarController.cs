@@ -1,11 +1,10 @@
-using System.Runtime.CompilerServices;
 using DCL;
 using DCL.Interface;
 using UnityEngine;
 
 public class PlayerAvatarController : MonoBehaviour
 {
-    private const string LOADING_WEARABLES_ERROR_MESSAGE = "There was a problem loading some of your wearables";
+    private const string LOADING_WEARABLES_ERROR_MESSAGE = "There was a problem loading some wearables";
 
     public AvatarRenderer avatarRenderer;
     public Collider avatarCollider;
@@ -17,6 +16,8 @@ public class PlayerAvatarController : MonoBehaviour
 
     private bool enableCameraCheck = false;
     private Camera mainCamera;
+    private bool avatarWereablesErrors = false;
+    private bool baseWereablesErrors = false;
 
     private void Start()
     {
@@ -27,6 +28,8 @@ public class PlayerAvatarController : MonoBehaviour
         avatarRenderer.OnFailEvent -= OnAvatarRendererFail;
         avatarRenderer.OnSuccessEvent += OnAvatarRendererReady;
         avatarRenderer.OnFailEvent += OnAvatarRendererFail;
+        UserProfileController.i.OnBaseWereablesFail -= OnBaseWereablesFail;
+        UserProfileController.i.OnBaseWereablesFail += OnBaseWereablesFail;
         CommonScriptableObjects.rendererState.AddLock(this);
 
         mainCamera = Camera.main;
@@ -40,26 +43,38 @@ public class PlayerAvatarController : MonoBehaviour
         avatarRenderer.OnSuccessEvent -= OnAvatarRendererReady;
         avatarRenderer.OnFailEvent -= OnAvatarRendererFail;
         DataStore.i.isPlayerRendererLoaded.Set(true);
+
+        if (avatarWereablesErrors || baseWereablesErrors)
+            ShowWearablesWarning();
     }
 
     private void OnAvatarRendererFail(bool isFatalError)
     {
-        if (isFatalError)
-        {
-            WebInterface.ReportAvatarFatalError();
-        }
-        else
-        {
-            NotificationsController.i.ShowNotification(new Notification.Model
-            {
-                message = LOADING_WEARABLES_ERROR_MESSAGE,
-                type = NotificationFactory.Type.WARNING,
-                timer = 5f,
-                destroyOnFinish = true
-            });
+        avatarWereablesErrors = true;
 
+        if (isFatalError)
+            WebInterface.ReportAvatarFatalError();
+        else
             OnAvatarRendererReady();
-        }
+    }
+
+    private void OnBaseWereablesFail()
+    {
+        baseWereablesErrors = true;
+
+        if (enableCameraCheck && !avatarWereablesErrors)
+            ShowWearablesWarning();
+    }
+
+    private void ShowWearablesWarning()
+    {
+        NotificationsController.i.ShowNotification(new Notification.Model
+        {
+            message = LOADING_WEARABLES_ERROR_MESSAGE,
+            type = NotificationFactory.Type.WARNING,
+            timer = 5f,
+            destroyOnFinish = true
+        });
     }
 
     private void Update()

@@ -367,7 +367,7 @@ namespace DCL
         {
             Debug.LogError($"Avatar: {model?.name}  -  Failed loading bodyshape: {wearableController?.id}");
             CleanupAvatar();
-            OnFailEvent?.Invoke(false);
+            OnFailEvent?.Invoke(true);
         }
 
         void OnWearableLoadingFail(WearableController wearableController, int retriesCount = MAX_RETRIES)

@@ -6,6 +6,8 @@ public class UserProfileController : MonoBehaviour
 {
     public static UserProfileController i { get; private set; }
 
+    public event Action OnBaseWereablesFail;
+
     private static UserProfileDictionary userProfilesCatalogValue;
     public static UserProfileDictionary userProfilesCatalog
     {
@@ -30,7 +32,12 @@ public class UserProfileController : MonoBehaviour
 
     public void LoadProfile(string payload)
     {
-        CatalogController.RequestBaseWearables().Catch((error) => Debug.LogError(error));
+        CatalogController.RequestBaseWearables()
+                         .Catch((error) =>
+                         {
+                             OnBaseWereablesFail?.Invoke();
+                             Debug.LogError(error);
+                         });
 
         if (payload == null)
             return;
