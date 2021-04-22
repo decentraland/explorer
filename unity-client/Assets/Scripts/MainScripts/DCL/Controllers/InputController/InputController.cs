@@ -87,6 +87,7 @@ public enum DCLAction_Hold
     BuildEditModeCameraAdvanceRight = 440,
     BuildEditModeCameraAdvanceUp = 441,
     BuildEditModeCameraAdvanceDown = 442,
+    BuildEditModeCameraPan = 446
 }
 
 /// <summary>
@@ -398,6 +399,9 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceDown:
                     InputProcessor.FromKey(action, KeyCode.X, InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Hold.BuildEditModeCameraPan:
+                    InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

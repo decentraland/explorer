@@ -44,21 +44,22 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     public LayerMask groundLayer;
 
-    bool isPlacingNewObject = false;
-    bool mousePressed = false;
-    bool isDoingSquareMultiSelection = false;
-    bool isTypeOfBoundSelectionSelected = false;
-    bool isVoxelBoundMultiSelection = false;
-    bool squareMultiSelectionButtonPressed = false;
+    private bool isPlacingNewObject = false;
+    private bool mousePressed = false;
+    private bool isSquareMultiSelectionInputActive = false;
+    private bool isMouseDragging = false;
+    private bool isTypeOfBoundSelectionSelected = false;
+    private bool isVoxelBoundMultiSelection = false;
+    private bool squareMultiSelectionButtonPressed = false;
 
-    bool wasGizmosActive = false;
-    bool isDraggingStarted = false;
-    bool canDragSelectedEntities = false;
+    private bool wasGizmosActive = false;
+    private bool isDraggingStarted = false;
+    private bool canDragSelectedEntities = false;
 
-    bool activateCamera = true;
+    private bool activateCamera = true;
 
-    Vector3 lastMousePosition;
-    Vector3 dragStartedPoint;
+    private Vector3 lastMousePosition;
+    private Vector3 dragStartedPoint;
 
     public const float RAYCAST_MAX_DISTANCE = 10000f;
 
@@ -122,7 +123,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             else
                 voxelController.SetEditObjectLikeVoxel();
         }
-        else if (isDoingSquareMultiSelection)
+        else if (isSquareMultiSelectionInputActive && isMouseDragging)
         {
             if (!squareMultiSelectionButtonPressed)
             {
@@ -167,7 +168,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     private void OnGUI()
     {
-        if (mousePressed && isDoingSquareMultiSelection)
+        if (mousePressed && isSquareMultiSelectionInputActive)
         {
             var rect = BuilderInWorldUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
             BuilderInWorldUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
@@ -229,6 +230,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
+        isMouseDragging = true;
         if (buttonId != 0 ||
             selectedEntities.Count <= 0)
             return;
@@ -260,12 +262,13 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     private void OnMouseUp(int buttonID, Vector3 position)
     {
+        isMouseDragging = false;
         if (buttonID != 0)
             return;
 
         EndDraggingSelectedEntities();
 
-        if (isDoingSquareMultiSelection && mousePressed)
+        if (isSquareMultiSelectionInputActive && mousePressed)
         {
             EndBoundMultiSelection();
         }
@@ -281,7 +284,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (!squareMultiSelectionButtonPressed || isPlacingNewObject)
             return;
 
-        isDoingSquareMultiSelection = true;
+        isSquareMultiSelectionInputActive = true;
         isTypeOfBoundSelectionSelected = false;
         isVoxelBoundMultiSelection = false;
         lastMousePosition = position;
@@ -326,7 +329,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     private void EndBoundMultiSelection()
     {
-        isDoingSquareMultiSelection = false;
+        isSquareMultiSelectionInputActive = false;
         mousePressed = false;
         freeCameraController.SetCameraCanMove(true);
         List<DCLBuilderInWorldEntity> allEntities = null;
