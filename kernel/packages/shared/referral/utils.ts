@@ -1,5 +1,5 @@
 import { getDefaultTLD } from 'config'
-import { queueTrackingEvent } from 'shared/analytics'
+import { trackEvent } from 'shared/analytics'
 import { ExplorerIdentity } from 'shared/session/types'
 import { defaultLogger } from 'shared/logger'
 import { saveToLocalStorage, getFromLocalStorage, removeFromLocalStorage } from '../../atomicHelpers/localStorage'
@@ -30,7 +30,7 @@ export function saveReferral() {
   const code = params.get('referral')
   if (code) {
     saveToLocalStorage(REFERRAL_KEY, code)
-    queueTrackingEvent('referral_save', { code })
+    trackEvent('referral_save', { code })
 
     params.delete('referral')
     history.replaceState(history.state, document.title, '?' + params.toString())
@@ -56,7 +56,7 @@ export function referUser(identity: ExplorerIdentity) {
         if (result.ok) {
           const address = identity.address
           const referral_of = result.data.referral_of
-          queueTrackingEvent('referral_save', { code, address, referral_of })
+          trackEvent('referral_save', { code, address, referral_of })
           removeFromLocalStorage(REFERRAL_KEY)
         }
       })
