@@ -3,7 +3,6 @@ using DCL.Helpers;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
-using static DCL.Interface.WebInterface;
 
 public class CatalogController : MonoBehaviour
 {

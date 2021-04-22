@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DCL.Helpers;
 using UnityEngine;
 using static WearableLiterals;
 
@@ -166,7 +165,6 @@ namespace DCL
             yield return new WaitUntil(() => gameObject.activeSelf);
 
             bool loadSoftFailed = false;
-            bool isFatalError = false;
 
             WearableItem resolvedBody = null;
             Helpers.Promise<WearableItem> avatarBodyPromise = null;
@@ -200,13 +198,19 @@ namespace DCL
                 {
                     Debug.LogError(avatarBodyPromise.error);
                     loadSoftFailed = true;
-                    isFatalError = true;
                 }
                 else
                 {
                     resolvedBody = avatarBodyPromise.value;
                     wearablesInUse.Add(avatarBodyPromise.value.id);
                 }
+            }
+
+            if (resolvedBody == null)
+            {
+                isLoading = false;
+                OnFailEvent?.Invoke(true);
+                yield break;
             }
 
             foreach (var avatarWearablePromise in avatarWearablePromises)
@@ -223,13 +227,6 @@ namespace DCL
                     resolvedWearables.Add(avatarWearablePromise.value);
                     wearablesInUse.Add(avatarWearablePromise.value.id);
                 }
-            }
-
-            if (resolvedBody == null)
-            {
-                isLoading = false;
-                this.OnSuccessEvent?.Invoke();
-                yield break;
             }
 
             bool bodyIsDirty = false;
@@ -353,7 +350,7 @@ namespace DCL
 
             if (loadSoftFailed)
             {
-                OnFailEvent?.Invoke(isFatalError);
+                OnFailEvent?.Invoke(false);
             }
             else
             {

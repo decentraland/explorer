@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UnityEngine;
 
 public class UserProfileController : MonoBehaviour
@@ -9,6 +8,8 @@ public class UserProfileController : MonoBehaviour
     public event Action OnBaseWereablesFail;
 
     private static UserProfileDictionary userProfilesCatalogValue;
+    private bool baseWearablesAlreadyRequested = false;
+
     public static UserProfileDictionary userProfilesCatalog
     {
         get
@@ -32,12 +33,16 @@ public class UserProfileController : MonoBehaviour
 
     public void LoadProfile(string payload)
     {
-        CatalogController.RequestBaseWearables()
-                         .Catch((error) =>
-                         {
-                             OnBaseWereablesFail?.Invoke();
-                             Debug.LogError(error);
-                         });
+        if (!baseWearablesAlreadyRequested)
+        {
+            baseWearablesAlreadyRequested = true;
+            CatalogController.RequestBaseWearables()
+                             .Catch((error) =>
+                             {
+                                 OnBaseWereablesFail?.Invoke();
+                                 Debug.LogError(error);
+                             });
+        }
 
         if (payload == null)
             return;

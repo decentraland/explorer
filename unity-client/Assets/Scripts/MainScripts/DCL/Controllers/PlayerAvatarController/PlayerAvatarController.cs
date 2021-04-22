@@ -60,6 +60,7 @@ public class PlayerAvatarController : MonoBehaviour
 
     private void OnBaseWereablesFail()
     {
+        UserProfileController.i.OnBaseWereablesFail -= OnBaseWereablesFail;
         baseWereablesErrors = true;
 
         if (enableCameraCheck && !avatarWereablesErrors)
