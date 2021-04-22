@@ -403,6 +403,12 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         gizmoManager.ForceRelativeScaleRatio();
     }
 
+    public override void DeselectedEntities()
+    {
+        base.DeselectedEntities();
+        gizmoManager.SetSelectedEntities(editionGO.transform, new List<EditableEntity>());
+    }
+
     public override void Deactivate()
     {
         base.Deactivate();
@@ -518,8 +524,13 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     public void LookAtEntity(IDCLEntity entity)
     {
+        if (entity.meshRootGameObject == null
+            || entity.meshesInfo == null
+            || BuilderInWorldUtils.IsBoundInsideCamera(entity.meshesInfo.mergedBounds))
+            return;
+
         Vector3 pointToLook = entity.gameObject.transform.position;
-        if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+        if (entity.meshesInfo.renderers.Length > 0)
         {
             Vector3 midPointFromEntityMesh = Vector3.zero;
             foreach (Renderer render in entity.renderers)
@@ -536,48 +547,27 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     #region Gizmos
 
-    public void TranslateMode()
-    {
-        if (!isModeActive && isPlacingNewObject)
-            return;
-        if (selectedEntities.Count > 0 && gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.TRANSLATE_GIZMO_NAME)
-        {
-            gizmoManager.SetGizmoType(BuilderInWorldSettings.TRANSLATE_GIZMO_NAME);
-            gizmoManager.ShowGizmo();
-        }
-        else
-        {
-            gizmoManager.HideGizmo(true);
-        }
-    }
+    public void TranslateMode() { GizmosMode( BuilderInWorldSettings.TRANSLATE_GIZMO_NAME); }
 
-    public void RotateMode()
-    {
-        if (!isModeActive && isPlacingNewObject)
-            return;
-        if (selectedEntities.Count > 0 && gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.ROTATE_GIZMO_NAME)
-        {
-            gizmoManager.SetGizmoType(BuilderInWorldSettings.ROTATE_GIZMO_NAME);
-            gizmoManager.ShowGizmo();
-        }
-        else
-        {
-            gizmoManager.HideGizmo(true);
-        }
-    }
+    public void RotateMode() { GizmosMode( BuilderInWorldSettings.ROTATE_GIZMO_NAME); }
 
-    public void ScaleMode()
+    public void ScaleMode() { GizmosMode( BuilderInWorldSettings.SCALE_GIZMO_NAME); }
+
+    void GizmosMode(string gizmos)
     {
         if (!isModeActive && isPlacingNewObject)
             return;
-        if (selectedEntities.Count > 0 && gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.SCLAE_GIZMO_NAME)
+        if (gizmoManager.GetSelectedGizmo() != gizmos)
         {
-            gizmoManager.SetGizmoType(BuilderInWorldSettings.SCLAE_GIZMO_NAME);
-            gizmoManager.ShowGizmo();
+            HUDController.i.builderInWorldMainHud?.SetGizmosActive(gizmos);
+            gizmoManager.SetGizmoType(gizmos);
+            if (selectedEntities.Count > 0 )
+                gizmoManager.ShowGizmo();
         }
         else
         {
             gizmoManager.HideGizmo(true);
+            HUDController.i.builderInWorldMainHud?.SetGizmosActive(BuilderInWorldSettings.EMPTY_GIZMO_NAME);
         }
     }
 
@@ -606,7 +596,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
                 ActionFinish(BuildInWorldCompleteAction.ActionType.ROTATE);
                 break;
-            case BuilderInWorldSettings.SCLAE_GIZMO_NAME:
+            case BuilderInWorldSettings.SCALE_GIZMO_NAME:
                 ActionFinish(BuildInWorldCompleteAction.ActionType.SCALE);
                 break;
         }
