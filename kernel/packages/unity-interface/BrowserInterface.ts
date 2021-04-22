@@ -518,12 +518,12 @@ export class BrowserInterface {
       .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
   }
 
-  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
-    return !array || array.length === 0 ? undefined : array
-  }
-
   public ReportAvatarFatalError() {
     ReportFatalError(AVATAR_LOADING_ERROR)
+  }
+
+  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
+    return !array || array.length === 0 ? undefined : array
   }
 }
 
