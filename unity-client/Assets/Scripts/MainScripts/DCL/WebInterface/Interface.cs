@@ -1117,5 +1117,7 @@ namespace DCL.Interface
             stringPayload.value = userId;
             SendMessage("RequestUserProfile", stringPayload);
         }
+
+        public static void ReportAvatarFatalError() { SendMessage("ReportAvatarFatalError"); }
     }
 }

@@ -23,7 +23,7 @@ namespace DCL
         private AvatarModel model;
 
         public event Action OnSuccessEvent;
-        public event Action OnFailEvent;
+        public event Action<bool> OnFailEvent;
 
         internal BodyShapeController bodyShapeController;
         internal Dictionary<WearableItem, WearableController> wearableControllers = new Dictionary<WearableItem, WearableController>();
@@ -65,7 +65,7 @@ namespace DCL
 
             this.OnSuccessEvent += onSuccessWrapper;
 
-            void onFailWrapper()
+            void onFailWrapper(bool isFatalError)
             {
                 onFail?.Invoke();
                 this.OnFailEvent -= onFailWrapper;
@@ -175,7 +175,7 @@ namespace DCL
             }
             else
             {
-                OnFailEvent?.Invoke();
+                OnFailEvent?.Invoke(true);
                 yield break;
             }
 
@@ -352,7 +352,7 @@ namespace DCL
 
             if (loadSoftFailed)
             {
-                OnFailEvent?.Invoke();
+                OnFailEvent?.Invoke(false);
             }
             else
             {
@@ -366,7 +366,7 @@ namespace DCL
         {
             Debug.LogError($"Avatar: {model?.name}  -  Failed loading bodyshape: {wearableController?.id}");
             CleanupAvatar();
-            OnFailEvent?.Invoke();
+            OnFailEvent?.Invoke(false);
         }
 
         void OnWearableLoadingFail(WearableController wearableController, int retriesCount = MAX_RETRIES)
@@ -375,7 +375,7 @@ namespace DCL
             {
                 Debug.LogError($"Avatar: {model?.name}  -  Failed loading wearable: {wearableController?.id}");
                 CleanupAvatar();
-                OnFailEvent?.Invoke();
+                OnFailEvent?.Invoke(false);
                 return;
             }
 

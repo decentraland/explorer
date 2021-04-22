@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using DCL;
+using DCL.Interface;
 using UnityEngine;
 
 public class PlayerAvatarController : MonoBehaviour
@@ -41,17 +42,24 @@ public class PlayerAvatarController : MonoBehaviour
         DataStore.i.isPlayerRendererLoaded.Set(true);
     }
 
-    private void OnAvatarRendererFail()
+    private void OnAvatarRendererFail(bool isFatalError)
     {
-        NotificationsController.i.ShowNotification(new Notification.Model
+        if (isFatalError)
         {
-            message = LOADING_WEARABLES_ERROR_MESSAGE,
-            type = NotificationFactory.Type.WARNING,
-            timer = 5f,
-            destroyOnFinish = true
-        });
+            WebInterface.ReportAvatarFatalError();
+        }
+        else
+        {
+            NotificationsController.i.ShowNotification(new Notification.Model
+            {
+                message = LOADING_WEARABLES_ERROR_MESSAGE,
+                type = NotificationFactory.Type.WARNING,
+                timer = 5f,
+                destroyOnFinish = true
+            });
 
-        OnAvatarRendererReady();
+            OnAvatarRendererReady();
+        }
     }
 
     private void Update()
