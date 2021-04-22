@@ -108,6 +108,7 @@ public class BuilderInWorldMode : MonoBehaviour
         }
 
         isNewObjectPlaced = false;
+        entityDeselected.IsNew = false;
     }
 
     public virtual void DeselectedEntities()

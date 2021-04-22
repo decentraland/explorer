@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.EventSystems;
@@ -196,6 +197,19 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             topActionsButtonsController.tooltipController.Received(1).HideTooltip();
+        }
+
+        [Test]
+        public void TestSetGizmosActivetedCorrectly()
+        {
+            //Arrange
+            string gizmosActive =  BuilderInWorldSettings.TRANSLATE_GIZMO_NAME;
+
+            // Act
+            topActionsButtonsController.SetGizmosActive(gizmosActive);
+
+            // Assert
+            topActionsButtonsController.topActionsButtonsView.Received(1).SetGizmosActive(gizmosActive);
         }
     }
 }
