@@ -117,5 +117,24 @@ namespace AssetPromiseKeeper_Texture_Tests
 
             Assert.IsTrue(loadedAsset3.texture == loadedAsset4.texture);
         }
+
+        [UnityTest]
+        public IEnumerator FailWithBogusTexture()
+        {
+            string url = $"file://{Application.dataPath + "/../TestResources/Audio/Train.wav"}";
+
+            Asset_Texture loadedAsset = null;
+            AssetPromise_Texture prom = new AssetPromise_Texture(url);
+            bool failed = false;
+            bool succeeded = false;
+            prom.OnSuccessEvent += (x) => succeeded = true;
+            prom.OnFailEvent += (x) => failed = true;
+
+            keeper.Keep(prom);
+            yield return prom;
+            
+            Assert.IsTrue(failed);
+            Assert.IsFalse(succeeded);
+        }
     }
 }
