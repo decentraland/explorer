@@ -41,8 +41,6 @@ public class BIWInputHandler : BIWController
 
     private float nexTimeToReceiveInput;
 
-    public Action OnEndMultiSelection;
-
     void Start()
     {
         editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
@@ -143,8 +141,6 @@ public class BIWInputHandler : BIWController
         builderInWorldEntityHandler.SetMultiSelectionActive(isMultiSelectionActive);
         biwModeController.EndMultiSelection();
         outlinerController.CancelUnselectedOutlines();
-
-        OnEndMultiSelection?.Invoke();
     }
 
     private void MouseClick(int buttonID, Vector3 position)

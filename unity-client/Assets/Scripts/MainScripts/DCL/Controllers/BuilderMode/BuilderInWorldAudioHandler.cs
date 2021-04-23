@@ -39,22 +39,25 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     private BuilderInWorldMode[] builderInWorldModes;
     private List<string> entitiesOutOfBounds = new List<string>();
 
-    private void Start() {
+    private void Start()
+    {
         inWorldController.OnEnterEditMode += OnEnterEditMode;
         inWorldController.OnExitEditMode += OnExitEditMode;
 
         AddListeners();
     }
 
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         inWorldController.OnEnterEditMode -= OnEnterEditMode;
         inWorldController.OnExitEditMode -= OnExitEditMode;
 
         RemoveListeners();
     }
 
-    private void AddListeners() {
-        creatorController.OnSceneObjectPlaced += OnAssetSpawn;
+    private void AddListeners()
+    {
+        creatorController.OnCatalogItemPlaced += OnAssetSpawn;
         entityHandler.OnDeleteSelectedEntities += OnAssetDelete;
         modeController.OnChangedEditModeState += OnChangedEditModeState;
         DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged += OnEntityBoundsCheckerStatusChanged;
@@ -63,14 +66,16 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         DCL.Tutorial.TutorialController.i.OnTutorialDisabled += OnTutorialDisabled;
 
         builderInWorldModes = builderInWorldModesParent.GetComponentsInChildren<BuilderInWorldMode>(true);
-        for (int i = 0; i < builderInWorldModes.Length; i++) {
+        for (int i = 0; i < builderInWorldModes.Length; i++)
+        {
             builderInWorldModes[i].OnEntityDeselected += OnAssetDeselect;
             builderInWorldModes[i].OnEntitySelected += OnAssetSelect;
         }
     }
 
-    private void RemoveListeners() {
-        creatorController.OnSceneObjectPlaced -= OnAssetSpawn;
+    private void RemoveListeners()
+    {
+        creatorController.OnCatalogItemPlaced -= OnAssetSpawn;
         entityHandler.OnDeleteSelectedEntities -= OnAssetDelete;
         modeController.OnChangedEditModeState -= OnChangedEditModeState;
         DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= OnEntityBoundsCheckerStatusChanged;
@@ -78,28 +83,29 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         DCL.Tutorial.TutorialController.i.OnTutorialEnabled -= OnTutorialEnabled;
         DCL.Tutorial.TutorialController.i.OnTutorialDisabled -= OnTutorialDisabled;
 
-        for (int i = 0; i < builderInWorldModes.Length; i++) {
+        for (int i = 0; i < builderInWorldModes.Length; i++)
+        {
             builderInWorldModes[i].OnEntityDeselected -= OnAssetDeselect;
             builderInWorldModes[i].OnEntitySelected -= OnAssetSelect;
         }
     }
 
-    private void OnEnterEditMode() {
-        StartCoroutine(StartBuilderMusic());
-    }
+    private void OnEnterEditMode() { StartCoroutine(StartBuilderMusic()); }
 
-    private void OnExitEditMode() {
+    private void OnExitEditMode()
+    {
         eventBuilderExit.Play();
         StartCoroutine(eventBuilderMusic.FadeOut(5f));
     }
 
-    private void OnAssetSpawn() {
-        eventAssetSpawn.Play();
-    }
+    private void OnAssetSpawn() { eventAssetSpawn.Play(); }
 
-    private void OnAssetDelete(List<DCLBuilderInWorldEntity> entities) {
-        foreach (DCLBuilderInWorldEntity deletedEntity in entities) {
-            if (entitiesOutOfBounds.Contains(deletedEntity.rootEntity.entityId)) {
+    private void OnAssetDelete(List<DCLBuilderInWorldEntity> entities)
+    {
+        foreach (DCLBuilderInWorldEntity deletedEntity in entities)
+        {
+            if (entitiesOutOfBounds.Contains(deletedEntity.rootEntity.entityId))
+            {
                 entitiesOutOfBounds.Remove(deletedEntity.rootEntity.entityId);
             }
         }
@@ -107,39 +113,43 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         eventAssetDelete.Play();
     }
 
-    private void OnAssetSelect() {
-        AudioScriptableObjects.inputFieldUnfocus.Play(true);
-    }
+    private void OnAssetSelect() { AudioScriptableObjects.inputFieldUnfocus.Play(true); }
 
-    private void OnAssetDeselect(DCLBuilderInWorldEntity entity, bool assetIsNew) {
-        if (assetIsNew || modeController.GetCurrentStateMode() == BIWModeController.EditModeState.FirstPerson) {
+    private void OnAssetDeselect(DCLBuilderInWorldEntity entity, bool assetIsNew)
+    {
+        if (assetIsNew || modeController.GetCurrentStateMode() == BIWModeController.EditModeState.FirstPerson)
+        {
             eventAssetPlace.Play();
 
-            if (entitiesOutOfBounds.Contains(entity.rootEntity.entityId)) {
+            if (entitiesOutOfBounds.Contains(entity.rootEntity.entityId))
+            {
                 eventBuilderOutOfBoundsPlaced.Play();
             }
         }
     }
 
-    private void OnTutorialEnabled() {
-        StartCoroutine(eventBuilderMusic.FadeOut(3f));
-    }
+    private void OnTutorialEnabled() { StartCoroutine(eventBuilderMusic.FadeOut(3f)); }
 
-    private void OnTutorialDisabled() {
+    private void OnTutorialDisabled()
+    {
         if (modeController.GetCurrentStateMode() != BIWModeController.EditModeState.Inactive)
             StartCoroutine(StartBuilderMusic());
     }
 
-    private IEnumerator StartBuilderMusic() {
+    private IEnumerator StartBuilderMusic()
+    {
         yield return new WaitForSeconds(4f);
 
         if (modeController.GetCurrentStateMode() != BIWModeController.EditModeState.Inactive)
             eventBuilderMusic.Play();
     }
 
-    private void OnChangedEditModeState(BIWModeController.EditModeState previous, BIWModeController.EditModeState current) {
-        if (previous != BIWModeController.EditModeState.Inactive) {
-            switch (current) {
+    private void OnChangedEditModeState(BIWModeController.EditModeState previous, BIWModeController.EditModeState current)
+    {
+        if (previous != BIWModeController.EditModeState.Inactive)
+        {
+            switch (current)
+            {
                 case BIWModeController.EditModeState.FirstPerson:
                     AudioScriptableObjects.cameraFadeIn.Play();
                     break;
@@ -152,14 +162,20 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         }
     }
 
-    private void OnEntityBoundsCheckerStatusChanged(DCL.Models.IDCLEntity entity, bool isInsideBoundaries) {
-        if (!isInsideBoundaries) {
-            if (!entitiesOutOfBounds.Contains(entity.entityId)) {
+    private void OnEntityBoundsCheckerStatusChanged(DCL.Models.IDCLEntity entity, bool isInsideBoundaries)
+    {
+        if (!isInsideBoundaries)
+        {
+            if (!entitiesOutOfBounds.Contains(entity.entityId))
+            {
                 entitiesOutOfBounds.Add(entity.entityId);
                 eventBuilderOutOfBounds.Play();
             }
-        } else {
-            if (entitiesOutOfBounds.Contains(entity.entityId)) {
+        }
+        else
+        {
+            if (entitiesOutOfBounds.Contains(entity.entityId))
+            {
                 entitiesOutOfBounds.Remove(entity.entityId);
             }
         }

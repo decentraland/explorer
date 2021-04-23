@@ -57,7 +57,6 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuildModeHUDController hudController;
 
-    public Action OnEntityUnlocked;
     public event Action<List<DCLBuilderInWorldEntity>> OnDeleteSelectedEntities;
 
     private void Start()
@@ -331,7 +330,8 @@ public class BuilderInWorldEntityHandler : BIWController
     public void Select(IDCLEntity entity)
     {
         DCLBuilderInWorldEntity entityEditable = GetConvertedEntity(entity);
-        if (entityEditable == null) return;
+        if (entityEditable == null)
+            return;
 
         SelectEntity(entityEditable);
     }
@@ -701,15 +701,9 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    private void RemoveConvertedEntity(IDCLEntity entity)
-    {
-        convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
-    }
+    private void RemoveConvertedEntity(IDCLEntity entity) { convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity)); }
 
-    public void NotifyEntityIsCreated(IDCLEntity entity)
-    {
-        builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit);
-    }
+    public void NotifyEntityIsCreated(IDCLEntity entity) { builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit); }
 
     public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate) { builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit); }
 
@@ -746,18 +740,11 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(entityToApply);
 
         builderInWorldBridge.ChangeEntityLockStatus(entityToApply, sceneToEdit);
-
-        if (!entityToApply.IsLocked)
-            OnEntityUnlocked?.Invoke();
-
     }
 
     private string GetConvertedUniqueKeyForEntity(string entityID) { return sceneToEdit.sceneData.id + entityID; }
 
-    private string GetConvertedUniqueKeyForEntity(IDCLEntity entity)
-    {
-        return entity.scene.sceneData.id + entity.entityId;
-    }
+    private string GetConvertedUniqueKeyForEntity(IDCLEntity entity) { return entity.scene.sceneData.id + entity.entityId; }
 
     private bool AreAllSelectedEntitiesInsideBoundaries()
     {
