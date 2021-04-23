@@ -280,6 +280,7 @@ MonoBehaviour:
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
   actionController: {fileID: 1208871512032110241}
   builderInWorldBridge: {fileID: 0}
+  biwSaveController: {fileID: 6802675824613373767}
   editorMode: {fileID: 1208871512657624393}
   layerToRaycast:
     serializedVersion: 2
@@ -342,6 +343,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -366,6 +368,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1208871511405416593
 GameObject:
   m_ObjectHideFlags: 0
@@ -538,6 +541,7 @@ MonoBehaviour:
   snapScaleFactor: 0.25
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
+  biwSaveController: {fileID: 6802675824613373767}
   actionController: {fileID: 1208871512032110241}
   scaleSpeed: 0.25
   rotationSpeed: 0.5
@@ -770,6 +774,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -794,6 +799,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1208871511809221803
 GameObject:
   m_ObjectHideFlags: 0
@@ -945,6 +951,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -969,6 +976,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1208871512032110247
 GameObject:
   m_ObjectHideFlags: 0
@@ -1071,6 +1079,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 2147483648
   m_RendererPriority: 0
   m_Materials:
@@ -1095,6 +1104,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1208871512097731730
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1240,6 +1250,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1264,6 +1275,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1208871512507521062
 GameObject:
   m_ObjectHideFlags: 0
@@ -1321,6 +1333,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 2147483648
   m_RendererPriority: 0
   m_Materials:
@@ -1345,6 +1358,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1208871512507521059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1492,6 +1506,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1516,6 +1531,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &1208871512567948725
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1592,10 +1608,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxDistanceToSelectEntities: 9999
   snapFactor: 1
-  snapRotationDegresFactor: 0.174533
+  snapRotationDegresFactor: 0.261799
   snapScaleFactor: 0.5
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
+  biwSaveController: {fileID: 6802675824613373767}
   actionController: {fileID: 1208871512032110241}
   distanceEagleCamera: 20
   snapDragFactor: 0.5
@@ -1696,6 +1713,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 2147483648
   m_RendererPriority: 0
   m_Materials:
@@ -1720,6 +1738,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1208871512691119593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1947,6 +1966,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1971,6 +1991,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1208871513081744904
 GameObject:
   m_ObjectHideFlags: 0
@@ -2026,6 +2047,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2050,6 +2072,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1208871513090114760
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,6 +2103,51 @@ Transform:
   m_Father: {fileID: 1208871512657624398}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1378312608805407874
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8521288927048571915}
+  - component: {fileID: 6802675824613373767}
+  m_Layer: 0
+  m_Name: SaveController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8521288927048571915
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378312608805407874}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3815261039525738060}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6802675824613373767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378312608805407874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbcf479da5c585940a83dd2feb2c1636, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  msBetweenSaves: 5000
+  builderInWorldBridge: {fileID: 0}
 --- !u!1 &2982904884276659583
 GameObject:
   m_ObjectHideFlags: 0
@@ -2266,6 +2334,7 @@ Transform:
   - {fileID: 2851376582841154354}
   - {fileID: 2383308837978366415}
   - {fileID: 7525513927146590247}
+  - {fileID: 8521288927048571915}
   m_Father: {fileID: 1208871511274338202}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2314,6 +2383,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
   builderInWorldBridge: {fileID: 0}
+  biwSaveController: {fileID: 6802675824613373767}
 --- !u!1 &7515311309793266013
 GameObject:
   m_ObjectHideFlags: 0
@@ -2361,6 +2431,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2501,12 +2572,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duplicateOffset: 2
-  msBetweenTransformUpdates: 2000
   outlinerController: {fileID: 4993453681677180110}
   buildModeController: {fileID: 1208871511274338203}
   biwModeController: {fileID: 4364144288841107711}
   actionController: {fileID: 1208871512032110241}
   builderInWorldBridge: {fileID: 0}
+  biwSaveController: {fileID: 6802675824613373767}
   editMaterial: {fileID: 2100000, guid: 92b0ce4a86423dd48b66212090fc7e34, type: 2}
   duplicateCursorTexture: {fileID: 2800000, guid: 422889cd6c61279459cc3c6bfa00ed20,
     type: 3}

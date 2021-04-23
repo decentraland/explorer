@@ -65,6 +65,7 @@ public class BuildModeHUDController : IHUD
         ConfigureTopActionsButtonsController();
         ConfigureCatalogItemDropController();
         ConfigureBuildModeConfirmationModalController();
+        ConfigureSaveHUDController();
     }
 
     public void Initialize(BuildModeHUDInitializationModel controllers)
@@ -92,7 +93,8 @@ public class BuildModeHUDController : IHUD
             catalogBtnController = new CatalogBtnController(),
             inspectorController = new InspectorController(),
             buildModeConfirmationModalController = new BuildModeConfirmationModalController(),
-            topActionsButtonsController = new TopActionsButtonsController()
+            topActionsButtonsController = new TopActionsButtonsController(),
+            saveHUDController = new SaveHUDController()
         };
 
         catalogItemDropController = new CatalogItemDropController();
@@ -171,6 +173,10 @@ public class BuildModeHUDController : IHUD
         catalogItemDropController.catalogGroupListView = view.sceneCatalog.catalogGroupListView;
         catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
     }
+
+    private void ConfigureSaveHUDController() { OnLogoutAction += controllers.saveHUDController.StopAnimation; }
+
+    public void SceneSaved() { controllers.saveHUDController.SceneStateSave(); }
 
     private void ConfigureBuildModeConfirmationModalController()
     {
@@ -342,6 +348,7 @@ public class BuildModeHUDController : IHUD
     public void ChangeVisibilityOfEntityList()
     {
         isEntityListVisible = !isEntityListVisible;
+        controllers.saveHUDController?.SetSaveViewByEntityListOpen(isEntityListVisible);
         if (isEntityListVisible)
         {
             OnEntityListVisible?.Invoke();
