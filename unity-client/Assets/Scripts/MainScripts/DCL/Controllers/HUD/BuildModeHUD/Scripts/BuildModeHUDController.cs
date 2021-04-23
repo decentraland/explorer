@@ -177,7 +177,7 @@ public class BuildModeHUDController : IHUD
 
     public void SceneSaved() { controllers.saveHUDController.SceneStateSave(); }
 
-    private void PublishStart()
+    public void PublishStart()
     {
         UnsubscribeConfirmationModal();
 
