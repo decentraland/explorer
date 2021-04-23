@@ -69,20 +69,22 @@ public class DCLBuilderInWorldEntity : EditableEntity
     CatalogItem associatedCatalogItem;
 
     public bool isFloor { get; set; } = false;
-    public bool isNFT { get; set; } = false;
+    public bool isNFT { get; private set; } = false;
 
     private bool isShapeComponentSet = false;
 
     private Animation[] meshAnimations;
 
     private Vector3 currentRotation;
-    Transform originalParent;
+    private Transform originalParent;
 
-    Material[] originalMaterials;
+    private Material[] originalMaterials;
 
-    Material editMaterial;
+    private Material editMaterial;
 
-    Dictionary<string, List<GameObject>> collidersGameObjectDictionary = new Dictionary<string, List<GameObject>>();
+    private Dictionary<string, List<GameObject>> collidersGameObjectDictionary = new Dictionary<string, List<GameObject>>();
+
+    private Vector3 lastPositionReported;
 
     public void Init(IDCLEntity entity, Material editMaterial)
     {
@@ -128,11 +130,16 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool HasShape() { return isShapeComponentSet; }
 
+    public bool HasMovedSinceLastReport() { return Vector3.Distance(lastPositionReported, transform.position) >= BuilderInWorldSettings.ENTITY_POSITION_POSITION_THRESHOLD; }
+
+    public void PositionReported() { lastPositionReported = transform.position; }
+
     public void Select()
     {
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
         SetEditMaterial();
+        lastPositionReported = transform.position;
     }
 
     public void Deselect()

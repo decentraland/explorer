@@ -32,6 +32,7 @@ public class BuilderInWorldController : MonoBehaviour
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
+    public BIWSaveController biwSaveController;
 
     [Header("Build Modes")]
     public BuilderInWorldGodMode editorMode;
@@ -219,6 +220,7 @@ public class BuilderInWorldController : MonoBehaviour
         outlinerController.Init();
         biwFloorHandler.Init();
         bIWInputHandler.Init();
+        biwSaveController.Init();
     }
 
     private void StartTutorial() { TutorialController.i.SetBuilderInWorldTutorialEnabled(); }
@@ -474,7 +476,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void ExitEditMode()
     {
-        builderInWorldBridge.SaveSceneState(sceneToEdit);
+        biwSaveController.ForceSave();
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
         initialLoadingController.Hide(true);
         inputController.inputTypeMode = InputTypeMode.GENERAL;
@@ -523,6 +525,7 @@ public class BuilderInWorldController : MonoBehaviour
         biwPublishController.EnterEditMode(sceneToEdit);
         bIWInputHandler.EnterEditMode(sceneToEdit);
         outlinerController.EnterEditMode(sceneToEdit);
+        biwSaveController.EnterEditMode(sceneToEdit);
     }
 
     public void ExitBiwControllers()
@@ -534,6 +537,7 @@ public class BuilderInWorldController : MonoBehaviour
         biwPublishController.ExitEditMode();
         bIWInputHandler.ExitEditMode();
         outlinerController.ExitEditMode();
+        biwSaveController.ExitEditMode();
     }
 
     public bool IsNewScene() { return sceneToEdit.entities.Count <= 0; }
