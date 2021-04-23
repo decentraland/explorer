@@ -43,6 +43,7 @@ namespace DCL
             cullingController.Dispose();
             debugController.Dispose();
             webRequest.Dispose();
+            serviceProviders.Dispose();
         }
     }
 }
