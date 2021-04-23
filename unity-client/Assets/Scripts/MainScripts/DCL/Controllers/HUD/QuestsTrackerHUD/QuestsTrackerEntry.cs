@@ -11,7 +11,7 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerEntry : MonoBehaviour
     {
-        internal const float OUT_ANIM_DELAY = 1f;
+        internal const float OUT_ANIM_DELAY = 0.5f;
         private const float DELAY_TO_DESTROY = 0.5f;
         private static readonly int OUT_ANIM_TRIGGER = Animator.StringToHash("Out");
         public event Action OnLayoutRebuildRequested;
@@ -41,6 +41,7 @@ namespace DCL.Huds.QuestsTracker
         internal bool isExpanded;
         internal bool isPinned;
         internal bool outAnimDone = false;
+        internal bool hasProgressedThisUpdate = false;
 
         internal readonly Dictionary<string, QuestsTrackerSection> sectionEntries = new Dictionary<string, QuestsTrackerSection>();
         private readonly List<QuestReward> rewardsToNotify = new List<QuestReward>();
@@ -79,6 +80,8 @@ namespace DCL.Huds.QuestsTracker
             questProgressText.text = $"{completedTasksAmount}/{allTasks.Length}";
             progress.fillAmount = quest.oldProgress;
             progressTarget = quest.progress;
+
+            hasProgressedThisUpdate = newQuest.sections.Any(x => x.tasks.Any(y => y.justProgressed));
 
             List<string> entriesToRemove = sectionEntries.Keys.ToList();
             List<QuestsTrackerSection> visibleSectionEntries = new List<QuestsTrackerSection>();
@@ -193,8 +196,8 @@ namespace DCL.Huds.QuestsTracker
             yield return WaitForTaskRoutines();
 
             OnLayoutRebuildRequested?.Invoke();
-            //The entry should exit automatically if questCompleted, therefore the use of MinValue
-            DateTime tasksIdleTime = quest.isCompleted ? DateTime.MinValue : DateTime.Now;
+            //The entry should exit automatically if questCompleted or no progress, therefore the use of MinValue
+            DateTime tasksIdleTime = (quest.isCompleted || !hasProgressedThisUpdate) ? DateTime.MinValue : DateTime.Now;
             yield return new WaitUntil(() => isProgressAnimationDone && !isPinned && (DateTime.Now - tasksIdleTime) > TimeSpan.FromSeconds(3));
 
             if (quest.isCompleted)
