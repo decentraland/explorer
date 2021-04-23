@@ -82,6 +82,11 @@ export abstract class SceneRuntime extends Script {
 
   eventSubscriber!: EventSubscriber
 
+  // this dictionary contains the list of subscriptions.
+  // the boolean value indicates if the client is actively
+  // listenting to that event
+  subscribedEvents: Map<string, boolean> = new Map<string, boolean>()
+
   onUpdateFunctions: Array<(dt: number) => void> = []
   onStartFunctions: Array<Function> = []
   onEventFunctions: Array<(event: any) => void> = []
@@ -393,19 +398,24 @@ export abstract class SceneRuntime extends Script {
 
         /** subscribe to specific events, events will be handled by the onEvent function */
         subscribe(eventName: string): void {
-          that.eventSubscriber.on(eventName, (event) => {
-            if (eventName === 'raycastResponse') {
-              let idAsNumber = parseInt(event.data.queryId, 10)
-              if (numberToIdStore[idAsNumber]) {
-                event.data.queryId = numberToIdStore[idAsNumber].toString()
+          if (!that.subscribedEvents.has(eventName)) {
+            that.subscribedEvents.set(eventName, true)
+
+            that.eventSubscriber.on(eventName, (event) => {
+              if (eventName === 'raycastResponse') {
+                let idAsNumber = parseInt(event.data.queryId, 10)
+                if (numberToIdStore[idAsNumber]) {
+                  event.data.queryId = numberToIdStore[idAsNumber].toString()
+                }
               }
-            }
-            that.fireEvent({ type: eventName, data: event.data })
-          })
+              that.fireEvent({ type: eventName, data: event.data })
+            })
+          }
         },
 
         /** unsubscribe to specific event */
         unsubscribe(eventName: string): void {
+          that.subscribedEvents.delete(eventName)
           that.eventSubscriber.off(eventName)
         },
 
