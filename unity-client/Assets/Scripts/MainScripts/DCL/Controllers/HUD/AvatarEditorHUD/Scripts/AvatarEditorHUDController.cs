@@ -13,6 +13,9 @@ public class AvatarEditorHUDController : IHUD
 {
     private const int LOADING_OWNED_WEARABLES_RETRIES = 3;
     private const string LOADING_OWNED_WEARABLES_ERROR_MESSAGE = "There was a problem loading your collectibles";
+    private const string URL_MARKET_PLACE = "https://market.decentraland.org/browse?section=wearables";
+    private const string URL_GET_A_WALLET = "https://docs.decentraland.org/get-a-wallet";
+    private const string URL_SELL_COLLECTIBLE = "https://market.decentraland.org/account";
 
     protected static readonly string[] categoriesThatMustHaveSelection = { Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH };
     protected static readonly string[] categoriesToRandomize = { Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET };
@@ -595,12 +598,12 @@ public class AvatarEditorHUDController : IHUD
     public void GoToMarketplace()
     {
         if (userProfile.hasConnectedWeb3)
-            WebInterface.OpenURL("https://market.decentraland.org/browse?section=wearables");
+            WebInterface.OpenURL(URL_MARKET_PLACE);
         else
-            WebInterface.OpenURL("https://docs.decentraland.org/get-a-wallet");
+            WebInterface.OpenURL(URL_GET_A_WALLET);
     }
 
-    public void SellCollectible(string collectibleId) { WebInterface.OpenURL("https://market.decentraland.org/account"); }
+    public void SellCollectible(string collectibleId) { WebInterface.OpenURL(URL_SELL_COLLECTIBLE); }
 
     public void ToggleVisibility() { SetVisibility(!view.isOpen); }
 }
