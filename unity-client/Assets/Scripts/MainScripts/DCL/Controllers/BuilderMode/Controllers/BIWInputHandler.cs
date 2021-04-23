@@ -101,9 +101,9 @@ public class BIWInputHandler : BIWController
         biwModeController.CheckInput();
     }
 
-    public override void EnterEditMode(ParcelScene sceneToEdit)
+    public override void EnterEditMode(ParcelScene scene)
     {
-        base.EnterEditMode(sceneToEdit);
+        base.EnterEditMode(scene);
         builderInputWrapper.gameObject.SetActive(true);
     }
 
@@ -149,6 +149,9 @@ public class BIWInputHandler : BIWController
 
         if (Time.timeSinceLevelLoad < nexTimeToReceiveInput)
             return;
+
+        if (!BuilderInWorldUtils.IsPointerOverUIElement())
+            HUDController.i.builderInWorldMainHud.HideExtraBtns();
 
         if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
         {
