@@ -1,4 +1,5 @@
 using Builder;
+using DCL;
 using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Tutorial;
@@ -62,6 +63,8 @@ public class BuilderInWorldController : MonoBehaviour
     private Material previousSkyBoxMaterial;
     private Vector3 parcelUnityMiddlePoint;
     private bool previousAllUIHidden;
+    private WebRequestAsyncOperation catalogAsyncOp;
+    private bool isCatalogLoading = false;
 
     internal IBuilderInWorldLoadingController initialLoadingController;
 
@@ -103,6 +106,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void Update()
     {
+        if (isCatalogLoading && catalogAsyncOp.webRequest != null)
+            UpdateCatalogLoadingProgress(catalogAsyncOp.webRequest.downloadProgress * 100);
+
         if (!isBuilderInWorldActivated)
             return;
 
@@ -138,6 +144,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void CatalogReceived(string catalogJson)
     {
+        isCatalogLoading = false;
         AssetCatalogBridge.i.AddFullSceneObjectCatalog(catalogJson);
         CatalogLoaded();
     }
@@ -175,7 +182,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
-        BuilderInWorldUtils.MakeGetCall(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+        catalogAsyncOp = BuilderInWorldUtils.MakeGetCall(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+        isCatalogLoading = true;
         BuilderInWorldNFTController.i.Initialize();
         BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
     }
@@ -384,7 +392,6 @@ public class BuilderInWorldController : MonoBehaviour
         NotificationsController.i.allowNotifications = true;
         inputController.inputTypeMode = InputTypeMode.BUILD_MODE_LOADING;
         initialLoadingController.Show();
-        initialLoadingController.SetPercentage(0f);
 
         //Note (Adrian) this should handle different when we have the full flow of the feature
         if (activateCamera)
@@ -560,6 +567,8 @@ public class BuilderInWorldController : MonoBehaviour
             }
         }
     }
+
+    private void UpdateCatalogLoadingProgress(float catalogLoadingProgress) { initialLoadingController.SetPercentage(catalogLoadingProgress / 2); }
 
     private void UpdateSceneLoadingProgress(float sceneLoadingProgress) { initialLoadingController.SetPercentage(50f + (sceneLoadingProgress / 2)); }
 }
