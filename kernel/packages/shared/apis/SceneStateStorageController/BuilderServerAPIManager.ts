@@ -4,7 +4,6 @@ import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import { ContentMapping } from '../../types'
 import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
 import { getDefaultTLD } from 'config'
-import { Console } from 'console'
 
 export type AssetId = string
 
