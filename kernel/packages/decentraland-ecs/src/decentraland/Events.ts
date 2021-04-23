@@ -1,6 +1,7 @@
 import { EventConstructor } from '../ecs/EventManager'
 import { Observable } from '../ecs/Observable'
-import { DecentralandInterface, IEvents, RaycastResponsePayload } from './Types'
+import { DecentralandInterface, IEvents, RaycastResponsePayload, CameraMode } from './Types'
+export { CameraMode }
 
 /**
  * @public
