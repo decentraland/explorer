@@ -60,7 +60,7 @@ namespace DCL.Huds.QuestsTracker
 
         private void OnQuestProgressed(string questId)
         {
-            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || model.visibility == QuestsLiterals.Visibility.SECRET)
+            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || (model.visibility == QuestsLiterals.Visibility.SECRET && model.status == QuestsLiterals.Status.NOT_STARTED))
             {
                 view?.RemoveEntry(questId);
                 return;

@@ -38,7 +38,7 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnQuestProgressed(string questId)
         {
-            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || model.visibility == QuestsLiterals.Visibility.SECRET)
+            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || (model.visibility == QuestsLiterals.Visibility.SECRET && model.status == QuestsLiterals.Status.NOT_STARTED))
             {
                 view.RemoveQuest(questId);
                 return;
@@ -49,7 +49,7 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnQuestAdded(string questId, QuestModel questModel)
         {
-            if (questModel.status == QuestsLiterals.Status.BLOCKED || questModel.visibility == QuestsLiterals.Visibility.SECRET)
+            if (questModel.status == QuestsLiterals.Status.BLOCKED || (questModel.visibility == QuestsLiterals.Visibility.SECRET && questModel.status == QuestsLiterals.Status.NOT_STARTED))
                 return;
             view.RequestAddOrUpdateQuest(questId);
         }
