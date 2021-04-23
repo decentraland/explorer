@@ -4,6 +4,7 @@ import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import { ContentMapping } from '../../types'
 import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
 import { getDefaultTLD } from 'config'
+import { Console } from 'console'
 
 export type AssetId = string
 
@@ -139,7 +140,10 @@ export class BuilderServerAPIManager {
 
     //TODO: We should delete this when we enter in production or we won't be able to set the project in production
     if (getDefaultTLD() === 'org')
+    {
+        console.log("Project saving is disable in org for the momment!")
         return;
+    }
     const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
