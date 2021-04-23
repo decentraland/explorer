@@ -95,6 +95,9 @@ public static class AudioScriptableObjects
 
     private static AudioEvent UIShowEvent;
     public static AudioEvent UIShow => CommonScriptableObjects.GetOrLoad(ref UIShowEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIUnhide");
+
+    private static AudioEvent tooltipPopupEvent;
+    public static AudioEvent tooltipPopup => CommonScriptableObjects.GetOrLoad(ref tooltipPopupEvent, "ScriptableObjects/AudioEvents/HUDCommon/TooltipPopup");
 }
 
 public static class CommonScriptableObjects
@@ -150,7 +153,6 @@ public static class CommonScriptableObjects
     public static BooleanVariable focusState => GetOrLoad(ref focusStateValue, "ScriptableObjects/FocusState");
     private static BooleanVariable focusStateValue;
 
-
     private static ReadMessagesDictionary lastReadChatMessagesDictionary;
     public static ReadMessagesDictionary lastReadChatMessages => GetOrLoad(ref lastReadChatMessagesDictionary, "ScriptableObjects/LastReadChatMessages");
 
@@ -174,7 +176,6 @@ public static class CommonScriptableObjects
 
     private static BooleanVariable isFullscreenHUDOpenValue;
     public static BooleanVariable isFullscreenHUDOpen => GetOrLoad(ref isFullscreenHUDOpenValue, "ScriptableObjects/IsAvatarHUDOpen");
-
 
     private static BooleanVariable isTaskbarHUDInitializedValue;
     public static BooleanVariable isTaskbarHUDInitialized => GetOrLoad(ref isTaskbarHUDInitializedValue, "ScriptableObjects/IsTaskbarHUDInitialized");

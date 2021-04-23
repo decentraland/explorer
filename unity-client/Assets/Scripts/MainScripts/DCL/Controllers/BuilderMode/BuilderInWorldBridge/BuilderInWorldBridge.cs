@@ -23,6 +23,7 @@ public class BuilderInWorldBridge : MonoBehaviour
     TransformComponent entityTransformComponentModel = new TransformComponent();
 
     StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
+    SaveSceneStateEvent saveSceneState = new SaveSceneStateEvent();
     ModifyEntityComponentEvent modifyEntityComponentEvent = new ModifyEntityComponentEvent();
     EntityPayload entityPayload = new EntityPayload();
     EntitySingleComponentPayload entitySingleComponentPayload = new EntitySingleComponentPayload();
@@ -42,27 +43,27 @@ public class BuilderInWorldBridge : MonoBehaviour
         ChangeEntityComponent(entitySingleComponentPayload, scene);
     }
 
+    public void SaveSceneState(ParcelScene scene) { WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, saveSceneState); }
+
     public void PublishSceneResult(string payload)
     {
         PublishSceneResultPayload publishSceneResultPayload = JsonUtility.FromJson<PublishSceneResultPayload>(payload);
-        string message;
+        string errorMessage = "";
         if (publishSceneResultPayload.ok)
         {
-            //Note (Adrian): This is temporary until implement the UI
-            message = "Done!\nThe scene has been published";
             OnPublishSuccess?.Invoke();
 
             AudioScriptableObjects.confirm.Play();
         }
         else
         {
-            message = publishSceneResultPayload.error;
+            errorMessage = publishSceneResultPayload.error;
             OnPublishError?.Invoke(publishSceneResultPayload.error);
 
             AudioScriptableObjects.error.Play();
         }
 
-        HUDController.i.builderInWorldMainHud.PublishEnd(message);
+        HUDController.i.builderInWorldMainHud.PublishEnd(publishSceneResultPayload.ok, errorMessage);
     }
 
     public void ChangeEntityLockStatus(DCLBuilderInWorldEntity entity, ParcelScene scene)

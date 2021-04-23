@@ -33,20 +33,20 @@ namespace DCL.Tests
             IWebRequestController webRequestControllerMock = Substitute.For<IWebRequestController>();
             webRequestControllerMock.Initialize(
                 genericWebRequest: Substitute.For<IWebRequest>(),
-                assetBundleWebRequest: Substitute.For<IWebRequest>(),
+                assetBundleWebRequest: Substitute.For<IWebRequestAssetBundle>(),
                 textureWebRequest: Substitute.For<IWebRequest>(),
                 audioWebRequest: Substitute.For<IWebRequestAudio>());
 
             return webRequestControllerMock;
         }
-        
+
         private static IServiceProviders GetServiceProvidersMock()
         {
             IServiceProviders serviceProviders = Substitute.For<IServiceProviders>();
-            
+
             ITheGraph theGraph = Substitute.For<ITheGraph>();
             serviceProviders.theGraph.Returns(theGraph);
-            
+
             return serviceProviders;
         }
     }

@@ -151,7 +151,14 @@ namespace DCL.Components
             ContentProvider provider = null;
 
             if (!string.IsNullOrEmpty(model.assetId))
+            {
                 provider = AssetCatalogBridge.i.GetContentProviderForAssetIdInSceneObjectCatalog(model.assetId);
+                if (string.IsNullOrEmpty(model.src))
+                {
+                    SceneObject sceneObject = AssetCatalogBridge.i.GetSceneObjectById(model.assetId);
+                    model.src = sceneObject.model;
+                }
+            }
 
             if (provider == null)
                 provider = scene.contentProvider;
@@ -192,10 +199,7 @@ namespace DCL.Components
             ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
         }
 
-        protected virtual void ConfigureColliders(IDCLEntity entity)
-        {
-            CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity, CalculateCollidersLayer(model));
-        }
+        protected virtual void ConfigureColliders(IDCLEntity entity) { CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity, CalculateCollidersLayer(model)); }
 
         protected void OnLoadFailed(LoadWrapper loadWrapper)
         {

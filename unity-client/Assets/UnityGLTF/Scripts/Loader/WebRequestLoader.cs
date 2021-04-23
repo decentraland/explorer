@@ -1,3 +1,4 @@
+using DCL;
 using System;
 using System.Collections;
 using System.IO;
@@ -20,14 +21,13 @@ namespace UnityGLTF.Loader
 
         string _rootURI;
         bool VERBOSE = false;
-        private int retryCont = 0;
+        IWebRequestController webRequestController;
 
-        private const int RETRY_AMOUNTS = 3;
-        
-        public WebRequestLoader(string rootURI)
+        public WebRequestLoader(string rootURI, IWebRequestController webRequestController)
         {
             _rootURI = rootURI;
             HasSyncLoadMethod = false;
+            this.webRequestController = webRequestController;
         }
 
         public IEnumerator LoadStream(string filePath)
@@ -53,10 +53,7 @@ namespace UnityGLTF.Loader
             return uri;
         }
 
-        public void LoadStreamSync(string jsonFilePath)
-        {
-            throw new NotImplementedException();
-        }
+        public void LoadStreamSync(string jsonFilePath) { throw new NotImplementedException(); }
 
         private IEnumerator CreateHTTPRequest(string rootUri, string httpRequestPath)
         {
@@ -66,53 +63,39 @@ namespace UnityGLTF.Loader
             {
                 finalUrl = Path.Combine(rootUri, httpRequestPath);
             }
-            
-            UnityWebRequest www = null; 
-            bool retry = true;
-            
-            while (retry)
+
+            WebRequestAsyncOperation asyncOp = webRequestController.Get(
+                url: finalUrl,
+                downloadHandler: new DownloadHandlerBuffer(),
+                timeout: 5000,
+                disposeOnCompleted: false);
+
+            yield return asyncOp;
+
+            if (!asyncOp.isSucceded)
             {
-                retry = false;
-                www = new UnityWebRequest(finalUrl, "GET", new DownloadHandlerBuffer(), null);
-
-                www.timeout = 5000;
-#if UNITY_2017_2_OR_NEWER
-                yield return www.SendWebRequest();
-#else
-            yield return www.Send();
-#endif
-                if ((int)www.responseCode >= 400)
-                {
-                    Debug.LogError($"{www.responseCode} - {www.url}");
-                    
-                    //Note (Adrian): 500 to 600 codes are reserved codes to Server error responses, so if we have an error from server, we retry
-                    if (retryCont < RETRY_AMOUNTS && www.responseCode >= 500 &&  www.responseCode < 600)
-                    {
-                        retryCont++;
-                        retry = true;
-                    }
-                    else
-                    {
-                        yield break;
-                    }
-                }
-
-                if (www.downloadedBytes > int.MaxValue)
-                {
-                    Debug.LogError("Stream is too big for a byte array");
-                    yield break;
-                }
-            }
-            
-            if(www.downloadHandler.data == null)
+                Debug.LogError($"{asyncOp.webRequest.error} - {finalUrl}");
                 yield break;
-            
-            //NOTE(Brian): Caution, www.downloadHandler.data returns a COPY of the data, if accessed twice,
+            }
+
+            if (asyncOp.webRequest.downloadedBytes > int.MaxValue)
+            {
+                Debug.LogError("Stream is too big for a byte array");
+                yield break;
+            }
+
+            if (asyncOp.webRequest.downloadHandler.data == null)
+                yield break;
+
+            //NOTE(Brian): Caution, webRequestResult.downloadHandler.data returns a COPY of the data, if accessed twice,
             //             2 copies will be performed for the entire file (and then discarded by GC, introducing hiccups).
             //             The correct fix is by using DownloadHandler.ReceiveData. But this is in version > 2019.3.
-            byte[] data = www.downloadHandler.data;
-            LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
+            byte[] data = asyncOp.webRequest.downloadHandler.data;
 
+            if (data != null)
+                LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
+
+            asyncOp.Dispose();
         }
     }
 }
