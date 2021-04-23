@@ -30,6 +30,7 @@ public interface ITopActionsButtonsController
     void TooltipPointerEntered(BaseEventData eventData, string tooltipText);
     void TooltipPointerExited();
     void SetExtraActionsActive(bool isActive);
+    void SetGizmosActive(string gizmos);
 }
 
 public class TopActionsButtonsController : ITopActionsButtonsController
@@ -137,4 +138,5 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public void TooltipPointerExited() { tooltipController.HideTooltip(); }
 
     public void SetExtraActionsActive(bool isActive) { extraActionsController.SetActive(isActive); }
+    public void SetGizmosActive(string gizmos) { topActionsButtonsView.SetGizmosActive(gizmos); }
 }

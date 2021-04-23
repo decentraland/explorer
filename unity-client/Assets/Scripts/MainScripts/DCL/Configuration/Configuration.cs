@@ -44,10 +44,12 @@ namespace DCL.Configuration
         //Gizmos
         public const string TRANSLATE_GIZMO_NAME = "MOVE";
         public const string ROTATE_GIZMO_NAME = "ROTATE";
-        public const string SCLAE_GIZMO_NAME = "SCALE";
+        public const string SCALE_GIZMO_NAME = "SCALE";
+        public const string EMPTY_GIZMO_NAME = "NONE";
 
         public const float GIZMOS_RELATIVE_SCALE_RATIO = 0.06f;
 
+        //Publish
         public const string PUBLISH_MODAL_TITLE = "Publish Scene";
         public const string PUBLISH_MODAL_SUBTITLE = "Are you sure you want to publish your scene to this Land?";
         public const string PUBLISH_MODAL_CONFIRM_BUTTON = "PUBLISH";

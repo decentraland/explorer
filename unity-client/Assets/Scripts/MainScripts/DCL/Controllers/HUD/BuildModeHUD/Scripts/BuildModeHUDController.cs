@@ -284,6 +284,7 @@ public class BuildModeHUDController : IHUD
         controllers.publishPopupController.PublishEnd(isOk, message);
     }
 
+    public void SetGizmosActive(string gizmos) { controllers.topActionsButtonsController.SetGizmosActive(gizmos); }
     public void SetParcelScene(ParcelScene parcelScene) { controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene); }
 
     public void SetPublishBtnAvailability(bool isAvailable) { view.SetPublishBtnAvailability(isAvailable); }
@@ -415,6 +416,12 @@ public class BuildModeHUDController : IHUD
     {
         areExtraButtonsVisible = !areExtraButtonsVisible;
         view.SetVisibilityOfExtraBtns(areExtraButtonsVisible);
+    }
+
+    public void HideExtraBtns()
+    {
+        areExtraButtonsVisible = false;
+        controllers.topActionsButtonsController.extraActionsController.SetActive(areExtraButtonsVisible);
     }
 
     public void SetVisibility(bool visible)
