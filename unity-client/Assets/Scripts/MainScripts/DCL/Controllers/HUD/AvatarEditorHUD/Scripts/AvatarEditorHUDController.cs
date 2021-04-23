@@ -86,44 +86,42 @@ public class AvatarEditorHUDController : IHUD
 
     private void LoadOwnedWereables(UserProfile userProfile)
     {
-        if (!ownedWearablesAlreadyLoaded &&
-            ownedWearablesRemainingRequests > 0 &&
-            !string.IsNullOrEmpty(userProfile.userId))
-        {
-            view.ShowCollectiblesLoadingSpinner(true);
-            view.ShowCollectiblesLoadingRetry(false);
-            CatalogController.RequestOwnedWearables(userProfile.userId)
-                             .Then((ownedWearables) =>
-                             {
-                                 ownedWearablesAlreadyLoaded = true;
-                                 this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
-                                 LoadUserProfile(userProfile, true);
-                                 view.ShowCollectiblesLoadingSpinner(false);
-                             })
-                             .Catch((error) =>
-                             {
-                                 ownedWearablesRemainingRequests--;
-                                 if (ownedWearablesRemainingRequests > 0)
-                                 {
-                                     Debug.LogWarning("Retrying owned wereables loading...");
-                                     LoadOwnedWereables(userProfile);
-                                 }
-                                 else
-                                 {
-                                     NotificationsController.i.ShowNotification(new Notification.Model
-                                     {
-                                         message = LOADING_OWNED_WEARABLES_ERROR_MESSAGE,
-                                         type = NotificationFactory.Type.WARNING,
-                                         timer = 5f,
-                                         destroyOnFinish = true
-                                     });
+        if (ownedWearablesAlreadyLoaded || ownedWearablesRemainingRequests <= 0 || string.IsNullOrEmpty(userProfile.userId))
+            return;
 
-                                     view.ShowCollectiblesLoadingSpinner(false);
-                                     view.ShowCollectiblesLoadingRetry(true);
-                                     Debug.LogError(error);
-                                 }
-                             });
-        }
+        view.ShowCollectiblesLoadingSpinner(true);
+        view.ShowCollectiblesLoadingRetry(false);
+        CatalogController.RequestOwnedWearables(userProfile.userId)
+                         .Then((ownedWearables) =>
+                         {
+                             ownedWearablesAlreadyLoaded = true;
+                             this.userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
+                             LoadUserProfile(userProfile, true);
+                             view.ShowCollectiblesLoadingSpinner(false);
+                         })
+                         .Catch((error) =>
+                         {
+                             ownedWearablesRemainingRequests--;
+                             if (ownedWearablesRemainingRequests > 0)
+                             {
+                                 Debug.LogWarning("Retrying owned wereables loading...");
+                                 LoadOwnedWereables(userProfile);
+                             }
+                             else
+                             {
+                                 NotificationsController.i.ShowNotification(new Notification.Model
+                                 {
+                                     message = LOADING_OWNED_WEARABLES_ERROR_MESSAGE,
+                                     type = NotificationFactory.Type.WARNING,
+                                     timer = 5f,
+                                     destroyOnFinish = true
+                                 });
+
+                                 view.ShowCollectiblesLoadingSpinner(false);
+                                 view.ShowCollectiblesLoadingRetry(true);
+                                 Debug.LogError(error);
+                             }
+                         });
     }
 
     public void RetryLoadOwnedWereables()
