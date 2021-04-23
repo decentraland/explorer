@@ -17,8 +17,6 @@ public class BuilderInWorldEntityHandler : BIWController
     [Header("Design variables")]
     public float duplicateOffset = 2f;
 
-    public float msBetweenTransformUpdates = 2000;
-
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
 
@@ -26,6 +24,7 @@ public class BuilderInWorldEntityHandler : BIWController
     public BIWModeController biwModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
+    public BIWSaveController biwSaveController;
 
     [Header("Build References")]
     public Material editMaterial;
@@ -39,8 +38,6 @@ public class BuilderInWorldEntityHandler : BIWController
     [SerializeField]
     internal InputAction_Trigger showAllEntitiesAction;
 
-    public event Action<DCLBuilderInWorldEntity> onSelectedEntity;
-
     private Dictionary<string, DCLBuilderInWorldEntity> convertedEntities = new Dictionary<string, DCLBuilderInWorldEntity>();
     private List<DCLBuilderInWorldEntity> selectedEntities = new List<DCLBuilderInWorldEntity>();
 
@@ -48,7 +45,6 @@ public class BuilderInWorldEntityHandler : BIWController
     private bool isMultiSelectionActive = false;
 
     private float lastTransformReportTime;
-    private float nextTimeToUpdateTransform;
 
     private List<string> entityNameList = new List<string>();
 
@@ -123,20 +119,18 @@ public class BuilderInWorldEntityHandler : BIWController
         ReportTransform();
     }
 
-    private void ReportTransform()
+    public void ReportTransform(bool forceReport = false)
     {
-        if (DCLTime.realtimeSinceStartup >= nextTimeToUpdateTransform)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            foreach (DCLBuilderInWorldEntity entity in selectedEntities)
-            {
-                builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
-            }
-
-            nextTimeToUpdateTransform = DCLTime.realtimeSinceStartup + msBetweenTransformUpdates / 1000f;
+            if (!entity.HasMovedSinceLastReport() && !forceReport)
+                return;
+            builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
+            entity.PositionReported();
         }
-    }
 
-    public ParcelScene GetParcelSceneToEdit() { return sceneToEdit; }
+        lastTransformReportTime = DCLTime.realtimeSinceStartup;
+    }
 
     public List<DCLBuilderInWorldEntity> GetSelectedEntityList() { return selectedEntities; }
 
@@ -150,9 +144,9 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public void SetMultiSelectionActive(bool isActive) { isMultiSelectionActive = isActive; }
 
-    public override void EnterEditMode(ParcelScene sceneToEdit)
+    public override void EnterEditMode(ParcelScene scene)
     {
-        base.EnterEditMode(sceneToEdit);
+        base.EnterEditMode(scene);
         SetupAllEntities();
         EntityListChanged();
     }
@@ -707,7 +701,8 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate) { builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit); }
 
-    public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName)
+    public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName) { SetEntityName(entityToApply, newName, true); }
+    public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName, bool sendUpdateToKernel = true)
     {
         string currentName = entityToApply.GetDescriptiveName();
 
@@ -723,7 +718,8 @@ public class BuilderInWorldEntityHandler : BIWController
         entityToApply.SetDescriptiveName(newName);
         entityNameList.Add(newName);
 
-        builderInWorldBridge?.ChangedEntityName(entityToApply, sceneToEdit);
+        if (sendUpdateToKernel)
+            builderInWorldBridge?.ChangedEntityName(entityToApply, sceneToEdit);
     }
 
     private void ChangeEntityVisibilityStatus(DCLBuilderInWorldEntity entityToApply)

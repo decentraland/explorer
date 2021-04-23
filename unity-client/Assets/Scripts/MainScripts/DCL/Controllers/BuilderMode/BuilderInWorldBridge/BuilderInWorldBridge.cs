@@ -16,6 +16,9 @@ using Environment = DCL.Environment;
 /// </summary>
 public class BuilderInWorldBridge : MonoBehaviour
 {
+    //Note Adrian: OnKernelUpdated in not called in the update of the transform, since it will give a lot of 
+    //events and probably dont need to get called with that frecuency
+    public event Action OnKernelUpdated;
     public event Action OnPublishSuccess;
     public event Action<string> OnPublishError;
 
@@ -117,6 +120,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         });
 
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
+        OnKernelUpdated?.Invoke();
     }
 
     public void AddEntityOnKernel(IDCLEntity entity, ParcelScene scene)
@@ -197,7 +201,6 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
         string message = JsonConvert.SerializeObject(sceneEvent);
-
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
 
@@ -209,6 +212,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         removeEntityEvent.payload = removeEntityPayLoad;
 
         WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, removeEntityEvent);
+        OnKernelUpdated?.Invoke();
     }
 
     public void StartKernelEditMode(ParcelScene scene) { WebInterface.ReportControlEvent(new WebInterface.StartStatefulMode(scene.sceneData.id)); }
@@ -217,6 +221,7 @@ public class BuilderInWorldBridge : MonoBehaviour
 
     public void PublishScene(ParcelScene scene) { WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, storeSceneState); }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     void SendNewEntityToKernel(string sceneId, string entityId, ComponentPayload[] componentsPayload)
     {
         AddEntityEvent addEntityEvent = new AddEntityEvent();
@@ -233,7 +238,7 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         //Note(Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
         string message = JsonConvert.SerializeObject(sceneEvent);
-
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
+        OnKernelUpdated?.Invoke();
     }
 }

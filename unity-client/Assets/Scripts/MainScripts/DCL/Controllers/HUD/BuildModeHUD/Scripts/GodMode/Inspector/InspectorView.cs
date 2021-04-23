@@ -24,17 +24,7 @@ public interface IInspectorView
 
 public class InspectorView : MonoBehaviour, IInspectorView
 {
-    public EntityListView entityList 
-    {
-        get 
-        { 
-            return entityListView; 
-        }
-        set 
-        {
-            entityListView = value;
-        }
-    }
+    public EntityListView entityList { get { return entityListView; } set { entityListView = value; } }
     public List<DCLBuilderInWorldEntity> entities => entitiesList;
     public ISceneLimitsController sceneLimitsController { get; internal set; }
 
@@ -72,38 +62,21 @@ public class InspectorView : MonoBehaviour, IInspectorView
             sceneLimitsController.Dispose();
     }
 
-    private void OnEnable() {
-        AudioScriptableObjects.dialogOpen.Play();
-    }
+    private void OnEnable() { AudioScriptableObjects.dialogOpen.Play(); }
 
-    private void OnDisable() {
-        AudioScriptableObjects.dialogClose.Play();
-    }
+    private void OnDisable() { AudioScriptableObjects.dialogClose.Play(); }
 
-    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
-    {
-        OnEntityActionInvoked?.Invoke(action, entityToApply, adapter);
-    }
+    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter) { OnEntityActionInvoked?.Invoke(action, entityToApply, adapter); }
 
-    public void EntityRename(DCLBuilderInWorldEntity entity, string newName)
-    {
-        OnEntityRename?.Invoke(entity, newName);
-    }
+    public void EntityRename(DCLBuilderInWorldEntity entity, string newName) { OnEntityRename?.Invoke(entity, newName); }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public bool IsActive() { return gameObject.activeSelf; }
 
-    public void SetEntitiesList(List<DCLBuilderInWorldEntity> entities)
-    {
-        entitiesList = entities;
-    }
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 
-    public void ClearEntitiesList()
-    {
-        entitiesList.Clear();
-    }
+    public void SetEntitiesList(List<DCLBuilderInWorldEntity> entities) { entitiesList = entities; }
+
+    public void ClearEntitiesList() { entitiesList.Clear(); }
 
     public void SetCloseButtonsAction(UnityAction call)
     {

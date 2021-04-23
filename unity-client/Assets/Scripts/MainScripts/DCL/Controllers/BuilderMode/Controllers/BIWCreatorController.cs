@@ -113,7 +113,9 @@ public class BIWCreatorController : BIWController
         return true;
     }
 
-    public DCLBuilderInWorldEntity CreateCatalogItem(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false)
+    public DCLBuilderInWorldEntity CreateCatalogItem(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false) { return CreateCatalogItem(catalogItem, biwModeController.GetModeCreationEntryPoint(), autoSelect, isFloor); }
+
+    public DCLBuilderInWorldEntity CreateCatalogItem(CatalogItem catalogItem, Vector3 startPosition, bool autoSelect = true, bool isFloor = false)
     {
         if (catalogItem.IsNFT() && BuilderInWorldNFTController.i.IsNFTInUse(catalogItem.id))
             return null;
@@ -123,7 +125,6 @@ public class BIWCreatorController : BIWController
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
         AddSceneMappings(catalogItem);
 
-        Vector3 startPosition = biwModeController.GetModeCreationEntryPoint();
         Vector3 editionPosition = biwModeController.GetCurrentEditionPosition();
 
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPosition, editionPosition, false);
@@ -215,7 +216,7 @@ public class BIWCreatorController : BIWController
     {
         DCLName name = (DCLName) sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
-        builderInWorldEntityHandler.SetEntityName(entity, catalogItem.name);
+        builderInWorldEntityHandler.SetEntityName(entity, catalogItem.name, false);
     }
 
     private void AddLockedComponent(DCLBuilderInWorldEntity entity)
