@@ -11,7 +11,7 @@ public class CatalogController : MonoBehaviour
     private const string BASE_WEARABLES_CONTEXT = "BaseWearables";
     private const int FRAMES_TO_CHECK_FOR_SENDING_PENDING_REQUESTS = 1;
     private const float TIME_TO_CHECK_FOR_UNUSED_WEARABLES = 10f;
-    private const float REQUESTS_TIME_OUT = 45;
+    private const float REQUESTS_TIME_OUT_SECONDS = 45;
 
     public static CatalogController i { get; private set; }
 
@@ -287,7 +287,7 @@ public class CatalogController : MonoBehaviour
             List<string> expiredRequestes = new List<string>();
             foreach (var promiseRequestedTime in pendingWearableRequestedTimes)
             {
-                if ((Time.realtimeSinceStartup - promiseRequestedTime.Value) > REQUESTS_TIME_OUT)
+                if ((Time.realtimeSinceStartup - promiseRequestedTime.Value) > REQUESTS_TIME_OUT_SECONDS)
                 {
                     expiredRequestes.Add(promiseRequestedTime.Key);
                 }
@@ -312,7 +312,7 @@ public class CatalogController : MonoBehaviour
             List<string> expiredRequests = new List<string>();
             foreach (var promiseByContextRequestedTime in pendingWearablesByContextRequestedTimes)
             {
-                if ((Time.realtimeSinceStartup - promiseByContextRequestedTime.Value) > REQUESTS_TIME_OUT)
+                if ((Time.realtimeSinceStartup - promiseByContextRequestedTime.Value) > REQUESTS_TIME_OUT_SECONDS)
                 {
                     expiredRequests.Add(promiseByContextRequestedTime.Key);
                 }
