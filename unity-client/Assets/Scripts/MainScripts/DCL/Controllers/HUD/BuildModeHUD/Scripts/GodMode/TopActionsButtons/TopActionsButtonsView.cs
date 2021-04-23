@@ -1,4 +1,5 @@
 using System;
+using DCL.Configuration;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -36,6 +37,7 @@ public interface ITopActionsButtonsView
     void OnRotateClick(DCLAction_Trigger action);
     void OnScaleClick(DCLAction_Trigger action);
     void OnTranslateClick(DCLAction_Trigger action);
+    void SetGizmosActive(string gizmos);
 }
 
 public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
@@ -105,6 +107,15 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
 
     [Header("Sub-Views")]
     [SerializeField] internal ExtraActionsView extraActionsView;
+
+    [Header("Images")]
+    [SerializeField] internal Image translateGizmosBtnImg;
+    [SerializeField] internal Image rotateGizmosBtnImg;
+    [SerializeField] internal Image scaleGizmosBtnImg;
+
+    [Header("Colors")]
+    [SerializeField] internal Color gizmosNormalColor;
+    [SerializeField] internal Color gizmosSelectedColor;
 
     private DCLAction_Trigger dummyActionTrigger = new DCLAction_Trigger();
     internal IExtraActionsController extraActionsController;
@@ -221,7 +232,8 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        toggleChangeCameraInputAction.OnTriggered += OnChangeModeClick;
+        //TODO: This should be reactivate when we activate the first person camera
+        //  toggleChangeCameraInputAction.OnTriggered += OnChangeModeClick;
         toggleTranslateInputAction.OnTriggered += OnTranslateClick;
         toggleRotateInputAction.OnTriggered += OnRotateClick;
         toggleScaleInputAction.OnTriggered += OnScaleClick;
@@ -279,48 +291,41 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         this.extraActionsController.Initialize(extraActionsView);
     }
 
-    public void OnChangeModeClick(DCLAction_Trigger action)
+    public void OnChangeModeClick(DCLAction_Trigger action) { OnChangeModeClicked?.Invoke(); }
+
+    public void OnExtraClick(DCLAction_Trigger action) { OnExtraClicked?.Invoke(); }
+
+    public void OnTranslateClick(DCLAction_Trigger action) { OnTranslateClicked?.Invoke(); }
+
+    public void SetGizmosActive(string gizmos)
     {
-        OnChangeModeClicked?.Invoke();
+        translateGizmosBtnImg.color = gizmosNormalColor;
+        rotateGizmosBtnImg.color = gizmosNormalColor;
+        scaleGizmosBtnImg.color = gizmosNormalColor;
+
+        switch (gizmos)
+        {
+            case BuilderInWorldSettings.TRANSLATE_GIZMO_NAME:
+                translateGizmosBtnImg.color = gizmosSelectedColor;
+                break;
+            case BuilderInWorldSettings.ROTATE_GIZMO_NAME:
+                rotateGizmosBtnImg.color = gizmosSelectedColor;
+                break;
+            case BuilderInWorldSettings.SCALE_GIZMO_NAME:
+                scaleGizmosBtnImg.color = gizmosSelectedColor;
+                break;
+        }
     }
 
-    public void OnExtraClick(DCLAction_Trigger action)
-    {
-        OnExtraClicked?.Invoke();
-    }
+    public void OnRotateClick(DCLAction_Trigger action) { OnRotateClicked?.Invoke(); }
 
-    public void OnTranslateClick(DCLAction_Trigger action)
-    {
-        OnTranslateClicked?.Invoke();
-    }
+    public void OnScaleClick(DCLAction_Trigger action) { OnScaleClicked?.Invoke(); }
 
-    public void OnRotateClick(DCLAction_Trigger action)
-    {
-        OnRotateClicked?.Invoke();
-    }
+    public void OnResetClick(DCLAction_Trigger action) { OnResetClicked?.Invoke(); }
 
-    public void OnScaleClick(DCLAction_Trigger action)
-    {
-        OnScaleClicked?.Invoke();
-    }
+    public void OnDuplicateClick(DCLAction_Trigger action) { OnDuplicateClicked?.Invoke(); }
 
-    public void OnResetClick(DCLAction_Trigger action)
-    {
-        OnResetClicked?.Invoke();
-    }
+    public void OnDeleteClick(DCLAction_Trigger action) { OnDeleteClicked?.Invoke(); }
 
-    public void OnDuplicateClick(DCLAction_Trigger action)
-    {
-        OnDuplicateClicked?.Invoke();
-    }
-
-    public void OnDeleteClick(DCLAction_Trigger action)
-    {
-        OnDeleteClicked?.Invoke();
-    }
-
-    public void OnLogOutClick(DCLAction_Trigger action)
-    {
-        OnLogOutClicked?.Invoke();
-    }
+    public void OnLogOutClick(DCLAction_Trigger action) { OnLogOutClicked?.Invoke(); }
 }

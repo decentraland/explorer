@@ -53,7 +53,8 @@ export function toBuilderFromStateDefinitionFormat(
     //we add the entity to builder format
     let builderEntity: BuilderEntity = {
       id: entityId,
-      components: builderComponentsIds
+      components: builderComponentsIds,
+      disableGizmos: false
     }
     entities[builderEntity.id] = builderEntity
   }

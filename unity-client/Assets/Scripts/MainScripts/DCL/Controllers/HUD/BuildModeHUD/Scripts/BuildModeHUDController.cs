@@ -65,6 +65,7 @@ public class BuildModeHUDController : IHUD
         ConfigureTopActionsButtonsController();
         ConfigureCatalogItemDropController();
         ConfigureBuildModeConfirmationModalController();
+        ConfigureSaveHUDController();
     }
 
     public void Initialize(BuildModeHUDInitializationModel controllers)
@@ -92,7 +93,8 @@ public class BuildModeHUDController : IHUD
             catalogBtnController = new CatalogBtnController(),
             inspectorController = new InspectorController(),
             buildModeConfirmationModalController = new BuildModeConfirmationModalController(),
-            topActionsButtonsController = new TopActionsButtonsController()
+            topActionsButtonsController = new TopActionsButtonsController(),
+            saveHUDController = new SaveHUDController()
         };
 
         catalogItemDropController = new CatalogItemDropController();
@@ -172,6 +174,10 @@ public class BuildModeHUDController : IHUD
         catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
     }
 
+    private void ConfigureSaveHUDController() { OnLogoutAction += controllers.saveHUDController.StopAnimation; }
+
+    public void SceneSaved() { controllers.saveHUDController.SceneStateSave(); }
+
     private void ConfigureBuildModeConfirmationModalController()
     {
         controllers.buildModeConfirmationModalController.OnCancelExit += CancelPublishModal;
@@ -235,6 +241,7 @@ public class BuildModeHUDController : IHUD
         controllers.publishPopupController.PublishEnd(isOk, message);
     }
 
+    public void SetGizmosActive(string gizmos) { controllers.topActionsButtonsController.SetGizmosActive(gizmos); }
     public void SetParcelScene(ParcelScene parcelScene) { controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene); }
 
     public void SetPublishBtnAvailability(bool isAvailable) { view.SetPublishBtnAvailability(isAvailable); }
@@ -341,6 +348,7 @@ public class BuildModeHUDController : IHUD
     public void ChangeVisibilityOfEntityList()
     {
         isEntityListVisible = !isEntityListVisible;
+        controllers.saveHUDController?.SetSaveViewByEntityListOpen(isEntityListVisible);
         if (isEntityListVisible)
         {
             OnEntityListVisible?.Invoke();
@@ -366,6 +374,12 @@ public class BuildModeHUDController : IHUD
     {
         areExtraButtonsVisible = !areExtraButtonsVisible;
         view.SetVisibilityOfExtraBtns(areExtraButtonsVisible);
+    }
+
+    public void HideExtraBtns()
+    {
+        areExtraButtonsVisible = false;
+        controllers.topActionsButtonsController.extraActionsController.SetActive(areExtraButtonsVisible);
     }
 
     public void SetVisibility(bool visible)

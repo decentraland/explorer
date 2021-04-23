@@ -26,7 +26,7 @@ import {
   setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
-import { identifyEmail, identifyUser, queueTrackingEvent } from 'shared/analytics'
+import { identifyEmail, identifyUser, trackEvent } from 'shared/analytics'
 import { checkTldVsWeb3Network, getAppNetwork } from 'shared/web3'
 import { connection, ProviderType } from 'decentraland-connect'
 
@@ -304,7 +304,7 @@ function* setUserAuthentified(userId: string, identity: ExplorerIdentity) {
 
     // Load contracts from https://contracts.decentraland.org
     yield setNetwork(net)
-    queueTrackingEvent('Use network', { net })
+    trackEvent('Use network', { net })
   }
 
   yield put(userAuthentified(userId, identity, net))
