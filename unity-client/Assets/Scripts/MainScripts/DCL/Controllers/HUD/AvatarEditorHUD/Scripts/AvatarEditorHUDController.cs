@@ -115,8 +115,8 @@ public class AvatarEditorHUDController : IHUD
                                  NotificationsController.i.ShowNotification(new Notification.Model
                                  {
                                      message = LOADING_OWNED_WEARABLES_ERROR_MESSAGE,
-                                     type = NotificationFactory.Type.WARNING,
-                                     timer = 5f,
+                                     type = NotificationFactory.Type.GENERIC,
+                                     timer = 10f,
                                      destroyOnFinish = true
                                  });
 
