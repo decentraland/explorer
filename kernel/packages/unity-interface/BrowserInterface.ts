@@ -9,7 +9,7 @@ import { decentralandConfigurations, ethereumConfigurations, playerConfiguration
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
+import { identifyEmail, trackEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
@@ -22,7 +22,7 @@ import {
   LoadableParcelScene
 } from 'shared/types'
 import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
-import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
+import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
@@ -138,16 +138,9 @@ export class BrowserInterface {
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
-    queueTrackingEvent('hiccup report', data)
-  }
-
-  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean }) {
+  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean, hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
     const perfReport = getPerformanceInfo(data)
-    queueTrackingEvent('performance report', perfReport)
-
-    const rawPerfReport = getRawPerformanceInfo(data)
-    queueTrackingEvent('raw perf report', rawPerfReport)
+    trackEvent('performance report', perfReport)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -162,7 +155,7 @@ export class BrowserInterface {
       }
     }
 
-    queueTrackingEvent(data.name, properties)
+    trackEvent(data.name, properties)
   }
 
   public TriggerExpression(data: { id: string; timestamp: number }) {
