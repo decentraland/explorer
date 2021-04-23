@@ -102,7 +102,10 @@ namespace DCL.Huds.QuestsPanel
             }
 
             if (string.IsNullOrEmpty(thumbnailURL))
+            {
+                thumbnailImage.gameObject.SetActive(false);
                 return;
+            }
 
             thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
