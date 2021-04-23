@@ -10,13 +10,10 @@ export const ErrorAvatarLoading: React.FC = () => (
       <div className="errortext col">
         <div className="error">Oops...</div>
         <div className="communicationslink">
-          There was a problem loading your avatar
+          There was a technical issue and we were unable to retrieve your avatar information
         </div>
         <div className="givesomedetailof">
-          It seems that the body shape of your avatar could not be loaded correctly.
-          <br />
-          <br />
-          Please try again later, or reach out to us at{" "}
+          Please try again later, and if the problem persists you can contact us through the Discord channel or at{" "}
           <a href="mailto:hello@decentraland.org">
             hello@decentraland.org
           </a>
