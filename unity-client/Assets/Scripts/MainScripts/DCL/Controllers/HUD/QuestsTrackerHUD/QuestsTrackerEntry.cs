@@ -151,7 +151,10 @@ namespace DCL.Huds.QuestsTracker
             }
 
             if (string.IsNullOrEmpty(iconURL))
+            {
+                iconImage.gameObject.SetActive(false);
                 return;
+            }
 
             iconPromise = new AssetPromise_Texture(iconURL);
             iconPromise.OnSuccessEvent += assetTexture =>
@@ -296,7 +299,7 @@ namespace DCL.Huds.QuestsTracker
 
         private IEnumerator ProgressSequence()
         {
-            while (progress.fillAmount < progressTarget)
+            while (Math.Abs(progress.fillAmount - progressTarget) > Mathf.Epsilon)
             {
                 progress.fillAmount = Mathf.MoveTowards(progress.fillAmount, progressTarget, Time.deltaTime);
                 yield return null;

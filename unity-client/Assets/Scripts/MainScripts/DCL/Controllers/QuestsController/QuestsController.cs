@@ -83,6 +83,7 @@ namespace DCL.QuestsController
             //Alex: Edge case. Progressed quest was not included in the initialization. We dont invoke quests events
             if (!quests.TryGetValue(progressedQuest.id, out QuestModel oldQuest))
             {
+                RestoreProgressFlags(progressedQuest);
                 quests.Add(progressedQuest.id, progressedQuest);
                 return;
             }
@@ -139,7 +140,11 @@ namespace DCL.QuestsController
                 }
             }
 
-            //Restore "progress" flags
+            RestoreProgressFlags(progressedQuest);
+        }
+
+        private void RestoreProgressFlags(QuestModel progressedQuest)
+        {
             progressedQuest.oldProgress = progressedQuest.progress;
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {

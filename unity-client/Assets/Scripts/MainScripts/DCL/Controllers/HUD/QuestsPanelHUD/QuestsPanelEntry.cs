@@ -50,7 +50,7 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnEnable()
         {
-            if (string.IsNullOrEmpty(currentThumbnail) || thumbnailPromise.state != AssetPromiseState.LOADING)
+            if (thumbnailPromise != null && (string.IsNullOrEmpty(currentThumbnail) || thumbnailPromise.state != AssetPromiseState.LOADING))
                 animator?.SetTrigger(LOADED_ANIM_TRIGGER);
         }
 
