@@ -36,13 +36,16 @@ public class FreeCameraMovement : CameraStateBase
     private float pitch = 0f;
 
     private bool isCameraAbleToMove = true;
+
     private bool isAdvancingForward = false;
     private bool isAdvancingBackward = false;
     private bool isAdvancingLeft = false;
     private bool isAdvancingRight = false;
     private bool isAdvancingUp = false;
     private bool isAdvancingDown = false;
+
     private bool isPanCameraActive = false;
+    private bool isMouseRightClickDown = false;
 
     private Coroutine smoothLookAtCor;
     private Coroutine smoothFocusOnTargetCor;
@@ -75,9 +78,11 @@ public class FreeCameraMovement : CameraStateBase
         builderInputWrapper.OnMouseDragRaw += MouseDragRaw;
         builderInputWrapper.OnMouseWheel += MouseWheel;
 
+        builderInputWrapper.OnMouseDown += OnMouseDown;
+        builderInputWrapper.OnMouseUp += OnMouseUp;
+
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
-
 
         advanceForwardStartDelegate = (action) => isAdvancingForward = true;
         advanceForwardFinishedDelegate = (action) => isAdvancingForward = false;
@@ -122,11 +127,30 @@ public class FreeCameraMovement : CameraStateBase
         cameraPanInputAction.OnFinished += cameraPanFinishedDelegate;
     }
 
+    private void OnMouseUp(int buttonId, Vector3 mousePosition)
+    {
+        if (buttonId != 1)
+            return;
+
+        isMouseRightClickDown = false;
+    }
+
+    private void OnMouseDown(int buttonId, Vector3 mousePosition)
+    {
+        if (buttonId != 1)
+            return;
+
+        isMouseRightClickDown = true;
+    }
+
     private void OnDestroy()
     {
         builderInputWrapper.OnMouseDrag -= MouseDrag;
         builderInputWrapper.OnMouseDragRaw -= MouseDragRaw;
         builderInputWrapper.OnMouseWheel -= MouseWheel;
+
+        builderInputWrapper.OnMouseDown -= OnMouseDown;
+        builderInputWrapper.OnMouseUp -= OnMouseUp;
 
         advanceFowardInputAction.OnStarted -= advanceForwardStartDelegate;
         advanceFowardInputAction.OnFinished -= advanceForwardFinishedDelegate;
@@ -152,6 +176,9 @@ public class FreeCameraMovement : CameraStateBase
 
     private void Update()
     {
+        if (!isMouseRightClickDown)
+            return;
+
         Vector3 velocity = Vector3.zero;
         if (isAdvancingForward)
         {

@@ -252,21 +252,11 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (entityToSelect != null)
         {
-            if (selectedEntities.Count <= 0)
-            {
+            if (!isMultiSelectionActive)
+                DeselectEntities();
+
+            if (!entityToSelect.IsLocked)
                 ChangeEntitySelectStatus(entityToSelect);
-            }
-            else
-            {
-                if (!isMultiSelectionActive)
-                {
-                    DeselectEntities();
-                }
-                else
-                {
-                    ChangeEntitySelectStatus(entityToSelect);
-                }
-            }
         }
         else if (!isMultiSelectionActive)
         {
@@ -328,7 +318,8 @@ public class BuilderInWorldEntityHandler : BIWController
     public void Select(IDCLEntity entity)
     {
         DCLBuilderInWorldEntity entityEditable = GetConvertedEntity(entity);
-        if (entityEditable == null) return;
+        if (entityEditable == null)
+            return;
 
         SelectEntity(entityEditable);
     }
@@ -696,15 +687,9 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    private void RemoveConvertedEntity(IDCLEntity entity)
-    {
-        convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
-    }
+    private void RemoveConvertedEntity(IDCLEntity entity) { convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity)); }
 
-    public void NotifyEntityIsCreated(IDCLEntity entity)
-    {
-        builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit);
-    }
+    public void NotifyEntityIsCreated(IDCLEntity entity) { builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit); }
 
     public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate) { builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit); }
 
@@ -745,10 +730,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private string GetConvertedUniqueKeyForEntity(string entityID) { return sceneToEdit.sceneData.id + entityID; }
 
-    private string GetConvertedUniqueKeyForEntity(IDCLEntity entity)
-    {
-        return entity.scene.sceneData.id + entity.entityId;
-    }
+    private string GetConvertedUniqueKeyForEntity(IDCLEntity entity) { return entity.scene.sceneData.id + entity.entityId; }
 
     private bool AreAllSelectedEntitiesInsideBoundaries()
     {

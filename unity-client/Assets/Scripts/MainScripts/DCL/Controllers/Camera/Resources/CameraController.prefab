@@ -849,7 +849,7 @@ MonoBehaviour:
     type: 2}
   advanceDownInputAction: {fileID: 11400000, guid: 04728f8a663911e4abf4424936bb9753,
     type: 2}
-  cameraPanInputAction: {fileID: 11400000, guid: 9f61e6f3586e51946868d8359b8a7e5a,
+  cameraPanInputAction: {fileID: 11400000, guid: eb66fafd45ae9b947979e198f552f36c,
     type: 2}
 --- !u!1 &2211258559095576586
 GameObject:

@@ -276,6 +276,18 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     void OnMouseDown(int buttonID, Vector3 position)
     {
+        if (buttonID == 1)
+        {
+            if (isPlacingNewObject)
+            {
+                builderInWorldEntityHandler.DestroyLastCreatedEntities();
+            }
+            else
+            {
+                DeselectedEntities();
+            }
+        }
+
         if (buttonID != 0)
             return;
 

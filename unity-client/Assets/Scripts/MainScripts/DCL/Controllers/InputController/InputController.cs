@@ -370,7 +370,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Hold.BuildEditModeMultiSelection:
-                    InputProcessor.FromKey(action, KeyCode.LeftControl, InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeSquareMultiSelection:
                     InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.FocusNotInInput);
@@ -395,10 +395,10 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.D, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceUp:
-                    InputProcessor.FromKey(action, KeyCode.Space, InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.E, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceDown:
-                    InputProcessor.FromKey(action, KeyCode.X, InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Q, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraPan:
                     InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.FocusNotInInput);
