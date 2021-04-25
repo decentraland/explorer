@@ -3,6 +3,7 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace DCL.Components
@@ -33,9 +34,6 @@ namespace DCL.Components
                 return;
 
             IShape shape = entity.meshesInfo.currentShape;
-
-            if (lastShape == shape)
-                return;
             
             this.ownerEntity = entity;
             lastShape = shape;
@@ -55,22 +53,31 @@ namespace DCL.Components
 
         Collider CreateColliders(Renderer renderer)
         {
-            GameObject go = new GameObject(COLLIDER_NAME);
+            // Get closest mesh collider child
+            var meshCollider = renderer.GetComponentsInChildren<MeshCollider>(true)?.FirstOrDefault(x => x.gameObject.layer == PhysicsLayers.onPointerEventLayer);
+            GameObject colliderGo = meshCollider?.gameObject;
+            
+            if (meshCollider == null)
+            {
+                colliderGo = new GameObject(COLLIDER_NAME);
+                colliderGo.layer = PhysicsLayers.onPointerEventLayer; // to avoid character collisions with onclick collider
 
-            go.name = COLLIDER_NAME;
-            go.layer = PhysicsLayers.onPointerEventLayer; // to avoid character collisions with onclick collider
-
-            var meshCollider = go.AddComponent<MeshCollider>();
+                meshCollider = colliderGo.AddComponent<MeshCollider>();
+            }
+            
+            if (!CollidersManager.i.GetColliderInfo(meshCollider, out ColliderInfo info))
+                CollidersManager.i.AddOrUpdateEntityCollider(ownerEntity, meshCollider);
+            
             meshCollider.sharedMesh = renderer.GetComponent<MeshFilter>().sharedMesh;
             meshCollider.enabled = renderer.enabled;
 
-            if (renderer.transform.parent != null)
+            if (renderer.transform.parent != null && !colliderNames.ContainsKey(meshCollider))
                 colliderNames.Add(meshCollider, renderer.transform.parent.name);
-
-            CollidersManager.i.AddOrUpdateEntityCollider(ownerEntity, meshCollider);
-
+            
+            colliderGo.name = COLLIDER_NAME;
+            
             // Reset objects position, rotation and scale once it's been parented
-            Transform t = go.transform;
+            Transform t = colliderGo.transform;
 
             t.SetParent(renderer.transform);
             t.ResetLocalTRS();
