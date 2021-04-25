@@ -5,6 +5,10 @@ using UnityEngine.EventSystems;
 
 public class BuilderInWorldAudioHandler : MonoBehaviour
 {
+    const float MUSIC_DELAY_TIME_ON_START = 4f;
+    const float MUSIC_FADE_OUT_TIME_ON_EXIT = 5f;
+    const float MUSIC_FADE_OUT_TIME_ON_TUTORIAL = 3f;
+
     [SerializeField]
     BIWCreatorController creatorController;
 
@@ -36,7 +40,6 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     [SerializeField]
     AudioEvent eventBuilderMusic;
 
-    private BuilderInWorldMode[] builderInWorldModes;
     private List<string> entitiesOutOfBounds = new List<string>();
 
     private void Start()
@@ -65,12 +68,8 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         DCL.Tutorial.TutorialController.i.OnTutorialEnabled += OnTutorialEnabled;
         DCL.Tutorial.TutorialController.i.OnTutorialDisabled += OnTutorialDisabled;
 
-        builderInWorldModes = builderInWorldModesParent.GetComponentsInChildren<BuilderInWorldMode>(true);
-        for (int i = 0; i < builderInWorldModes.Length; i++)
-        {
-            builderInWorldModes[i].OnEntityDeselected += OnAssetDeselect;
-            builderInWorldModes[i].OnEntitySelected += OnAssetSelect;
-        }
+        entityHandler.OnEntityDeselected += OnAssetDeselect;
+        entityHandler.OnEntitySelected += OnAssetSelect;
     }
 
     private void RemoveListeners()
@@ -83,19 +82,16 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         DCL.Tutorial.TutorialController.i.OnTutorialEnabled -= OnTutorialEnabled;
         DCL.Tutorial.TutorialController.i.OnTutorialDisabled -= OnTutorialDisabled;
 
-        for (int i = 0; i < builderInWorldModes.Length; i++)
-        {
-            builderInWorldModes[i].OnEntityDeselected -= OnAssetDeselect;
-            builderInWorldModes[i].OnEntitySelected -= OnAssetSelect;
-        }
+        entityHandler.OnEntityDeselected -= OnAssetDeselect;
+        entityHandler.OnEntitySelected -= OnAssetSelect;
     }
 
-    private void OnEnterEditMode() { StartCoroutine(StartBuilderMusic()); }
+    private void OnEnterEditMode() { CoroutineStarter.Start(StartBuilderMusic()); }
 
     private void OnExitEditMode()
     {
         eventBuilderExit.Play();
-        StartCoroutine(eventBuilderMusic.FadeOut(5f));
+        CoroutineStarter.Start(eventBuilderMusic.FadeOut(MUSIC_FADE_OUT_TIME_ON_EXIT));
     }
 
     private void OnAssetSpawn() { eventAssetSpawn.Play(); }
@@ -128,19 +124,23 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         }
     }
 
-    private void OnTutorialEnabled() { StartCoroutine(eventBuilderMusic.FadeOut(3f)); }
+    private void OnTutorialEnabled()
+    {
+        if (inWorldController.isBuilderInWorldActivated)
+            CoroutineStarter.Start(eventBuilderMusic.FadeOut(MUSIC_FADE_OUT_TIME_ON_TUTORIAL));
+    }
 
     private void OnTutorialDisabled()
     {
-        if (modeController.GetCurrentStateMode() != BIWModeController.EditModeState.Inactive)
-            StartCoroutine(StartBuilderMusic());
+        if (inWorldController.isBuilderInWorldActivated)
+            CoroutineStarter.Start(StartBuilderMusic());
     }
 
     private IEnumerator StartBuilderMusic()
     {
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(MUSIC_DELAY_TIME_ON_START);
 
-        if (modeController.GetCurrentStateMode() != BIWModeController.EditModeState.Inactive)
+        if (inWorldController.isBuilderInWorldActivated)
             eventBuilderMusic.Play();
     }
 

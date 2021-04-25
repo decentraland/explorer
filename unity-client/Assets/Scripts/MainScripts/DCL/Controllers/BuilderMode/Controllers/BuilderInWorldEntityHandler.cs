@@ -53,6 +53,8 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuildModeHUDController hudController;
 
+    public event Action<DCLBuilderInWorldEntity, bool> OnEntityDeselected;
+    public event Action OnEntitySelected;
     public event Action<List<DCLBuilderInWorldEntity>> OnDeleteSelectedEntities;
 
     private void Start()
@@ -226,6 +228,8 @@ public class BuilderInWorldEntityHandler : BIWController
         if (selectedEntities.Count <= 0 &&
             hudController != null)
             hudController.HideEntityInformation();
+
+        OnEntityDeselected?.Invoke(entity, false);
     }
 
     public void DeselectEntities()
@@ -351,6 +355,9 @@ public class BuilderInWorldEntityHandler : BIWController
         }
 
         outlinerController.CancelAllOutlines();
+
+        OnEntitySelected?.Invoke();
+
         return true;
     }
 

@@ -25,8 +25,6 @@ public class BuilderInWorldMode : MonoBehaviour
 
     public event Action OnInputDone;
     public event Action<BuildInWorldCompleteAction> OnActionGenerated;
-    public event Action<DCLBuilderInWorldEntity, bool> OnEntityDeselected;
-    public event Action OnEntitySelected;
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 
@@ -86,8 +84,6 @@ public class BuilderInWorldMode : MonoBehaviour
         CenterGameObjectToEdit();
 
         BuilderInWorldUtils.CopyGameObjectStatus(editionGO, undoGO, false, false);
-
-        OnEntitySelected?.Invoke();
     }
 
     public virtual void CenterGameObjectToEdit()
@@ -119,8 +115,6 @@ public class BuilderInWorldMode : MonoBehaviour
         {
             actionController.CreateActionEntityCreated(entityDeselected.rootEntity);
         }
-
-        OnEntityDeselected?.Invoke(entityDeselected, isNewObjectPlaced);
 
         isNewObjectPlaced = false;
         entityDeselected.IsNew = false;
