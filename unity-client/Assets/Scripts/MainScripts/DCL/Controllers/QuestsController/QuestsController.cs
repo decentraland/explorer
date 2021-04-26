@@ -60,6 +60,7 @@ namespace DCL.QuestsController
                 pinnedQuests.Remove(questId);
             }
 
+            parsedQuests.ForEach(RestoreProgressFlags);
             //We ignore quests without sections/tasks
             quests.Set(parsedQuests.Where(x => x.sections != null && x.sections.Length > 0).Select(x => (x.id, x)));
         }
