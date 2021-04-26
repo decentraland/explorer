@@ -111,16 +111,12 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
 
     private void OnAssetSelect() { AudioScriptableObjects.inputFieldUnfocus.Play(true); }
 
-    private void OnAssetDeselect(DCLBuilderInWorldEntity entity, bool assetIsNew)
+    private void OnAssetDeselect(DCLBuilderInWorldEntity entity)
     {
-        if (assetIsNew || modeController.GetCurrentStateMode() == BIWModeController.EditModeState.FirstPerson)
-        {
-            eventAssetPlace.Play();
+        eventAssetPlace.Play();
 
-            if (entitiesOutOfBounds.Contains(entity.rootEntity.entityId))
-            {
-                eventBuilderOutOfBoundsPlaced.Play();
-            }
+        if (entitiesOutOfBounds.Contains(entity.rootEntity.entityId)) {
+            eventBuilderOutOfBoundsPlaced.Play();
         }
     }
 

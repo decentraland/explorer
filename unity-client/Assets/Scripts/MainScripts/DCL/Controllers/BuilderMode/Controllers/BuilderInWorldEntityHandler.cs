@@ -53,7 +53,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuildModeHUDController hudController;
 
-    public event Action<DCLBuilderInWorldEntity, bool> OnEntityDeselected;
+    public event Action<DCLBuilderInWorldEntity> OnEntityDeselected;
     public event Action OnEntitySelected;
     public event Action<List<DCLBuilderInWorldEntity>> OnDeleteSelectedEntities;
 
@@ -229,7 +229,7 @@ public class BuilderInWorldEntityHandler : BIWController
             hudController != null)
             hudController.HideEntityInformation();
 
-        OnEntityDeselected?.Invoke(entity, false);
+        OnEntityDeselected?.Invoke(entity);
     }
 
     public void DeselectEntities()
