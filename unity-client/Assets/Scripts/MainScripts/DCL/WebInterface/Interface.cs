@@ -105,6 +105,12 @@ namespace DCL.Interface
             public string eventType;
             public T payload;
         }
+        [System.Serializable]
+        public class AllScenesEvent<T>
+        {
+            public string eventType;
+            public T payload;
+        }
 
         [System.Serializable]
         public class UUIDEvent<TPayload>
@@ -625,6 +631,14 @@ namespace DCL.Interface
         private static RequestWearablesPayload requestWearablesPayload = new RequestWearablesPayload();
         private static SearchENSOwnerPayload searchEnsOwnerPayload = new SearchENSOwnerPayload();
 
+        public static void SendAllScenesEvent<T>(string eventType, T payload)
+        {
+            AllScenesEvent<T> allScenesEvent = new AllScenesEvent<T>();
+            allScenesEvent.eventType = eventType;
+            allScenesEvent.payload = payload;
+
+            SendMessage("AllScenesEvent", allScenesEvent);
+        }
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
             SceneEvent<T> sceneEvent = new SceneEvent<T>();
@@ -647,7 +661,7 @@ namespace DCL.Interface
         public static void ReportCameraChanged(CameraMode.ModeId cameraMode)
         {
             cameraModePayload.cameraMode = cameraMode;
-            SendMessage("ReportCameraMode", cameraModePayload);
+            SendAllScenesEvent("cameraModeChanged", cameraModePayload);
         }
 
         public static void ReportControlEvent<T>(T controlEvent) where T : ControlEvent { SendMessage("ControlEvent", controlEvent); }

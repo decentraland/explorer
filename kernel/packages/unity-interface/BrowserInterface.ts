@@ -7,7 +7,7 @@ import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { CameraMode, IEventNames } from '../decentraland-ecs/src/decentraland/Types'
+import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
@@ -21,9 +21,14 @@ import {
   WorldPosition,
   LoadableParcelScene
 } from 'shared/types'
-import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import {
+  getSceneWorkerBySceneID,
+  setNewParcelScene,
+  stopParcelSceneWorker,
+  loadedSceneWorkers
+} from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { cameraModeObservable, positionObservable } from 'shared/world/positionThings'
+import { positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
@@ -116,10 +121,6 @@ export class BrowserInterface {
     positionObservable.notifyObservers(positionEvent)
   }
 
-  public ReportCameraMode(data: { cameraMode: CameraMode }) {
-    cameraModeObservable.notifyObservers(data.cameraMode)
-  }
-
   public ReportMousePosition(data: { id: string; mousePosition: ReadOnlyVector3 }) {
     positionEvent.mousePosition.set(data.mousePosition.x, data.mousePosition.y, data.mousePosition.z)
     positionObservable.notifyObservers(positionEvent)
@@ -137,12 +138,24 @@ export class BrowserInterface {
     }
   }
 
+  public AllScenesEvent(data: { eventType: string; payload: any }) {
+    for (const [_key, scene] of loadedSceneWorkers) {
+      scene.emit(data.eventType as IEventNames, data.payload)
+    }
+  }
+
   public OpenWebURL(data: { url: string }) {
     const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean, hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
+  public PerformanceReport(data: {
+    samples: string
+    fpsIsCapped: boolean
+    hiccupsInThousandFrames: number
+    hiccupsTime: number
+    totalTime: number
+  }) {
     const perfReport = getPerformanceInfo(data)
     trackEvent('performance report', perfReport)
   }

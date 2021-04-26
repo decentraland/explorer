@@ -48,7 +48,7 @@ function createSubscriber(eventName: keyof IEvents) {
  * This event is triggered when you change your camera between 1st and 3rd person
  * @public
  */
-export const onCameraModeChanged = new Observable<IEvents['onCameraModeChanged']>(createSubscriber('onCameraModeChanged'))
+export const onCameraModeChanged = new Observable<IEvents['cameraModeChanged']>(createSubscriber('cameraModeChanged'))
 
 /**
  * These events are triggered after your character enters the scene.
@@ -82,8 +82,8 @@ export function _initEventObservables(dcl: DecentralandInterface) {
           onLeaveScene.notifyObservers(event.data as IEvents['onLeaveScene'])
           return
         }
-        case 'onCameraModeChanged': {
-          onCameraModeChanged.notifyObservers(event.data as IEvents['onCameraModeChanged'])
+        case 'cameraModeChanged': {
+          onCameraModeChanged.notifyObservers(event.data as IEvents['cameraModeChanged'])
           return
         }
       }
