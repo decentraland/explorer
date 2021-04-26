@@ -7,7 +7,7 @@ import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
+import { CameraMode, IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
 import { aborted, ReportFatalError } from 'shared/loading/ReportFatalError'
@@ -23,7 +23,7 @@ import {
 } from 'shared/types'
 import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { positionObservable } from 'shared/world/positionThings'
+import { cameraModeObservable, positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
@@ -115,6 +115,10 @@ export class BrowserInterface {
     }
 
     positionObservable.notifyObservers(positionEvent)
+  }
+
+  public ReportCameraMode(data: { cameraMode: CameraMode }) {
+    cameraModeObservable.notifyObservers(data.cameraMode)
   }
 
   public ReportMousePosition(data: { id: string; mousePosition: ReadOnlyVector3 }) {

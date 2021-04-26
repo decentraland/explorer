@@ -126,6 +126,12 @@ namespace DCL.Interface
         public class OnClickEvent : UUIDEvent<OnClickEventPayload> { };
 
         [System.Serializable]
+        public class CameraModePayload
+        {
+            public CameraMode.ModeId cameraMode;
+        };
+
+        [System.Serializable]
         public class OnPointerDownEvent : UUIDEvent<OnPointerEventPayload> { };
 
         [System.Serializable]
@@ -160,7 +166,6 @@ namespace DCL.Interface
         {
             public ACTION_BUTTON buttonId = ACTION_BUTTON.POINTER;
         }
-
         [System.Serializable]
         public class SendChatMessageEvent
         {
@@ -585,6 +590,7 @@ namespace DCL.Interface
         }
 
         private static ReportPositionPayload positionPayload = new ReportPositionPayload();
+        private static CameraModePayload cameraModePayload = new CameraModePayload();
         private static OnMetricsUpdate onMetricsUpdate = new OnMetricsUpdate();
         private static OnClickEvent onClickEvent = new OnClickEvent();
         private static OnPointerDownEvent onPointerDownEvent = new OnPointerDownEvent();
@@ -636,6 +642,12 @@ namespace DCL.Interface
             positionPayload.playerHeight = playerHeight;
 
             SendMessage("ReportPosition", positionPayload);
+        }
+        
+        public static void ReportCameraChanged(CameraMode.ModeId cameraMode)
+        {
+            cameraModePayload.cameraMode = cameraMode;
+            SendMessage("ReportCameraMode", cameraModePayload);
         }
 
         public static void ReportControlEvent<T>(T controlEvent) where T : ControlEvent { SendMessage("ControlEvent", controlEvent); }
