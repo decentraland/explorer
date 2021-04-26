@@ -97,7 +97,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (initialLoadingController != null)
         {
-            initialLoadingController.OnCancelLoading -= ExitEditMode;
+            initialLoadingController.OnCancelLoading -= CancelLoading;
             initialLoadingController.Dispose();
         }
 
@@ -193,7 +193,7 @@ public class BuilderInWorldController : MonoBehaviour
     {
         initialLoadingController = new BuilderInWorldLoadingController();
         initialLoadingController.Initialize(initialLoadingView);
-        initialLoadingController.OnCancelLoading += ExitEditMode;
+        initialLoadingController.OnCancelLoading += CancelLoading;
     }
 
     public void InitGameObjects()
@@ -431,6 +431,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void EnterEditMode()
     {
+        if (!initialLoadingController.isActive)
+            return;
+
         BuilderInWorldNFTController.i.ClearNFTs();
 
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
@@ -485,6 +488,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void OnAllParcelsFloorLoaded()
     {
+        if (!initialLoadingController.isActive)
+            return;
+
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
         initialLoadingController.Hide(onHideAction: () =>
         {
@@ -492,6 +498,12 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.SetVisibility(true);
             CommonScriptableObjects.allUIHidden.Set(previousAllUIHidden);
         });
+    }
+
+    public void CancelLoading()
+    {
+        editorMode.Deactivate();
+        ExitEditMode();
     }
 
     public void ExitEditMode()
