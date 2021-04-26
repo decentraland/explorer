@@ -22,6 +22,8 @@ internal interface ISceneData
     string[] contributors { get; }
     string[] admins { get;  }
     string[] bannedUsers { get;  }
+    bool isEditable { get; }
+    Vector2Int[] parcels { get; }
 }
 
 [Serializable]
@@ -46,6 +48,8 @@ internal class SceneData : ISceneData
     public string[] contributors;
     public string[] admins;
     public string[] bannedUsers;
+    public bool isEditable;
+    public Vector2Int[] parcels;
 
     Vector2Int ISceneData.coords => coords;
     Vector2Int ISceneData.size => size;
@@ -66,6 +70,8 @@ internal class SceneData : ISceneData
     string[] ISceneData.contributors => contributors;
     string[] ISceneData.admins => admins;
     string[] ISceneData.bannedUsers => bannedUsers;
+    bool ISceneData.isEditable => isEditable;
+    Vector2Int[] ISceneData.parcels => parcels;
 
     public SceneData() { }
 
@@ -83,6 +89,8 @@ internal class SceneData : ISceneData
         authorName = deployedScene.author;
         requiredPermissions = deployedScene.requiredPermissions;
         bannedUsers = deployedScene.bannedUsers;
+        isEditable = deployedScene.source != DeployedScene.Source.SDK;
+        parcels = deployedScene.parcels;
 
         isMatureContent = false;
         if (!string.IsNullOrEmpty(deployedScene.contentRating))

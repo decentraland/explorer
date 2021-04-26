@@ -9,6 +9,7 @@ internal interface ISceneCardView : IDisposable
 {
     event Action<ISceneData> OnJumpInPressed;
     event Action<ISceneData> OnEditorPressed;
+    event Action<ISceneData> OnSettingsPressed;
     event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
     ISceneData sceneData { get; }
     ISearchInfo searchInfo { get; }
@@ -23,6 +24,7 @@ internal interface ISceneCardView : IDisposable
     void SetThumbnail(string thumbnailUrl);
     void SetThumbnail(Texture2D thumbnailTexture);
     void SetDeployed(bool deployed);
+    void SetEditable(bool isEditable);
     void SetUserRole(bool isOwner, bool isOperator, bool isContributor);
     void SetActive(bool active);
     void SetSiblingIndex(int index);
@@ -30,8 +32,13 @@ internal interface ISceneCardView : IDisposable
 
 internal class SceneCardView : MonoBehaviour, ISceneCardView
 {
+    const int THMBL_MARKETPLACE_WIDTH = 196;
+    const int THMBL_MARKETPLACE_HEIGHT = 143;
+    const int THMBL_MARKETPLACE_SIZEFACTOR = 50;
+    
     public event Action<ISceneData> OnJumpInPressed;
     public event Action<ISceneData> OnEditorPressed;
+    public event Action<ISceneData> OnSettingsPressed;
     public event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
 
     [SerializeField] private Texture2D defaultThumbnail;
@@ -52,11 +59,16 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     [SerializeField] internal Button jumpInButton;
     [SerializeField] internal Button editorButton;
     [SerializeField] internal Button contextMenuButton;
+    [SerializeField] internal Button settingsButton;
     [Space]
 
     [SerializeField] internal GameObject roleOwnerGO;
     [SerializeField] internal GameObject roleOperatorGO;
     [SerializeField] internal GameObject roleContributorGO;
+    [Space]
+
+    [SerializeField] internal GameObject editorLockedGO;
+    [SerializeField] internal GameObject editorLockedTooltipGO;
 
     ISearchInfo ISceneCardView.searchInfo { get; } = new SearchInfo();
     ISceneData ISceneCardView.sceneData => sceneData;
@@ -72,19 +84,31 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
         jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneData));
         editorButton.onClick.AddListener(()=> OnEditorPressed?.Invoke(sceneData));
         contextMenuButton.onClick.AddListener(()=> OnContextMenuPressed?.Invoke(sceneData, this));
+        settingsButton.onClick.AddListener(()=> OnSettingsPressed?.Invoke(sceneData));
+        
+        editorLockedGO.SetActive(false);
+        editorLockedTooltipGO.SetActive(false);
     }
 
     void ISceneCardView.Setup(ISceneData sceneData)
     {
         this.sceneData = sceneData;
-        
+
+        string sceneThumbnailUrl = sceneData.thumbnailUrl;
+        if (string.IsNullOrEmpty(sceneThumbnailUrl) && sceneData.parcels != null)
+        {
+            sceneThumbnailUrl = MapUtils.GetMarketPlaceThumbnailUrl(sceneData.parcels,
+                THMBL_MARKETPLACE_WIDTH, THMBL_MARKETPLACE_HEIGHT, THMBL_MARKETPLACE_SIZEFACTOR);
+        }
+
         ISceneCardView thisView = this;
-        thisView.SetThumbnail(sceneData.thumbnailUrl);
+        thisView.SetThumbnail(sceneThumbnailUrl);
         thisView.SetName(sceneData.name);
         thisView.SetCoords(sceneData.coords);
         thisView.SetSize(sceneData.size);
         thisView.SetDeployed(sceneData.isDeployed);
         thisView.SetUserRole(sceneData.isOwner, sceneData.isOperator, sceneData.isContributor);
+        thisView.SetEditable(sceneData.isEditable);
         
         thisView.searchInfo.SetId(sceneData.id);
     }
@@ -188,6 +212,13 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     void ISceneCardView.ConfigureDefaultParent(Transform parent)
     {
         defaultParent = parent;
+    }
+    
+    void ISceneCardView.SetEditable(bool isEditable)
+    {
+        editorButton.gameObject.SetActive(isEditable);
+        editorLockedGO.SetActive(!isEditable);
+        settingsButton.gameObject.SetActive(isEditable);
     }
 
     public void Dispose()
