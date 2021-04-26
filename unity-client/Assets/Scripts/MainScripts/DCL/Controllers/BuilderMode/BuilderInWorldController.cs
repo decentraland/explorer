@@ -438,7 +438,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         foreach (var groundVisual in groundVisualsGO)
         {
-            groundVisual.SetActive(false);
+            //TODO: Reactivate if necessary
+            //groundVisual.SetActive(false);
         }
         previousSkyBoxMaterial = RenderSettings.skybox;
         RenderSettings.skybox = skyBoxMaterial;

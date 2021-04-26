@@ -228,6 +228,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
+    #region Mouse
+
     private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
         isMouseDragging = true;
@@ -277,16 +279,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     void OnMouseDown(int buttonID, Vector3 position)
     {
         if (buttonID == 1)
-        {
-            if (isPlacingNewObject)
-            {
-                builderInWorldEntityHandler.DestroyLastCreatedEntities();
-            }
-            else
-            {
-                builderInWorldEntityHandler.DeselectEntities();
-            }
-        }
+            builderInWorldEntityHandler.CancelSelection();
 
         if (buttonID != 0)
             return;
@@ -304,6 +297,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         freeCameraController.SetCameraCanMove(false);
         outlinerController.SetOutlineCheckActive(false);
     }
+
+    #endregion
 
     void StarDraggingSelectedEntities()
     {
@@ -418,9 +413,16 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         gizmoManager.ForceRelativeScaleRatio();
     }
 
-    public override void DeselectedEntities()
+    public override void OnDeleteEntity(DCLBuilderInWorldEntity entity)
     {
-        base.DeselectedEntities();
+        base.OnDeleteEntity(entity);
+        if (selectedEntities.Count == 0)
+            gizmoManager.HideGizmo();
+    }
+
+    public override void OnDeselectedEntities()
+    {
+        base.OnDeselectedEntities();
         gizmoManager.SetSelectedEntities(editionGO.transform, new List<EditableEntity>());
     }
 

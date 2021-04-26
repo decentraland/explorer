@@ -178,13 +178,14 @@ public class BuilderInWorldEntityHandler : BIWController
         DuplicateSelectedEntities();
     }
 
-    public void ExitFromEditMode()
+    public override void ExitEditMode()
     {
+        base.ExitEditMode();
         DeselectEntities();
 
         foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-            entity.Delete();
+            entity.Dispose();
         }
 
         convertedEntities.Clear();
@@ -237,7 +238,7 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(selectedEntities[0]);
         }
 
-        currentActiveMode?.DeselectedEntities();
+        currentActiveMode?.OnDeselectedEntities();
 
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
@@ -280,6 +281,15 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(entityCliked);
         else
             SelectEntity(entityCliked);
+    }
+
+    public void CancelSelection()
+    {
+        if (selectedEntities.Count == 0)
+            return;
+
+        DestroyLastCreatedEntities();
+        DeselectEntities();
     }
 
     public void ChangeLockStateSelectedEntities()
@@ -388,37 +398,37 @@ public class BuilderInWorldEntityHandler : BIWController
         buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATE;
 
         List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
+        List<DCLBuilderInWorldEntity> entitiesToDuplicate = new List<DCLBuilderInWorldEntity>(selectedEntities);
+        DeselectEntities();
 
-        int amount = selectedEntities.Count;
-        for (int i = 0; i < amount; i++)
+        foreach (DCLBuilderInWorldEntity entityToDuplicate in entitiesToDuplicate)
         {
-            if (selectedEntities[i].isNFT)
+            if (entityToDuplicate.isNFT)
                 continue;
 
-            var entityDuplicated = DuplicateEntity(selectedEntities[i]);
-            BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated, entityDuplicated.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated));
+            var entityDuplicated = DuplicateEntity(entityToDuplicate);
+            BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated.rootEntity, entityDuplicated.rootEntity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated.rootEntity));
             entityActionList.Add(builderInWorldEntityAction);
+            SelectEntity(entityDuplicated);
         }
 
         currentActiveMode?.SetDuplicationOffset(duplicateOffset);
-        Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
-
 
         buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATE);
         actionController.AddAction(buildAction);
     }
 
-    public IDCLEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
+    public DCLBuilderInWorldEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
     {
         IDCLEntity entity = SceneUtils.DuplicateEntity(sceneToEdit, entityToDuplicate.rootEntity);
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
-        var convertedEntity = SetupEntityToEdit(entity);
+        DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(entity);
         convertedEntity.IsNew = true;
 
         NotifyEntityIsCreated(entity);
         EntityListChanged();
-        return entity;
+        return convertedEntity;
     }
 
     public IDCLEntity CreateEntityFromJSON(string entityJson)
@@ -622,6 +632,7 @@ public class BuilderInWorldEntityHandler : BIWController
         entityToDelete.rootEntity.OnRemoved -= RemoveConvertedEntity;
         entityToDelete.Delete();
         string idToRemove = entityToDelete.rootEntity.entityId;
+        currentActiveMode?.OnDeleteEntity(entityToDelete);
         Destroy(entityToDelete);
         if (sceneToEdit.entities.ContainsKey(idToRemove))
             sceneToEdit.RemoveEntity(idToRemove, true);
