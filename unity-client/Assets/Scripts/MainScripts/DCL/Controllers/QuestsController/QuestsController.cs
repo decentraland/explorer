@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace DCL.QuestsController
 {
-    public delegate void QuestUpdated(string questId);
+    public delegate void QuestUpdated(string questId, bool hasProgress);
     public delegate void QuestCompleted(string questId);
     public delegate void RewardObtained(string questId, string rewardId);
 
@@ -92,9 +92,6 @@ namespace DCL.QuestsController
             quests[progressedQuest.id] = progressedQuest;
             progressedQuest.oldProgress = oldQuest.progress;
 
-            if (!HasProgressed(progressedQuest, oldQuest))
-                return;
-
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
                 QuestSection newQuestSection = progressedQuest.sections[index];
@@ -120,7 +117,7 @@ namespace DCL.QuestsController
                 }
             }
 
-            OnQuestUpdated?.Invoke(progressedQuest.id);
+            OnQuestUpdated?.Invoke(progressedQuest.id, HasProgressed(progressedQuest, oldQuest));
             if (!oldQuest.isCompleted && progressedQuest.isCompleted)
                 OnQuestCompleted?.Invoke(progressedQuest.id);
 

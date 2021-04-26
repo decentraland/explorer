@@ -9,7 +9,7 @@ namespace DCL.Huds.QuestsTracker
 {
     public interface IQuestsTrackerHUDView
     {
-        void UpdateQuest(string questId);
+        void UpdateQuest(string questId, bool hasProgressed);
         void RemoveEntry(string questId);
         void PinQuest(string questId);
         void UnpinQuest(string questId);
@@ -47,7 +47,11 @@ namespace DCL.Huds.QuestsTracker
 
         private void Awake() { StartCoroutine(RemoveEntriesRoutine()); }
 
-        public void UpdateQuest(string questId) { AddOrUpdateQuest(questId, pinnedQuests.Contains(questId)); }
+        public void UpdateQuest(string questId, bool hasProgressed)
+        {
+            if(hasProgressed || currentEntries.ContainsKey(questId))
+                AddOrUpdateQuest(questId, pinnedQuests.Contains(questId));
+        }
 
         internal void AddOrUpdateQuest(string questId, bool isPinned)
         {

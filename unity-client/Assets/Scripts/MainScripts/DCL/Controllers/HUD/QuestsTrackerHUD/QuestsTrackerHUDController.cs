@@ -58,7 +58,7 @@ namespace DCL.Huds.QuestsTracker
             }
         }
 
-        private void OnQuestUpdated(string questId)
+        private void OnQuestUpdated(string questId, bool hasProgress)
         {
             if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || (model.visibility == QuestsLiterals.Visibility.SECRET && model.status == QuestsLiterals.Status.NOT_STARTED))
             {
@@ -66,7 +66,7 @@ namespace DCL.Huds.QuestsTracker
                 return;
             }
 
-            view?.UpdateQuest(questId);
+            view?.UpdateQuest(questId, hasProgress);
         }
 
         private void OnPinnedQuest(string questId) { view?.PinQuest(questId); }

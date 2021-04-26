@@ -55,9 +55,9 @@ namespace Tests.QuestsTrackerHUD
         public void CallViewWhenQuestProgressed()
         {
             hudController.Initialize(questsController);
-            questsController.OnQuestUpdated += Raise.Event<QuestUpdated>(MOCK_QUEST_ID);
+            questsController.OnQuestUpdated += Raise.Event<QuestUpdated>(MOCK_QUEST_ID, true);
 
-            hudView.Received().UpdateQuest(MOCK_QUEST_ID);
+            hudView.Received().UpdateQuest(MOCK_QUEST_ID, true);
         }
 
         [Test]
@@ -172,7 +172,7 @@ namespace Tests.QuestsTrackerHUD
         [Test]
         public void TrackQuestProgress()
         {
-            hudView.UpdateQuest(MOCK_QUEST_ID);
+            hudView.UpdateQuest(MOCK_QUEST_ID, true);
 
             Assert.AreEqual(1, hudView.currentEntries.Count);
             Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
