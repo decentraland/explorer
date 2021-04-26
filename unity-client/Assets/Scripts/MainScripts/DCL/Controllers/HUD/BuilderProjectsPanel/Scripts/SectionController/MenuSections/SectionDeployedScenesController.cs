@@ -1,5 +1,4 @@
 ﻿using System;
-using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -80,7 +79,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
         {
             while (iterator.MoveNext())
             {
-                iterator.Current.Value.SetParent(view.scenesCardContainer);
+                iterator.Current.Value.SetParent(view.GetCardsContainer());
                 iterator.Current.Value.SetActive(false);
             }
         }
@@ -93,6 +92,25 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
             cardView.SetActive(true);
             cardView.SetSiblingIndex(i);
         }
-        view.ResetScrollRect();
+
+        if (scenesViews.Count == 0)
+        {
+            if (isLoading)
+            {
+                view.SetLoading();
+            }
+            else
+            {
+                view.SetEmpty();
+            }            
+        }
+        else if (searchInfoScenes.Count == 0)
+        {
+            view.SetNoSearchResult();
+        }
+        else
+        {
+            view.SetFilled();
+        }
     }
 }

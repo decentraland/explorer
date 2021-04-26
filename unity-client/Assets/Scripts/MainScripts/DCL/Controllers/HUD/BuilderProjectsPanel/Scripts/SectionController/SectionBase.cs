@@ -12,11 +12,13 @@ internal abstract class SectionBase : IDisposable
         showFilterOwner = true,
         showResultLabel = true
     };
+    public bool isLoading { get; private set; } = false;
 
     public abstract void SetViewContainer(Transform viewContainer);
     public abstract void Dispose();
     protected abstract void OnShow();
     protected abstract void OnHide();
+    protected virtual void OnFetchingStateChange(bool isLoading) { }
 
     public void SetVisible(bool visible)
     {
@@ -26,5 +28,11 @@ internal abstract class SectionBase : IDisposable
         isVisible = visible;
         if (visible) OnShow();
         else OnHide();
+    }
+
+    public void SetFetchingDataState(bool isLoading)
+    {
+        this.isLoading = isLoading;
+        OnFetchingStateChange(isLoading);
     }
 }

@@ -67,5 +67,45 @@ namespace Tests
             }
             controller.Dispose();
         }
+        
+        [Test]
+        public void ShowEmptyCorrectly()
+        {
+            view.SetEmpty();
+            Assert.IsFalse(view.contentContainer.activeSelf);
+            Assert.IsFalse(view.loadingAnimationContainer.activeSelf);
+            Assert.IsFalse(view.noSearchResultContainer.activeSelf);
+            Assert.IsTrue(view.emptyContainer.activeSelf);
+        }
+        
+        [Test]
+        public void ShowFilledCorrectly()
+        {
+            view.SetFilled();
+            Assert.IsTrue(view.contentContainer.activeSelf);
+            Assert.IsFalse(view.loadingAnimationContainer.activeSelf);
+            Assert.IsFalse(view.noSearchResultContainer.activeSelf);
+            Assert.IsFalse(view.emptyContainer.activeSelf);
+        }
+        
+        [Test]
+        public void ShowNoResultCorrectly()
+        {
+            view.SetNoSearchResult();
+            Assert.IsFalse(view.contentContainer.activeSelf);
+            Assert.IsFalse(view.loadingAnimationContainer.activeSelf);
+            Assert.IsTrue(view.noSearchResultContainer.activeSelf);
+            Assert.IsFalse(view.emptyContainer.activeSelf);
+        }    
+        
+        [Test]
+        public void ShowLoadingCorrectly()
+        {
+            view.SetLoading();
+            Assert.IsFalse(view.contentContainer.activeSelf);
+            Assert.IsTrue(view.loadingAnimationContainer.activeSelf);
+            Assert.IsFalse(view.noSearchResultContainer.activeSelf);
+            Assert.IsFalse(view.emptyContainer.activeSelf);
+        } 
     }
 }

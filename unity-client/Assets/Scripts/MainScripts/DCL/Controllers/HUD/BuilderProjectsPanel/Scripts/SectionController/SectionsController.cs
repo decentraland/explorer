@@ -25,6 +25,8 @@ internal interface ISectionsController : IDisposable
     event Action<string, SceneAdminsUpdatePayload> OnRequestUpdateSceneAdmins;
     event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
     void OpenSection(SectionId id);
+    void SetFetchingDataStart();
+    void SetFetchingDataEnd();
 }
 
 /// <summary>
@@ -46,6 +48,7 @@ internal class SectionsController : ISectionsController
     private Transform sectionsParent;
     private ISectionFactory sectionFactory;
     private SectionBase currentOpenSection;
+    private bool isLoading = false;
 
     /// <summary>
     /// Ctor
@@ -82,6 +85,7 @@ internal class SectionsController : ISectionsController
         if (section != null)
         {
             section.SetViewContainer(sectionsParent);
+            section.SetFetchingDataState(isLoading);
             SubscribeEvents(section);
         }
 
@@ -102,6 +106,28 @@ internal class SectionsController : ISectionsController
         if (success)
         {
             OnOpenSectionId?.Invoke(id);
+        }
+    }
+
+    public void SetFetchingDataStart()
+    {
+        SetIsLoading(true);
+    }
+    
+    public void SetFetchingDataEnd()
+    {
+        SetIsLoading(false);
+    }
+
+    private void SetIsLoading(bool isLoading)
+    {
+        this.isLoading = isLoading;
+        using (var iterator = loadedSections.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                iterator.Current.Value.SetFetchingDataState(isLoading);
+            }
         }
     }
 

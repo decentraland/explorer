@@ -115,7 +115,7 @@ public class BuilderProjectsPanelController : IHUD
         if (isVisible)
         {
             FetchLandsAndScenes();
-            sectionsController.OpenSection(SectionId.SCENES_MAIN);
+            sectionsController.OpenSection(SectionId.SCENES_DEPLOYED);
         }
     }
 
@@ -139,6 +139,8 @@ public class BuilderProjectsPanelController : IHUD
         address = !string.IsNullOrEmpty(address) ? address : TESTING_ETH_ADDRESS;
 #endif
         
+        sectionsController.SetFetchingDataStart();
+        
         fetchLandPromise = DeployedScenesFetcher.FetchLandsFromOwner(catalyst, theGraph, address, KernelConfig.i.Get().tld);
         fetchLandPromise
             .Then(lands =>
@@ -147,10 +149,15 @@ public class BuilderProjectsPanelController : IHUD
                                   .Select(land => land.scenes.Select(scene => (ISceneData)new SceneData(scene)))
                                   .Aggregate((i, j) => i.Concat(j))
                                   .ToArray();
-    
+        
                 landsController.SetLands(lands);
                 scenesViewController.SetScenes(scenes);
+                sectionsController.SetFetchingDataEnd();
             })
-            .Catch(Debug.LogError);
+            .Catch(error =>
+            {
+                sectionsController.SetFetchingDataEnd();
+                Debug.LogError(error);
+            });
     }
 }
