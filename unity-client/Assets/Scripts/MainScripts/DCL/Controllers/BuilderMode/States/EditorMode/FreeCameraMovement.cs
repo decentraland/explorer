@@ -226,7 +226,7 @@ public class FreeCameraMovement : CameraStateBase
 
     private void MouseDragRaw(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if (buttonId == 0)
+        if (buttonId == 1 && !isPanCameraActive)
             CameraLook(axisX, axisY);
     }
 

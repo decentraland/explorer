@@ -125,44 +125,38 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
         else if (isSquareMultiSelectionInputActive && isMouseDragging)
         {
-            if (!squareMultiSelectionButtonPressed)
-            {
-                EndBoundMultiSelection();
-            }
-            else
-            {
-                List<DCLBuilderInWorldEntity> allEntities = null;
-                if (!isTypeOfBoundSelectionSelected || !isVoxelBoundMultiSelection)
-                    allEntities = builderInWorldEntityHandler.GetAllEntitiesFromCurrentScene();
-                else if (isVoxelBoundMultiSelection)
-                    allEntities = builderInWorldEntityHandler.GetAllVoxelsEntities();
+            List<DCLBuilderInWorldEntity> allEntities = null;
+            if (!isTypeOfBoundSelectionSelected || !isVoxelBoundMultiSelection)
+                allEntities = builderInWorldEntityHandler.GetAllEntitiesFromCurrentScene();
+            else if (isVoxelBoundMultiSelection)
+                allEntities = builderInWorldEntityHandler.GetAllVoxelsEntities();
 
-                foreach (DCLBuilderInWorldEntity entity in allEntities)
+            foreach (DCLBuilderInWorldEntity entity in allEntities)
+            {
+                if (entity.isVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected)
+                    continue;
+                if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
                 {
-                    if (entity.isVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected)
-                        continue;
-                    if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
+                    if (BuilderInWorldUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
                     {
-                        if (BuilderInWorldUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
+                        if (!isTypeOfBoundSelectionSelected && !entity.IsLocked)
                         {
-                            if (!isTypeOfBoundSelectionSelected && !entity.IsLocked)
-                            {
-                                if (entity.isVoxel)
-                                    isVoxelBoundMultiSelection = true;
-                                else
-                                    isVoxelBoundMultiSelection = false;
-                                isTypeOfBoundSelectionSelected = true;
-                            }
+                            if (entity.isVoxel)
+                                isVoxelBoundMultiSelection = true;
+                            else
+                                isVoxelBoundMultiSelection = false;
+                            isTypeOfBoundSelectionSelected = true;
+                        }
 
-                            outlinerController.OutlineEntity(entity);
-                        }
-                        else
-                        {
-                            outlinerController.CancelEntityOutline(entity);
-                        }
+                        outlinerController.OutlineEntity(entity);
+                    }
+                    else
+                    {
+                        outlinerController.CancelEntityOutline(entity);
                     }
                 }
             }
+
         }
     }
 
@@ -286,7 +280,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         dragStartedPoint = GetFloorPointAtMouse(position);
 
-        if (!squareMultiSelectionButtonPressed || isPlacingNewObject)
+        if (isPlacingNewObject)
             return;
 
         isSquareMultiSelectionInputActive = true;
