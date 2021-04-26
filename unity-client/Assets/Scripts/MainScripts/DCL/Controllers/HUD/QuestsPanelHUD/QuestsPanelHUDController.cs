@@ -22,7 +22,7 @@ namespace DCL.Huds.QuestsPanel
             toggleQuestsPanel = Resources.Load<InputAction_Trigger>("ToggleQuestsPanelHud");
             toggleQuestsPanel.OnTriggered += OnToggleActionTriggered;
 
-            questsController.OnQuestProgressed += OnQuestProgressed;
+            questsController.OnQuestUpdated += OnQuestUpdated;
             quests.OnAdded += OnQuestAdded;
             quests.OnRemoved += OnQuestRemoved;
             quests.OnSet += OnQuestSet;
@@ -36,7 +36,7 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnToggleActionTriggered(DCLAction_Trigger action) { SetVisibility(!DataStore.i.HUDs.questsPanelVisible.Get()); }
 
-        private void OnQuestProgressed(string questId)
+        private void OnQuestUpdated(string questId)
         {
             if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || (model.visibility == QuestsLiterals.Visibility.SECRET && model.status == QuestsLiterals.Status.NOT_STARTED))
             {
@@ -84,7 +84,7 @@ namespace DCL.Huds.QuestsPanel
             view.Dispose();
             toggleQuestsPanel.OnTriggered -= OnToggleActionTriggered;
             if (questsController != null)
-                questsController.OnQuestProgressed -= OnQuestProgressed;
+                questsController.OnQuestUpdated -= OnQuestUpdated;
             quests.OnAdded -= OnQuestAdded;
             quests.OnRemoved -= OnQuestRemoved;
             quests.OnSet -= OnQuestSet;

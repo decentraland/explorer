@@ -7,13 +7,13 @@ using UnityEngine;
 
 namespace DCL.QuestsController
 {
-    public delegate void QuestProgressed(string questId);
+    public delegate void QuestUpdated(string questId);
     public delegate void QuestCompleted(string questId);
     public delegate void RewardObtained(string questId, string rewardId);
 
     public interface IQuestsController : IDisposable
     {
-        event QuestProgressed OnQuestProgressed;
+        event QuestUpdated OnQuestUpdated;
         event QuestCompleted OnQuestCompleted;
         event RewardObtained OnRewardObtained;
 
@@ -28,7 +28,7 @@ namespace DCL.QuestsController
 
         public static IQuestsController i { get; internal set; }
 
-        public event QuestProgressed OnQuestProgressed;
+        public event QuestUpdated OnQuestUpdated;
         public event QuestCompleted OnQuestCompleted;
         public event RewardObtained OnRewardObtained;
 
@@ -120,7 +120,7 @@ namespace DCL.QuestsController
                 }
             }
 
-            OnQuestProgressed?.Invoke(progressedQuest.id);
+            OnQuestUpdated?.Invoke(progressedQuest.id);
             if (!oldQuest.isCompleted && progressedQuest.isCompleted)
                 OnQuestCompleted?.Invoke(progressedQuest.id);
 

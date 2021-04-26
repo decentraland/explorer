@@ -55,7 +55,7 @@ namespace Tests.QuestsTrackerHUD
         public void CallViewWhenQuestProgressed()
         {
             hudController.Initialize(questsController);
-            questsController.OnQuestProgressed += Raise.Event<QuestProgressed>(MOCK_QUEST_ID);
+            questsController.OnQuestUpdated += Raise.Event<QuestUpdated>(MOCK_QUEST_ID);
 
             hudView.Received().UpdateQuest(MOCK_QUEST_ID);
         }

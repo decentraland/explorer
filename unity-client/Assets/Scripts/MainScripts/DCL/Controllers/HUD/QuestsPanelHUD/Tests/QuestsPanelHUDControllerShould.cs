@@ -60,7 +60,7 @@ namespace Tests.QuestsPanelHUD
         public void CallViewWhenQuestProgressed()
         {
             hudController.Initialize(questsController);
-            questsController.OnQuestProgressed += Raise.Event<QuestProgressed>(MOCK_QUEST_ID);
+            questsController.OnQuestUpdated += Raise.Event<QuestUpdated>(MOCK_QUEST_ID);
 
             hudView.Received().RequestAddOrUpdateQuest(MOCK_QUEST_ID);
         }
@@ -70,7 +70,7 @@ namespace Tests.QuestsPanelHUD
         {
             DataStore.i.Quests.quests[MOCK_QUEST_ID].status = QuestsLiterals.Status.BLOCKED;
             hudController.Initialize(questsController);
-            questsController.OnQuestProgressed += Raise.Event<QuestProgressed>(MOCK_QUEST_ID);
+            questsController.OnQuestUpdated += Raise.Event<QuestUpdated>(MOCK_QUEST_ID);
 
             hudView.Received().RemoveQuest(MOCK_QUEST_ID);
         }
