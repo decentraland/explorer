@@ -284,7 +284,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             }
             else
             {
-                DeselectedEntities();
+                builderInWorldEntityHandler.DeselectEntities();
             }
         }
 

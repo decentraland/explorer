@@ -413,7 +413,8 @@ public class BuilderInWorldEntityHandler : BIWController
         IDCLEntity entity = SceneUtils.DuplicateEntity(sceneToEdit, entityToDuplicate.rootEntity);
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
-        SetupEntityToEdit(entity);
+        var convertedEntity = SetupEntityToEdit(entity);
+        convertedEntity.IsNew = true;
 
         NotifyEntityIsCreated(entity);
         EntityListChanged();
@@ -509,6 +510,7 @@ public class BuilderInWorldEntityHandler : BIWController
         {
             DeleteEntity(entity, false);
         }
+        hudController.HideEntityInformation();
     }
 
     public void EntityListChanged()

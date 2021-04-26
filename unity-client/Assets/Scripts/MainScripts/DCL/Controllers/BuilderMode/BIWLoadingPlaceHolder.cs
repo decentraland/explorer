@@ -36,11 +36,17 @@ public class BIWLoadingPlaceHolder : MonoBehaviour
         yield return null;
         if (placeHolderAnimator != null)
         {
-            while (!placeHolderAnimator.GetCurrentAnimatorStateInfo(0).IsName(EXIT_ANIMATION_NAME))
+            bool isExitingAnimationActive = false;
+            while (!isExitingAnimationActive)
             {
+                if (placeHolderAnimator != null)
+                    isExitingAnimationActive = placeHolderAnimator.GetCurrentAnimatorStateInfo(0).IsName(EXIT_ANIMATION_NAME);
+                else
+                    isExitingAnimationActive  = true;
                 yield return null;
             }
-            Destroy(gameObject);
+            if (gameObject != null)
+                Destroy(gameObject);
         }
     }
 }
