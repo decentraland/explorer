@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerAvatarController : MonoBehaviour
 {
-    private const string LOADING_WEARABLES_ERROR_MESSAGE = "There was a problem loading some wearables";
+    private const string LOADING_WEARABLES_ERROR_MESSAGE = "There was a problem loading your wearables";
 
     public AvatarRenderer avatarRenderer;
     public Collider avatarCollider;

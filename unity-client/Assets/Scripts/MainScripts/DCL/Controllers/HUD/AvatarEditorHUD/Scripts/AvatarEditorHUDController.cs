@@ -12,7 +12,7 @@ using Categories = WearableLiterals.Categories;
 public class AvatarEditorHUDController : IHUD
 {
     private const int LOADING_OWNED_WEARABLES_RETRIES = 3;
-    private const string LOADING_OWNED_WEARABLES_ERROR_MESSAGE = "There was a problem loading your collectibles";
+    private const string LOADING_OWNED_WEARABLES_ERROR_MESSAGE = "There was a problem loading your wearables";
     private const string URL_MARKET_PLACE = "https://market.decentraland.org/browse?section=wearables";
     private const string URL_GET_A_WALLET = "https://docs.decentraland.org/get-a-wallet";
     private const string URL_SELL_COLLECTIBLE = "https://market.decentraland.org/account";
