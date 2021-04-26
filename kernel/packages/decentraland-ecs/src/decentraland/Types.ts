@@ -135,6 +135,13 @@ export type RaycastResponsePayload<T> = {
   payload: T
 }
 
+/** @public */
+export enum CameraMode {
+  FirstPerson,
+  ThirdPerson,
+  BuildingToolGodMode
+}
+
 /**
  * @public
  */
@@ -163,6 +170,13 @@ export interface IEvents {
     rotation: ReadOnlyVector3
     /** Rotation quaternion, useful in some scenarios. */
     quaternion: ReadOnlyQuaternion
+  }
+
+  /**
+   * `onCameraModeChanged` is triggered when the user changes the camera mode
+   */
+  onCameraModeChanged: {
+    cameraMode: CameraMode
   }
 
   /**
