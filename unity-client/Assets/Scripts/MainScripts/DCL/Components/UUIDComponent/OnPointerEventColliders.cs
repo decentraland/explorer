@@ -3,7 +3,6 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace DCL.Components
