@@ -81,6 +81,7 @@ public class BuilderInWorldController : MonoBehaviour
         if (sceneToEdit != null)
             sceneToEdit.OnLoadingStateUpdated -= UpdateSceneLoadingProgress;
 
+        Environment.i.world.sceneController.OnNewSceneAdded -= NewSceneAdded;
         Environment.i.world.sceneController.OnReadyScene -= NewSceneReady;
 
         KernelConfig.i.OnChange -= OnKernelConfigChanged;
@@ -333,6 +334,17 @@ public class BuilderInWorldController : MonoBehaviour
         return voxelEntityHit;
     }
 
+    private void NewSceneAdded(ParcelScene newScene)
+    {
+        if (newScene.sceneData.id != sceneToEditId)
+            return;
+
+        Environment.i.world.sceneController.OnNewSceneAdded -= NewSceneAdded;
+
+        FindSceneToEdit();
+        sceneToEdit.OnLoadingStateUpdated += UpdateSceneLoadingProgress;
+    }
+
     private void NewSceneReady(string id)
     {
         if (sceneToEditId != id)
@@ -392,6 +404,7 @@ public class BuilderInWorldController : MonoBehaviour
         NotificationsController.i.allowNotifications = true;
         inputController.inputTypeMode = InputTypeMode.BUILD_MODE_LOADING;
         initialLoadingController.Show();
+        initialLoadingController.SetPercentage(0f);
 
         //Note (Adrian) this should handle different when we have the full flow of the feature
         if (activateCamera)
@@ -410,7 +423,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         // In this point we're sure that the catalog loading (the first half of our progress bar) has already finished
         initialLoadingController.SetPercentage(50f);
-        sceneToEdit.OnLoadingStateUpdated += UpdateSceneLoadingProgress;
+        Environment.i.world.sceneController.OnNewSceneAdded += NewSceneAdded;
         Environment.i.world.sceneController.OnReadyScene += NewSceneReady;
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
