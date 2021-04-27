@@ -479,6 +479,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         SetupEntityToEdit(newEntity, true);
         EntityListChanged();
+
         return newEntity;
     }
 
@@ -535,6 +536,11 @@ public class BuilderInWorldEntityHandler : BIWController
         if (HUDController.i.builderInWorldMainHud == null)
             return;
         hudController.SetEntityList(GetEntitiesInCurrentScene());
+    }
+
+    public int GetCurrentSceneEntityCount()
+    {
+        return GetEntitiesInCurrentScene().Count;
     }
 
     List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
