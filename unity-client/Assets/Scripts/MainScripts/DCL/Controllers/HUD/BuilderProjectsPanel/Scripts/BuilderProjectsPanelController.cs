@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DCL;
 using DCL.Helpers;
+using DCL.Interface;
 using UnityEngine;
 using Environment = DCL.Environment;
 using Object = UnityEngine.Object;
@@ -95,7 +96,10 @@ public class BuilderProjectsPanelController : IHUD
 
         SetView();
 
-        //sectionsController.OpenSection(SectionId.SCENES_MAIN);
+        sectionsController.OnRequestOpenUrl += OpenUrl;
+        sectionsController.OnRequestGoToCoords += GoToCoords;
+        scenesViewController.OnJumpInPressed += GoToCoords;
+        scenesViewController.OnRequestOpenUrl += OpenUrl;
 
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += OnVisibilityChanged;
     }
@@ -115,7 +119,7 @@ public class BuilderProjectsPanelController : IHUD
         if (isVisible)
         {
             FetchLandsAndScenes();
-            sectionsController.OpenSection(SectionId.SCENES_DEPLOYED);
+            sectionsController.OpenSection(SectionId.LAND);
         }
     }
 
@@ -159,5 +163,16 @@ public class BuilderProjectsPanelController : IHUD
                 sectionsController.SetFetchingDataEnd();
                 Debug.LogError(error);
             });
+    }
+
+    private void GoToCoords(Vector2Int coords)
+    {
+        WebInterface.GoTo(coords.x, coords.y);
+        SetVisibility(false);
+    }
+
+    private void OpenUrl(string url)
+    {
+        WebInterface.OpenURL(url);
     }
 }

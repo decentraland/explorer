@@ -110,7 +110,7 @@ public class LandWithAccess
     {
         rawData = land;
         parcels = land.parcels.Select(parcel => new Vector2Int(parcel.x, parcel.y)).ToArray();
-        @base = new Vector2Int(land.x, land.y);
+        @base = land.type == LandType.PARCEL ? new Vector2Int(land.x, land.y) : parcels[0];
     }
 }
 
@@ -131,6 +131,7 @@ public class DeployedScene
     public string contentRating => metadata.policy?.contentRating;
     public bool voiceEnabled => metadata.policy?.voiceEnabled ?? false;
     public string[] bannedUsers => metadata.policy?.blacklist;
+    public string projectId => metadata.source?.projectId;
 
     private CatalystSceneEntityMetadata metadata;
     private Source deploymentSource;

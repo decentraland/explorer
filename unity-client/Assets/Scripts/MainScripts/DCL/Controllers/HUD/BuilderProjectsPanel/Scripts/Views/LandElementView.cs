@@ -9,12 +9,12 @@ using Object = UnityEngine.Object;
 internal class LandElementView : MonoBehaviour, IDisposable
 {
     internal const string SIZE_TEXT_FORMAT = "{0} LAND";
-    private const string BUILDER_LAND_URL_FORMAT = "https://builder.decentraland.org/land/{0}";
 
-    public event Action<string> OnJumpInPressed; 
-    public event Action<string> OnEditorPressed; 
-    public event Action<string> OnSettingsPressed; 
-        
+    public event Action<Vector2Int> OnJumpInPressed;
+    public event Action<Vector2Int> OnEditorPressed;
+    public event Action<string> OnSettingsPressed;
+    public event Action<string> OnOpenInDappPressed;
+
     [SerializeField] private Texture2D defaultThumbnail;
     [SerializeField] private RawImageFillParent thumbnail;
     [SerializeField] internal TextMeshProUGUI landName;
@@ -26,30 +26,35 @@ internal class LandElementView : MonoBehaviour, IDisposable
     [SerializeField] internal Button buttonSettings;
     [SerializeField] internal Button buttonJumpIn;
     [SerializeField] internal Button buttonEditor;
+    [SerializeField] internal Button buttonOpenInBuilderDapp;
+    [SerializeField] internal UIHoverTriggerShowHideAnimator editorLocked;
+    [SerializeField] private ShowHideAnimator editorLockedTooltipEstate;
+    [SerializeField] private ShowHideAnimator editorLockedTooltipSdkScene;
 
     public ISearchInfo searchInfo { get; } = new SearchInfo();
 
     private bool isDestroyed = false;
     private string landId;
     private string landCoordinates;
-    private bool isEstate;
     private string thumbnailUrl;
     private AssetPromise_Texture thumbnailPromise;
+    private Vector2Int coords;
 
     private void Awake()
     {
-        buttonSettings.onClick.AddListener(()=> OnSettingsPressed?.Invoke(landId));
-        buttonJumpIn.onClick.AddListener(()=> OnJumpInPressed?.Invoke(landId));
-        buttonEditor.onClick.AddListener(()=> OnEditorPressed?.Invoke(landId));
-        
-        //NOTE: for MVP we are redirecting user to Builder's page
-        OnSettingsPressed += (id) => WebInterface.OpenURL(string.Format(BUILDER_LAND_URL_FORMAT, isEstate ? landId : landCoordinates));
+        buttonSettings.onClick.AddListener(() => OnSettingsPressed?.Invoke(landId));
+        buttonJumpIn.onClick.AddListener(() => OnJumpInPressed?.Invoke(coords));
+        buttonEditor.onClick.AddListener(() => OnEditorPressed?.Invoke(coords));
+        buttonOpenInBuilderDapp.onClick.AddListener(() => OnOpenInDappPressed?.Invoke(landId));
+
+        editorLockedTooltipEstate.gameObject.SetActive(false);
+        editorLockedTooltipSdkScene.gameObject.SetActive(false);
     }
 
     private void OnDestroy()
     {
         isDestroyed = true;
-        
+
         if (thumbnailPromise != null)
         {
             AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
@@ -62,16 +67,35 @@ internal class LandElementView : MonoBehaviour, IDisposable
         gameObject.SetActive(active);
     }
 
+    public void Setup(LandWithAccess land)
+    {
+        bool estate = land.type == LandType.ESTATE;
+
+        SetId(land.id);
+        SetName(land.name);
+        SetCoords(land.@base.x, land.@base.y);
+        SetSize(land.size);
+        SetRole(land.role == LandRole.OWNER);
+        SetEditable(!estate);
+
+        if (estate)
+        {
+            editorLocked.SetShowHideAnimator(editorLockedTooltipEstate);
+        }
+        else if (land.scenes != null && land.scenes.Count > 0 && land.scenes[0].source == DeployedScene.Source.SDK)
+        {
+            editorLocked.SetShowHideAnimator(editorLockedTooltipSdkScene);
+            SetEditable(false);
+        }
+    }
+
     public void SetId(string id)
     {
         landId = id;
         searchInfo.SetId(id);
     }
 
-    public string GetId()
-    {
-        return landId;
-    }
+    public string GetId() { return landId; }
 
     public void SetName(string name)
     {
@@ -84,6 +108,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
         landCoordinates = $"{x},{y}";
         landCoords.text = landCoordinates;
         searchInfo.SetCoords(landCoordinates);
+        coords.Set(x, y);
     }
 
     public void SetSize(int size)
@@ -98,11 +123,6 @@ internal class LandElementView : MonoBehaviour, IDisposable
         roleOwner.SetActive(isOwner);
         roleOperator.SetActive(!isOwner);
         searchInfo.SetRole(isOwner);
-    }
-
-    public void SetIsEstate(bool isEstate)
-    {
-        this.isEstate = isEstate;
     }
 
     public Transform GetParent()
@@ -121,7 +141,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
             return;
 
         thumbnailUrl = url;
-        
+
         var prevPromise = thumbnailPromise;
 
         if (string.IsNullOrEmpty(url))
@@ -135,7 +155,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
             thumbnailPromise.OnFailEvent += asset => SetThumbnail(defaultThumbnail);
             AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
         }
-        
+
         if (prevPromise != null)
         {
             AssetPromiseKeeper_Texture.i.Forget(prevPromise);
@@ -147,6 +167,12 @@ internal class LandElementView : MonoBehaviour, IDisposable
         thumbnail.texture = thumbnailTexture;
     }
 
+    public void SetEditable(bool isEditable)
+    {
+        buttonEditor.gameObject.SetActive(isEditable);
+        editorLocked.gameObject.SetActive(!isEditable);
+    }
+
     public void Dispose()
     {
         if (!isDestroyed)
@@ -154,5 +180,4 @@ internal class LandElementView : MonoBehaviour, IDisposable
             Destroy(gameObject);
         }
     }
-
 }

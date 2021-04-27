@@ -17,6 +17,11 @@ public class UIHoverTriggerShowHideAnimator : MonoBehaviour, IPointerEnterHandle
 
     Coroutine delayRoutine = null;
 
+    public void SetShowHideAnimator(ShowHideAnimator showHideAnimator)
+    {
+        this.showHideAnimator = showHideAnimator;
+    }
+
     void Awake()
     {
         if (hideAnimatorOnAwake)

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 internal interface ISceneCardView : IDisposable
 {
-    event Action<ISceneData> OnJumpInPressed;
+    event Action<Vector2Int> OnJumpInPressed;
     event Action<ISceneData> OnEditorPressed;
     event Action<ISceneData> OnSettingsPressed;
     event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
@@ -36,7 +36,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     const int THMBL_MARKETPLACE_HEIGHT = 143;
     const int THMBL_MARKETPLACE_SIZEFACTOR = 50;
     
-    public event Action<ISceneData> OnJumpInPressed;
+    public event Action<Vector2Int> OnJumpInPressed;
     public event Action<ISceneData> OnEditorPressed;
     public event Action<ISceneData> OnSettingsPressed;
     public event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
@@ -81,7 +81,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
 
     private void Awake()
     {
-        jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneData));
+        jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneData.coords));
         editorButton.onClick.AddListener(()=> OnEditorPressed?.Invoke(sceneData));
         contextMenuButton.onClick.AddListener(()=> OnContextMenuPressed?.Invoke(sceneData, this));
         settingsButton.onClick.AddListener(()=> OnSettingsPressed?.Invoke(sceneData));

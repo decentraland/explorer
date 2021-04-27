@@ -24,6 +24,8 @@ internal interface ISectionsController : IDisposable
     event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
     event Action<string, SceneAdminsUpdatePayload> OnRequestUpdateSceneAdmins;
     event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
+    event Action<string> OnRequestOpenUrl;
+    event Action<Vector2Int> OnRequestGoToCoords;
     void OpenSection(SectionId id);
     void SetFetchingDataStart();
     void SetFetchingDataEnd();
@@ -43,6 +45,8 @@ internal class SectionsController : ISectionsController
     public event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
     public event Action<string, SceneAdminsUpdatePayload> OnRequestUpdateSceneAdmins;
     public event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
+    public event Action<string> OnRequestOpenUrl;
+    public event Action<Vector2Int> OnRequestGoToCoords;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -190,6 +194,16 @@ internal class SectionsController : ISectionsController
     {
         OnRequestUpdateSceneBannedUsers?.Invoke(id, payload);
     }
+    
+    private void OnOpenUrlRequested(string url)
+    {
+        OnRequestOpenUrl?.Invoke(url);
+    }
+    
+    private void OnGoToCoordsRequested(Vector2Int coords)
+    {
+        OnRequestGoToCoords?.Invoke(coords);
+    }
 
     private void SubscribeEvents(SectionBase sectionBase)
     {
@@ -216,6 +230,14 @@ internal class SectionsController : ISectionsController
         if (sectionBase is ISectionUpdateSceneBannedUsersRequester updateSceneBannedUsersRequester)
         {
             updateSceneBannedUsersRequester.OnRequestUpdateSceneBannedUsers += OnUpdateSceneBannedUsersRequested;
+        }
+        if (sectionBase is ISectionOpenURLRequester openURLRequester)
+        {
+            openURLRequester.OnRequestOpenUrl += OnOpenUrlRequested;
+        }
+        if (sectionBase is ISectionGotoCoordsRequester goToRequester)
+        {
+            goToRequester.OnRequestGoToCoords += OnGoToCoordsRequested;
         }
     }
 }

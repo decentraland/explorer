@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Interface;
 
 internal class SceneContextMenuHandler : IDisposable
 {
@@ -33,7 +34,7 @@ internal class SceneContextMenuHandler : IDisposable
         sectionsController.OnRequestContextMenuHide -= OnRequestContextMenuHide;
 
         scenesViewController.OnContextMenuPressed -= OnContextMenuOpen;
-
+        
         contextMenu.OnSettingsPressed -= OnContextMenuSettingsPressed;
         contextMenu.OnDuplicatePressed -= OnContextMenuDuplicatePressed;
         contextMenu.OnDownloadPressed -= OnContextMenuDownloadPressed;
@@ -49,7 +50,7 @@ internal class SceneContextMenuHandler : IDisposable
         contextMenu.Show(sceneData.id, sceneData.isDeployed,
             sceneData.isOwner || sceneData.isOperator, sceneData.isContributor);
     }
-
+    
     void OnRequestContextMenuHide()
     {
         contextMenu.Hide();

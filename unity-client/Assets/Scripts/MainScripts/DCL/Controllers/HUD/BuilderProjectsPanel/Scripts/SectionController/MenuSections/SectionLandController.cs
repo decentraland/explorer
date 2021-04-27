@@ -1,13 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DCL.Helpers;
+using DCL.Interface;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-internal class SectionLandController : SectionBase, ILandsListener
+internal class SectionLandController : SectionBase, ILandsListener, ISectionOpenURLRequester, ISectionGotoCoordsRequester
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionLandsView";
     
+    private const string BUILDER_LAND_URL_FORMAT = "https://builder.decentraland.org/land/{0}";
+    private const string MARKETPLACE_URL = "https://market.decentraland.org/";
+
+    public event Action<string> OnRequestOpenUrl;
+    public event Action<Vector2Int> OnRequestGoToCoords;
+
     public override ISectionSearchHandler searchHandler => landSearchHandler;
 
     private readonly SectionLandView view;
@@ -25,6 +33,7 @@ internal class SectionLandController : SectionBase, ILandsListener
         this.view = view;
         PoolView(view.GetLandElementeBaseView());
 
+        view.OnOpenMarketplaceRequested += OnOpenMarketplacePressed;
         landSearchHandler.OnResult += OnSearchResult;
     }
 
@@ -35,6 +44,22 @@ internal class SectionLandController : SectionBase, ILandsListener
 
     public override void Dispose()
     {
+        view.OnOpenMarketplaceRequested -= OnOpenMarketplacePressed;
+        landSearchHandler.OnResult -= OnSearchResult;
+        
+        using (var iterator = landElementViews.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+               iterator.Dispose();
+            }
+        }
+
+        while (landElementViewsPool.Count > 0)
+        {
+            landElementViewsPool.Dequeue().Dispose();
+        }
+        
         view.Dispose();
     }
 
@@ -50,8 +75,11 @@ internal class SectionLandController : SectionBase, ILandsListener
 
     void ILandsListener.OnSetLands(LandWithAccess[] lands)
     {
-        view.SetEmpty(lands == null || lands.Length == 0);
-        
+        if (lands == null || lands.Length == 0)
+        {
+            SetEmptyOrLoading();
+        }
+
         if (lands == null)
             return;
 
@@ -74,13 +102,8 @@ internal class SectionLandController : SectionBase, ILandsListener
             }
 
             bool isEstate = lands[i].type == LandType.ESTATE;
-            landElementView.SetId(lands[i].id);
-            landElementView.SetName(lands[i].name);
-            landElementView.SetCoords(lands[i].@base.x, lands[i].@base.y);
-            landElementView.SetSize(lands[i].size);
-            landElementView.SetRole(lands[i].role == LandRole.OWNER);
+            landElementView.Setup(lands[i]);
             landElementView.SetThumbnail(GetLandThumbnailUrl(lands[i], isEstate));
-            landElementView.SetIsEstate(isEstate);
         }
         landSearchHandler.SetSearchableList(landElementViews.Values.Select(scene => scene.searchInfo).ToList());
     }
@@ -107,13 +130,29 @@ internal class SectionLandController : SectionBase, ILandsListener
             landView.gameObject.SetActive(true);
             landView.transform.SetSiblingIndex(i);
         }
-        view.ResetScrollRect();
+
+        if (landElementViews.Count == 0)
+        {
+            SetEmptyOrLoading();
+        }
+        else if (searchInfoLands.Count == 0)
+        {
+            view.SetNoSearchResult();
+        }
+        else
+        {
+            view.SetFilled();
+        }        
     }
 
-    private void PoolView(LandElementView view)
+    private void PoolView(LandElementView landView)
     {
-        view.SetActive(false);
-        landElementViewsPool.Enqueue(view);
+        landView.OnSettingsPressed -= OnSettingsPressed;
+        landView.OnJumpInPressed -= OnJumpInPressed;
+        landView.OnOpenInDappPressed -= OnOpenInDappPressed;
+        
+        landView.SetActive(false);
+        landElementViewsPool.Enqueue(landView);
     }
 
     private LandElementView GetPooledView()
@@ -128,7 +167,24 @@ internal class SectionLandController : SectionBase, ILandsListener
         {
             landView = Object.Instantiate(view.GetLandElementeBaseView(), view.GetLandElementsContainer());
         }
+        
+        landView.OnSettingsPressed += OnSettingsPressed;
+        landView.OnJumpInPressed += OnJumpInPressed;
+        landView.OnOpenInDappPressed += OnOpenInDappPressed;
+        
         return landView;
+    }
+
+    private void SetEmptyOrLoading()
+    {
+        if (isLoading)
+        {
+            view.SetLoading();
+        }
+        else
+        {
+            view.SetEmpty();
+        } 
     }
 
     private string GetLandThumbnailUrl(LandWithAccess land, bool isEstate)
@@ -147,5 +203,26 @@ internal class SectionLandController : SectionBase, ILandsListener
         }
 
         return MapUtils.GetMarketPlaceThumbnailUrl(land.parcels, width, height, sizeFactorEstate);
+    }
+
+    private void OnSettingsPressed(string landId)
+    {
+        //NOTE: for MVP we are redirecting user to Builder's page
+        WebInterface.OpenURL(string.Format(BUILDER_LAND_URL_FORMAT, landId));
+    }
+
+    private void OnOpenInDappPressed(string landId)
+    {
+        OnRequestOpenUrl?.Invoke(string.Format(BUILDER_LAND_URL_FORMAT, landId));
+    }
+
+    private void OnJumpInPressed(Vector2Int coords)
+    {
+        OnRequestGoToCoords?.Invoke(coords);
+    }
+
+    private void OnOpenMarketplacePressed()
+    {
+        OnRequestOpenUrl?.Invoke(MARKETPLACE_URL);
     }
 }

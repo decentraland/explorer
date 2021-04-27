@@ -12,9 +12,10 @@ internal interface IScenesViewController : IDisposable
     event Action<ISceneCardView> OnProjectSceneAdded;
     event Action<ISceneCardView> OnProjectSceneRemoved;
     event Action<ISceneCardView> OnSceneSelected;
-    event Action<ISceneData> OnJumpInPressed;
+    event Action<Vector2Int> OnJumpInPressed;
     event Action<ISceneData> OnEditorPressed;
     event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
+    event Action<string> OnRequestOpenUrl;
     void SetScenes(ISceneData[] scenesData);
     void SelectScene(string id);
     void AddListener(IDeployedSceneListener listener);
@@ -41,9 +42,10 @@ internal class ScenesViewController : IScenesViewController
     public event Action<ISceneCardView> OnProjectSceneAdded;
     public event Action<ISceneCardView> OnProjectSceneRemoved;
     public event Action<ISceneCardView> OnSceneSelected;
-    public event Action<ISceneData> OnJumpInPressed;
+    public event Action<Vector2Int> OnJumpInPressed;
     public event Action<ISceneData> OnEditorPressed;
     public event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
+    public event Action<string> OnRequestOpenUrl;
 
     private Dictionary<string, ISceneCardView> deployedScenes = new Dictionary<string, ISceneCardView>();
     private Dictionary<string, ISceneCardView> projectScenes = new Dictionary<string, ISceneCardView>();
@@ -295,6 +297,7 @@ internal class ScenesViewController : IScenesViewController
         view.OnEditorPressed += OnEditorPressed;
         view.OnContextMenuPressed += OnContextMenuPressed;
         view.OnJumpInPressed += OnJumpInPressed;
+        view.OnSettingsPressed += OnSceneSettingsPressed;
         
         return view;
     }
@@ -305,7 +308,13 @@ internal class ScenesViewController : IScenesViewController
         sceneCardView.OnEditorPressed -= OnEditorPressed;
         sceneCardView.OnContextMenuPressed -= OnContextMenuPressed;
         sceneCardView.OnJumpInPressed -= OnJumpInPressed;
+        sceneCardView.OnSettingsPressed -= OnSceneSettingsPressed;
         
         sceneCardView.Dispose();
+    }
+    
+    private void OnSceneSettingsPressed(ISceneData sceneData)
+    {
+        OnRequestOpenUrl?.Invoke($"https://builder.decentraland.org/scenes/{sceneData.projectId}");
     }
 }

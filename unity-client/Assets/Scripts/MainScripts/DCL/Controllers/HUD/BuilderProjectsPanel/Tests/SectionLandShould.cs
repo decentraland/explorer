@@ -35,17 +35,41 @@ namespace Tests
         [Test]
         public void SetEmptyCorrectly()
         {
-            view.SetEmpty(true);
+            view.SetEmpty();
             Assert.IsTrue(view.emptyContainer.activeSelf);
             Assert.IsFalse(view.contentContainer.activeSelf);
+            Assert.IsFalse(view.loadingAnimationContainer.activeSelf);
+            Assert.IsFalse(view.noSearchResultContainer.activeSelf);
         }
         
         [Test]
         public void SetNotEmptyCorrectly()
         {
-            view.SetEmpty(false);
+            view.SetFilled();
             Assert.IsTrue(view.contentContainer.activeSelf);
             Assert.IsFalse(view.emptyContainer.activeSelf);
+            Assert.IsFalse(view.loadingAnimationContainer.activeSelf);
+            Assert.IsFalse(view.noSearchResultContainer.activeSelf);
+        }
+        
+        [Test]
+        public void SetNoSearchResultCorrectly()
+        {
+            view.SetNoSearchResult();
+            Assert.IsFalse(view.contentContainer.activeSelf);
+            Assert.IsFalse(view.emptyContainer.activeSelf);
+            Assert.IsFalse(view.loadingAnimationContainer.activeSelf);
+            Assert.IsTrue(view.noSearchResultContainer.activeSelf);
+        }
+        
+        [Test]
+        public void SetLoadingCorrectly()
+        {
+            view.SetLoading();
+            Assert.IsFalse(view.contentContainer.activeSelf);
+            Assert.IsFalse(view.emptyContainer.activeSelf);
+            Assert.IsTrue(view.loadingAnimationContainer.activeSelf);
+            Assert.IsFalse(view.noSearchResultContainer.activeSelf);
         }
         
         [Test]
@@ -67,6 +91,7 @@ namespace Tests
         {
             SectionLandController controller = new SectionLandController(view);
             ILandsListener landsListener = controller;
+            controller.SetFetchingDataState(false);
 
             landsListener.OnSetLands(new [] { CreateLandData("1"), CreateLandData("2") });
             Assert.AreEqual(2, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
