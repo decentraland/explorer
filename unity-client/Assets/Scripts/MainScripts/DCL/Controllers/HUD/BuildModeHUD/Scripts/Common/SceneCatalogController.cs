@@ -303,7 +303,11 @@ public class SceneCatalogController : ISceneCatalogController
 
     public void OpenCatalog()
     {
-        RefreshCatalog();
+        if (isFilterByAssetPacks)
+            ShowAssetsPacks();
+        else
+            ShowCategories();
+
         sceneCatalogView.SetCatalogTitle(BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE);
         Utils.UnlockCursor();
         sceneCatalogView.SetActive(true);
