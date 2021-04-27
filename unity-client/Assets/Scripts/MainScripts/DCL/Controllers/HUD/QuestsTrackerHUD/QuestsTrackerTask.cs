@@ -58,6 +58,7 @@ namespace DCL.Huds.QuestsTracker
                     SetProgressText(task.progress, 1);
                     break;
                 case "numeric":
+                case "step-based":
                     var payload = JsonUtility.FromJson<TaskPayload_Numeric>(task.payload);
                     SetProgressText(payload.current, payload.end);
                     break;
