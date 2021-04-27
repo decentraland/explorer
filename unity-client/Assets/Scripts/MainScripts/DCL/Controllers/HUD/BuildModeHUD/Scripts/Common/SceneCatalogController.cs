@@ -308,7 +308,6 @@ public class SceneCatalogController : ISceneCatalogController
         else
             ShowCategories();
 
-        sceneCatalogView.SetCatalogTitle(BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE);
         Utils.UnlockCursor();
         sceneCatalogView.SetActive(true);
     }
