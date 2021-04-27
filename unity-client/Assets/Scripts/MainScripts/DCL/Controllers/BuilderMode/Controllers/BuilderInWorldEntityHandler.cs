@@ -224,7 +224,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
-        hudController.UpdateEntitiesSelection(selectedEntities.Count);
+        hudController?.UpdateEntitiesSelection(selectedEntities.Count);
         currentActiveMode?.EntityDeselected(entity);
         if (selectedEntities.Count <= 0 &&
             hudController != null)
@@ -346,12 +346,12 @@ public class BuilderInWorldEntityHandler : BIWController
         entityEditable.Select();
 
         selectedEntities.Add(entityEditable);
-        hudController.UpdateEntitiesSelection(selectedEntities.Count);
 
         currentActiveMode?.SelectedEntity(entityEditable);
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
+            hudController.UpdateEntitiesSelection(selectedEntities.Count);
             hudController.ShowEntityInformation();
             hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
@@ -635,7 +635,7 @@ public class BuilderInWorldEntityHandler : BIWController
         if (selectedEntities.Contains(entityToDelete))
         {
             selectedEntities.Remove(entityToDelete);
-            hudController.UpdateEntitiesSelection(selectedEntities.Count);
+            hudController?.UpdateEntitiesSelection(selectedEntities.Count);
         }
 
         string entityName = entityToDelete.GetDescriptiveName();
