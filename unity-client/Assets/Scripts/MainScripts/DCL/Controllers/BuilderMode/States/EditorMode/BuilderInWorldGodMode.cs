@@ -30,7 +30,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public DCLBuilderGizmoManager gizmoManager;
 
     public VoxelController voxelController;
-    public BuilderInWorldInputWrapper builderInputWrapper;
     public BIWOutlinerController outlinerController;
 
     [Header("InputActions")]
@@ -45,7 +44,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public LayerMask groundLayer;
 
     private bool isPlacingNewObject = false;
-    private bool mousePressed = false;
+    private bool mouseMainBtnPressed = false;
+    private bool mouseSecondaryBtnPressed = false;
     private bool isSquareMultiSelectionInputActive = false;
     private bool isMouseDragging = false;
     private bool isTypeOfBoundSelectionSelected = false;
@@ -68,9 +68,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
 
-        builderInputWrapper.OnMouseDown += OnMouseDown;
-        builderInputWrapper.OnMouseUp += OnMouseUp;
-        builderInputWrapper.OnMouseDrag += OnMouseDrag;
+        BuilderInWorldInputWrapper.OnMouseDown += OnMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp += OnMouseUp;
+        BuilderInWorldInputWrapper.OnMouseDrag += OnMouseDrag;
 
         focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
 
@@ -96,9 +96,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart -= OnGizmosTransformStart;
 
-        builderInputWrapper.OnMouseDown -= OnMouseDown;
-        builderInputWrapper.OnMouseUp -= OnMouseUp;
-        builderInputWrapper.OnMouseDrag -= OnMouseDrag;
+        BuilderInWorldInputWrapper.OnMouseDown -= OnMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp -= OnMouseUp;
+        BuilderInWorldInputWrapper.OnMouseDrag -= OnMouseDrag;
 
         gizmoManager.OnChangeTransformValue -= EntitiesTransfromByGizmos;
 
@@ -162,7 +162,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     private void OnGUI()
     {
-        if (mousePressed && isSquareMultiSelectionInputActive)
+        if (mouseMainBtnPressed && isSquareMultiSelectionInputActive)
         {
             var rect = BuilderInWorldUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
             BuilderInWorldUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
@@ -259,12 +259,22 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     private void OnMouseUp(int buttonID, Vector3 position)
     {
         isMouseDragging = false;
+        if (buttonID == 1)
+        {
+            mouseSecondaryBtnPressed = false;
+            if (CanCancelAction(position))
+                builderInWorldEntityHandler.CancelSelection();
+
+            freeCameraController.StopDetectingMovement();
+        }
+
+
         if (buttonID != 0)
             return;
 
         EndDraggingSelectedEntities();
 
-        if (isSquareMultiSelectionInputActive && mousePressed)
+        if (isSquareMultiSelectionInputActive && mouseMainBtnPressed)
         {
             EndBoundMultiSelection();
         }
@@ -272,8 +282,13 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     void OnMouseDown(int buttonID, Vector3 position)
     {
+        lastMousePosition = position;
+
         if (buttonID == 1)
-            builderInWorldEntityHandler.CancelSelection();
+        {
+            mouseSecondaryBtnPressed = true;
+            freeCameraController.StartDectectingMovement();
+        }
 
         if (buttonID != 0)
             return;
@@ -286,15 +301,16 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         isSquareMultiSelectionInputActive = true;
         isTypeOfBoundSelectionSelected = false;
         isVoxelBoundMultiSelection = false;
-        lastMousePosition = position;
-        mousePressed = true;
+        mouseMainBtnPressed = true;
         freeCameraController.SetCameraCanMove(false);
         outlinerController.SetOutlineCheckActive(false);
     }
 
     #endregion
 
-    void StarDraggingSelectedEntities()
+    private bool CanCancelAction(Vector3 currentMousePosition) { return Vector3.Distance(lastMousePosition, currentMousePosition) <= BuilderInWorldSettings.MOUSE_THRESHOLD_MOVEMENT_FOR_DESELECT && !freeCameraController.HasBeenMovement; }
+
+    private void StarDraggingSelectedEntities()
     {
         if (!builderInWorldEntityHandler.IsPointerInSelectedEntity() ||
             gizmoManager.HasAxisHover() ||
@@ -331,7 +347,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     private void EndBoundMultiSelection()
     {
         isSquareMultiSelectionInputActive = false;
-        mousePressed = false;
+        mouseMainBtnPressed = false;
         freeCameraController.SetCameraCanMove(true);
         List<DCLBuilderInWorldEntity> allEntities = null;
         if (!isVoxelBoundMultiSelection)
@@ -394,7 +410,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         freeCameraController.gameObject.SetActive(true);
         SetLookAtObject(parcelScene);
 
-        // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player position and the camera
+        // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player currentMousePosition and the camera
         Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;
         freeCameraController.SetPosition(cameraPosition + Vector3.up * distanceEagleCamera);
         //
@@ -566,7 +582,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     void GizmosMode(string gizmos)
     {
-        if (!isModeActive && isPlacingNewObject)
+        if ((!isModeActive && isPlacingNewObject) || mouseSecondaryBtnPressed)
             return;
         if (gizmoManager.GetSelectedGizmo() != gizmos)
         {

@@ -1,3 +1,4 @@
+using System;
 using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Models;
@@ -10,9 +11,7 @@ public class VoxelController : MonoBehaviour
     [Header("References")]
     public VoxelPrefab voxelPrefab;
 
-    public BuilderInWorldInputWrapper builderInputWrapper;
     public BuilderInWorldController buildModeController;
-    public BuilderInWorldGodMode buildEditorMode;
     public BIWOutlinerController outlinerController;
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public FreeCameraMovement freeCameraMovement;
@@ -34,8 +33,14 @@ public class VoxelController : MonoBehaviour
 
     private void Start()
     {
-        builderInputWrapper.OnMouseDown += MouseDown;
-        builderInputWrapper.OnMouseUp += MouseUp;
+        BuilderInWorldInputWrapper.OnMouseDown += MouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp += MouseUp;
+    }
+
+    private void OnDestroy()
+    {
+        BuilderInWorldInputWrapper.OnMouseDown -= MouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp -= MouseUp;
     }
 
     private void Update()

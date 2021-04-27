@@ -19,7 +19,8 @@ namespace DCL.Configuration
         public const string VOXEL_TAG = "Voxel";
         public const string CUSTOM_LAND = "CUSTOM LAND";
 
-        public const int RETRY_AMOUNTS = 3;
+        //Inputs
+        public static float MOUSE_THRESHOLD_MOVEMENT_FOR_DESELECT = 15f;
 
         //Kernel Report
         public const string STATE_EVENT_NAME = "stateEvent";

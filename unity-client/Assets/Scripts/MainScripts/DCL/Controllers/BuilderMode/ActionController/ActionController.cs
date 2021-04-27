@@ -7,7 +7,7 @@ using static BuildInWorldCompleteAction;
 
 public class ActionController : MonoBehaviour
 {
-    public static bool VERBOSE = true;
+    public static bool VERBOSE = false;
 
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BIWFloorHandler biwFloorHandler;

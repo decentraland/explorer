@@ -238,27 +238,14 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.ToggleAvatarEditorHud:
                     InputProcessor.FromKey(action, KeyCode.I, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
-                case DCLAction_Trigger.BuildEditModeToggleCatalog:
-                    InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
-                    break;
                 case DCLAction_Trigger.BuildEditModeToggleUI:
                     InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.FocusNotInInput);
-                    break;
-                case DCLAction_Trigger.BuildEditModeToggleEntityList:
-                    InputProcessor.FromKey(action, KeyCode.Q, modifiers: InputProcessor.Modifier.FocusNotInInput);
-                    break;
-                case DCLAction_Trigger.BuildEditModeToggleSceneInfo:
-                    InputProcessor.FromKey(action, KeyCode.Tab, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleChangeCamera:
                     InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleControls:
                     InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
-                    break;
-                case DCLAction_Trigger.BuildEditModeCreateLastSceneObject:
-                    InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl });
-                    InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftCommand });
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleSnapMode:
                     InputProcessor.FromKey(action, KeyCode.O, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -314,10 +301,6 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.BuildEditModeFocusSelectedEntities:
                     InputProcessor.FromKey(action, KeyCode.F, modifiers: InputProcessor.Modifier.FocusNotInInput);
-                    break;
-                case DCLAction_Trigger.BuildEditModeReset:
-                    InputProcessor.FromKey(action, KeyCode.R, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl });
-                    InputProcessor.FromKey(action, KeyCode.R, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftCommand });
                     break;
                 case DCLAction_Trigger.BuildEditHideSelectedEntities:
                     InputProcessor.FromKey(action, KeyCode.H, modifiers: InputProcessor.Modifier.FocusNotInInput);

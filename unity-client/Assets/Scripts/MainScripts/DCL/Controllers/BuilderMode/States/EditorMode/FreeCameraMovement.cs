@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class FreeCameraMovement : CameraStateBase
 {
-    public BuilderInWorldInputWrapper builderInputWrapper;
-
     public float smoothLookAtSpeed = 5f;
     public float focusDistance = 5f;
     public float focusSpeed = 5f;
@@ -44,6 +42,9 @@ public class FreeCameraMovement : CameraStateBase
     private bool isAdvancingUp = false;
     private bool isAdvancingDown = false;
 
+    private bool isDetectingMovement = false;
+    private bool hasBeenMovement = false;
+
     private bool isPanCameraActive = false;
     private bool isMouseRightClickDown = false;
 
@@ -74,12 +75,12 @@ public class FreeCameraMovement : CameraStateBase
 
     private void Awake()
     {
-        builderInputWrapper.OnMouseDrag += MouseDrag;
-        builderInputWrapper.OnMouseDragRaw += MouseDragRaw;
-        builderInputWrapper.OnMouseWheel += MouseWheel;
+        BuilderInWorldInputWrapper.OnMouseDrag += MouseDrag;
+        BuilderInWorldInputWrapper.OnMouseDragRaw += MouseDragRaw;
+        BuilderInWorldInputWrapper.OnMouseWheel += MouseWheel;
 
-        builderInputWrapper.OnMouseDown += OnMouseDown;
-        builderInputWrapper.OnMouseUp += OnMouseUp;
+        BuilderInWorldInputWrapper.OnMouseDown += OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp += OnInputMouseUp;
 
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
@@ -127,7 +128,17 @@ public class FreeCameraMovement : CameraStateBase
         cameraPanInputAction.OnFinished += cameraPanFinishedDelegate;
     }
 
-    private void OnMouseUp(int buttonId, Vector3 mousePosition)
+    public void StartDectectingMovement()
+    {
+        isDetectingMovement = true;
+        hasBeenMovement = false;
+    }
+
+    public bool HasBeenMovement => hasBeenMovement;
+
+    public void StopDetectingMovement() { isDetectingMovement = false; }
+
+    private void OnInputMouseUp(int buttonId, Vector3 mousePosition)
     {
         if (buttonId != 1)
             return;
@@ -135,7 +146,7 @@ public class FreeCameraMovement : CameraStateBase
         isMouseRightClickDown = false;
     }
 
-    private void OnMouseDown(int buttonId, Vector3 mousePosition)
+    private void OnInputMouseDown(int buttonId, Vector3 mousePosition)
     {
         if (buttonId != 1)
             return;
@@ -145,12 +156,12 @@ public class FreeCameraMovement : CameraStateBase
 
     private void OnDestroy()
     {
-        builderInputWrapper.OnMouseDrag -= MouseDrag;
-        builderInputWrapper.OnMouseDragRaw -= MouseDragRaw;
-        builderInputWrapper.OnMouseWheel -= MouseWheel;
+        BuilderInWorldInputWrapper.OnMouseDrag -= MouseDrag;
+        BuilderInWorldInputWrapper.OnMouseDragRaw -= MouseDragRaw;
+        BuilderInWorldInputWrapper.OnMouseWheel -= MouseWheel;
 
-        builderInputWrapper.OnMouseDown -= OnMouseDown;
-        builderInputWrapper.OnMouseUp -= OnMouseUp;
+        BuilderInWorldInputWrapper.OnMouseDown -= OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp -= OnInputMouseUp;
 
         advanceFowardInputAction.OnStarted -= advanceForwardStartDelegate;
         advanceFowardInputAction.OnFinished -= advanceForwardFinishedDelegate;
@@ -182,29 +193,36 @@ public class FreeCameraMovement : CameraStateBase
         Vector3 velocity = Vector3.zero;
         if (isAdvancingForward)
         {
-            velocity += transform.forward;
+            velocity += GetTotalVelocity(velocity, transform.forward);
         }
         if (isAdvancingBackward)
         {
-            velocity += -transform.forward;
+            velocity += GetTotalVelocity(velocity, -transform.forward);
         }
         if (isAdvancingRight)
         {
-            velocity += transform.right;
+            velocity += GetTotalVelocity(velocity, transform.right);
         }
         if (isAdvancingLeft)
         {
-            velocity += -transform.right;
+            velocity += GetTotalVelocity(velocity, -transform.right);
         }
         if (isAdvancingUp)
         {
-            velocity += transform.up;
+            velocity += GetTotalVelocity(velocity, transform.up);
         }
         if (isAdvancingDown)
         {
-            velocity += -transform.up;
+            velocity += GetTotalVelocity(velocity, -transform.up);
         }
         transform.position += velocity * (keyboardMovementSpeed * Time.deltaTime);
+    }
+
+    public Vector3 GetTotalVelocity(Vector3 currentVelocity, Vector3 velocityToAdd)
+    {
+        if (isDetectingMovement)
+            hasBeenMovement = true;
+        return currentVelocity + velocityToAdd;
     }
 
     public void SetCameraCanMove(bool canMove) { isCameraAbleToMove = canMove; }

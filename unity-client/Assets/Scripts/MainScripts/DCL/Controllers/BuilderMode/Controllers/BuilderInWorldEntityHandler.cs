@@ -43,6 +43,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuilderInWorldMode currentActiveMode;
     private bool isMultiSelectionActive = false;
+    private bool isSecondayClickPressed = false;
 
     private float lastTransformReportTime;
 
@@ -80,6 +81,21 @@ public class BuilderInWorldEntityHandler : BIWController
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
+
+        BuilderInWorldInputWrapper.OnMouseDown += OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp += OnInputMouseUp;
+    }
+
+    private void OnInputMouseDown(int buttonId, Vector3 mousePosition)
+    {
+        if (buttonId == 1)
+            isSecondayClickPressed = true;
+    }
+
+    private void OnInputMouseUp(int buttonId, Vector3 mousePosition)
+    {
+        if (buttonId == 1)
+            isSecondayClickPressed = false;
     }
 
     private void OnDestroy()
@@ -103,6 +119,9 @@ public class BuilderInWorldEntityHandler : BIWController
         hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         hudController.OnEntityRename -= SetEntityName;
+
+        BuilderInWorldInputWrapper.OnMouseDown -= OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp -= OnInputMouseUp;
     }
 
     protected override void FrameUpdate()
@@ -172,7 +191,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private void DuplicateSelectedEntitiesInput()
     {
-        if (selectedEntities.Count <= 0)
+        if (selectedEntities.Count <= 0 || isSecondayClickPressed)
             return;
 
         DuplicateSelectedEntities();
