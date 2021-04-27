@@ -34,6 +34,7 @@ public interface IEntityInformationView
     void StartChangingName();
     void ToggleBasicInfo();
     void ToggleDetailsInfo();
+    void UpdateEntitiesSelection(int numberOfSelectedEntities);
 }
 
 public class EntityInformationView : MonoBehaviour, IEntityInformationView
@@ -43,6 +44,9 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     [SerializeField] internal Sprite closeMenuSprite;
 
     [Header("Prefab references")]
+    [SerializeField] internal GameObject individualEntityPanel;
+    [SerializeField] internal GameObject multipleEntitiesPanel;
+    [SerializeField] internal TextMeshProUGUI multipleEntitiesText;
     [SerializeField] internal TextMeshProUGUI titleTxt;
     [SerializeField] internal TextMeshProUGUI entityLimitsTrisTxt;
     [SerializeField] internal TextMeshProUGUI entityLimitsMaterialsTxt;
@@ -58,7 +62,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     [SerializeField] internal Image basicToggleBtn;
     [SerializeField] internal SmartItemListView smartItemListView;
     [SerializeField] internal Button backButton;
-    [SerializeField] internal Button hideCatalogButton;
     [SerializeField] internal Button detailsToggleButton;
     [SerializeField] internal Button basicInfoTogglekButton;
 
@@ -88,7 +91,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     private void Awake()
     {
         backButton.onClick.AddListener(Disable);
-        hideCatalogButton.onClick.AddListener(Disable);
         detailsToggleButton.onClick.AddListener(ToggleDetailsInfo);
         basicInfoTogglekButton.onClick.AddListener(ToggleBasicInfo);
         nameIF.onEndEdit.AddListener((newName) => ChangeEntityName(newName));
@@ -99,7 +101,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     private void OnDestroy()
     {
         backButton.onClick.RemoveListener(Disable);
-        hideCatalogButton.onClick.RemoveListener(Disable);
         detailsToggleButton.onClick.RemoveListener(ToggleDetailsInfo);
         basicInfoTogglekButton.onClick.RemoveListener(ToggleBasicInfo);
         nameIF.onEndEdit.RemoveListener((newName) => ChangeEntityName(newName));
@@ -174,4 +175,19 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     public void SetRotationAttribute(Vector3 newRotation) { rotationAttribute.SetValues(newRotation); }
 
     public void SetScaleAttribute(Vector3 newScale) { scaleAttribute.SetValues(newScale); }
+
+    public void UpdateEntitiesSelection(int numberOfSelectedEntities)
+    {
+        if (numberOfSelectedEntities > 1)
+        {
+            individualEntityPanel.SetActive(false);
+            multipleEntitiesPanel.SetActive(true);
+            multipleEntitiesText.text = $"{numberOfSelectedEntities} entities selected.";
+        }
+        else
+        {
+            individualEntityPanel.SetActive(true);
+            multipleEntitiesPanel.SetActive(false);
+        }
+    }
 }

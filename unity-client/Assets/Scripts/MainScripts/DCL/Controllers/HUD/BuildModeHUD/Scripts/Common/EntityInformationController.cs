@@ -27,6 +27,7 @@ public interface IEntityInformationController
     void Enable();
     void Disable();
     void UpdateInfo(DCLBuilderInWorldEntity entity);
+    void UpdateEntitiesSelection(int numberOfSelectedEntities);
 }
 
 public class EntityInformationController : IEntityInformationController
@@ -224,4 +225,6 @@ public class EntityInformationController : IEntityInformationController
             entityInformationView.SetScaleAttribute(currentScale);
         }
     }
+
+    public void UpdateEntitiesSelection(int numberOfSelectedEntities) { entityInformationView.UpdateEntitiesSelection(numberOfSelectedEntities); }
 }

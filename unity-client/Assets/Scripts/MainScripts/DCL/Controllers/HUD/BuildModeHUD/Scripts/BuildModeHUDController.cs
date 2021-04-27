@@ -421,4 +421,6 @@ public class BuildModeHUDController : IHUD
     public void SceneObjectDroppedInView() { catalogItemDropController.CatalogitemDropped(); }
 
     internal virtual IBuildModeHUDView CreateView() => BuildModeHUDView.Create();
+
+    public void UpdateEntitiesSelection(int numberOfSelectedEntities) { controllers.entityInformationController.UpdateEntitiesSelection(numberOfSelectedEntities); }
 }
