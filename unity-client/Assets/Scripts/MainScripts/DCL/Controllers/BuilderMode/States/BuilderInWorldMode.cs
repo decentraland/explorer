@@ -19,7 +19,7 @@ public class BuilderInWorldMode : MonoBehaviour
 
     [Header("Prefab references")]
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
-
+    public BIWSaveController biwSaveController;
     public ActionController actionController;
 
     public event System.Action OnInputDone;
@@ -111,7 +111,11 @@ public class BuilderInWorldMode : MonoBehaviour
         entityDeselected.IsNew = false;
     }
 
-    public virtual void DeselectedEntities() { }
+    public virtual void DeselectedEntities()
+    {
+        builderInWorldEntityHandler.ReportTransform(true);
+        biwSaveController.TryToSave();
+    }
 
     public virtual void CheckInput() { }
 

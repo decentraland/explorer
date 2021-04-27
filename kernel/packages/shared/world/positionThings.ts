@@ -17,6 +17,7 @@ import {
 } from 'atomicHelpers/parcelScenePositions'
 import { DEBUG } from "../../config"
 import { isInsideWorldLimits } from '@dcl/schemas'
+import { CameraMode } from 'decentraland-ecs/src/decentraland/Types'
 
 declare var location: any
 declare var history: any
@@ -47,6 +48,8 @@ export const positionObservable = new Observable<Readonly<PositionReport>>()
 export const parcelObservable = new Observable<ParcelReport>()
 
 export const teleportObservable = new Observable<ReadOnlyVector2>()
+
+export const cameraModeObservable = new Observable<CameraMode>()
 
 export const lastPlayerPosition = new Vector3()
 export let lastPlayerParcel: Vector2

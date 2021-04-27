@@ -1,5 +1,6 @@
 fileFormatVersion: 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/QuestsTrackerHUD/Resources/QuestNotification_RewardObtained.prefab.meta
 guid: 109a9d70273810847bd39c01b622854b
 =======
@@ -8,6 +9,13 @@ guid: 6315466c90043f14a918976fc0c3db5d
 =======
 guid: 109a9d70273810847bd39c01b622854b
 >>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5
+=======
+<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/BuilderProjectsPanel/Prefabs/EditorLockedTooltipEstateView.prefab.meta
+guid: 6deb8a3b85c4d4ce1823a50175d23886
+=======
+guid: 109a9d70273810847bd39c01b622854b
+>>>>>>> 545821505e4507f4c7d64d7eb4745f244a2cde6f:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/QuestsTrackerHUD/Resources/QuestNotification_RewardObtained.prefab.meta
+>>>>>>> 545821505e4507f4c7d64d7eb4745f244a2cde6f
 PrefabImporter:
   externalObjects: {}
   userData: 

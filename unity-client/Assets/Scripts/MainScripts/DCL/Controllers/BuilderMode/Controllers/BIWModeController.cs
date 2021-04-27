@@ -103,9 +103,9 @@ public class BIWModeController : BIWController
         BuilderInWorldUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
     }
 
-    public override void EnterEditMode(ParcelScene parcelScene)
+    public override void EnterEditMode(ParcelScene scene)
     {
-        base.EnterEditMode(parcelScene);
+        base.EnterEditMode(scene);
         if (currentActiveMode == null)
             SetBuildMode(EditModeState.GodMode);
     }

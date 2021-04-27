@@ -1,5 +1,6 @@
 fileFormatVersion: 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 guid: 3d1a503a92d494d8aa3f35909695fa1f
 =======
 <<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Bridges/BuilderProjectsPanelBridge/BuilderProjectsPanelDataMock/BuilderProjectsPanelDataMock.asmdef.meta
@@ -8,6 +9,13 @@ guid: 99f1c728107724153bc9c17f979d04ea
 guid: 3d1a503a92d494d8aa3f35909695fa1f
 >>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5:unity-client/Assets/Scripts/MainScripts/DCL/ServiceProviders/Catalyst/Catalyst.asmdef.meta
 >>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5
+=======
+<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Helpers/DeployedScenesFetcher/DeployedScenesFetcher.asmdef.meta
+guid: 4441321ef4d7544189dc9aaf74e00438
+=======
+guid: 3d1a503a92d494d8aa3f35909695fa1f
+>>>>>>> 545821505e4507f4c7d64d7eb4745f244a2cde6f:unity-client/Assets/Scripts/MainScripts/DCL/ServiceProviders/Catalyst/Catalyst.asmdef.meta
+>>>>>>> 545821505e4507f4c7d64d7eb4745f244a2cde6f
 AssemblyDefinitionImporter:
   externalObjects: {}
   userData: 

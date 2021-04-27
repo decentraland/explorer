@@ -76,7 +76,7 @@ export class BuilderServerAPIManager {
       const manifest: BuilderManifest = data.data
 
       //If this manifest contains assets, we add them so we don't need to fetch them
-      this.addAssetsFromManifest(manifest)
+      if (manifest) this.addAssetsFromManifest(manifest)
       return manifest
     } catch (e) {
       console.trace(e)
@@ -100,13 +100,14 @@ export class BuilderServerAPIManager {
       const response = await fetch(urlToFecth, params)
       const data = await response.json()
 
-      if (data.data === false) {
+      if (data.data.length === 0) {
         return undefined
       }
-      const manifest: BuilderManifest = data.data
+      const manifest: BuilderManifest = data.data[0]
 
       //If this manifest contains assets, we add them so we don't need to fetch them
-      this.addAssetsFromManifest(manifest)
+      if(manifest)
+         this.addAssetsFromManifest(manifest)
 
       return manifest
     } catch (e) {
@@ -135,6 +136,13 @@ export class BuilderServerAPIManager {
   }
 
   private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
+
+    //TODO: We should delete this when we enter in production or we won't be able to set the project in production
+    if (getDefaultTLD() === 'org')
+    {
+        console.log("Project saving is disable in org for the momment!")
+        return;
+    }
     const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
@@ -181,13 +189,54 @@ export class BuilderServerAPIManager {
       cols: 1,
       created_at: today,
       updated_at: today,
-      created_location: land
+      creation_coords: land
     }
 
     let builderScene: BuilderScene = {
       id: sceneId,
-      entities: {},
-      components: {},
+      entities: {
+        
+        "29d657c1-95cf-4e17-b424-fe252d43ced5": {
+          id: "29d657c1-95cf-4e17-b424-fe252d43ced5",
+          components: [
+            "14708436-ffd4-44d6-8a28-48d8fcb65917",
+            "47924b6e-27ba-41a3-8bd9-c025cd092a48"
+          ],
+          disableGizmos: true,
+        }
+      
+      },
+      components: {       
+        "14708436-ffd4-44d6-8a28-48d8fcb65917": {
+          id: "14708436-ffd4-44d6-8a28-48d8fcb65917",
+          type: "GLTFShape",
+          data: {
+            "assetId": "da1fed3c954172146414a66adfa134f7a5e1cb49c902713481bf2fe94180c2cf"
+          }
+        },
+        "47924b6e-27ba-41a3-8bd9-c025cd092a48": {
+          id: "47924b6e-27ba-41a3-8bd9-c025cd092a48",
+          type: "Transform",
+          data: {
+            "position": {
+              "x": 8,
+              "y": 0,
+              "z": 8
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          }
+        }
+      },
       assets: {},
       metrics: {
         textures: 0,
