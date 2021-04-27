@@ -30,6 +30,10 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     [SerializeField]
     AudioEvent eventAssetPlace;
     [SerializeField]
+    AudioEvent eventAssetSelect;
+    [SerializeField]
+    AudioEvent eventAssetDeselect;
+    [SerializeField]
     AudioEvent eventBuilderOutOfBounds;
     [SerializeField]
     AudioEvent eventBuilderOutOfBoundsPlaced;
@@ -41,9 +45,13 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     AudioEvent eventBuilderMusic;
 
     private List<string> entitiesOutOfBounds = new List<string>();
+    private int entityCount;
+    bool playPlacementSoundOnDeselect;
 
     private void Start()
     {
+        playPlacementSoundOnDeselect = false;
+
         inWorldController.OnEnterEditMode += OnEnterEditMode;
         inWorldController.OnExitEditMode += OnExitEditMode;
 
@@ -86,12 +94,20 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         entityHandler.OnEntitySelected -= OnAssetSelect;
     }
 
-    private void OnEnterEditMode() { CoroutineStarter.Start(StartBuilderMusic()); }
+    private void OnEnterEditMode()
+    {
+        UpdateEntityCount();
+        CoroutineStarter.Start(StartBuilderMusic());
+        if (HUDController.i.builderInWorldMainHud != null)
+            HUDController.i.builderInWorldMainHud.OnCatalogItemSelected += OnCatalogItemSelected;
+    }
 
     private void OnExitEditMode()
     {
         eventBuilderExit.Play();
         CoroutineStarter.Start(eventBuilderMusic.FadeOut(MUSIC_FADE_OUT_TIME_ON_EXIT));
+        if (HUDController.i.builderInWorldMainHud != null)
+            HUDController.i.builderInWorldMainHud.OnCatalogItemSelected -= OnCatalogItemSelected;
     }
 
     private void OnAssetSpawn() { eventAssetSpawn.Play(); }
@@ -109,15 +125,26 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         eventAssetDelete.Play();
     }
 
-    private void OnAssetSelect() { AudioScriptableObjects.inputFieldUnfocus.Play(true); }
+    private void OnAssetSelect() { eventAssetSelect.Play(); }
 
     private void OnAssetDeselect(DCLBuilderInWorldEntity entity)
     {
-        eventAssetPlace.Play();
+        if (playPlacementSoundOnDeselect) {
+            eventAssetPlace.Play();
+            playPlacementSoundOnDeselect = false;
+        }
+        else
+            eventAssetDeselect.Play();
+
+        UpdateEntityCount();
 
         if (entitiesOutOfBounds.Contains(entity.rootEntity.entityId)) {
             eventBuilderOutOfBoundsPlaced.Play();
         }
+    }
+
+    private void OnCatalogItemSelected(CatalogItem catalogItem) {
+        playPlacementSoundOnDeselect = true;
     }
 
     private void OnTutorialEnabled()
@@ -175,5 +202,15 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
                 entitiesOutOfBounds.Remove(entity.entityId);
             }
         }
+    }
+
+    private void UpdateEntityCount()
+    {
+        entityCount = entityHandler.GetCurrentSceneEntityCount();
+    }
+
+    private bool EntityHasBeenAddedSinceLastUpdate()
+    {
+        return (entityHandler.GetCurrentSceneEntityCount() > entityCount);
     }
 }
