@@ -610,12 +610,40 @@ namespace DCL.Controllers
             switch (componentName)
             {
                 case "shape":
-
                     if (entity.meshesInfo.currentShape is BaseShape baseShape)
                     {
                         baseShape.DetachFrom(entity);
                     }
 
+                    return;
+
+                case OnClick.NAME:
+                    {
+                        if ( entity.TryGetBaseComponent(CLASS_ID_COMPONENT.UUID_ON_CLICK, out IEntityComponent component ))
+                        {
+                            Utils.SafeDestroy(component.GetTransform().gameObject);
+                            entity.components.Remove( CLASS_ID_COMPONENT.UUID_ON_CLICK );
+                        }
+
+                        return;
+                    }
+                case OnPointerDown.NAME:
+                    {
+                        if ( entity.TryGetBaseComponent(CLASS_ID_COMPONENT.UUID_ON_DOWN, out IEntityComponent component ))
+                        {
+                            Utils.SafeDestroy(component.GetTransform().gameObject);
+                            entity.components.Remove( CLASS_ID_COMPONENT.UUID_ON_DOWN );
+                        }
+                    }
+                    return;
+                case OnPointerUp.NAME:
+                    {
+                        if ( entity.TryGetBaseComponent(CLASS_ID_COMPONENT.UUID_ON_UP, out IEntityComponent component ))
+                        {
+                            Utils.SafeDestroy(component.GetTransform().gameObject);
+                            entity.components.Remove( CLASS_ID_COMPONENT.UUID_ON_UP );
+                        }
+                    }
                     return;
             }
         }

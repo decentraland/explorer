@@ -139,7 +139,7 @@ namespace DCL.Components
                 if (updateCollisions)
                     ConfigureColliders(entity);
 
-                entity.OnShapeUpdated?.Invoke(entity);
+                RaiseOnShapeUpdated(entity);
             }
 
             previousModel = model;
@@ -252,7 +252,7 @@ namespace DCL.Components
 
             ConfigureColliders(entity);
 
-            entity.OnShapeUpdated?.Invoke(entity);
+            RaiseOnShapeUpdated(entity);
 
             OnFinishCallbacks?.Invoke(this);
             OnFinishCallbacks = null;
@@ -280,6 +280,13 @@ namespace DCL.Components
             {
                 OnFinishCallbacks += callback;
             }
+        }
+
+        private void RaiseOnShapeUpdated(IDCLEntity entity)
+        {
+            if (!isLoaded) return;
+            
+            entity.OnShapeUpdated?.Invoke(entity);
         }
     }
 }
