@@ -119,7 +119,7 @@ public class BuilderProjectsPanelController : IHUD
         if (isVisible)
         {
             FetchLandsAndScenes();
-            sectionsController.OpenSection(SectionId.LAND);
+            sectionsController.OpenSection(SectionId.SCENES_DEPLOYED);
         }
     }
 
