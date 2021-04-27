@@ -27,7 +27,7 @@ namespace DCL.Huds.QuestsTracker
 
             foreach (string questId in pinnedQuests.Get())
             {
-                view?.PinQuest(questId);
+                OnPinnedQuest(questId);
             }
         }
 
@@ -54,7 +54,7 @@ namespace DCL.Huds.QuestsTracker
             view?.ClearEntries();
             foreach (string questId in pinnedQuests)
             {
-                view?.PinQuest(questId);
+                OnPinnedQuest(questId);
             }
         }
 
@@ -69,7 +69,15 @@ namespace DCL.Huds.QuestsTracker
             view?.UpdateQuest(questId, hasProgress);
         }
 
-        private void OnPinnedQuest(string questId) { view?.PinQuest(questId); }
+        private void OnPinnedQuest(string questId)
+        {
+            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED || (model.visibility == QuestsLiterals.Visibility.SECRET && model.status == QuestsLiterals.Status.NOT_STARTED))
+            {
+                view?.RemoveEntry(questId);
+                return;
+            }
+            view?.PinQuest(questId);
+        }
 
         private void OnUnpinnedQuest(string questId) { view?.UnpinQuest(questId); }
 
