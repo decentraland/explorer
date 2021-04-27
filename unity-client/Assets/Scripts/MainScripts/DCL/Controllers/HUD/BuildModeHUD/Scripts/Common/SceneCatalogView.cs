@@ -24,7 +24,7 @@ public interface ISceneCatalogView
     void SetCatalogTitle(string text);
     void ToggleCatalogExpanse();
     void SetActive(bool isActive);
-    void SetBackBtnSprite(bool isBackSprite);
+    void ShowBackButton(bool isActive);
 }
 
 public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
@@ -38,10 +38,6 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 
     public event Action OnHideCatalogClicked;
     public event Action OnSceneCatalogBack;
-
-    [Header("Design")]
-    [SerializeField] internal Sprite mainCatalogBackBtnSprite;
-    [SerializeField] internal Sprite backCatalogBackBtnSprite;
 
     [Header("Prefab References")]
     [SerializeField] internal TextMeshProUGUI catalogTitleTxt;
@@ -101,13 +97,9 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         toggleCatalogBtn.onClick.RemoveListener(ToggleCatalogExpanse);
     }
 
-    private void OnEnable() {
-        AudioScriptableObjects.dialogOpen.Play();
-    }
+    private void OnEnable() { AudioScriptableObjects.dialogOpen.Play(); }
 
-    private void OnDisable() {
-        AudioScriptableObjects.dialogClose.Play();
-    }
+    private void OnDisable() { AudioScriptableObjects.dialogClose.Play(); }
 
     public void ToggleCatalogExpanse()
     {
@@ -135,14 +127,14 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 
     public void OnHideCatalogClick() { OnHideCatalogClicked?.Invoke(); }
 
-    public void SetBackBtnSprite(bool isBackSprite) { backgBtn.image.sprite = isBackSprite ? backCatalogBackBtnSprite : mainCatalogBackBtnSprite; }
+    public void ShowBackButton(bool isActive) { backgBtn.gameObject.SetActive(isActive); }
 
     public void Back() { OnSceneCatalogBack?.Invoke(); }
 
     public void SetCatalogTitle(string text) { catalogTitleTxt.text = text; }
 
     public bool IsCatalogOpen() { return gameObject.activeSelf; }
-    
+
     public bool IsCatalogExpanded() { return isCatalogExpanded; }
 
     public void CloseCatalog()
@@ -157,8 +149,5 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         gameObject.SetActive(false);
     }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 }

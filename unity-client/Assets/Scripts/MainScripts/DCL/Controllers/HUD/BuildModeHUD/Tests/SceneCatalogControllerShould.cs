@@ -173,6 +173,7 @@ namespace Tests.BuildModeHUDControllers
             // Assert
             Assert.IsTrue(sceneCatalogController.isShowingAssetPacks, "The isShowingAssetPacks is false!");
             sceneCatalogController.sceneCatalogView.Received(1).SetCatalogTitle(Arg.Any<string>());
+            sceneCatalogController.sceneCatalogView.Received(1).ShowBackButton(false);
         }
 
         [Test]
@@ -187,6 +188,7 @@ namespace Tests.BuildModeHUDControllers
             // Assert
             Assert.IsTrue(sceneCatalogController.isShowingAssetPacks, "The isShowingAssetPacks is false!");
             sceneCatalogController.sceneCatalogView.Received(1).SetCatalogTitle(Arg.Any<string>());
+            sceneCatalogController.sceneCatalogView.Received(1).ShowBackButton(false);
         }
 
         [Test]
