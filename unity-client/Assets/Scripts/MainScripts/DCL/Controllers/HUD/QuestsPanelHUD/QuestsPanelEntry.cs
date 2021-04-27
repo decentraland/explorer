@@ -73,11 +73,10 @@ namespace DCL.Huds.QuestsPanel
             SetThumbnail(quest.thumbnail_entry);
             pinQuestToggle.SetIsOnWithoutNotify(pinnedQuests.Contains(quest.id));
 
-            var questCompleted = quest.isCompleted;
-            pinQuestToggle.gameObject.SetActive(!questCompleted);
-            progressInTitle.fillAmount = quest.progress;
-            completedProgressInTitle.gameObject.SetActive(questCompleted);
-            completedMarkInTitle.gameObject.SetActive(questCompleted);
+            pinQuestToggle.gameObject.SetActive(!quest.isCompleted);
+            progressInTitle.transform.localScale = new Vector3(quest.progress, 1, 1);
+            completedProgressInTitle.gameObject.SetActive(quest.isCompleted);
+            completedMarkInTitle.gameObject.SetActive(quest.isCompleted);
 
             SetRewards(quest.rewards?.Length ?? 0);
         }
@@ -181,6 +180,13 @@ namespace DCL.Huds.QuestsPanel
             if (isDestroyed)
                 return;
             transform.parent = null;
+        }
+
+        public void SelfDestroy()
+        {
+            if (isDestroyed)
+                return;
+            Destroy(gameObject);
         }
     }
 }

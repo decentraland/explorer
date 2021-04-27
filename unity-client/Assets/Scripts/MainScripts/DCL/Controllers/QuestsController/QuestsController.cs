@@ -7,12 +7,14 @@ using UnityEngine;
 
 namespace DCL.QuestsController
 {
+    public delegate void NewQuest(string questId);
     public delegate void QuestUpdated(string questId, bool hasProgress);
     public delegate void QuestCompleted(string questId);
     public delegate void RewardObtained(string questId, string rewardId);
 
     public interface IQuestsController : IDisposable
     {
+        event NewQuest OnNewQuest;
         event QuestUpdated OnQuestUpdated;
         event QuestCompleted OnQuestCompleted;
         event RewardObtained OnRewardObtained;
@@ -28,6 +30,7 @@ namespace DCL.QuestsController
 
         public static IQuestsController i { get; internal set; }
 
+        public event NewQuest OnNewQuest;
         public event QuestUpdated OnQuestUpdated;
         public event QuestCompleted OnQuestCompleted;
         public event RewardObtained OnRewardObtained;
@@ -60,6 +63,7 @@ namespace DCL.QuestsController
                 pinnedQuests.Remove(questId);
             }
 
+            parsedQuests.ForEach(x => JsonUtility.ToJson(x));
             parsedQuests.ForEach(RestoreProgressFlags);
             //We ignore quests without sections/tasks
             quests.Set(parsedQuests.Where(x => x.sections != null && x.sections.Length > 0).Select(x => (x.id, x)));
@@ -71,6 +75,8 @@ namespace DCL.QuestsController
         /// <param name="progressedQuest"></param>
         public void UpdateQuestProgress(QuestModel progressedQuest)
         {
+            Debug.Log(JsonUtility.ToJson(progressedQuest));
+
             if (!progressedQuest.canBePinned)
                 pinnedQuests.Remove(progressedQuest.id);
 
@@ -86,6 +92,8 @@ namespace DCL.QuestsController
             {
                 RestoreProgressFlags(progressedQuest);
                 quests.Add(progressedQuest.id, progressedQuest);
+                if (!progressedQuest.isCompleted)
+                    OnNewQuest?.Invoke(progressedQuest.id);
                 return;
             }
 
@@ -116,6 +124,13 @@ namespace DCL.QuestsController
                     }
                 }
             }
+
+
+            // If quest is not blocked anymore or being secret has been just started, we call NewQuest event.
+            if (!progressedQuest.isCompleted &&
+                ((oldQuest.status == QuestsLiterals.Status.BLOCKED && progressedQuest.status != QuestsLiterals.Status.BLOCKED) ||
+                 (progressedQuest.visibility == QuestsLiterals.Visibility.SECRET && oldQuest.status == QuestsLiterals.Status.NOT_STARTED && progressedQuest.status != QuestsLiterals.Status.NOT_STARTED )))
+                OnNewQuest?.Invoke(progressedQuest.id);
 
             OnQuestUpdated?.Invoke(progressedQuest.id, HasProgressed(progressedQuest, oldQuest));
             if (!oldQuest.isCompleted && progressedQuest.isCompleted)

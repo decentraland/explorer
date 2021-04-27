@@ -26,7 +26,7 @@ namespace Tests.QuestsTrackerHUD
         [SetUp]
         public void SetUp()
         {
-            QuestModel questMock = new QuestModel { id = MOCK_QUEST_ID };
+            QuestModel questMock = new QuestModel { id = MOCK_QUEST_ID, status = QuestsLiterals.Status.ON_GOING };
             QuestSection sectionMock = new QuestSection { id = MOCK_SECTION_ID };
             QuestTask taskMock = new QuestTask { id = MOCK_TASK_ID };
             sectionMock.tasks = new [] { taskMock };
@@ -81,6 +81,12 @@ namespace Tests.QuestsTrackerHUD
         [Test]
         public void CallViewWhenPinnedQuestsSet()
         {
+            DataStore.i.Quests.quests.Set(new []
+            {
+                ("newQuest1", new QuestModel { id = "newQuest1" }),
+                ("newQuest2", new QuestModel { id = "newQuest2" })
+            });
+
             hudController.Initialize(questsController);
             DataStore.i.Quests.pinnedQuests.Set(new []
             {

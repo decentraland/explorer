@@ -104,7 +104,7 @@ namespace DCL.Huds.QuestsPanel
                 return;
             questEntries.Remove(questId);
             questEntry.Unparent();
-            Destroy(questEntry.gameObject);
+            questEntry.SelfDestroy();
 
             if (currentQuestInPopup == questId)
                 questPopup.Close();
