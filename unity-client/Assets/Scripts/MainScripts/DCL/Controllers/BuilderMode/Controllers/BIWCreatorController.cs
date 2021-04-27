@@ -194,6 +194,15 @@ public class BIWCreatorController : BIWController
         loadingPlaceHolder.DestroyAfterAnimation();
     }
 
+    public void RemoveLoadingObjectInmediate(string entityId)
+    {
+        if (!loadingGameObjects.ContainsKey(entityId))
+            return;
+        BIWLoadingPlaceHolder loadingPlaceHolder = loadingGameObjects[entityId];
+        loadingGameObjects.Remove(entityId);
+        loadingPlaceHolder.Disspose();
+    }
+
     #endregion
 
     #region Add Components

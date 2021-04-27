@@ -22,6 +22,8 @@ public class BIWLoadingPlaceHolder : MonoBehaviour
 
     public void DestroyAfterAnimation()
     {
+        if (placeHolderAnimator == null)
+            return;
         placeHolderAnimator.SetTrigger(disspose);
 
         foreach (ParticleSystem placeHolderParticleSystem in placeHolderParticleSystems)
@@ -45,7 +47,7 @@ public class BIWLoadingPlaceHolder : MonoBehaviour
                     isExitingAnimationActive  = true;
                 yield return null;
             }
-            if (gameObject != null)
+            if (this != null)
                 Destroy(gameObject);
         }
     }

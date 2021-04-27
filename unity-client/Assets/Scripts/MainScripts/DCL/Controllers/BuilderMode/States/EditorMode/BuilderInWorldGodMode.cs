@@ -298,9 +298,13 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (isPlacingNewObject)
             return;
 
-        isSquareMultiSelectionInputActive = true;
-        isTypeOfBoundSelectionSelected = false;
-        isVoxelBoundMultiSelection = false;
+        var entity = builderInWorldEntityHandler.GetEntityOnPointer();
+        if (entity != null && !entity.IsSelected)
+        {
+            isSquareMultiSelectionInputActive = true;
+            isTypeOfBoundSelectionSelected = false;
+            isVoxelBoundMultiSelection = false;
+        }
         mouseMainBtnPressed = true;
         freeCameraController.SetCameraCanMove(false);
         outlinerController.SetOutlineCheckActive(false);

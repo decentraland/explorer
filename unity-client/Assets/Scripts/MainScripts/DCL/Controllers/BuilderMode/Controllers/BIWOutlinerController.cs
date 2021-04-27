@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 
 public class BIWOutlinerController : BIWController
 {
@@ -15,7 +16,7 @@ public class BIWOutlinerController : BIWController
     public Material outlineMaterial;
     public Material cameraOutlinerMaterial;
 
-    public BuilderInWorldController builderInWorldController;
+    [SerializeField] internal BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BIWInputHandler biwInputHandler;
 
     private List<DCLBuilderInWorldEntity> entitiesOutlined = new List<DCLBuilderInWorldEntity>();
@@ -42,11 +43,11 @@ public class BIWOutlinerController : BIWController
         {
             if (!BuilderInWorldUtils.IsPointerOverUIElement())
             {
-                DCLBuilderInWorldEntity entity = builderInWorldController.GetEntityOnPointer();
-                if (!biwInputHandler.IsMultiSelectionActive())
-                    CancelAllOutlines();
-                else
-                    CancelUnselectedOutlines();
+                DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.GetEntityOnPointer();
+                // if (!biwInputHandler.IsMultiSelectionActive())
+                //     CancelAllOutlines();
+                // else
+                CancelUnselectedOutlines();
 
                 if (entity != null && !entity.IsSelected)
                     OutlineEntity(entity);

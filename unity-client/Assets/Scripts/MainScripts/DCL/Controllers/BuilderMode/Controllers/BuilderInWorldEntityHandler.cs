@@ -20,16 +20,14 @@ public class BuilderInWorldEntityHandler : BIWController
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
 
-    public BuilderInWorldController buildModeController;
     public BIWModeController biwModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
-    public BIWSaveController biwSaveController;
+    public BIWCreatorController biwCreatorController;
 
     [Header("Build References")]
     public Material editMaterial;
-
-    public Texture2D duplicateCursorTexture;
+    [SerializeField] internal LayerMask layerToRaycast;
 
     [Header("InputActions")]
     [SerializeField]
@@ -170,7 +168,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public bool IsPointerInSelectedEntity()
     {
-        DCLBuilderInWorldEntity entityInPointer = buildModeController.GetEntityOnPointer();
+        DCLBuilderInWorldEntity entityInPointer = GetEntityOnPointer();
         if (entityInPointer == null)
             return false;
 
@@ -260,6 +258,24 @@ public class BuilderInWorldEntityHandler : BIWController
         currentActiveMode?.OnDeselectedEntities();
 
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+    }
+
+    public DCLBuilderInWorldEntity GetEntityOnPointer()
+    {
+        RaycastHit hit;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(biwModeController.GetMousePosition());
+        float distanceToSelect = biwModeController.GetMaxDistanceToSelectEntities();
+
+        if (Physics.Raycast(ray, out hit, distanceToSelect, layerToRaycast))
+        {
+            string entityID = hit.collider.gameObject.name;
+
+            if (sceneToEdit.entities.ContainsKey(entityID))
+            {
+                return GetConvertedEntity(sceneToEdit.entities[entityID]);
+            }
+        }
+        return null;
     }
 
     public void EntityClicked(DCLBuilderInWorldEntity entityToSelect)
@@ -654,6 +670,7 @@ public class BuilderInWorldEntityHandler : BIWController
         entityToDelete.Delete();
         string idToRemove = entityToDelete.rootEntity.entityId;
         currentActiveMode?.OnDeleteEntity(entityToDelete);
+        biwCreatorController.RemoveLoadingObjectInmediate(entityToDelete.rootEntity.entityId);
         Destroy(entityToDelete);
         if (sceneToEdit.entities.ContainsKey(idToRemove))
             sceneToEdit.RemoveEntity(idToRemove, true);

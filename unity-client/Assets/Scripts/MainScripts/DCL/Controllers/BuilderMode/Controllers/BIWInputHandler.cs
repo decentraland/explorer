@@ -187,7 +187,7 @@ public class BIWInputHandler : BIWController
 
     private void MouseClickDetected()
     {
-        DCLBuilderInWorldEntity entityToSelect = builderInWorldController.GetEntityOnPointer();
+        DCLBuilderInWorldEntity entityToSelect = builderInWorldEntityHandler.GetEntityOnPointer();
         if (entityToSelect != null)
         {
             builderInWorldEntityHandler.EntityClicked(entityToSelect);

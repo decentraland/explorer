@@ -12,7 +12,7 @@ namespace UnityGLTF
     /// </summary>
     public class GLTFComponent : MonoBehaviour, ILoadable
     {
-        public static bool VERBOSE = false;
+        public static bool VERBOSE = true;
 
         public static int maxSimultaneousDownloads = 10;
         public static float nearestDistance = float.MaxValue;
