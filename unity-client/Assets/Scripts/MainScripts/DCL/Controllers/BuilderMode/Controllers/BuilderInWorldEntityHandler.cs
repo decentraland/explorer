@@ -443,7 +443,6 @@ public class BuilderInWorldEntityHandler : BIWController
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(entity);
-        convertedEntity.IsNew = true;
 
         NotifyEntityIsCreated(entity);
         EntityListChanged();
@@ -532,6 +531,9 @@ public class BuilderInWorldEntityHandler : BIWController
             if (entity.IsSelected && entity.IsNew)
                 entitiesToRemove.Add(entity);
         }
+
+        if (entitiesToRemove.Count == 0)
+            return;
 
         biwModeController.UndoEditionGOLastStep();
 
