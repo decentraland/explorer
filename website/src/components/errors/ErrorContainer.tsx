@@ -7,6 +7,7 @@ import { ErrorNewLogin } from "./ErrorNewLogin";
 import { ErrorNetworkMismatch } from "./ErrorNetworkMismatch";
 import { ErrorNotInvited } from "./ErrorNotInvited";
 import { ErrorNotSupported } from "./ErrorNotSupported";
+import { ErrorAvatarLoading } from "./ErrorAvatarLoading"
 
 import "./errors.css";
 
@@ -18,6 +19,7 @@ export enum Error {
   NOT_INVITED = "notinvited",
   NOT_SUPPORTED = "notsupported",
   NET_MISMATCH = "networkmismatch",
+  AVATAR_ERROR = "avatarerror"
 }
 
 const mapStateToProps = (state: any) => {
@@ -44,6 +46,7 @@ export const ErrorContainer: React.FC<ErrorContainerProps> = (props) => {
       {props.error === Error.NET_MISMATCH && (
         <ErrorNetworkMismatch details={props.details} />
       )}
+      {props.error === Error.AVATAR_ERROR && <ErrorAvatarLoading />}
     </React.Fragment>
   );
 };
