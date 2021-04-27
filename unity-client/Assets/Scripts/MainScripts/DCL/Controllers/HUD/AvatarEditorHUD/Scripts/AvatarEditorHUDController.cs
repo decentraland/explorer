@@ -127,7 +127,7 @@ public class AvatarEditorHUDController : IHUD
                          });
     }
 
-    public void RetryLoadOwnedWereables()
+    public void RetryLoadOwnedWearables()
     {
         ownedWearablesRemainingRequests = LOADING_OWNED_WEARABLES_RETRIES;
         LoadOwnedWereables(userProfile);

@@ -318,14 +318,14 @@ public class CatalogController : MonoBehaviour
                 }
             }
 
-            foreach (var expiredRquestToRemove in expiredRequests)
+            foreach (var expiredRequestToRemove in expiredRequests)
             {
-                pendingWearablesByContextRequestedTimes.Remove(expiredRquestToRemove);
+                pendingWearablesByContextRequestedTimes.Remove(expiredRequestToRemove);
 
                 ResolvePendingWearablesByContextPromise(
-                    expiredRquestToRemove,
+                    expiredRequestToRemove,
                     null,
-                    $"The request for the wearable context '{expiredRquestToRemove}' has exceed the set timeout!");
+                    $"The request for the wearable context '{expiredRequestToRemove}' has exceed the set timeout!");
             }
         }
     }

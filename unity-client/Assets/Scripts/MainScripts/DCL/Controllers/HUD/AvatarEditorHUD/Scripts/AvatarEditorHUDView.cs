@@ -193,7 +193,7 @@ public class AvatarEditorHUDView : MonoBehaviour
 
         collectiblesItemSelector.OnItemClicked += controller.WearableClicked;
         collectiblesItemSelector.OnSellClicked += controller.SellCollectible;
-        collectiblesItemSelector.OnRetryClicked += controller.RetryLoadOwnedWereables;
+        collectiblesItemSelector.OnRetryClicked += controller.RetryLoadOwnedWearables;
 
         skinColorSelector.OnColorChanged += controller.SkinColorClicked;
         eyeColorSelector.OnColorChanged += controller.EyesColorClicked;
@@ -403,7 +403,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         {
             collectiblesItemSelector.OnItemClicked -= controller.WearableClicked;
             collectiblesItemSelector.OnSellClicked -= controller.SellCollectible;
-            collectiblesItemSelector.OnRetryClicked -= controller.RetryLoadOwnedWereables;
+            collectiblesItemSelector.OnRetryClicked -= controller.RetryLoadOwnedWearables;
         }
 
         if (skinColorSelector != null)
