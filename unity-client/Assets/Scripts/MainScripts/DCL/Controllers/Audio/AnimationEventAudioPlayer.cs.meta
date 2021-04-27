@@ -1,21 +1,5 @@
 fileFormatVersion: 2
-<<<<<<< HEAD
-<<<<<<< HEAD
 guid: 7c67778c03e2cdf4b98268b406743e04
-=======
-<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Bridges/BuilderProjectsPanelBridge/BuilderProjectsPanelBridge.cs.meta
-guid: 9e2408b79734a465a861c1d08bccc0b5
-=======
-guid: 7c67778c03e2cdf4b98268b406743e04
->>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/Audio/AnimationEventAudioPlayer.cs.meta
->>>>>>> bdbe69f14f81dc7a53c43d9d1d50e869090a70a5
-=======
-<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/HUD/BuilderProjectsPanel/Editor/BuilderPorjectsPanelLocalTest.cs.meta
-guid: 9abd3cdeead59402fbe03129f604ba32
-=======
-guid: 7c67778c03e2cdf4b98268b406743e04
->>>>>>> 545821505e4507f4c7d64d7eb4745f244a2cde6f:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/Audio/AnimationEventAudioPlayer.cs.meta
->>>>>>> 545821505e4507f4c7d64d7eb4745f244a2cde6f
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
