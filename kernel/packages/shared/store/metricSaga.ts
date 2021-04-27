@@ -28,7 +28,8 @@ import {
   NOT_INVITED,
   NEW_LOGIN,
   CATALYST_COULD_NOT_LOAD,
-  AWAITING_USER_SIGNATURE
+  AWAITING_USER_SIGNATURE,
+  AVATAR_LOADING_ERROR
 } from '../loading/types'
 
 const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
@@ -58,7 +59,8 @@ const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   [COMMS_COULD_NOT_BE_ESTABLISHED]: 'error_comms_failed',
   [CATALYST_COULD_NOT_LOAD]: 'error_catalyst_loading',
   [MOBILE_NOT_SUPPORTED]: 'unsupported_mobile',
-  [NOT_INVITED]: 'error_not_invited'
+  [NOT_INVITED]: 'error_not_invited',
+  [AVATAR_LOADING_ERROR]: 'error_avatar_loading'
 }
 
 export function* metricSaga() {
