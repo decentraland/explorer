@@ -38,7 +38,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 
     public event Action OnCancelLoading;
 
-    public bool isActive => gameObject.activeInHierarchy;
+    public bool isActive => gameObject.activeSelf;
 
     internal Coroutine tipsCoroutine;
     internal Coroutine hideCoroutine;

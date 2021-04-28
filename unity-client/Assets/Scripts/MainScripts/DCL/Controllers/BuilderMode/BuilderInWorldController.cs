@@ -344,7 +344,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         Environment.i.world.sceneController.OnNewSceneAdded -= NewSceneAdded;
 
-        FindSceneToEdit();
+        sceneToEdit = Environment.i.world.state.GetScene(sceneToEditId) as ParcelScene;
         sceneToEdit.OnLoadingStateUpdated += UpdateSceneLoadingProgress;
     }
 
