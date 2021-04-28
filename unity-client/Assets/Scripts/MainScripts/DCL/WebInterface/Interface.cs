@@ -631,7 +631,7 @@ namespace DCL.Interface
         private static RequestWearablesPayload requestWearablesPayload = new RequestWearablesPayload();
         private static SearchENSOwnerPayload searchEnsOwnerPayload = new SearchENSOwnerPayload();
 
-        public static void SendAllScenesEvent<T>(string eventType, T payload)
+        private static void SendAllScenesEvent<T>(string eventType, T payload)
         {
             AllScenesEvent<T> allScenesEvent = new AllScenesEvent<T>();
             allScenesEvent.eventType = eventType;
