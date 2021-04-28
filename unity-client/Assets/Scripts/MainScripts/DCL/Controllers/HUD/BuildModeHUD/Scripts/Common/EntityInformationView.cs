@@ -25,7 +25,6 @@ public interface IEntityInformationView
     void SetCurrentEntity(DCLBuilderInWorldEntity entity);
     void SetEntityThumbnailEnable(bool isEnable);
     void SetEntityThumbnailTexture(Texture2D texture);
-    void SeTitleText(string text);
     void SetNameIFText(string text);
     void SetPositionAttribute(Vector3 newPos);
     void SetRotationAttribute(Vector3 newRotation);
@@ -47,7 +46,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     [SerializeField] internal GameObject individualEntityPanel;
     [SerializeField] internal GameObject multipleEntitiesPanel;
     [SerializeField] internal TextMeshProUGUI multipleEntitiesText;
-    [SerializeField] internal TextMeshProUGUI titleTxt;
     [SerializeField] internal TextMeshProUGUI entityLimitsTrisTxt;
     [SerializeField] internal TextMeshProUGUI entityLimitsMaterialsTxt;
     [SerializeField] internal TextMeshProUGUI entityLimitsTextureTxt;
@@ -155,8 +153,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
         entitytTumbailImg.texture = texture;
     }
 
-    public void SeTitleText(string text) { titleTxt.text = text; }
-
     public void SeEntityLimitsText(string tris, string mats, string textures)
     {
         entityLimitsTrisTxt.text = tris;
@@ -182,7 +178,7 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
         {
             individualEntityPanel.SetActive(false);
             multipleEntitiesPanel.SetActive(true);
-            multipleEntitiesText.text = $"{numberOfSelectedEntities} entities selected.";
+            multipleEntitiesText.text = $"{numberOfSelectedEntities} entities selected";
         }
         else
         {

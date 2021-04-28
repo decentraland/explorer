@@ -168,7 +168,6 @@ public class EntityInformationController : IEntityInformationController
             return;
 
         string currentName = entity.GetDescriptiveName();
-        entityInformationView.SeTitleText(currentName);
 
         if (!isChangingName)
             entityInformationView.SetNameIFText(currentName);

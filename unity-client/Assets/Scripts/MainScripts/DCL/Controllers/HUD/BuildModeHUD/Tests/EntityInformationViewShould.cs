@@ -165,20 +165,6 @@ namespace Tests.BuildModeHUDViews
         }
 
         [Test]
-        public void SetTitleTextCorrectly()
-        {
-            // Arrange
-            string newText = "Test text";
-            entityInformationView.titleTxt.text = "";
-
-            // Act
-            entityInformationView.SeTitleText(newText);
-
-            // Assert
-            Assert.AreEqual(newText, entityInformationView.titleTxt.text, "The title text does not match!");
-        }
-
-        [Test]
         public void SeEntityLimitsLeftTextCorrectly()
         {
             // Arrange

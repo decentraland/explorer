@@ -192,7 +192,6 @@ namespace Tests.BuildModeHUDControllers
             entityInformationController.UpdateEntityName(testEntity);
 
             // Assert
-            entityInformationController.entityInformationView.Received(1).SeTitleText(Arg.Any<string>());
             entityInformationController.entityInformationView.Received(1).SetNameIFText(Arg.Any<string>());
         }
 
