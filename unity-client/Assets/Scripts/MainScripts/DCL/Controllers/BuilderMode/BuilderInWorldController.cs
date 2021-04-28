@@ -5,6 +5,7 @@ using DCL.Tutorial;
 using UnityEngine;
 using Environment = DCL.Environment;
 using System;
+using DCL;
 
 public class BuilderInWorldController : MonoBehaviour
 {
@@ -91,6 +92,8 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.OnTutorialAction -= StartTutorial;
             HUDController.i.builderInWorldMainHud.OnLogoutAction -= ExitEditMode;
         }
+        
+        BuilderInWorldTeleportAndEdit.OnTeleportEnd -= OnPlayerTeleportedToEditScene;
 
         if (initialLoadingController != null)
         {
@@ -170,6 +173,8 @@ public class BuilderInWorldController : MonoBehaviour
         HUDController.i.builderInWorldInititalHud.OnEnterEditMode += TryStartEnterEditMode;
         HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
         HUDController.i.builderInWorldMainHud.OnLogoutAction += ExitEditMode;
+
+        BuilderInWorldTeleportAndEdit.OnTeleportEnd += OnPlayerTeleportedToEditScene;
 
         ConfigureLoadingController();
         InitControllers();
@@ -541,6 +546,14 @@ public class BuilderInWorldController : MonoBehaviour
                 sceneToEdit = scene;
                 break;
             }
+        }
+    }
+
+    private void OnPlayerTeleportedToEditScene(Vector2Int coords)
+    {
+        if (activeFeature)
+        {
+            TryStartEnterEditMode();
         }
     }
 }
