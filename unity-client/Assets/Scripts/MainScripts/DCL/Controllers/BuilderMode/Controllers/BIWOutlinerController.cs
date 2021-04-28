@@ -44,10 +44,7 @@ public class BIWOutlinerController : BIWController
             if (!BuilderInWorldUtils.IsPointerOverUIElement())
             {
                 DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.GetEntityOnPointer();
-                // if (!biwInputHandler.IsMultiSelectionActive())
-                //     CancelAllOutlines();
-                // else
-                CancelUnselectedOutlines();
+                RemoveEntitiesOutsidePointerOrUnselected();
 
                 if (entity != null && !entity.IsSelected)
                     OutlineEntity(entity);
@@ -96,6 +93,16 @@ public class BIWOutlinerController : BIWController
             {
                 CancelEntityOutline(entitiesOutlined[i]);
             }
+        }
+    }
+
+    public void RemoveEntitiesOutsidePointerOrUnselected()
+    {
+        var entity = builderInWorldEntityHandler.GetEntityOnPointer();
+        for (int i = 0; i < entitiesOutlined.Count; i++)
+        {
+            if (!entitiesOutlined[i].IsSelected || entity != entitiesOutlined[i])
+                CancelEntityOutline(entitiesOutlined[i]);
         }
     }
 

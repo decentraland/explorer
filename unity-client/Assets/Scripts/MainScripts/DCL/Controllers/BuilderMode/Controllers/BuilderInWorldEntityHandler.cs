@@ -354,8 +354,16 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public void ChangeShowStateSelectedEntities()
     {
-        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
+        List<DCLBuilderInWorldEntity> entitiesToHide = new List<DCLBuilderInWorldEntity>(selectedEntities);
+        // foreach (DCLBuilderInWorldEntity entity in selectedEntities)
+        // {
+        //     entitiesToHide.Add(entity);
+        // }
+
+        foreach (DCLBuilderInWorldEntity entity in entitiesToHide)
         {
+            if (entity.IsVisible && entity.IsSelected)
+                DeselectEntity(entity);
             entity.ToggleShowStatus();
         }
     }
@@ -577,10 +585,7 @@ public class BuilderInWorldEntityHandler : BIWController
         hudController.SetEntityList(GetEntitiesInCurrentScene());
     }
 
-    public int GetCurrentSceneEntityCount()
-    {
-        return GetEntitiesInCurrentScene().Count;
-    }
+    public int GetCurrentSceneEntityCount() { return GetEntitiesInCurrentScene().Count; }
 
     List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
     {
