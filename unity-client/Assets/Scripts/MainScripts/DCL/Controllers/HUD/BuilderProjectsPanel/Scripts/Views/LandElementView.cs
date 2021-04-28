@@ -30,6 +30,9 @@ internal class LandElementView : MonoBehaviour, IDisposable
     [SerializeField] internal UIHoverTriggerShowHideAnimator editorLocked;
     [SerializeField] private ShowHideAnimator editorLockedTooltipEstate;
     [SerializeField] private ShowHideAnimator editorLockedTooltipSdkScene;
+    [SerializeField] internal Animator loadingAnimator;
+    
+    private static readonly int isLoadingAnimation = Animator.StringToHash("isLoading");
 
     public ISearchInfo searchInfo { get; } = new SearchInfo();
 
@@ -140,6 +143,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
         if (url == thumbnailUrl)
             return;
 
+        loadingAnimator.SetBool(isLoadingAnimation, true);
         thumbnailUrl = url;
 
         var prevPromise = thumbnailPromise;
@@ -165,6 +169,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
     public void SetThumbnail(Texture thumbnailTexture)
     {
         thumbnail.texture = thumbnailTexture;
+        loadingAnimator.SetBool(isLoadingAnimation, false);
     }
 
     public void SetEditable(bool isEditable)

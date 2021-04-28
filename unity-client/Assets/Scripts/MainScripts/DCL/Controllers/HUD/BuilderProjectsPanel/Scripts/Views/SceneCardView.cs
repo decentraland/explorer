@@ -69,6 +69,10 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
 
     [SerializeField] internal GameObject editorLockedGO;
     [SerializeField] internal GameObject editorLockedTooltipGO;
+    
+    [SerializeField] internal Animator loadingAnimator;
+    
+    private static readonly int isLoadingAnimation = Animator.StringToHash("isLoading");
 
     ISearchInfo ISceneCardView.searchInfo { get; } = new SearchInfo();
     ISceneData ISceneCardView.sceneData => sceneData;
@@ -143,6 +147,8 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
 
     void ISceneCardView.SetThumbnail(string thumbnailUrl)
     {
+        loadingAnimator.SetBool(isLoadingAnimation, true);
+        
         if (thumbnailPromise != null)
         {
             AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
@@ -165,6 +171,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     void ISceneCardView.SetThumbnail(Texture2D thumbnailTexture)
     {
         thumbnail.texture = thumbnailTexture ?? defaultThumbnail;
+        loadingAnimator.SetBool(isLoadingAnimation, false);
     }
 
     void ISceneCardView.SetDeployed(bool deployed)
