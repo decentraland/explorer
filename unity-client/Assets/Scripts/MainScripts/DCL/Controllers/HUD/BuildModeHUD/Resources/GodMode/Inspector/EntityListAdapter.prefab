@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8690944226667863885}
   - component: {fileID: 7764534091301909399}
   - component: {fileID: 4435950372000458455}
+  - component: {fileID: 3055440241725497703}
   m_Layer: 0
   m_Name: UnlockButton
   m_TagString: Untagged
@@ -130,6 +131,22 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3055440241725497703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315810767479724011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playHover: 0
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &1639278206607765011
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,6 +607,7 @@ GameObject:
   - component: {fileID: 2867222797425772182}
   - component: {fileID: 5439454521911294905}
   - component: {fileID: 183314318796568087}
+  - component: {fileID: 1453597485032396424}
   m_Layer: 0
   m_Name: Show/HideButton
   m_TagString: Untagged
@@ -707,6 +725,22 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1453597485032396424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3904096514025101057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playHover: 0
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &4538675465682245217
 GameObject:
   m_ObjectHideFlags: 0
@@ -719,6 +753,7 @@ GameObject:
   - component: {fileID: 460735212930397391}
   - component: {fileID: 7427889286139121875}
   - component: {fileID: 6621741414445235588}
+  - component: {fileID: 6407499108160075663}
   m_Layer: 0
   m_Name: LockButton
   m_TagString: Untagged
@@ -837,6 +872,22 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6407499108160075663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4538675465682245217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playHover: 0
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &7383184414712840795
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,10 +7,10 @@ import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
+import { CameraMode, IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
-import { aborted } from 'shared/loading/ReportFatalError'
+import { aborted, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, ProfileType } from 'shared/profiles/types'
@@ -23,7 +23,7 @@ import {
 } from 'shared/types'
 import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { positionObservable } from 'shared/world/positionThings'
+import { cameraModeObservable, positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
@@ -55,6 +55,7 @@ import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -114,6 +115,10 @@ export class BrowserInterface {
     }
 
     positionObservable.notifyObservers(positionEvent)
+  }
+
+  public ReportCameraMode(data: { cameraMode: CameraMode }) {
+    cameraModeObservable.notifyObservers(data.cameraMode)
   }
 
   public ReportMousePosition(data: { id: string; mousePosition: ReadOnlyVector3 }) {
@@ -515,6 +520,10 @@ export class BrowserInterface {
     ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
       .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
       .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
+  }
+
+  public ReportAvatarFatalError() {
+    ReportFatalError(AVATAR_LOADING_ERROR)
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {

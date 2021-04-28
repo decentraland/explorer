@@ -85,6 +85,15 @@ The make process will take a while. When its finished, you can start debugging t
 
 Note that the Unity version used by this approach will be the latest version deployed to `master` branch. If you need a local Unity build, check out the [advanced debugging scenarios](#advanced-debugging-scenarios).
 
+### Update local renderer build version
+
+The unity build used when accessing through localhost can be changed with several commands:
+* `make update-renderer` downloads the renderer build for the current branch (or master branch if there is no current-branch build yet) and installs it, overwriting the previous build.
+* `make update-renderer-master` downloads the renderer build for the master branch and installs it, overwriting the previous build.
+* `make watch` triggers a `make update-renderer` during its local server startup process.
+  
+Keep in mind that a `make watch` should be run and keep the server up before updating the local build, otherwise it will be replaced by the `make watch` command.
+
 ### Run kernel tests
 
 To see test logs/errors directly in the browser, run:
