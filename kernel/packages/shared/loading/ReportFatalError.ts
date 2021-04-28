@@ -9,7 +9,8 @@ import {
   NETWORK_MISMATCH,
   NEW_LOGIN,
   NO_WEBGL_COULD_BE_CREATED,
-  NOT_INVITED
+  NOT_INVITED,
+  AVATAR_LOADING_ERROR
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import Html from '../Html'
@@ -44,7 +45,10 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       ? 'newlogin'
       : event === NETWORK_MISMATCH
       ? 'networkmismatch'
+      : event === AVATAR_LOADING_ERROR
+      ? 'avatarerror'
       : 'fatal'
+
   globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
   Html.showErrorModal(targetError)
   aborted = true

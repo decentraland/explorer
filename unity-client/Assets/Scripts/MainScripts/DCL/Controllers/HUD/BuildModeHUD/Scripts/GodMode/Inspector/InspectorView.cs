@@ -24,17 +24,7 @@ public interface IInspectorView
 
 public class InspectorView : MonoBehaviour, IInspectorView
 {
-    public EntityListView entityList 
-    {
-        get 
-        { 
-            return entityListView; 
-        }
-        set 
-        {
-            entityListView = value;
-        }
-    }
+    public EntityListView entityList { get { return entityListView; } set { entityListView = value; } }
     public List<DCLBuilderInWorldEntity> entities => entitiesList;
     public ISceneLimitsController sceneLimitsController { get; internal set; }
 
@@ -72,30 +62,21 @@ public class InspectorView : MonoBehaviour, IInspectorView
             sceneLimitsController.Dispose();
     }
 
-    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
-    {
-        OnEntityActionInvoked?.Invoke(action, entityToApply, adapter);
-    }
+    private void OnEnable() { AudioScriptableObjects.dialogOpen.Play(); }
 
-    public void EntityRename(DCLBuilderInWorldEntity entity, string newName)
-    {
-        OnEntityRename?.Invoke(entity, newName);
-    }
+    private void OnDisable() { AudioScriptableObjects.dialogClose.Play(); }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter) { OnEntityActionInvoked?.Invoke(action, entityToApply, adapter); }
 
-    public void SetEntitiesList(List<DCLBuilderInWorldEntity> entities)
-    {
-        entitiesList = entities;
-    }
+    public void EntityRename(DCLBuilderInWorldEntity entity, string newName) { OnEntityRename?.Invoke(entity, newName); }
 
-    public void ClearEntitiesList()
-    {
-        entitiesList.Clear();
-    }
+    public bool IsActive() { return gameObject.activeSelf; }
+
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
+
+    public void SetEntitiesList(List<DCLBuilderInWorldEntity> entities) { entitiesList = entities; }
+
+    public void ClearEntitiesList() { entitiesList.Clear(); }
 
     public void SetCloseButtonsAction(UnityAction call)
     {

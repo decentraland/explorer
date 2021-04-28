@@ -95,6 +95,8 @@ export const FATAL_ERROR = 'fatal error'
 export const fatalError = (type: string) => action(FATAL_ERROR, { type })
 export const SET_ERROR_TLD = 'TLD network error'
 export const setTLDError = (values: any) => action(SET_ERROR_TLD, values)
+export const AVATAR_LOADING_ERROR = 'The avatar could not be loaded correctly'
+export const avatarLoadingError = () => action(AVATAR_LOADING_ERROR)
 
 export const SET_LOADING_SCREEN = 'setting loading screen'
 export const setLoadingScreen = (show: boolean) => action(SET_LOADING_SCREEN, { show })
@@ -154,6 +156,7 @@ export type ExecutionLifecycleEvent =
   | typeof NEW_LOGIN
   | typeof NETWORK_MISMATCH
   | typeof AWAITING_USER_SIGNATURE
+  | typeof AVATAR_LOADING_ERROR
 
 export const ExecutionLifecycleEventsList: ExecutionLifecycleEvent[] = [
   NOT_STARTED,
@@ -180,7 +183,8 @@ export const ExecutionLifecycleEventsList: ExecutionLifecycleEvent[] = [
   COMMS_COULD_NOT_BE_ESTABLISHED,
   CATALYST_COULD_NOT_LOAD,
   NEW_LOGIN,
-  NETWORK_MISMATCH
+  NETWORK_MISMATCH,
+  AVATAR_LOADING_ERROR
 ]
 
 export const SUBSYSTEMS_EVENTS = [

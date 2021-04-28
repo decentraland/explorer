@@ -3,6 +3,7 @@ using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BIWInputHandler : BIWController
 {
@@ -101,9 +102,9 @@ public class BIWInputHandler : BIWController
         biwModeController.CheckInput();
     }
 
-    public override void EnterEditMode(ParcelScene sceneToEdit)
+    public override void EnterEditMode(ParcelScene scene)
     {
-        base.EnterEditMode(sceneToEdit);
+        base.EnterEditMode(scene);
         builderInputWrapper.gameObject.SetActive(true);
     }
 
