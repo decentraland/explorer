@@ -428,6 +428,7 @@ public class BuilderInWorldController : MonoBehaviour
         initialLoadingController.SetPercentage(50f);
         Environment.i.world.sceneController.OnNewSceneAdded += NewSceneAdded;
         Environment.i.world.sceneController.OnReadyScene += NewSceneReady;
+        Environment.i.world.blockersController.SetEnabled(false);
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
     }
@@ -554,6 +555,7 @@ public class BuilderInWorldController : MonoBehaviour
         }
 
         Environment.i.world.sceneController.DeactivateBuilderInWorldEditScene();
+        Environment.i.world.blockersController.SetEnabled(true);
         ExitBiwControllers();
 
         foreach (var groundVisual in groundVisualsGO)
