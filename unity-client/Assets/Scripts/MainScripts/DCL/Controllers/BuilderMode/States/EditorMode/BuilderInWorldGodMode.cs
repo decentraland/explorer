@@ -310,8 +310,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             return;
 
         var entity = builderInWorldEntityHandler.GetEntityOnPointer();
-        if (entity == null
-            || (entity != null && !entity.IsSelected)
+        if ((entity == null
+             || (entity != null && !entity.IsSelected))
             && !BuilderInWorldUtils.IsPointerOverMaskElement(layerToStopClick))
         {
             isSquareMultiSelectionInputActive = true;
@@ -372,6 +372,10 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         List<DCLBuilderInWorldEntity> selectedInsideBoundsEntities = new List<DCLBuilderInWorldEntity>();
         int alreadySelectedEntities = 0;
+
+        if (!isMultiSelectionActive)
+            builderInWorldEntityHandler.DeselectEntities();
+
         foreach (DCLBuilderInWorldEntity entity in allEntities)
         {
             if ((entity.isVoxel && !isVoxelBoundMultiSelection) ||
@@ -391,7 +395,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
                 }
             }
         }
-        if (selectedInsideBoundsEntities.Count == alreadySelectedEntities)
+        if (selectedInsideBoundsEntities.Count == alreadySelectedEntities && alreadySelectedEntities > 0)
         {
             foreach (DCLBuilderInWorldEntity entity in selectedInsideBoundsEntities)
             {

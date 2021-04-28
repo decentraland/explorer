@@ -9,7 +9,6 @@ public class FreeCameraMovement : CameraStateBase
 {
     public float smoothLookAtSpeed = 5f;
     public float focusDistance = 5f;
-    public float focusSpeed = 5f;
 
     [Header("Manual Camera Movement")]
     public float keyboardMovementSpeed = 5f;
@@ -192,29 +191,23 @@ public class FreeCameraMovement : CameraStateBase
 
         Vector3 velocity = Vector3.zero;
         if (isAdvancingForward)
-        {
             velocity += GetTotalVelocity(velocity, transform.forward);
-        }
+
         if (isAdvancingBackward)
-        {
             velocity += GetTotalVelocity(velocity, -transform.forward);
-        }
+
         if (isAdvancingRight)
-        {
             velocity += GetTotalVelocity(velocity, transform.right);
-        }
+
         if (isAdvancingLeft)
-        {
             velocity += GetTotalVelocity(velocity, -transform.right);
-        }
+
         if (isAdvancingUp)
-        {
-            velocity += GetTotalVelocity(velocity, transform.up);
-        }
+            velocity += GetTotalVelocity(velocity, Vector3.up);
+
         if (isAdvancingDown)
-        {
-            velocity += GetTotalVelocity(velocity, -transform.up);
-        }
+            velocity += GetTotalVelocity(velocity, -Vector3.up);
+
         transform.position += velocity * (keyboardMovementSpeed * Time.deltaTime);
     }
 
