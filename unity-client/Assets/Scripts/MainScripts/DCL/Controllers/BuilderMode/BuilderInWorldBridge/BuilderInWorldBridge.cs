@@ -55,11 +55,15 @@ public class BuilderInWorldBridge : MonoBehaviour
         if (publishSceneResultPayload.ok)
         {
             OnPublishSuccess?.Invoke();
+
+            AudioScriptableObjects.confirm.Play();
         }
         else
         {
             errorMessage = publishSceneResultPayload.error;
             OnPublishError?.Invoke(publishSceneResultPayload.error);
+
+            AudioScriptableObjects.error.Play();
         }
 
         HUDController.i.builderInWorldMainHud.PublishEnd(publishSceneResultPayload.ok, errorMessage);

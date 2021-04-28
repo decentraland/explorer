@@ -14,10 +14,7 @@ namespace DCL
 
         [SerializeField] private PerformanceMetricsDataVariable performanceMetricsDataVariable;
 
-        public PerformanceMetricsController()
-        {
-            performanceMetricsDataVariable = Resources.Load<PerformanceMetricsDataVariable>("ScriptableObjects/PerformanceMetricsData");
-        }
+        public PerformanceMetricsController() { performanceMetricsDataVariable = Resources.Load<PerformanceMetricsDataVariable>("ScriptableObjects/PerformanceMetricsData"); }
 
         public void Update()
         {
@@ -43,9 +40,6 @@ namespace DCL
             }
         }
 
-        private void Report(string encodedSamples)
-        {
-            WebInterface.SendPerformanceReport(encodedSamples, Settings.i.currentQualitySettings.fpsCap, tracker.CurrentHiccupCount(), tracker.GetHiccupSum(), tracker.GetTotalSeconds());
-        }
+        private void Report(string encodedSamples) { WebInterface.SendPerformanceReport(encodedSamples, Settings.i.currentQualitySettings.fpsCap, tracker.CurrentHiccupCount(), tracker.GetHiccupSum(), tracker.GetTotalSeconds()); }
     }
 }

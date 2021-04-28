@@ -11,7 +11,8 @@ public class TaskbarNewQuestTooltip : MonoBehaviour
 
     private void OnQuestsAdded(string s, QuestModel model)
     {
-        if (!model.isCompleted) {
+        if (!model.isCompleted)
+        {
             animator?.SetTrigger(ANIM_STATE_TRIGGER);
             newQuestAudioEvent.Play();
         }

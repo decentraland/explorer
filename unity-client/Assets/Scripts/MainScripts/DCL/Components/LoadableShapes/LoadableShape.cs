@@ -199,10 +199,7 @@ namespace DCL.Components
             ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
         }
 
-        protected virtual void ConfigureColliders(IDCLEntity entity)
-        {
-            CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity, CalculateCollidersLayer(model));
-        }
+        protected virtual void ConfigureColliders(IDCLEntity entity) { CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity, CalculateCollidersLayer(model)); }
 
         protected void OnLoadFailed(LoadWrapper loadWrapper)
         {
