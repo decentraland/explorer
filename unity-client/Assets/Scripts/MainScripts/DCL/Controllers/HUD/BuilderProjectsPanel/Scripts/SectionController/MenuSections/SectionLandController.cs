@@ -6,7 +6,7 @@ using DCL.Interface;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-internal class SectionLandController : SectionBase, ILandsListener, ISectionOpenURLRequester, ISectionGotoCoordsRequester
+internal class SectionLandController : SectionBase, ILandsListener, ISectionOpenURLRequester, ISectionGotoCoordsRequester, ISectionEditSceneAtCoordsRequester
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionLandsView";
     
@@ -15,6 +15,7 @@ internal class SectionLandController : SectionBase, ILandsListener, ISectionOpen
 
     public event Action<string> OnRequestOpenUrl;
     public event Action<Vector2Int> OnRequestGoToCoords;
+    public event Action<Vector2Int> OnRequestEditSceneAtCoords;
 
     public override ISectionSearchHandler searchHandler => landSearchHandler;
 
@@ -150,6 +151,7 @@ internal class SectionLandController : SectionBase, ILandsListener, ISectionOpen
         landView.OnSettingsPressed -= OnSettingsPressed;
         landView.OnJumpInPressed -= OnJumpInPressed;
         landView.OnOpenInDappPressed -= OnOpenInDappPressed;
+        landView.OnEditorPressed -= OnEditPressed;
         
         landView.SetActive(false);
         landElementViewsPool.Enqueue(landView);
@@ -171,6 +173,7 @@ internal class SectionLandController : SectionBase, ILandsListener, ISectionOpen
         landView.OnSettingsPressed += OnSettingsPressed;
         landView.OnJumpInPressed += OnJumpInPressed;
         landView.OnOpenInDappPressed += OnOpenInDappPressed;
+        landView.OnEditorPressed += OnEditPressed;
         
         return landView;
     }
@@ -224,5 +227,10 @@ internal class SectionLandController : SectionBase, ILandsListener, ISectionOpen
     private void OnOpenMarketplacePressed()
     {
         OnRequestOpenUrl?.Invoke(MARKETPLACE_URL);
+    }
+    
+    private void OnEditPressed(Vector2Int coords)
+    {
+        OnRequestEditSceneAtCoords?.Invoke(coords);
     }
 }

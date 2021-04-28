@@ -26,6 +26,7 @@ internal interface ISectionsController : IDisposable
     event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
     event Action<string> OnRequestOpenUrl;
     event Action<Vector2Int> OnRequestGoToCoords;
+    event Action<Vector2Int> OnRequestEditSceneAtCoords;
     void OpenSection(SectionId id);
     void SetFetchingDataStart();
     void SetFetchingDataEnd();
@@ -47,6 +48,7 @@ internal class SectionsController : ISectionsController
     public event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
     public event Action<string> OnRequestOpenUrl;
     public event Action<Vector2Int> OnRequestGoToCoords;
+    public event Action<Vector2Int> OnRequestEditSceneAtCoords;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -204,6 +206,11 @@ internal class SectionsController : ISectionsController
     {
         OnRequestGoToCoords?.Invoke(coords);
     }
+    
+    private void OnEditSceneAtCoordsRequested(Vector2Int coords)
+    {
+        OnRequestEditSceneAtCoords?.Invoke(coords);
+    }
 
     private void SubscribeEvents(SectionBase sectionBase)
     {
@@ -238,6 +245,10 @@ internal class SectionsController : ISectionsController
         if (sectionBase is ISectionGotoCoordsRequester goToRequester)
         {
             goToRequester.OnRequestGoToCoords += OnGoToCoordsRequested;
+        }
+        if (sectionBase is ISectionEditSceneAtCoordsRequester editSceneRequester)
+        {
+            editSceneRequester.OnRequestEditSceneAtCoords += OnEditSceneAtCoordsRequested;
         }
     }
 }

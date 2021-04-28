@@ -13,7 +13,7 @@ internal interface IScenesViewController : IDisposable
     event Action<ISceneCardView> OnProjectSceneRemoved;
     event Action<ISceneCardView> OnSceneSelected;
     event Action<Vector2Int> OnJumpInPressed;
-    event Action<ISceneData> OnEditorPressed;
+    event Action<Vector2Int> OnEditorPressed;
     event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
     event Action<string> OnRequestOpenUrl;
     void SetScenes(ISceneData[] scenesData);
@@ -43,7 +43,7 @@ internal class ScenesViewController : IScenesViewController
     public event Action<ISceneCardView> OnProjectSceneRemoved;
     public event Action<ISceneCardView> OnSceneSelected;
     public event Action<Vector2Int> OnJumpInPressed;
-    public event Action<ISceneData> OnEditorPressed;
+    public event Action<Vector2Int> OnEditorPressed;
     public event Action<ISceneData, ISceneCardView> OnContextMenuPressed;
     public event Action<string> OnRequestOpenUrl;
 

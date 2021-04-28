@@ -100,8 +100,10 @@ public class BuilderProjectsPanelController : IHUD
 
         sectionsController.OnRequestOpenUrl += OpenUrl;
         sectionsController.OnRequestGoToCoords += GoToCoords;
+        sectionsController.OnRequestEditSceneAtCoords += OnGoToEditScene;
         scenesViewController.OnJumpInPressed += GoToCoords;
         scenesViewController.OnRequestOpenUrl += OpenUrl;
+        scenesViewController.OnEditorPressed += OnGoToEditScene;
 
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += OnVisibilityChanged;
     }
@@ -197,5 +199,14 @@ public class BuilderProjectsPanelController : IHUD
     private void OpenUrl(string url)
     {
         WebInterface.OpenURL(url);
+    }
+
+    private void OnGoToEditScene(Vector2Int coords)
+    {
+        bool isGoingToTeleport = BuilderInWorldTeleportAndEdit.TeleportAndEdit(coords);
+        if (isGoingToTeleport)
+        {
+            SetVisibility(false);
+        }
     }
 }
