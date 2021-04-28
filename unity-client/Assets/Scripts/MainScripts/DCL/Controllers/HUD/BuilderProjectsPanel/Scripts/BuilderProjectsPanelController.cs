@@ -5,12 +5,14 @@ using DCL;
 using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
+using Variables.RealmsInfo;
 using Environment = DCL.Environment;
 using Object = UnityEngine.Object;
 
 public class BuilderProjectsPanelController : IHUD
 {
     private const string TESTING_ETH_ADDRESS = "0x2fa1859029A483DEFbB664bB6026D682f55e2fcD";
+    private const string TESTING_TLD = "org";
     
     internal readonly IBuilderProjectsPanelView view;
 
@@ -137,30 +139,51 @@ public class BuilderProjectsPanelController : IHUD
     private void FetchLandsAndScenes()
     {
         var address = UserProfile.GetOwnUserProfile().ethAddress;
+        var tld = KernelConfig.i.Get().tld;
 
 #if UNITY_EDITOR
         // NOTE: to be able to test in editor without getting a profile we hardcode an address here
-        address = !string.IsNullOrEmpty(address) ? address : TESTING_ETH_ADDRESS;
+        if (string.IsNullOrEmpty(address))
+        {
+            address = TESTING_ETH_ADDRESS;
+            tld = TESTING_TLD;
+            DataStore.i.playerRealm.Set(new CurrentRealmModel()
+            {
+                domain = $"https://peer.decentraland.{TESTING_TLD}",
+                contentServerUrl = $"https://peer.decentraland.{TESTING_TLD}/content",
+            });
+        }
 #endif
         
         sectionsController.SetFetchingDataStart();
         
-        fetchLandPromise = DeployedScenesFetcher.FetchLandsFromOwner(catalyst, theGraph, address, KernelConfig.i.Get().tld);
+        fetchLandPromise = DeployedScenesFetcher.FetchLandsFromOwner(catalyst, theGraph, address, tld);
         fetchLandPromise
             .Then(lands =>
             {
-                var scenes = lands.Where(land => land.scenes != null && land.scenes.Count > 0)
-                                  .Select(land => land.scenes.Select(scene => (ISceneData)new SceneData(scene)))
-                                  .Aggregate((i, j) => i.Concat(j))
-                                  .ToArray();
-        
-                landsController.SetLands(lands);
-                scenesViewController.SetScenes(scenes);
                 sectionsController.SetFetchingDataEnd();
+
+                try
+                {
+                    var scenes = lands.Where(land => land.scenes != null && land.scenes.Count > 0)
+                                      .Select(land => land.scenes.Select(scene => (ISceneData)new SceneData(scene)))
+                                      .Aggregate((i, j) => i.Concat(j))
+                                      .ToArray();
+
+                    landsController.SetLands(lands);
+                    scenesViewController.SetScenes(scenes);
+                }
+                catch (Exception e)
+                {
+                    landsController.SetLands(lands);
+                    scenesViewController.SetScenes(new ISceneData[]{});
+                }
             })
             .Catch(error =>
             {
                 sectionsController.SetFetchingDataEnd();
+                landsController.SetLands(new LandWithAccess[]{});
+                scenesViewController.SetScenes(new ISceneData[]{});
                 Debug.LogError(error);
             });
     }

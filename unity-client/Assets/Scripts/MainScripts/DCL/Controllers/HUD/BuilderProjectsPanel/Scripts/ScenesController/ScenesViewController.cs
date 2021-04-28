@@ -111,12 +111,12 @@ internal class ScenesViewController : IScenesViewController
         }
 
         // notify scenes set if needed
-        if (scenesRefreshHelper.isOldDeployedScenesEmpty && deployedScenes.Count > 0)
+        if (scenesRefreshHelper.isOldDeployedScenesEmpty)
         {
             OnDeployedScenesSet?.Invoke(deployedScenes);
         }
 
-        if (scenesRefreshHelper.isOldProjectScenesEmpty && projectScenes.Count > 0)
+        if (scenesRefreshHelper.isOldProjectScenesEmpty)
         {
             OnProjectScenesSet?.Invoke(projectScenes);
         }

@@ -91,7 +91,6 @@ namespace Tests
         {
             SectionLandController controller = new SectionLandController(view);
             ILandsListener landsListener = controller;
-            controller.SetFetchingDataState(false);
 
             landsListener.OnSetLands(new [] { CreateLandData("1"), CreateLandData("2") });
             Assert.AreEqual(2, GetVisibleChildrenAmount(view.GetLandElementsContainer()));

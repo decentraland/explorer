@@ -45,9 +45,16 @@ public static class DeployedScenesFetcher
 
         getOwnedParcelsPromise.Then(parcels =>
                               {
-                                  FetchScenes(catalyst, parcels)
-                                      .Then(scenes => getDeployedScenesPromise.Resolve(scenes))
-                                      .Catch(err => getDeployedScenesPromise.Reject(err));
+                                  if (parcels.Length > 0)
+                                  {
+                                      FetchScenes(catalyst, parcels)
+                                          .Then(scenes => getDeployedScenesPromise.Resolve(scenes))
+                                          .Catch(err => getDeployedScenesPromise.Reject(err));
+                                  }
+                                  else
+                                  {
+                                      getDeployedScenesPromise.Resolve(new DeployedScene[]{});
+                                  }
                               })
                               .Catch(err => getDeployedScenesPromise.Reject(err));
 

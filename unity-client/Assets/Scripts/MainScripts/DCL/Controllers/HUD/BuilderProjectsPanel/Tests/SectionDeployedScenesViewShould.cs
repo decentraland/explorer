@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -106,6 +108,29 @@ namespace Tests
             Assert.IsTrue(view.loadingAnimationContainer.activeSelf);
             Assert.IsFalse(view.noSearchResultContainer.activeSelf);
             Assert.IsFalse(view.emptyContainer.activeSelf);
-        } 
+        }
+        
+        [Test]
+        public void SetSectionStateCorrectly()
+        {
+            SectionDeployedScenesController controller = new SectionDeployedScenesController(view);
+            IDeployedSceneListener listener = controller;
+            
+            controller.SetFetchingDataState(true);
+            listener.OnSetScenes(new Dictionary<string, ISceneCardView>());
+            Assert.IsTrue(view.loadingAnimationContainer.activeSelf);
+
+            controller.SetFetchingDataState(false);
+            listener.OnSetScenes(new Dictionary<string, ISceneCardView>());
+            Assert.IsTrue(view.emptyContainer.activeSelf);
+            
+            listener.OnSetScenes(new Dictionary<string, ISceneCardView>(){{"1", Substitute.For<ISceneCardView>()}, {"2", Substitute.For<ISceneCardView>()}});
+            Assert.IsTrue(view.contentContainer.activeSelf);
+
+            listener.OnSetScenes(new Dictionary<string, ISceneCardView>(){{"1", Substitute.For<ISceneCardView>()}});
+            Assert.IsTrue(view.contentContainer.activeSelf);
+
+            controller.Dispose();
+        }
     }
 }
