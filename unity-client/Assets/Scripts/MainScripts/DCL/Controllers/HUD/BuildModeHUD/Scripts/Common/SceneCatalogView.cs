@@ -149,5 +149,8 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         gameObject.SetActive(false);
     }
 
-    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
 }
