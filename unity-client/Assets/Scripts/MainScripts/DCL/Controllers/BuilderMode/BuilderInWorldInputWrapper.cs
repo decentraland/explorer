@@ -7,7 +7,6 @@ using UnityEngine.EventSystems;
 
 public class BuilderInWorldInputWrapper : MonoBehaviour
 {
-    public LayerMask layerToStopClick;
     public float msClickThreshold = 200;
     public float movementClickThreshold = 50;
 
@@ -57,7 +56,7 @@ public class BuilderInWorldInputWrapper : MonoBehaviour
         if (!canInputBeMade)
             return;
 
-        if (!BuilderInWorldUtils.IsPointerOverUIElement() && !BuilderInWorldUtils.IsPointerOverMaskElement(layerToStopClick))
+        if (!BuilderInWorldUtils.IsPointerOverUIElement())
         {
             OnMouseUp?.Invoke(buttonId, mousePosition);
             if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold)
@@ -76,7 +75,7 @@ public class BuilderInWorldInputWrapper : MonoBehaviour
 
         if (!canInputBeMade)
             return;
-        if (!currentClickIsOnUi && !BuilderInWorldUtils.IsPointerOverMaskElement(layerToStopClick))
+        if (!currentClickIsOnUi)
             OnMouseDown?.Invoke(buttonId, mousePosition);
     }
 

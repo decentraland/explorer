@@ -15,7 +15,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 {
     [Header("Editor Design")]
     public float distanceEagleCamera = 20f;
-
+    public LayerMask layerToStopClick;
     public float snapDragFactor = 5f;
 
     [Header("Scenes References")]
@@ -228,7 +228,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         isMouseDragging = true;
         if (buttonId != 0 ||
-            selectedEntities.Count <= 0)
+            selectedEntities.Count <= 0 ||
+            BuilderInWorldUtils.IsPointerOverMaskElement(layerToStopClick) ||
+            isSquareMultiSelectionInputActive)
             return;
 
         if (!isDraggingStarted)
@@ -278,6 +280,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         {
             EndBoundMultiSelection();
         }
+        outlinerController.SetOutlineCheckActive(true);
     }
 
     void OnMouseDown(int buttonID, Vector3 position)
@@ -299,15 +302,15 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             return;
 
         var entity = builderInWorldEntityHandler.GetEntityOnPointer();
-        if (entity != null && !entity.IsSelected)
+        if (entity != null && !entity.IsSelected && !BuilderInWorldUtils.IsPointerOverMaskElement(layerToStopClick))
         {
             isSquareMultiSelectionInputActive = true;
             isTypeOfBoundSelectionSelected = false;
             isVoxelBoundMultiSelection = false;
+            outlinerController.SetOutlineCheckActive(false);
         }
         mouseMainBtnPressed = true;
         freeCameraController.SetCameraCanMove(false);
-        outlinerController.SetOutlineCheckActive(false);
     }
 
     #endregion
@@ -374,7 +377,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             }
         }
 
-        outlinerController.SetOutlineCheckActive(true);
         outlinerController.CancelAllOutlines();
     }
 

@@ -414,9 +414,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1057dc9d5eb891048bccaceaa1e70597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerToStopClick:
-    serializedVersion: 2
-    m_Bits: 2048
   msClickThreshold: 500
   movementClickThreshold: 2
 --- !u!114 &1208871511405416595
@@ -1616,6 +1613,9 @@ MonoBehaviour:
   biwSaveController: {fileID: 6802675824613373767}
   actionController: {fileID: 1208871512032110241}
   distanceEagleCamera: 20
+  layerToStopClick:
+    serializedVersion: 2
+    m_Bits: 2048
   snapDragFactor: 0.5
   freeCameraController: {fileID: 0}
   cameraController: {fileID: 0}

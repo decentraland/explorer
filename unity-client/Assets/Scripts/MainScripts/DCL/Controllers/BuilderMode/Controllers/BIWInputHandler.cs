@@ -116,10 +116,7 @@ public class BIWInputHandler : BIWController
 
     private void CheckEditModeInput()
     {
-        if (!builderInWorldEntityHandler.IsAnyEntitySelected() || isMultiSelectionActive)
-        {
-            outlinerController.CheckOutline();
-        }
+        outlinerController.CheckOutline();
 
         if (builderInWorldEntityHandler.IsAnyEntitySelected())
         {
