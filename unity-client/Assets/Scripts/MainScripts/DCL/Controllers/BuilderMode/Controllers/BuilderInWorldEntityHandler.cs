@@ -355,10 +355,6 @@ public class BuilderInWorldEntityHandler : BIWController
     public void ChangeShowStateSelectedEntities()
     {
         List<DCLBuilderInWorldEntity> entitiesToHide = new List<DCLBuilderInWorldEntity>(selectedEntities);
-        // foreach (DCLBuilderInWorldEntity entity in selectedEntities)
-        // {
-        //     entitiesToHide.Add(entity);
-        // }
 
         foreach (DCLBuilderInWorldEntity entity in entitiesToHide)
         {

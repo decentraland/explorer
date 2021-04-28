@@ -156,7 +156,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
                     }
                 }
             }
-
         }
     }
 
@@ -442,7 +441,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         freeCameraController.gameObject.SetActive(true);
         SetLookAtObject(parcelScene);
 
-        // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player currentMousePosition and the camera
+        // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player position and the camera
         Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;
         freeCameraController.SetPosition(cameraPosition + Vector3.up * distanceEagleCamera);
         //
