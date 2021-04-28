@@ -20,7 +20,7 @@ namespace DCL.Configuration
         public const string CUSTOM_LAND = "CUSTOM LAND";
 
         //Inputs
-        public static float MOUSE_THRESHOLD_MOVEMENT_FOR_DESELECT = 15f;
+        public static float MOUSE_THRESHOLD_FOR_DRAG = 15f;
 
         //Kernel Report
         public const string STATE_EVENT_NAME = "stateEvent";

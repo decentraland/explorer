@@ -1627,7 +1627,7 @@ MonoBehaviour:
   outlinerController: {fileID: 4993453681677180110}
   focusOnSelectedEntitiesInputAction: {fileID: 11400000, guid: 746094ad79f2853439fc98abd3963fb8,
     type: 2}
-  squareMultiSelectionInputAction: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,
+  multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
     type: 2}
   groundLayer:
     serializedVersion: 2
