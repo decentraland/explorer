@@ -5,6 +5,7 @@ using DCL.Controllers;
 using DCL.Tutorial;
 using UnityEngine;
 using Environment = DCL.Environment;
+using System;
 
 public class BuilderInWorldController : MonoBehaviour
 {
@@ -66,6 +67,8 @@ public class BuilderInWorldController : MonoBehaviour
     private WebRequestAsyncOperation catalogAsyncOp;
     private bool isCatalogLoading = false;
 
+    public event Action OnEnterEditMode;
+    public event Action OnExitEditMode;
     internal IBuilderInWorldLoadingController initialLoadingController;
 
     private void Awake() { BIWCatalogManager.Init(); }
@@ -484,6 +487,8 @@ public class BuilderInWorldController : MonoBehaviour
         }
         previousSkyBoxMaterial = RenderSettings.skybox;
         RenderSettings.skybox = skyBoxMaterial;
+
+        OnEnterEditMode?.Invoke();
     }
 
     private void OnAllParcelsFloorLoaded()
@@ -546,6 +551,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         isBuilderInWorldActivated = false;
         RenderSettings.skybox = previousSkyBoxMaterial;
+
+        OnExitEditMode?.Invoke();
     }
 
     public void StartBiwControllers()

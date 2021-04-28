@@ -88,6 +88,8 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         {
             StartTipsCarousel();
         }
+
+        AudioScriptableObjects.builderEnter.Play();
     }
 
     public void Hide(bool forzeHidding = false, Action onHideAction = null)
@@ -125,6 +127,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         StopTipsCarousel();
         gameObject.SetActive(false);
         onHideAction?.Invoke();
+        AudioScriptableObjects.builderReady.Play();
     }
 
     internal IEnumerator RunTipsCarouselCoroutine()

@@ -53,6 +53,10 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuildModeHUDController hudController;
 
+    public event Action<DCLBuilderInWorldEntity> OnEntityDeselected;
+    public event Action OnEntitySelected;
+    public event Action<List<DCLBuilderInWorldEntity>> OnDeleteSelectedEntities;
+
     private void Start()
     {
         hideSelectedEntitiesDelegate = (action) => ChangeShowStateSelectedEntities();
@@ -224,6 +228,8 @@ public class BuilderInWorldEntityHandler : BIWController
         if (selectedEntities.Count <= 0 &&
             hudController != null)
             hudController.HideEntityInformation();
+
+        OnEntityDeselected?.Invoke(entity);
     }
 
     public void DeselectEntities()
@@ -349,6 +355,9 @@ public class BuilderInWorldEntityHandler : BIWController
         }
 
         outlinerController.CancelAllOutlines();
+
+        OnEntitySelected?.Invoke();
+
         return true;
     }
 
@@ -470,6 +479,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         SetupEntityToEdit(newEntity, true);
         EntityListChanged();
+
         return newEntity;
     }
 
@@ -526,6 +536,11 @@ public class BuilderInWorldEntityHandler : BIWController
         if (HUDController.i.builderInWorldMainHud == null)
             return;
         hudController.SetEntityList(GetEntitiesInCurrentScene());
+    }
+
+    public int GetCurrentSceneEntityCount()
+    {
+        return GetEntitiesInCurrentScene().Count;
     }
 
     List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
@@ -661,6 +676,8 @@ public class BuilderInWorldEntityHandler : BIWController
         {
             DeleteEntity(entity);
         }
+
+        OnDeleteSelectedEntities?.Invoke(entitiesToRemove);
     }
 
     public void DeleteEntitiesOutsideSceneBoundaries()
