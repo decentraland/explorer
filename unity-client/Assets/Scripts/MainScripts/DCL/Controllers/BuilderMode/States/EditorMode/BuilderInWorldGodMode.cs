@@ -68,9 +68,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
 
-        BuilderInWorldInputWrapper.OnMouseDown += OnMouseDown;
-        BuilderInWorldInputWrapper.OnMouseUp += OnMouseUp;
-        BuilderInWorldInputWrapper.OnMouseDrag += OnMouseDrag;
+        BuilderInWorldInputWrapper.OnMouseDown += OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp += OnInputMouseUp;
+        BuilderInWorldInputWrapper.OnMouseDrag += OnInputMouseDrag;
 
         focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
 
@@ -96,9 +96,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart -= OnGizmosTransformStart;
 
-        BuilderInWorldInputWrapper.OnMouseDown -= OnMouseDown;
-        BuilderInWorldInputWrapper.OnMouseUp -= OnMouseUp;
-        BuilderInWorldInputWrapper.OnMouseDrag -= OnMouseDrag;
+        BuilderInWorldInputWrapper.OnMouseDown -= OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp -= OnInputMouseUp;
+        BuilderInWorldInputWrapper.OnMouseDrag -= OnInputMouseDrag;
 
         gizmoManager.OnChangeTransformValue -= EntitiesTransfromByGizmos;
 
@@ -224,8 +224,11 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     #region Mouse
 
-    private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
+    private void OnInputMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
+        if (Vector3.Distance(lastMousePosition, mousePosition) <= BuilderInWorldSettings.MOUSE_THRESHOLD_FOR_DRAG && !isMouseDragging)
+            return;
+
         isMouseDragging = true;
         if (buttonId != 0 ||
             selectedEntities.Count <= 0 ||
@@ -259,7 +262,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    private void OnMouseUp(int buttonID, Vector3 position)
+    private void OnInputMouseUp(int buttonID, Vector3 position)
     {
         if (buttonID == 1)
         {
@@ -269,7 +272,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
             freeCameraController.StopDetectingMovement();
         }
-
 
         if (buttonID != 0)
             return;
@@ -289,7 +291,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         isMouseDragging = false;
     }
 
-    void OnMouseDown(int buttonID, Vector3 position)
+    void OnInputMouseDown(int buttonID, Vector3 position)
     {
         lastMousePosition = position;
 
