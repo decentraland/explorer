@@ -4,7 +4,5 @@ using UnityEngine;
 
 public class AnimationEventAudioPlayer : MonoBehaviour
 {
-    public void PlayAudioEvent(AudioEvent audioEvent) {
-        audioEvent.Play();
-    }
+    public void PlayAudioEvent(AudioEvent audioEvent) { audioEvent.Play(); }
 }

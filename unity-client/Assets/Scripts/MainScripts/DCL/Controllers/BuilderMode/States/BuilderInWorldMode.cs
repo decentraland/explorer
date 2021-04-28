@@ -3,6 +3,7 @@ using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BuilderInWorldMode : MonoBehaviour
 {
@@ -22,8 +23,8 @@ public class BuilderInWorldMode : MonoBehaviour
     public BIWSaveController biwSaveController;
     public ActionController actionController;
 
-    public event System.Action OnInputDone;
-    public event System.Action<BuildInWorldCompleteAction> OnActionGenerated;
+    public event Action OnInputDone;
+    public event Action<BuildInWorldCompleteAction> OnActionGenerated;
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 
@@ -58,7 +59,15 @@ public class BuilderInWorldMode : MonoBehaviour
         builderInWorldEntityHandler.DeselectEntities();
     }
 
-    public virtual void SetSnapActive(bool isActive) { isSnapActive = isActive; }
+    public virtual void SetSnapActive(bool isActive)
+    {
+        if (isActive && !isSnapActive)
+            AudioScriptableObjects.enable.Play();
+        else if (!isActive && isSnapActive)
+            AudioScriptableObjects.disable.Play();
+
+        isSnapActive = isActive;
+    }
 
     public virtual void StartMultiSelection() { isMultiSelectionActive = true; }
 
