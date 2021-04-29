@@ -715,6 +715,8 @@ MonoBehaviour:
   toggleButton: {fileID: 150534880425735011}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 1774619737842260240}
+  iconImage: {fileID: 8002379926953698459}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &4558583283900186539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1731,7 +1733,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 1311366885191657452}
+  buttonText: {fileID: 4023912748079699117}
   buttonAnimator: {fileID: 1055635260988060801}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &2487175484081554518
 GameObject:
   m_ObjectHideFlags: 0
@@ -1959,6 +1963,8 @@ MonoBehaviour:
   toggleButton: {fileID: 5695286407739124719}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 0}
+  iconImage: {fileID: 4984223206757442300}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &5173558686886444464
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2248,7 +2254,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 2196291874239998215}
+  buttonText: {fileID: 2249234510775131790}
   buttonAnimator: {fileID: 8544591177226152426}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &3625380502454875568
 GameObject:
   m_ObjectHideFlags: 0
@@ -2582,6 +2590,8 @@ MonoBehaviour:
   toggleButton: {fileID: 5434203226770861003}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 8732571876791626547}
+  iconImage: {fileID: 494223209092887929}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &5137945526149666104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3282,6 +3292,8 @@ MonoBehaviour:
   toggleButton: {fileID: 5877298668561613140}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 124698351805280561}
+  iconImage: {fileID: 1318800973797180785}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &5292177451088930375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3932,7 +3944,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 3257714978902248256}
+  buttonText: {fileID: 7213773184576584900}
   buttonAnimator: {fileID: 2550941768183551349}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &4880327015657366470
 GameObject:
   m_ObjectHideFlags: 0
@@ -5652,7 +5666,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 5147666751783043214}
+  buttonText: {fileID: 4847627635822721250}
   buttonAnimator: {fileID: 3598127344089481857}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &6778910183623629656
 GameObject:
   m_ObjectHideFlags: 0
@@ -5976,7 +5992,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 7510301272497182283}
+  buttonText: {fileID: 7693650452536660701}
   buttonAnimator: {fileID: 5202620765264291448}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &7114272077052289652
 GameObject:
   m_ObjectHideFlags: 0
@@ -6239,7 +6257,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 702143947393827336}
+  buttonText: {fileID: 1022975929039098981}
   buttonAnimator: {fileID: 6552739787088316042}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &7316427552286486522
 GameObject:
   m_ObjectHideFlags: 0
@@ -6381,6 +6401,8 @@ MonoBehaviour:
   toggleButton: {fileID: 2482073859384292770}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 1071394598337391035}
+  iconImage: {fileID: 3343024848651752155}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &1634509361992002614
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6878,6 +6900,8 @@ MonoBehaviour:
   toggleButton: {fileID: 3686269489964235905}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 6911774643657849555}
+  iconImage: {fileID: 7061163220679428443}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &7425461968562306836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7213,6 +7237,8 @@ MonoBehaviour:
   toggleButton: {fileID: 5681366293077149653}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 326955172821251110}
+  iconImage: {fileID: 1413073526740766789}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!114 &6765384184983891056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7792,7 +7818,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 1688212778456124928}
+  buttonText: {fileID: 6563643499286018422}
   buttonAnimator: {fileID: 4364468116114812075}
+  notInteractableColor: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 1}
 --- !u!1 &9020917434462224825
 GameObject:
   m_ObjectHideFlags: 0

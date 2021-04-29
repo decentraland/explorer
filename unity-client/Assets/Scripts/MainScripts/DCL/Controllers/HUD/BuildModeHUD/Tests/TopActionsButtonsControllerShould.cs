@@ -15,8 +15,7 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController = new TopActionsButtonsController();
             topActionsButtonsController.Initialize(
                 Substitute.For<ITopActionsButtonsView>(),
-                Substitute.For<ITooltipController>(),
-                Substitute.For<IBuildModeConfirmationModalController>());
+                Substitute.For<ITooltipController>());
         }
 
         [TearDown]
@@ -135,29 +134,17 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void HideLogoutConfirmationCorrectly()
-        {
-            // Act
-            topActionsButtonsController.HideLogoutConfirmation(BuildModeModalType.EXIT);
-
-            // Assert
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(false, BuildModeModalType.EXIT);
-        }
-
-        [Test]
         public void ShowLogoutConfirmationCorrectly()
         {
+            // Arrange
+            bool clicked = false;
+            topActionsButtonsController.OnLogOutClick += () => { clicked = true; };
+
             // Act
-            topActionsButtonsController.ShowLogoutConfirmation();
+            topActionsButtonsController.LogoutClicked();
 
             // Assert
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1)
-                                       .Configure(
-                                           Arg.Any<string>(),
-                                           Arg.Any<string>(),
-                                           Arg.Any<string>(),
-                                           Arg.Any<string>());
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.EXIT);
+            Assert.IsTrue(clicked, "The clicked is false!");
         }
 
         [Test]
