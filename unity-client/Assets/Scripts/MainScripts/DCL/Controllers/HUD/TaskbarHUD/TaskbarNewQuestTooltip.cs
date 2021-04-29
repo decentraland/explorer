@@ -1,4 +1,5 @@
 using DCL;
+using DCL.QuestsController;
 using UnityEngine;
 
 public class TaskbarNewQuestTooltip : MonoBehaviour
@@ -7,14 +8,13 @@ public class TaskbarNewQuestTooltip : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private AudioEvent newQuestAudioEvent;
 
-    private void Awake() { DataStore.i.Quests.quests.OnAdded += OnQuestsAdded; }
+    private void Awake() { QuestsController.i.OnNewQuest += OnNewQuest; }
 
-    private void OnQuestsAdded(string s, QuestModel model)
+    private void OnDestroy() { QuestsController.i.OnNewQuest -= OnNewQuest; }
+
+    private void OnNewQuest(string s)
     {
-        if (!model.isCompleted)
-        {
-            animator?.SetTrigger(ANIM_STATE_TRIGGER);
-            newQuestAudioEvent.Play();
-        }
+        animator?.SetTrigger(ANIM_STATE_TRIGGER);
+        newQuestAudioEvent.Play();
     }
 }

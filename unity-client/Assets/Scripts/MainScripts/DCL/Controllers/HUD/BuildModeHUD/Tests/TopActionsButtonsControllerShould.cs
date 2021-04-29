@@ -198,5 +198,17 @@ namespace Tests.BuildModeHUDControllers
             // Assert
             topActionsButtonsController.topActionsButtonsView.Received(1).SetGizmosActive(gizmosActive);
         }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestSeActionsInteractable(bool isInteractable)
+        {
+            //Act 
+            topActionsButtonsController.SetActionsInteractable(isInteractable);
+
+            //Assert
+            topActionsButtonsController.topActionsButtonsView.Received(1).SetActionsInteractable(isInteractable);
+        }
     }
 }

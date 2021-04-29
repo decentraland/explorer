@@ -201,5 +201,19 @@ namespace Tests.BuildModeHUDViews
             Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
             Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
         }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void SetActionsInteractable(bool isActive)
+        {
+            //Act
+            topActionsButtonsView.SetActionsInteractable(isActive);
+
+            //Assert
+            Assert.AreEqual(isActive, topActionsButtonsView.resetBtn.IsInteractable());
+            Assert.AreEqual(isActive, topActionsButtonsView.duplicateBtn.IsInteractable());
+            Assert.AreEqual(isActive, topActionsButtonsView.deleteBtn.IsInteractable());
+        }
     }
 }

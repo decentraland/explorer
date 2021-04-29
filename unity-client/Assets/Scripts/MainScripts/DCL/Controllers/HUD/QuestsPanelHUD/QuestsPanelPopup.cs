@@ -9,6 +9,8 @@ namespace DCL.Huds.QuestsPanel
 {
     public class QuestsPanelPopup : MonoBehaviour
     {
+        private const int ARROW_OFFSET = 220;
+
         [SerializeField] internal TextMeshProUGUI questName;
         [SerializeField] internal TextMeshProUGUI description;
         [SerializeField] internal RectTransform sectionsContainer;
@@ -100,7 +102,10 @@ namespace DCL.Huds.QuestsPanel
             }
 
             if (string.IsNullOrEmpty(thumbnailURL))
+            {
+                thumbnailImage.gameObject.SetActive(false);
                 return;
+            }
 
             thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
@@ -177,6 +182,13 @@ namespace DCL.Huds.QuestsPanel
                 thumbnailPromise.ClearEvents();
                 AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
             }
+        }
+
+        public void SetPositionToReadMoreButton(Vector3 position)
+        {
+            Vector3 pos = transform.position;
+            pos.y = Mathf.Max(0, position.y - ARROW_OFFSET);
+            transform.position = pos;
         }
     }
 }
