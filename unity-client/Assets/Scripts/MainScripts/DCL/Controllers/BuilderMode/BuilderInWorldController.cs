@@ -283,24 +283,6 @@ public class BuilderInWorldController : MonoBehaviour
         }
     }
 
-    public DCLBuilderInWorldEntity GetEntityOnPointer()
-    {
-        RaycastHit hit;
-        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(biwModeController.GetMousePosition());
-        float distanceToSelect = biwModeController.GetMaxDistanceToSelectEntities();
-
-        if (Physics.Raycast(ray, out hit, distanceToSelect, layerToRaycast))
-        {
-            string entityID = hit.collider.gameObject.name;
-
-            if (sceneToEdit.entities.ContainsKey(entityID))
-            {
-                return builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
-            }
-        }
-        return null;
-    }
-
     public VoxelEntityHit GetCloserUnselectedVoxelEntityOnPointer()
     {
         RaycastHit[] hits;
@@ -492,6 +474,7 @@ public class BuilderInWorldController : MonoBehaviour
         {
             groundVisual.SetActive(false);
         }
+
         previousSkyBoxMaterial = RenderSettings.skybox;
         RenderSettings.skybox = skyBoxMaterial;
 

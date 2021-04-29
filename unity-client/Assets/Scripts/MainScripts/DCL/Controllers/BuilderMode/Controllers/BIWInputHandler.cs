@@ -54,7 +54,7 @@ public class BIWInputHandler : BIWController
         multiSelectionStartDelegate = (action) => StartMultiSelection();
         multiSelectionFinishedDelegate = (action) => EndMultiSelection();
 
-        builderInputWrapper.OnMouseClick += MouseClick;
+        BuilderInWorldInputWrapper.OnMouseClick += MouseClick;
         biwModeController.OnInputDone += InputDone;
 
         multiSelectionInputAction.OnStarted += multiSelectionStartDelegate;
@@ -71,7 +71,7 @@ public class BIWInputHandler : BIWController
         multiSelectionInputAction.OnStarted -= multiSelectionStartDelegate;
         multiSelectionInputAction.OnFinished -= multiSelectionFinishedDelegate;
 
-        builderInputWrapper.OnMouseClick -= MouseClick;
+        BuilderInWorldInputWrapper.OnMouseClick -= MouseClick;
         biwModeController.OnInputDone -= InputDone;
         if (HUDController.i.builderInWorldMainHud != null)
         {
@@ -116,10 +116,7 @@ public class BIWInputHandler : BIWController
 
     private void CheckEditModeInput()
     {
-        if (!builderInWorldEntityHandler.IsAnyEntitySelected() || isMultiSelectionActive)
-        {
-            outlinerController.CheckOutline();
-        }
+        outlinerController.CheckOutline();
 
         if (builderInWorldEntityHandler.IsAnyEntitySelected())
         {
@@ -188,7 +185,7 @@ public class BIWInputHandler : BIWController
 
     private void MouseClickDetected()
     {
-        DCLBuilderInWorldEntity entityToSelect = builderInWorldController.GetEntityOnPointer();
+        DCLBuilderInWorldEntity entityToSelect = builderInWorldEntityHandler.GetEntityOnPointer();
         if (entityToSelect != null)
         {
             builderInWorldEntityHandler.EntityClicked(entityToSelect);
