@@ -410,6 +410,7 @@ public class BuilderInWorldController : MonoBehaviour
         initialLoadingController.SetPercentage(50f);
         Environment.i.world.sceneController.OnNewSceneAdded += NewSceneAdded;
         Environment.i.world.sceneController.OnReadyScene += NewSceneReady;
+        Environment.i.world.blockersController.SetEnabled(false);
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
     }
@@ -436,6 +437,12 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
         }
 
+        if (HUDController.i.taskbarHud != null)
+        {
+            HUDController.i.taskbarHud.SetExploreInteractable(false);
+            HUDController.i.taskbarHud.SetMoreTutorialInteractable(false);
+        }
+
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
 
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
@@ -456,7 +463,7 @@ public class BuilderInWorldController : MonoBehaviour
             initialLoadingController.Hide(onHideAction: () =>
             {
                 inputController.inputTypeMode = InputTypeMode.BUILD_MODE;
-                HUDController.i.builderInWorldMainHud.SetVisibility(true);
+                HUDController.i.builderInWorldMainHud?.SetVisibility(true);
                 CommonScriptableObjects.allUIHidden.Set(previousAllUIHidden);
             });
         }
@@ -524,7 +531,14 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.SetVisibility(false);
         }
 
+        if (HUDController.i.taskbarHud != null)
+        {
+            HUDController.i.taskbarHud?.SetExploreInteractable(true);
+            HUDController.i.taskbarHud?.SetMoreTutorialInteractable(true);
+        }
+
         Environment.i.world.sceneController.DeactivateBuilderInWorldEditScene();
+        Environment.i.world.blockersController.SetEnabled(true);
         ExitBiwControllers();
 
         foreach (var groundVisual in groundVisualsGO)

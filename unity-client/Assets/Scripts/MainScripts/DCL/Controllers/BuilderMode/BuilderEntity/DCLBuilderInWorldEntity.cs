@@ -85,6 +85,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     private Dictionary<string, List<GameObject>> collidersGameObjectDictionary = new Dictionary<string, List<GameObject>>();
 
     private Vector3 lastPositionReported;
+    private Vector3 initialPosition;
 
     public void Init(IDCLEntity entity, Material editMaterial)
     {
@@ -100,6 +101,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsVisible = rootEntity.gameObject.activeSelf;
 
         isShapeComponentSet = false;
+        initialPosition = entity.gameObject.transform.position;
         InitRotation();
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
@@ -150,7 +152,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsNew = false;
         IsSelected = false;
         if (rootEntity.gameObject != null)
+        {
             rootEntity.gameObject.transform.SetParent(originalParent);
+
+            if (IsNew)
+                initialPosition = rootEntity.gameObject.transform.position;
+        }
 
         SetOriginalMaterials();
     }
@@ -321,6 +328,15 @@ public class DCLBuilderInWorldEntity : EditableEntity
     #endregion
 
     #endregion
+
+    public void ResetTransfrom()
+    {
+        currentRotation = Vector3.zero;
+        rootEntity.gameObject.transform.eulerAngles = currentRotation;
+        rootEntity.gameObject.transform.position = initialPosition;
+
+        OnStatusUpdate?.Invoke(this);
+    }
 
     void ShapeInit()
     {
