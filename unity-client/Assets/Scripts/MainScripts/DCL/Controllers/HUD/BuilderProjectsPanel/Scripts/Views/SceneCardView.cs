@@ -82,6 +82,7 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     private AssetPromise_Texture thumbnailPromise;
     private bool isDestroyed = false;
     private Transform defaultParent;
+    private bool isLoadingThumbnail = false; 
 
     private void Awake()
     {
@@ -92,6 +93,11 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
         
         editorLockedGO.SetActive(false);
         editorLockedTooltipGO.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        loadingAnimator.SetBool(isLoadingAnimation, isLoadingThumbnail);
     }
 
     void ISceneCardView.Setup(ISceneData sceneData)
@@ -147,7 +153,8 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
 
     void ISceneCardView.SetThumbnail(string thumbnailUrl)
     {
-        loadingAnimator.SetBool(isLoadingAnimation, true);
+        isLoadingThumbnail = true;
+        loadingAnimator.SetBool(isLoadingAnimation, isLoadingThumbnail);
         
         if (thumbnailPromise != null)
         {
@@ -171,7 +178,8 @@ internal class SceneCardView : MonoBehaviour, ISceneCardView
     void ISceneCardView.SetThumbnail(Texture2D thumbnailTexture)
     {
         thumbnail.texture = thumbnailTexture ?? defaultThumbnail;
-        loadingAnimator.SetBool(isLoadingAnimation, false);
+        isLoadingThumbnail = false;
+        loadingAnimator.SetBool(isLoadingAnimation, isLoadingThumbnail);
     }
 
     void ISceneCardView.SetDeployed(bool deployed)

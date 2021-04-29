@@ -42,6 +42,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
     private string thumbnailUrl;
     private AssetPromise_Texture thumbnailPromise;
     private Vector2Int coords;
+    private bool isLoadingThumbnail = false; 
 
     private void Awake()
     {
@@ -63,6 +64,11 @@ internal class LandElementView : MonoBehaviour, IDisposable
             AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
             thumbnailPromise = null;
         }
+    }
+    
+    private void OnEnable()
+    {
+        loadingAnimator.SetBool(isLoadingAnimation, isLoadingThumbnail);
     }
 
     public void SetActive(bool active)
@@ -143,7 +149,8 @@ internal class LandElementView : MonoBehaviour, IDisposable
         if (url == thumbnailUrl)
             return;
 
-        loadingAnimator.SetBool(isLoadingAnimation, true);
+        isLoadingThumbnail = true;
+        loadingAnimator.SetBool(isLoadingAnimation, isLoadingThumbnail);
         thumbnailUrl = url;
 
         var prevPromise = thumbnailPromise;
@@ -169,7 +176,8 @@ internal class LandElementView : MonoBehaviour, IDisposable
     public void SetThumbnail(Texture thumbnailTexture)
     {
         thumbnail.texture = thumbnailTexture;
-        loadingAnimator.SetBool(isLoadingAnimation, false);
+        isLoadingThumbnail = false;
+        loadingAnimator.SetBool(isLoadingAnimation, isLoadingThumbnail);
     }
 
     public void SetEditable(bool isEditable)
