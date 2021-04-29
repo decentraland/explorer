@@ -100,10 +100,15 @@ initializeUnity(container)
       i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
+      const tutorialConfig = {
+        fromDeepLink: HAS_INITIAL_POSITION_MARK,
+        enableNewTutorialCamera: false,
+      }
+
       EnsureProfile(identity.address)
         .then((profile) => {
           i.ConfigureEmailPrompt(profile.tutorialStep)
-          i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+          i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
         })
         .catch((e) => logger.error(`error getting profile ${e}`))
     } catch (e) {
