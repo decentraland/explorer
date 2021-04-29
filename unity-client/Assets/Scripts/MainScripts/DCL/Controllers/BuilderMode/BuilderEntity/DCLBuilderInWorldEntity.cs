@@ -151,10 +151,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         IsSelected = false;
         if (rootEntity.gameObject != null)
+        {
             rootEntity.gameObject.transform.SetParent(originalParent);
 
-        if (IsNew)
-            initialPosition = rootEntity.gameObject.transform.position;
+            if (IsNew)
+                initialPosition = rootEntity.gameObject.transform.position;
+        }
 
         SetOriginalMaterials();
     }
