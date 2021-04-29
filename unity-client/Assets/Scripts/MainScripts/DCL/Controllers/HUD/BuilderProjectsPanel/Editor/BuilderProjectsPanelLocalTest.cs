@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class BuilderPorjectsPanelLocalTest : MonoBehaviour
+public class BuilderProjectsPanelLocalTest : MonoBehaviour
 {
     private BuilderProjectsPanelController controller;
     private IBuilderProjectsPanelBridge bridge;
