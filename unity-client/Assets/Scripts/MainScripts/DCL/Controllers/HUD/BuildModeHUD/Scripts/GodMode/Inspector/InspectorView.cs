@@ -78,14 +78,6 @@ public class InspectorView : MonoBehaviour, IInspectorView
 
     public void ClearEntitiesList() { entitiesList?.Clear(); }
 
-    public void SetCloseButtonsAction(UnityAction call)
-    {
-        if (entitiesList == null)
-            return;
-
-        entitiesList.Clear();
-    }
-
     public void SetCloseButtonsAction(UnityAction call) { closeEntityListBtn.onClick.AddListener(call); }
 
     public void ConfigureSceneLimits(ISceneLimitsController sceneLimitsController)
