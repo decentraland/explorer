@@ -210,5 +210,17 @@ namespace Tests.BuildModeHUDControllers
             //Assert
             topActionsButtonsController.topActionsButtonsView.Received(1).SetActionsInteractable(isInteractable);
         }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestSnapModeChange(bool isActive)
+        {
+            //Act 
+            topActionsButtonsController.SetSnapActive(isActive);
+
+            //Assert
+            topActionsButtonsController.topActionsButtonsView.Received(1).SetSnapActive(isActive);
+        }
     }
 }

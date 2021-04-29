@@ -51,6 +51,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     private bool isTypeOfBoundSelectionSelected = false;
     private bool isVoxelBoundMultiSelection = false;
     private bool multiSelectionButtonPressed = false;
+    private bool changeSnapTemporaryButtonPressed = false;
 
     private bool wasGizmosActive = false;
     private bool isDraggingStarted = false;
@@ -77,18 +78,10 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         multiSelectionInputAction.OnStarted += (o) => multiSelectionButtonPressed = true;
         multiSelectionInputAction.OnFinished += (o) => multiSelectionButtonPressed = false;
 
+        multiSelectionInputAction.OnStarted += (o) => ChangeSnapTemporaryActivated();
+        multiSelectionInputAction.OnFinished += (o) => ChangeSnapTemporaryDeactivated();
+
         gizmoManager.OnChangeTransformValue += EntitiesTransfromByGizmos;
-    }
-
-    private void EntitiesTransfromByGizmos(Vector3 transformValue)
-    {
-        if (gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.ROTATE_GIZMO_NAME)
-            return;
-
-        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
-        {
-            entity.AddRotation(transformValue);
-        }
     }
 
     private void OnDestroy()
@@ -166,6 +159,35 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             var rect = BuilderInWorldUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
             BuilderInWorldUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
             BuilderInWorldUtils.DrawScreenRectBorder(rect, 1, Color.white);
+        }
+    }
+
+    private void ChangeSnapTemporaryDeactivated()
+    {
+        if (changeSnapTemporaryButtonPressed)
+            SetSnapActive(!isSnapActive);
+
+        changeSnapTemporaryButtonPressed = false;
+    }
+
+    private void ChangeSnapTemporaryActivated()
+    {
+        if (!mouseMainBtnPressed || !gizmoManager.HasAxisHover())
+            return;
+
+        changeSnapTemporaryButtonPressed = true;
+
+        SetSnapActive(!isSnapActive);
+    }
+
+    private void EntitiesTransfromByGizmos(Vector3 transformValue)
+    {
+        if (gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.ROTATE_GIZMO_NAME)
+            return;
+
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
+        {
+            entity.AddRotation(transformValue);
         }
     }
 

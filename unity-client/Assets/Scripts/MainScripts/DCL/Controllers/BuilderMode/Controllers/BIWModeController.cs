@@ -83,6 +83,7 @@ public class BIWModeController : BIWController
         {
             HUDController.i.builderInWorldMainHud.OnChangeModeAction += ChangeAdvanceMode;
             HUDController.i.builderInWorldMainHud.OnResetAction += ResetScaleAndRotation;
+            HUDController.i.builderInWorldMainHud.OnChangeSnapModeAction += ChangeSnapMode;
         }
     }
 

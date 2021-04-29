@@ -12,6 +12,7 @@ public interface ITopActionsButtonsController
     event Action OnDuplicateClick;
     event Action OnDeleteClick;
     event Action OnLogOutClick;
+    event Action OnSnapModeClick;
 
     IExtraActionsController extraActionsController { get; }
 
@@ -32,6 +33,7 @@ public interface ITopActionsButtonsController
     void SetExtraActionsActive(bool isActive);
     void SetGizmosActive(string gizmos);
     void SetActionsInteractable(bool isActive);
+    void SetSnapActive(bool isActive);
 }
 
 public class TopActionsButtonsController : ITopActionsButtonsController
@@ -45,6 +47,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public event Action OnDuplicateClick;
     public event Action OnDeleteClick;
     public event Action OnLogOutClick;
+    public event Action OnSnapModeClick;
 
     public IExtraActionsController extraActionsController { get; private set; }
 
@@ -75,6 +78,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDeletePointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnMoreActionsPointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnSnapModeClicked += SnapModeClicked;
 
         extraActionsController = new ExtraActionsController();
         topActionsButtonsView.ConfigureExtraActions(extraActionsController);
@@ -121,6 +125,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public void DeleteClicked() { OnDeleteClick?.Invoke(); }
 
     public void LogoutClicked() { OnLogOutClick?.Invoke(); }
+    public void SnapModeClicked() { OnSnapModeClick?.Invoke(); }
 
     public void ConfirmLogout(BuildModeModalType modalType)
     {
@@ -141,4 +146,5 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public void SetExtraActionsActive(bool isActive) { extraActionsController.SetActive(isActive); }
     public void SetGizmosActive(string gizmos) { topActionsButtonsView.SetGizmosActive(gizmos); }
     public void SetActionsInteractable(bool isActive) { topActionsButtonsView.SetActionsInteractable(isActive); }
+    public void SetSnapActive(bool isActive) { topActionsButtonsView.SetSnapActive(isActive); }
 }

@@ -22,6 +22,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnPublishAction;
     public event Action OnConfirmPublishAction;
     public event Action OnLogoutAction;
+    public event Action OnChangeSnapModeAction;
     public event Action<CatalogItem> OnCatalogItemSelected;
     public event Action<DCLBuilderInWorldEntity> OnEntityClick;
     public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
@@ -161,6 +162,7 @@ public class BuildModeHUDController : IHUD
         controllers.topActionsButtonsController.OnResetClick += () => OnResetAction?.Invoke();
         controllers.topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectedAction?.Invoke();
         controllers.topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectedAction?.Invoke();
+        controllers.topActionsButtonsController.OnSnapModeClick += () => OnChangeSnapModeAction?.Invoke();
         controllers.topActionsButtonsController.OnLogOutClick += ExitStart;
         controllers.topActionsButtonsController.extraActionsController.OnControlsClick += ChangeVisibilityOfControls;
         controllers.topActionsButtonsController.extraActionsController.OnHideUIClick += ChangeVisibilityOfUI;
@@ -434,6 +436,8 @@ public class BuildModeHUDController : IHUD
     }
 
     public void SetActionsButtonsInteractable(bool isInteractable) { controllers.topActionsButtonsController.SetActionsInteractable(isInteractable); }
+
+    public void SetSnapModeActive(bool isActive) { controllers.topActionsButtonsController.SetSnapActive(isActive); }
 
     #endregion
 
