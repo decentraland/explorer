@@ -192,7 +192,6 @@ namespace Tests.BuildModeHUDControllers
             entityInformationController.UpdateEntityName(testEntity);
 
             // Assert
-            entityInformationController.entityInformationView.Received(1).SeTitleText(Arg.Any<string>());
             entityInformationController.entityInformationView.Received(1).SetNameIFText(Arg.Any<string>());
         }
 
@@ -263,6 +262,18 @@ namespace Tests.BuildModeHUDControllers
             entityInformationController.entityInformationView.Received(1).SetPositionAttribute(Arg.Any<Vector3>());
             entityInformationController.entityInformationView.Received(1).SetRotationAttribute(Arg.Any<Vector3>());
             entityInformationController.entityInformationView.Received(1).SetScaleAttribute(Arg.Any<Vector3>());
+        }
+
+        [Test]
+        [TestCase(1)]
+        [TestCase(5)]
+        public void UpdateEntitiesSelectionCorrectly(int numberOfSelectedEntities)
+        {
+            // Act
+            entityInformationController.UpdateEntitiesSelection(numberOfSelectedEntities);
+
+            // Assert
+            entityInformationController.entityInformationView.Received(1).UpdateEntitiesSelection(numberOfSelectedEntities);
         }
     }
 }
