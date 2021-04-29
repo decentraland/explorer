@@ -27,6 +27,7 @@ export type WorldConfig = {
   renderProfile?: RenderProfile
   messageOfTheDay?: MessageOfTheDayConfig | null
   messageOfTheDayInit?: boolean
+  enableNewTutorialCamera?: boolean
 }
 
 export type MessageOfTheDayConfig = {

@@ -582,3 +582,8 @@ export type RealmsInfoForRenderer = {
     userParcels: [number, number][]
   }[]
 }
+
+export type TutorialInitializationMessage = {
+  fromDeepLink: boolean
+  enableNewTutorialCamera: boolean
+}

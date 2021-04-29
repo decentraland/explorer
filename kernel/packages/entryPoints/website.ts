@@ -93,6 +93,7 @@ namespace webApp {
     const i = unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
+    const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -144,10 +145,15 @@ namespace webApp {
           Html.switchGameContainer(true)
         }).catch(logger.error)
 
+        const tutorialConfig = {
+          fromDeepLink: HAS_INITIAL_POSITION_MARK,
+          enableNewTutorialCamera: enableNewTutorialCamera,
+        }
+
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
-            i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
