@@ -167,9 +167,9 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.SetGizmosActive(gizmosActive);
 
             // Assert
-            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
-            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
-            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.selectedBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
         }
 
         [Test]
@@ -182,9 +182,9 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.SetGizmosActive(gizmosActive);
 
             // Assert
-            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
-            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
-            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.selectedBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
         }
 
         [Test]
@@ -197,9 +197,24 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.SetGizmosActive(gizmosActive);
 
             // Assert
-            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
-            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.gizmosNormalColor);
-            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.gizmosSelectedColor);
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.selectedBtnImgColor);
+        }
+
+        [Test]
+        public void SetEmptyGizmosCorrectly()
+        {
+            //Arrange
+            string gizmosActive = BuilderInWorldSettings.EMPTY_GIZMO_NAME;
+
+            // Act
+            topActionsButtonsView.SetGizmosActive(gizmosActive);
+
+            // Assert
+            Assert.AreEqual(topActionsButtonsView.translateGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.rotateGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
+            Assert.AreEqual(topActionsButtonsView.scaleGizmosBtnImg.color , topActionsButtonsView.normalBtnImgColor);
         }
 
         [Test]
@@ -214,6 +229,21 @@ namespace Tests.BuildModeHUDViews
             Assert.AreEqual(isActive, topActionsButtonsView.resetBtn.IsInteractable());
             Assert.AreEqual(isActive, topActionsButtonsView.duplicateBtn.IsInteractable());
             Assert.AreEqual(isActive, topActionsButtonsView.deleteBtn.IsInteractable());
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void SetSnapMode(bool isActive)
+        {
+            //Arrange
+            Color correctColor = isActive ? topActionsButtonsView.selectedBtnImgColor : topActionsButtonsView.normalBtnImgColor;
+
+            //Act
+            topActionsButtonsView.SetSnapActive(isActive);
+
+            //Assert
+            Assert.AreEqual(topActionsButtonsView.snapModeBtnImg.color , correctColor);
         }
     }
 }

@@ -15,6 +15,7 @@ public interface ITopActionsButtonsView
                  OnDuplicateClicked,
                  OnDeleteClicked,
                  OnLogOutClicked,
+                 OnSnapModeClicked,
                  OnPointerExit;
 
     event Action<BaseEventData, string> OnChangeCameraModePointerEnter,
@@ -25,7 +26,8 @@ public interface ITopActionsButtonsView
                                         OnDuplicatePointerEnter,
                                         OnDeletePointerEnter,
                                         OnMoreActionsPointerEnter,
-                                        OnLogoutPointerEnter;
+                                        OnLogoutPointerEnter,
+                                        OnSnapModePointerEnter;
 
     void ConfigureExtraActions(IExtraActionsController extraActionsController);
     void OnChangeModeClick(DCLAction_Trigger action);
@@ -39,6 +41,7 @@ public interface ITopActionsButtonsView
     void OnTranslateClick(DCLAction_Trigger action);
     void SetGizmosActive(string gizmos);
     void SetActionsInteractable(bool isActive);
+    void SetSnapActive(bool isActive);
 }
 
 public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
@@ -52,6 +55,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
                         OnDuplicateClicked,
                         OnDeleteClicked,
                         OnLogOutClicked,
+                        OnSnapModeClicked,
                         OnPointerExit;
 
     public event Action<BaseEventData, string> OnChangeCameraModePointerEnter,
@@ -62,7 +66,8 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
                                                OnDuplicatePointerEnter,
                                                OnDeletePointerEnter,
                                                OnMoreActionsPointerEnter,
-                                               OnLogoutPointerEnter;
+                                               OnLogoutPointerEnter,
+                                               OnSnapModePointerEnter;
 
     [Header("Buttons")]
     [SerializeField] internal Button changeModeBtn;
@@ -74,6 +79,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
     [SerializeField] internal Button duplicateBtn;
     [SerializeField] internal Button deleteBtn;
     [SerializeField] internal Button logOutBtn;
+    [SerializeField] internal Button snapModeBtn;
 
     [Header("Input Actions")]
     [SerializeField] internal InputAction_Trigger toggleChangeCameraInputAction;
@@ -94,6 +100,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
     [SerializeField] internal EventTrigger deleteEventTrigger;
     [SerializeField] internal EventTrigger moreActionsEventTrigger;
     [SerializeField] internal EventTrigger logoutEventTrigger;
+    [SerializeField] internal EventTrigger snapModeEventTrigger;
 
     [Header("Tooltip Texts")]
     [SerializeField] internal string changeCameraModeTooltipText = "Change Camera (V)";
@@ -105,6 +112,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
     [SerializeField] internal string deleteTooltipText = "Delete (Del) or (Backspace)";
     [SerializeField] internal string moreActionsTooltipText = "Extra Actions";
     [SerializeField] internal string logoutTooltipText = "Exit from edition";
+    [SerializeField] internal string snapModeTooltipText = "Change snap (O)";
 
     [Header("Sub-Views")]
     [SerializeField] internal ExtraActionsView extraActionsView;
@@ -113,10 +121,11 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
     [SerializeField] internal Image translateGizmosBtnImg;
     [SerializeField] internal Image rotateGizmosBtnImg;
     [SerializeField] internal Image scaleGizmosBtnImg;
+    [SerializeField] internal Image snapModeBtnImg;
 
     [Header("Colors")]
-    [SerializeField] internal Color gizmosNormalColor;
-    [SerializeField] internal Color gizmosSelectedColor;
+    [SerializeField] internal Color normalBtnImgColor;
+    [SerializeField] internal Color selectedBtnImgColor;
 
     private DCLAction_Trigger dummyActionTrigger = new DCLAction_Trigger();
     internal IExtraActionsController extraActionsController;
@@ -142,6 +151,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         deleteBtn.onClick.AddListener(() => OnDeleteClick(dummyActionTrigger));
         logOutBtn.onClick.AddListener(() => OnLogOutClick(dummyActionTrigger));
         extraBtn.onClick.AddListener(() => OnExtraClick(dummyActionTrigger));
+        snapModeBtn.onClick.AddListener(() => OnSnapModeClick(dummyActionTrigger));
 
         BuilderInWorldUtils.ConfigureEventTrigger(
             changeCameraModeEventTrigger,
@@ -233,6 +243,16 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
+        BuilderInWorldUtils.ConfigureEventTrigger(
+            snapModeEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnSnapModePointerEnter?.Invoke(eventData, snapModeTooltipText));
+
+        BuilderInWorldUtils.ConfigureEventTrigger(
+            snapModeEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
         //TODO: This should be reactivate when we activate the first person camera
         //  toggleChangeCameraInputAction.OnTriggered += OnChangeModeClick;
         toggleTranslateInputAction.OnTriggered += OnTranslateClick;
@@ -254,6 +274,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         deleteBtn.onClick.RemoveAllListeners();
         logOutBtn.onClick.RemoveAllListeners();
         extraBtn.onClick.RemoveAllListeners();
+        snapModeBtn.onClick.RemoveAllListeners();
 
         BuilderInWorldUtils.RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerEnter);
         BuilderInWorldUtils.RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerExit);
@@ -273,6 +294,8 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         BuilderInWorldUtils.RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerExit);
         BuilderInWorldUtils.RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerEnter);
         BuilderInWorldUtils.RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(snapModeEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(snapModeEventTrigger, EventTriggerType.PointerExit);
 
         toggleChangeCameraInputAction.OnTriggered -= OnChangeModeClick;
         toggleTranslateInputAction.OnTriggered -= OnTranslateClick;
@@ -297,23 +320,26 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
     public void OnExtraClick(DCLAction_Trigger action) { OnExtraClicked?.Invoke(); }
 
     public void OnTranslateClick(DCLAction_Trigger action) { OnTranslateClicked?.Invoke(); }
+    public void OnSnapModeClick(DCLAction_Trigger action) { OnSnapModeClicked?.Invoke(); }
+
+    public void SetSnapActive(bool isActive) { snapModeBtnImg.color = isActive ? selectedBtnImgColor : normalBtnImgColor; }
 
     public void SetGizmosActive(string gizmos)
     {
-        translateGizmosBtnImg.color = gizmosNormalColor;
-        rotateGizmosBtnImg.color = gizmosNormalColor;
-        scaleGizmosBtnImg.color = gizmosNormalColor;
+        translateGizmosBtnImg.color = normalBtnImgColor;
+        rotateGizmosBtnImg.color = normalBtnImgColor;
+        scaleGizmosBtnImg.color = normalBtnImgColor;
 
         switch (gizmos)
         {
             case BuilderInWorldSettings.TRANSLATE_GIZMO_NAME:
-                translateGizmosBtnImg.color = gizmosSelectedColor;
+                translateGizmosBtnImg.color = selectedBtnImgColor;
                 break;
             case BuilderInWorldSettings.ROTATE_GIZMO_NAME:
-                rotateGizmosBtnImg.color = gizmosSelectedColor;
+                rotateGizmosBtnImg.color = selectedBtnImgColor;
                 break;
             case BuilderInWorldSettings.SCALE_GIZMO_NAME:
-                scaleGizmosBtnImg.color = gizmosSelectedColor;
+                scaleGizmosBtnImg.color = selectedBtnImgColor;
                 break;
         }
     }

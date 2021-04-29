@@ -67,6 +67,7 @@ public class BuilderInWorldMode : MonoBehaviour
             AudioScriptableObjects.disable.Play();
 
         isSnapActive = isActive;
+        HUDController.i.builderInWorldMainHud?.SetSnapModeActive(isSnapActive);
     }
 
     public virtual void StartMultiSelection() { isMultiSelectionActive = true; }
