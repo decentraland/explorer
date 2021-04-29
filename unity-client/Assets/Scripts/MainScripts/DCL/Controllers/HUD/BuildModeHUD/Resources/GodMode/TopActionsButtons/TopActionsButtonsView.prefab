@@ -762,11 +762,11 @@ MonoBehaviour:
   moreActionsEventTrigger: {fileID: 8221625501305900034}
   logoutEventTrigger: {fileID: 3234168961420652693}
   changeCameraModeTooltipText: Change Camera (V)
-  translateTooltipText: Translate (M)
+  translateTooltipText: Translate (G)
   rotateTooltipText: Rotate (R)
-  scaleTooltipText: Scale (G)
-  resetTooltipText: Reset (Control+R)
-  duplicateTooltipText: Duplicate (Control+D)
+  scaleTooltipText: Scale (S)
+  resetTooltipText: Reset
+  duplicateTooltipText: Duplicate (D)
   deleteTooltipText: Delete (Del) or (Backspace)
   moreActionsTooltipText: Extra Actions
   logoutTooltipText: Exit from edition
@@ -1152,7 +1152,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
     m_PressedColor: {r: 1, g: 0, b: 0, a: 1}
     m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -1166,7 +1166,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3820961470834295583}
   m_OnClick:
     m_PersistentCalls:
@@ -1379,7 +1379,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
     m_PressedColor: {r: 1, g: 0, b: 0, a: 1}
     m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -1393,7 +1393,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3820961470558227733}
   m_OnClick:
     m_PersistentCalls:
@@ -1683,7 +1683,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
     m_PressedColor: {r: 1, g: 0, b: 0, a: 1}
     m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -1697,7 +1697,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3820961471019888302}
   m_OnClick:
     m_PersistentCalls:

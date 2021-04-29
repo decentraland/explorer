@@ -38,6 +38,7 @@ public interface ITopActionsButtonsView
     void OnScaleClick(DCLAction_Trigger action);
     void OnTranslateClick(DCLAction_Trigger action);
     void SetGizmosActive(string gizmos);
+    void SetActionsInteractable(bool isActive);
 }
 
 public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
@@ -315,6 +316,13 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
                 scaleGizmosBtnImg.color = gizmosSelectedColor;
                 break;
         }
+    }
+
+    public void SetActionsInteractable(bool isActive)
+    {
+        resetBtn.interactable = isActive;
+        duplicateBtn.interactable = isActive;
+        deleteBtn.interactable = isActive;
     }
 
     public void OnRotateClick(DCLAction_Trigger action) { OnRotateClicked?.Invoke(); }

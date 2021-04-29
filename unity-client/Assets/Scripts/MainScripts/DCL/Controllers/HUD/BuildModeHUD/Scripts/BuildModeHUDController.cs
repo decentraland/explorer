@@ -370,6 +370,8 @@ public class BuildModeHUDController : IHUD
 
     public void ChangeVisibilityOfUI() { SetVisibility(!IsVisible()); }
 
+    #region TopButtons
+
     public void ChangeVisibilityOfExtraBtns()
     {
         areExtraButtonsVisible = !areExtraButtonsVisible;
@@ -381,6 +383,10 @@ public class BuildModeHUDController : IHUD
         areExtraButtonsVisible = false;
         controllers.topActionsButtonsController.extraActionsController.SetActive(areExtraButtonsVisible);
     }
+
+    public void SetActionsButtonsInteractable(bool isInteractable) { controllers.topActionsButtonsController.SetActionsInteractable(isInteractable); }
+
+    #endregion
 
     public void SetVisibility(bool visible)
     {

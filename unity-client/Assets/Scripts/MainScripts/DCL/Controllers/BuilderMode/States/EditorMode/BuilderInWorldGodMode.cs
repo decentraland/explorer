@@ -475,16 +475,26 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         {
             editionGO.transform.position = voxelController.ConverPositionToVoxelPosition(editionGO.transform.position);
         }
+        UpdateActionsInteractable();
     }
 
     public override void EntityDeselected(DCLBuilderInWorldEntity entityDeselected)
     {
         base.EntityDeselected(entityDeselected);
         if (selectedEntities.Count <= 0)
+        {
             gizmoManager.HideGizmo();
+            UpdateActionsInteractable();
+        }
 
         isPlacingNewObject = false;
         DesactivateVoxelMode();
+    }
+
+    private void UpdateActionsInteractable()
+    {
+        bool areInteratable = selectedEntities.Count > 0;
+        HUDController.i.builderInWorldMainHud.SetActionsButtonsInteractable(areInteratable);
     }
 
     public override bool ShouldCancelUndoAction()
