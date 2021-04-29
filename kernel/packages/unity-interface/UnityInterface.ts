@@ -19,7 +19,8 @@ import {
   KernelConfigForRenderer,
   RealmsInfoForRenderer,
   ContentMapping,
-  Profile
+  Profile,
+  TutorialInitializationMessage
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -279,12 +280,12 @@ export class UnityInterface {
     }
   }
 
-  public SetTutorialEnabled(fromDeepLink: boolean) {
-    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
+  public SetTutorialEnabled(tutorialConfig: TutorialInitializationMessage) {
+    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabled', JSON.stringify(tutorialConfig))
   }
 
-  public SetTutorialEnabledForUsersThatAlreadyDidTheTutorial() {
-    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial')
+  public SetTutorialEnabledForUsersThatAlreadyDidTheTutorial(tutorialConfig: TutorialInitializationMessage) {
+    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial', JSON.stringify(tutorialConfig))
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -344,14 +345,14 @@ export class UnityInterface {
     })
   }
 
-  public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
+  public ConfigureTutorial(tutorialStep: number, tutorialConfig: TutorialInitializationMessage) {
     const tutorialCompletedFlag = 256
 
     if (WORLD_EXPLORER) {
       if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
-        this.SetTutorialEnabled(fromDeepLink)
+        this.SetTutorialEnabled(tutorialConfig)
       } else {
-        this.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial()
+        this.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial(tutorialConfig)
         setDelightedSurveyEnabled(true)
       }
     }
