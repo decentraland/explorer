@@ -48,8 +48,7 @@ namespace Tests
 
 
             SectionDeployedScenesController controller = new SectionDeployedScenesController(view);
-            controller.searchHandler.SetSortType(SectionSearchHandler.SIZE_SORT_TYPE);
-            controller.searchHandler.SetSortOrder(false);
+            controller.searchHandler.SetSortType(SectionSearchHandler.SIZE_SORT_TYPE_ASC);
             
             ((IDeployedSceneListener)controller).OnSetScenes(cardViews);
             

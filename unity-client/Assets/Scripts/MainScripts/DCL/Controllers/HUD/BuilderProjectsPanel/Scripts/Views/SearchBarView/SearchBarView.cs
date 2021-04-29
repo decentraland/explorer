@@ -1,5 +1,4 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +17,6 @@ internal class SearchBarView : MonoBehaviour
     [SerializeField] internal SearchInputField inputField;
     [SerializeField] internal Button sortButton;
     [SerializeField] internal TextMeshProUGUI sortTypeLabel;
-    [SerializeField] internal SortOrderToggleView sortOrderToggle;
     [SerializeField] internal Toggle ownerToggle;
     [SerializeField] internal Toggle operatorToggle;
     [SerializeField] internal Toggle contributorToggle;
@@ -44,7 +42,6 @@ internal class SearchBarView : MonoBehaviour
         filterContributor = contributorToggle.isOn;
 
         inputField.OnSearchText += text => searchHandler?.SetSearchString(text);
-        sortOrderToggle.OnToggle += isDescending => searchHandler?.SetSortOrder(isDescending);
         sortDropdown.OnSortTypeSelected += OnSortTypeSelected;
     }
 
@@ -133,8 +130,6 @@ internal class SearchBarView : MonoBehaviour
         filterOwner = handler.filterOwner;
         filterOperator = handler.filterOperator;
         filterContributor = handler.filterContributor;
-
-        sortOrderToggle.SetWithoutNotify(handler.descendingSortOrder);
 
         sortTypeLabel.text = handler.sortType;
         inputField.inputField.SetTextWithoutNotify(handler.searchString);

@@ -71,13 +71,13 @@ internal class SearchInfo : ISearchInfo
     {
         switch (sortType)
         {
-            case SectionSearchHandler.NAME_SORT_TYPE when isDescendingOrder:
+            case SectionSearchHandler.NAME_SORT_TYPE_ASC:
                 return String.CompareOrdinal(name, other.name);
-            case SectionSearchHandler.NAME_SORT_TYPE:
+            case SectionSearchHandler.NAME_SORT_TYPE_DESC:
                 return String.CompareOrdinal(other.name, name);
-            case SectionSearchHandler.SIZE_SORT_TYPE when isDescendingOrder:
+            case SectionSearchHandler.SIZE_SORT_TYPE_DESC:
                 return other.size - size;
-            case SectionSearchHandler.SIZE_SORT_TYPE:
+            case SectionSearchHandler.SIZE_SORT_TYPE_ASC:
                 return size - other.size;
             default:
                 return 0;

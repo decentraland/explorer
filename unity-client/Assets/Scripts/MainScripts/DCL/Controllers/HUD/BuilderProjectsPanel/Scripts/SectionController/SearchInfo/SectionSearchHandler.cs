@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 internal class SectionSearchHandler : ISectionSearchHandler
 {
-    public const string NAME_SORT_TYPE = "NAME";
-    public const string SIZE_SORT_TYPE = "SIZE";
+    public const string NAME_SORT_TYPE_ASC = "Alphabetic A-Z";
+    public const string NAME_SORT_TYPE_DESC = "Alphabetic Z-A";
+    public const string SIZE_SORT_TYPE_ASC = "Size Asc";
+    public const string SIZE_SORT_TYPE_DESC = "Size Desc";
 
-    private readonly string[] scenesSortTypes = { NAME_SORT_TYPE, SIZE_SORT_TYPE };
+    private readonly string[] scenesSortTypes = { NAME_SORT_TYPE_ASC, NAME_SORT_TYPE_DESC, 
+        SIZE_SORT_TYPE_ASC, SIZE_SORT_TYPE_DESC };
 
     public event Action OnUpdated;
     public event Action<List<ISearchInfo>> OnResult;
@@ -22,7 +25,6 @@ internal class SectionSearchHandler : ISectionSearchHandler
     bool ISectionSearchHandler.filterOwner => filterOwner;
     bool ISectionSearchHandler.filterOperator => filterOperator;
     bool ISectionSearchHandler.filterContributor => filterContributor;
-    bool ISectionSearchHandler.descendingSortOrder => scenesSearchHandler.isDescendingSortOrder;
     string ISectionSearchHandler.sortType => scenesSearchHandler.currentSortingType;
     int ISectionSearchHandler.resultCount => scenesSearchHandler.resultCount;
 
@@ -73,11 +75,6 @@ internal class SectionSearchHandler : ISectionSearchHandler
     void ISectionSearchHandler.SetSortType(string sortType)
     {
         scenesSearchHandler.NotifySortTypeChanged(sortType);
-    }
-
-    void ISectionSearchHandler.SetSortOrder(bool isDescending)
-    {
-        scenesSearchHandler.NotifySortOrderChanged(isDescending);
     }
 
     void ISectionSearchHandler.SetSearchString(string searchText)
