@@ -17,10 +17,19 @@ namespace Tests.BuildModeHUDControllers
         {
             entityInformationController = new EntityInformationController();
             entityInformationController.Initialize(Substitute.For<IEntityInformationView>());
+            Environment.i.platform.webRequest.Initialize(
+                genericWebRequest: new WebRequest(),
+                assetBundleWebRequest: new WebRequestAssetBundle(),
+                textureWebRequest: new WebRequestTexture(),
+                audioWebRequest: new WebRequestAudio());
         }
 
         [TearDown]
-        public void TearDown() { entityInformationController.Dispose(); }
+        public void TearDown()
+        {
+            entityInformationController.Dispose();
+            Environment.i.platform.webRequest.Dispose();
+        }
 
         [Test]
         public void PositionChangedCorrectly()

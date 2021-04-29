@@ -87,7 +87,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         this.controllers.catalogBtnController.Initialize(catalogBtnView, this.controllers.tooltipController);
         this.controllers.inspectorController.Initialize(inspectorView);
         this.controllers.buildModeConfirmationModalController.Initialize(buildModeConfirmationModalView);
-        this.controllers.topActionsButtonsController.Initialize(topActionsButtonsView, this.controllers.tooltipController, this.controllers.buildModeConfirmationModalController);
+        this.controllers.topActionsButtonsController.Initialize(topActionsButtonsView, this.controllers.tooltipController);
         this.controllers.saveHUDController.Initialize(saveView);
     }
 
