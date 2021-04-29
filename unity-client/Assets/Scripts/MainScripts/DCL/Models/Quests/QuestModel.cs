@@ -21,6 +21,13 @@ public static class QuestsLiterals
         public const string TASK_ALREADY_COMPLETED = "task_already_completed";
         public const string FAILED = "failed";
     }
+
+    public static class Visibility
+    {
+        public const string VISIBLE = "visible";
+        public const string VISIBLE_IF_CAN_START = "visible_if_can_start";
+        public const string SECRET = "secret";
+    }
 }
 
 [System.Serializable]
@@ -31,6 +38,7 @@ public class QuestModel : BaseModel
     public string description;
     public string thumbnail_entry;
     public string status;
+    public string visibility;
     public string thumbnail_banner;
     public QuestSection[] sections;
     public DateTime assignmentTime = DateTime.Now; //TODO remove this once kernel send the data properly

@@ -26,7 +26,7 @@ namespace Tests.QuestsTrackerHUD
         [SetUp]
         public void SetUp()
         {
-            QuestModel questMock = new QuestModel { id = MOCK_QUEST_ID };
+            QuestModel questMock = new QuestModel { id = MOCK_QUEST_ID, status = QuestsLiterals.Status.ON_GOING };
             QuestSection sectionMock = new QuestSection { id = MOCK_SECTION_ID };
             QuestTask taskMock = new QuestTask { id = MOCK_TASK_ID };
             sectionMock.tasks = new [] { taskMock };
@@ -55,9 +55,9 @@ namespace Tests.QuestsTrackerHUD
         public void CallViewWhenQuestProgressed()
         {
             hudController.Initialize(questsController);
-            questsController.OnQuestProgressed += Raise.Event<QuestProgressed>(MOCK_QUEST_ID);
+            questsController.OnQuestUpdated += Raise.Event<QuestUpdated>(MOCK_QUEST_ID, true);
 
-            hudView.Received().UpdateQuest(MOCK_QUEST_ID);
+            hudView.Received().UpdateQuest(MOCK_QUEST_ID, true);
         }
 
         [Test]
@@ -81,6 +81,12 @@ namespace Tests.QuestsTrackerHUD
         [Test]
         public void CallViewWhenPinnedQuestsSet()
         {
+            DataStore.i.Quests.quests.Set(new []
+            {
+                ("newQuest1", new QuestModel { id = "newQuest1" }),
+                ("newQuest2", new QuestModel { id = "newQuest2" })
+            });
+
             hudController.Initialize(questsController);
             DataStore.i.Quests.pinnedQuests.Set(new []
             {
@@ -172,7 +178,7 @@ namespace Tests.QuestsTrackerHUD
         [Test]
         public void TrackQuestProgress()
         {
-            hudView.UpdateQuest(MOCK_QUEST_ID);
+            hudView.UpdateQuest(MOCK_QUEST_ID, true);
 
             Assert.AreEqual(1, hudView.currentEntries.Count);
             Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));

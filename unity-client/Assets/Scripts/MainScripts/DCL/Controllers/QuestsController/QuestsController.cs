@@ -7,13 +7,15 @@ using UnityEngine;
 
 namespace DCL.QuestsController
 {
-    public delegate void QuestProgressed(string questId);
+    public delegate void NewQuest(string questId);
+    public delegate void QuestUpdated(string questId, bool hasProgress);
     public delegate void QuestCompleted(string questId);
     public delegate void RewardObtained(string questId, string rewardId);
 
     public interface IQuestsController : IDisposable
     {
-        event QuestProgressed OnQuestProgressed;
+        event NewQuest OnNewQuest;
+        event QuestUpdated OnQuestUpdated;
         event QuestCompleted OnQuestCompleted;
         event RewardObtained OnRewardObtained;
 
@@ -28,7 +30,8 @@ namespace DCL.QuestsController
 
         public static IQuestsController i { get; internal set; }
 
-        public event QuestProgressed OnQuestProgressed;
+        public event NewQuest OnNewQuest;
+        public event QuestUpdated OnQuestUpdated;
         public event QuestCompleted OnQuestCompleted;
         public event RewardObtained OnRewardObtained;
 
@@ -60,6 +63,7 @@ namespace DCL.QuestsController
                 pinnedQuests.Remove(questId);
             }
 
+            parsedQuests.ForEach(RestoreProgressFlags);
             //We ignore quests without sections/tasks
             quests.Set(parsedQuests.Where(x => x.sections != null && x.sections.Length > 0).Select(x => (x.id, x)));
         }
@@ -83,15 +87,15 @@ namespace DCL.QuestsController
             //Alex: Edge case. Progressed quest was not included in the initialization. We dont invoke quests events
             if (!quests.TryGetValue(progressedQuest.id, out QuestModel oldQuest))
             {
+                RestoreProgressFlags(progressedQuest);
                 quests.Add(progressedQuest.id, progressedQuest);
+                if (!progressedQuest.isCompleted)
+                    OnNewQuest?.Invoke(progressedQuest.id);
                 return;
             }
 
             quests[progressedQuest.id] = progressedQuest;
             progressedQuest.oldProgress = oldQuest.progress;
-
-            if (!HasProgressed(progressedQuest, oldQuest))
-                return;
 
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
@@ -106,7 +110,7 @@ namespace DCL.QuestsController
                     {
                         bool oldTaskFound = oldQuestSection.TryGetTask(currentTask.id, out QuestTask oldTask);
                         currentTask.justProgressed = !oldTaskFound || currentTask.progress != oldTask.progress;
-                        currentTask.justUnlocked = !oldTaskFound || (currentTask.status != QuestsLiterals.Status.BLOCKED &&  oldTask.status == QuestsLiterals.Status.BLOCKED);
+                        currentTask.justUnlocked = !oldTaskFound || (currentTask.status != QuestsLiterals.Status.BLOCKED && oldTask.status == QuestsLiterals.Status.BLOCKED);
                         currentTask.oldProgress = oldTaskFound ? oldTask.progress : 0;
                     }
                     else
@@ -118,7 +122,14 @@ namespace DCL.QuestsController
                 }
             }
 
-            OnQuestProgressed?.Invoke(progressedQuest.id);
+
+            // If quest is not blocked anymore or being secret has been just started, we call NewQuest event.
+            if (!progressedQuest.isCompleted &&
+                ((oldQuest.status == QuestsLiterals.Status.BLOCKED && progressedQuest.status != QuestsLiterals.Status.BLOCKED) ||
+                 (progressedQuest.visibility == QuestsLiterals.Visibility.SECRET && oldQuest.status == QuestsLiterals.Status.NOT_STARTED && progressedQuest.status != QuestsLiterals.Status.NOT_STARTED )))
+                OnNewQuest?.Invoke(progressedQuest.id);
+
+            OnQuestUpdated?.Invoke(progressedQuest.id, HasProgressed(progressedQuest, oldQuest));
             if (!oldQuest.isCompleted && progressedQuest.isCompleted)
                 OnQuestCompleted?.Invoke(progressedQuest.id);
 
@@ -139,7 +150,11 @@ namespace DCL.QuestsController
                 }
             }
 
-            //Restore "progress" flags
+            RestoreProgressFlags(progressedQuest);
+        }
+
+        private void RestoreProgressFlags(QuestModel progressedQuest)
+        {
             progressedQuest.oldProgress = progressedQuest.progress;
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
