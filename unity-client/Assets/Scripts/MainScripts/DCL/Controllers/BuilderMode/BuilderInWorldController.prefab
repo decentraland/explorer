@@ -414,9 +414,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1057dc9d5eb891048bccaceaa1e70597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerToStopClick:
-    serializedVersion: 2
-    m_Bits: 2048
   msClickThreshold: 500
   movementClickThreshold: 2
 --- !u!114 &1208871511405416595
@@ -1616,6 +1613,9 @@ MonoBehaviour:
   biwSaveController: {fileID: 6802675824613373767}
   actionController: {fileID: 1208871512032110241}
   distanceEagleCamera: 20
+  layerToStopClick:
+    serializedVersion: 2
+    m_Bits: 2048
   snapDragFactor: 0.5
   freeCameraController: {fileID: 0}
   cameraController: {fileID: 0}
@@ -1624,11 +1624,10 @@ MonoBehaviour:
   avatarRenderer: {fileID: 0}
   gizmoManager: {fileID: 1208871511615770936}
   voxelController: {fileID: 1208871512657624392}
-  builderInputWrapper: {fileID: 1208871511405416592}
   outlinerController: {fileID: 4993453681677180110}
   focusOnSelectedEntitiesInputAction: {fileID: 11400000, guid: 746094ad79f2853439fc98abd3963fb8,
     type: 2}
-  squareMultiSelectionInputAction: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,
+  multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
     type: 2}
   groundLayer:
     serializedVersion: 2
@@ -1647,9 +1646,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelPrefab: {fileID: 2850604652874431653, guid: 66757bbb758595942be7e52b3a4f0df3,
     type: 3}
-  builderInputWrapper: {fileID: 1208871511405416592}
   buildModeController: {fileID: 1208871511274338203}
-  buildEditorMode: {fileID: 1208871512657624393}
   outlinerController: {fileID: 4993453681677180110}
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
   freeCameraMovement: {fileID: 0}
@@ -2243,7 +2240,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d9cc0526a987be489ee7f8e156b3a92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secondsToTimeOut: 10
   biwModeController: {fileID: 4364144288841107711}
   biwFloorHandler: {fileID: 1205861337032038080}
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
@@ -2298,7 +2294,7 @@ MonoBehaviour:
   outlineMaterial: {fileID: 2100000, guid: 92b0ce4a86423dd48b66212090fc7e34, type: 2}
   cameraOutlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4,
     type: 2}
-  builderInWorldController: {fileID: 1208871511274338203}
+  builderInWorldEntityHandler: {fileID: 1676156629805984034}
   biwInputHandler: {fileID: 6563051222090226857}
 --- !u!1 &5373867681970374750
 GameObject:
@@ -2574,14 +2570,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   duplicateOffset: 2
   outlinerController: {fileID: 4993453681677180110}
-  buildModeController: {fileID: 1208871511274338203}
   biwModeController: {fileID: 4364144288841107711}
   actionController: {fileID: 1208871512032110241}
   builderInWorldBridge: {fileID: 0}
-  biwSaveController: {fileID: 6802675824613373767}
+  biwCreatorController: {fileID: 2072020105617305708}
   editMaterial: {fileID: 2100000, guid: 92b0ce4a86423dd48b66212090fc7e34, type: 2}
-  duplicateCursorTexture: {fileID: 2800000, guid: 422889cd6c61279459cc3c6bfa00ed20,
-    type: 3}
+  layerToRaycast:
+    serializedVersion: 2
+    m_Bits: 16384
   hideSelectedEntitiesAction: {fileID: 11400000, guid: a9f9f5fb4f1639d4b8461c2838cfae56,
     type: 2}
   showAllEntitiesAction: {fileID: 11400000, guid: f0a0f94cc4fd01c4e82210e0de670a65,

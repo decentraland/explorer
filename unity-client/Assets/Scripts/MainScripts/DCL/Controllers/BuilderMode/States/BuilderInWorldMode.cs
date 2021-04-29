@@ -118,10 +118,11 @@ public class BuilderInWorldMode : MonoBehaviour
         }
 
         isNewObjectPlaced = false;
-        entityDeselected.IsNew = false;
     }
 
-    public virtual void DeselectedEntities()
+    public virtual void OnDeleteEntity(DCLBuilderInWorldEntity entity) { }
+
+    public virtual void OnDeselectedEntities()
     {
         builderInWorldEntityHandler.ReportTransform(true);
         biwSaveController.TryToSave();

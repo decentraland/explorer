@@ -76,13 +76,7 @@ public class InspectorView : MonoBehaviour, IInspectorView
 
     public void SetEntitiesList(List<DCLBuilderInWorldEntity> entities) { entitiesList = entities; }
 
-    public void ClearEntitiesList()
-    {
-        if (entitiesList == null)
-            return;
-
-        entitiesList.Clear();
-    }
+    public void ClearEntitiesList() { entitiesList?.Clear(); }
 
     public void SetCloseButtonsAction(UnityAction call) { closeEntityListBtn.onClick.AddListener(call); }
 

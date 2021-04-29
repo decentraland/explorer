@@ -20,16 +20,14 @@ public class BuilderInWorldEntityHandler : BIWController
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
 
-    public BuilderInWorldController buildModeController;
     public BIWModeController biwModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
-    public BIWSaveController biwSaveController;
+    public BIWCreatorController biwCreatorController;
 
     [Header("Build References")]
     public Material editMaterial;
-
-    public Texture2D duplicateCursorTexture;
+    [SerializeField] internal LayerMask layerToRaycast;
 
     [Header("InputActions")]
     [SerializeField]
@@ -43,6 +41,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuilderInWorldMode currentActiveMode;
     private bool isMultiSelectionActive = false;
+    private bool isSecondayClickPressed = false;
 
     private float lastTransformReportTime;
 
@@ -84,6 +83,21 @@ public class BuilderInWorldEntityHandler : BIWController
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
+
+        BuilderInWorldInputWrapper.OnMouseDown += OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp += OnInputMouseUp;
+    }
+
+    private void OnInputMouseDown(int buttonId, Vector3 mousePosition)
+    {
+        if (buttonId == 1)
+            isSecondayClickPressed = true;
+    }
+
+    private void OnInputMouseUp(int buttonId, Vector3 mousePosition)
+    {
+        if (buttonId == 1)
+            isSecondayClickPressed = false;
     }
 
     private void OnDestroy()
@@ -107,6 +121,9 @@ public class BuilderInWorldEntityHandler : BIWController
         hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         hudController.OnEntityRename -= SetEntityName;
+
+        BuilderInWorldInputWrapper.OnMouseDown -= OnInputMouseDown;
+        BuilderInWorldInputWrapper.OnMouseUp -= OnInputMouseUp;
     }
 
     protected override void FrameUpdate()
@@ -155,7 +172,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public bool IsPointerInSelectedEntity()
     {
-        DCLBuilderInWorldEntity entityInPointer = buildModeController.GetEntityOnPointer();
+        DCLBuilderInWorldEntity entityInPointer = GetEntityOnPointer();
         if (entityInPointer == null)
             return false;
 
@@ -176,19 +193,20 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private void DuplicateSelectedEntitiesInput()
     {
-        if (selectedEntities.Count <= 0)
+        if (selectedEntities.Count <= 0 || isSecondayClickPressed)
             return;
 
         DuplicateSelectedEntities();
     }
 
-    public void ExitFromEditMode()
+    public override void ExitEditMode()
     {
+        base.ExitEditMode();
         DeselectEntities();
 
         foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-            entity.Delete();
+            entity.Dispose();
         }
 
         convertedEntities.Clear();
@@ -244,30 +262,38 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(selectedEntities[0]);
         }
 
-        currentActiveMode?.DeselectedEntities();
+        currentActiveMode?.OnDeselectedEntities();
 
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+    }
+
+    public DCLBuilderInWorldEntity GetEntityOnPointer()
+    {
+        RaycastHit hit;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(biwModeController.GetMousePosition());
+        float distanceToSelect = biwModeController.GetMaxDistanceToSelectEntities();
+
+        if (Physics.Raycast(ray, out hit, distanceToSelect, layerToRaycast))
+        {
+            string entityID = hit.collider.gameObject.name;
+
+            if (sceneToEdit.entities.ContainsKey(entityID))
+            {
+                return GetConvertedEntity(sceneToEdit.entities[entityID]);
+            }
+        }
+        return null;
     }
 
     public void EntityClicked(DCLBuilderInWorldEntity entityToSelect)
     {
         if (entityToSelect != null)
         {
-            if (selectedEntities.Count <= 0)
-            {
+            if (!isMultiSelectionActive)
+                DeselectEntities();
+
+            if (!entityToSelect.IsLocked)
                 ChangeEntitySelectStatus(entityToSelect);
-            }
-            else
-            {
-                if (!isMultiSelectionActive)
-                {
-                    DeselectEntities();
-                }
-                else
-                {
-                    ChangeEntitySelectStatus(entityToSelect);
-                }
-            }
         }
         else if (!isMultiSelectionActive)
         {
@@ -299,6 +325,15 @@ public class BuilderInWorldEntityHandler : BIWController
             SelectEntity(entityCliked);
     }
 
+    public void CancelSelection()
+    {
+        if (selectedEntities.Count == 0)
+            return;
+
+        DestroyLastCreatedEntities();
+        DeselectEntities();
+    }
+
     public void ChangeLockStateSelectedEntities()
     {
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
@@ -320,8 +355,12 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public void ChangeShowStateSelectedEntities()
     {
-        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
+        List<DCLBuilderInWorldEntity> entitiesToHide = new List<DCLBuilderInWorldEntity>(selectedEntities);
+
+        foreach (DCLBuilderInWorldEntity entity in entitiesToHide)
         {
+            if (entity.IsVisible && entity.IsSelected)
+                DeselectEntity(entity);
             entity.ToggleShowStatus();
         }
     }
@@ -409,36 +448,36 @@ public class BuilderInWorldEntityHandler : BIWController
         buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATE;
 
         List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
+        List<DCLBuilderInWorldEntity> entitiesToDuplicate = new List<DCLBuilderInWorldEntity>(selectedEntities);
+        DeselectEntities();
 
-        int amount = selectedEntities.Count;
-        for (int i = 0; i < amount; i++)
+        foreach (DCLBuilderInWorldEntity entityToDuplicate in entitiesToDuplicate)
         {
-            if (selectedEntities[i].isNFT)
+            if (entityToDuplicate.isNFT)
                 continue;
 
-            var entityDuplicated = DuplicateEntity(selectedEntities[i]);
-            BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated, entityDuplicated.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated));
+            var entityDuplicated = DuplicateEntity(entityToDuplicate);
+            BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated.rootEntity, entityDuplicated.rootEntity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated.rootEntity));
             entityActionList.Add(builderInWorldEntityAction);
+            SelectEntity(entityDuplicated);
         }
 
         currentActiveMode?.SetDuplicationOffset(duplicateOffset);
-        Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
-
 
         buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATE);
         actionController.AddAction(buildAction);
     }
 
-    public IDCLEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
+    public DCLBuilderInWorldEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
     {
         IDCLEntity entity = SceneUtils.DuplicateEntity(sceneToEdit, entityToDuplicate.rootEntity);
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
-        SetupEntityToEdit(entity);
+        DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(entity);
 
         NotifyEntityIsCreated(entity);
         EntityListChanged();
-        return entity;
+        return convertedEntity;
     }
 
     public IDCLEntity CreateEntityFromJSON(string entityJson)
@@ -525,12 +564,16 @@ public class BuilderInWorldEntityHandler : BIWController
                 entitiesToRemove.Add(entity);
         }
 
+        if (entitiesToRemove.Count == 0)
+            return;
+
         biwModeController.UndoEditionGOLastStep();
 
         foreach (DCLBuilderInWorldEntity entity in entitiesToRemove)
         {
             DeleteEntity(entity, false);
         }
+        hudController.HideEntityInformation();
     }
 
     public void EntityListChanged()
@@ -647,6 +690,8 @@ public class BuilderInWorldEntityHandler : BIWController
         entityToDelete.rootEntity.OnRemoved -= RemoveConvertedEntity;
         entityToDelete.Delete();
         string idToRemove = entityToDelete.rootEntity.entityId;
+        currentActiveMode?.OnDeleteEntity(entityToDelete);
+        biwCreatorController.RemoveLoadingObjectInmediate(entityToDelete.rootEntity.entityId);
         Destroy(entityToDelete);
         if (sceneToEdit.entities.ContainsKey(idToRemove))
             sceneToEdit.RemoveEntity(idToRemove, true);
