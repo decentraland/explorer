@@ -53,6 +53,10 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuildModeHUDController hudController;
 
+    public event Action<DCLBuilderInWorldEntity> OnEntityDeselected;
+    public event Action OnEntitySelected;
+    public event Action<List<DCLBuilderInWorldEntity>> OnDeleteSelectedEntities;
+
     private void Start()
     {
         hideSelectedEntitiesDelegate = (action) => ChangeShowStateSelectedEntities();
@@ -220,10 +224,13 @@ public class BuilderInWorldEntityHandler : BIWController
 
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
+        hudController?.UpdateEntitiesSelection(selectedEntities.Count);
         currentActiveMode?.EntityDeselected(entity);
         if (selectedEntities.Count <= 0 &&
             hudController != null)
             hudController.HideEntityInformation();
+
+        OnEntityDeselected?.Invoke(entity);
     }
 
     public void DeselectEntities()
@@ -344,11 +351,15 @@ public class BuilderInWorldEntityHandler : BIWController
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
+            hudController.UpdateEntitiesSelection(selectedEntities.Count);
             hudController.ShowEntityInformation();
             hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
 
         outlinerController.CancelAllOutlines();
+
+        OnEntitySelected?.Invoke();
+
         return true;
     }
 
@@ -470,6 +481,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         SetupEntityToEdit(newEntity, true);
         EntityListChanged();
+
         return newEntity;
     }
 
@@ -527,6 +539,8 @@ public class BuilderInWorldEntityHandler : BIWController
             return;
         hudController.SetEntityList(GetEntitiesInCurrentScene());
     }
+
+    public int GetCurrentSceneEntityCount() { return GetEntitiesInCurrentScene().Count; }
 
     List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
     {
@@ -619,7 +633,10 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(entityToDelete);
 
         if (selectedEntities.Contains(entityToDelete))
+        {
             selectedEntities.Remove(entityToDelete);
+            hudController?.UpdateEntitiesSelection(selectedEntities.Count);
+        }
 
         string entityName = entityToDelete.GetDescriptiveName();
 
@@ -661,6 +678,8 @@ public class BuilderInWorldEntityHandler : BIWController
         {
             DeleteEntity(entity);
         }
+
+        OnDeleteSelectedEntities?.Invoke(entitiesToRemove);
     }
 
     public void DeleteEntitiesOutsideSceneBoundaries()

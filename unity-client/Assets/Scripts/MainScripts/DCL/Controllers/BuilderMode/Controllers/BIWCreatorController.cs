@@ -27,8 +27,7 @@ public class BIWCreatorController : BIWController
 
     public Action OnInputDone;
 
-    //Note(Adrian): This is for tutorial purposes
-    public Action OnSceneObjectPlaced;
+    public Action OnCatalogItemPlaced;
 
     private CatalogItem lastCatalogItemCreated;
 
@@ -165,7 +164,7 @@ public class BIWCreatorController : BIWController
         builderInWorldEntityHandler.EntityListChanged();
         builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
         OnInputDone?.Invoke();
-        OnSceneObjectPlaced?.Invoke();
+        OnCatalogItemPlaced?.Invoke();
         return entity;
     }
 

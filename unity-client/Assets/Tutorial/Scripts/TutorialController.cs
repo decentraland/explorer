@@ -47,6 +47,8 @@ namespace DCL.Tutorial
         }
 
         public int currentStepIndex { get; private set; }
+        public event Action OnTutorialEnabled;
+        public event Action OnTutorialDisabled;
 
         private const string PLAYER_PREFS_VOICE_CHAT_FEATURE_SHOWED = "VoiceChatFeatureShowed";
 
@@ -223,6 +225,8 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
                 OnRenderingStateChanged(true, false);
+
+            OnTutorialEnabled?.Invoke();
         }
 
         /// <summary>
@@ -263,6 +267,8 @@ namespace DCL.Tutorial
             RestoreCullingSettings();
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+
+            OnTutorialDisabled?.Invoke();
         }
 
         /// <summary>

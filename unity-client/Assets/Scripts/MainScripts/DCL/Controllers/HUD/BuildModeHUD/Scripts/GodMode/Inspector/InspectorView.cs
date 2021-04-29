@@ -33,7 +33,7 @@ public class InspectorView : MonoBehaviour, IInspectorView
 
     [SerializeField] internal EntityListView entityListView;
     [SerializeField] internal SceneLimitsView sceneLimitsView;
-    [SerializeField] internal Button[] closeEntityListBtns;
+    [SerializeField] internal Button closeEntityListBtn;
 
     internal List<DCLBuilderInWorldEntity> entitiesList;
 
@@ -62,6 +62,10 @@ public class InspectorView : MonoBehaviour, IInspectorView
             sceneLimitsController.Dispose();
     }
 
+    private void OnEnable() { AudioScriptableObjects.dialogOpen.Play(); }
+
+    private void OnDisable() { AudioScriptableObjects.dialogClose.Play(); }
+
     public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter) { OnEntityActionInvoked?.Invoke(action, entityToApply, adapter); }
 
     public void EntityRename(DCLBuilderInWorldEntity entity, string newName) { OnEntityRename?.Invoke(entity, newName); }
@@ -74,13 +78,7 @@ public class InspectorView : MonoBehaviour, IInspectorView
 
     public void ClearEntitiesList() { entitiesList.Clear(); }
 
-    public void SetCloseButtonsAction(UnityAction call)
-    {
-        foreach (Button closeEntityListBtn in closeEntityListBtns)
-        {
-            closeEntityListBtn.onClick.AddListener(call);
-        }
-    }
+    public void SetCloseButtonsAction(UnityAction call) { closeEntityListBtn.onClick.AddListener(call); }
 
     public void ConfigureSceneLimits(ISceneLimitsController sceneLimitsController)
     {
