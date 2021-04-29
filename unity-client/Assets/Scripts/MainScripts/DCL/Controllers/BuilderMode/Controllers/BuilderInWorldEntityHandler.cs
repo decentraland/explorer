@@ -242,6 +242,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
+        hudController?.UpdateEntitiesSelection(selectedEntities.Count);
         currentActiveMode?.EntityDeselected(entity);
         if (selectedEntities.Count <= 0 &&
             hudController != null)
@@ -389,6 +390,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
+            hudController.UpdateEntitiesSelection(selectedEntities.Count);
             hudController.ShowEntityInformation();
             hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
@@ -674,7 +676,10 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(entityToDelete);
 
         if (selectedEntities.Contains(entityToDelete))
+        {
             selectedEntities.Remove(entityToDelete);
+            hudController?.UpdateEntitiesSelection(selectedEntities.Count);
+        }
 
         string entityName = entityToDelete.GetDescriptiveName();
 

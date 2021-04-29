@@ -33,7 +33,7 @@ public class InspectorView : MonoBehaviour, IInspectorView
 
     [SerializeField] internal EntityListView entityListView;
     [SerializeField] internal SceneLimitsView sceneLimitsView;
-    [SerializeField] internal Button[] closeEntityListBtns;
+    [SerializeField] internal Button closeEntityListBtn;
 
     internal List<DCLBuilderInWorldEntity> entitiesList;
 
@@ -80,11 +80,13 @@ public class InspectorView : MonoBehaviour, IInspectorView
 
     public void SetCloseButtonsAction(UnityAction call)
     {
-        foreach (Button closeEntityListBtn in closeEntityListBtns)
-        {
-            closeEntityListBtn.onClick.AddListener(call);
-        }
+        if (entitiesList == null)
+            return;
+
+        entitiesList.Clear();
     }
+
+    public void SetCloseButtonsAction(UnityAction call) { closeEntityListBtn.onClick.AddListener(call); }
 
     public void ConfigureSceneLimits(ISceneLimitsController sceneLimitsController)
     {

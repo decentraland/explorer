@@ -103,6 +103,17 @@ public enum DCLAction_Measurable
 }
 
 /// <summary>
+/// Group of actions currently actived
+/// </summary>
+public enum InputTypeMode
+{
+    OFF,
+    GENERAL,
+    BUILD_MODE_LOADING,
+    BUILD_MODE
+}
+
+/// <summary>
 /// Input Controller will map inputs(keys/mouse/axis) to DCL actions, check if they can be triggered (modifiers) and raise the events
 /// </summary>
 public class InputController : MonoBehaviour
@@ -117,30 +128,32 @@ public class InputController : MonoBehaviour
     [Header("BuildMode Input")]
     public InputAction_Trigger[] builderTriggerTimeActions;
     public InputAction_Hold[] builderHoldActions;
+    public InputAction_Trigger[] loadingBuilderTriggerTimeActions;
 
     bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
     bool allUIHidden => CommonScriptableObjects.allUIHidden.Get();
-
-    public bool isBuildModeActivate { get; set; } = false;
-    public bool isInputActive { get; set; } = true;
+    public InputTypeMode inputTypeMode { get; set; } = InputTypeMode.GENERAL;
 
     private void Update()
     {
         if (!renderingEnabled)
             return;
-        if (!isInputActive)
-            return;
 
-        if (isBuildModeActivate)
+        switch (inputTypeMode)
         {
-            Update_Trigger(builderTriggerTimeActions);
-            Update_Hold(builderHoldActions);
-        }
-        else
-        {
-            Update_Trigger(triggerTimeActions);
-            Update_Hold(holdActions);
-
+            case InputTypeMode.OFF:
+                return;
+            case InputTypeMode.GENERAL:
+                Update_Trigger(triggerTimeActions);
+                Update_Hold(holdActions);
+                break;
+            case InputTypeMode.BUILD_MODE_LOADING:
+                Update_Trigger(loadingBuilderTriggerTimeActions);
+                break;
+            case InputTypeMode.BUILD_MODE:
+                Update_Trigger(builderTriggerTimeActions);
+                Update_Hold(builderHoldActions);
+                break;
         }
         Update_Measurable(measurableActions);
     }

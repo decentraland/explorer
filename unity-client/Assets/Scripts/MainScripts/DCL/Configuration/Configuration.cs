@@ -56,6 +56,11 @@ namespace DCL.Configuration
         public const string PUBLISH_MODAL_SUBTITLE = "Are you sure you want to publish your scene to this Land?";
         public const string PUBLISH_MODAL_CONFIRM_BUTTON = "PUBLISH";
         public const string PUBLISH_MODAL_CANCEL_BUTTON = "CANCEL";
+
+        public const string EXIT_MODAL_TITLE = "Exiting Builder mode";
+        public const string EXIT_MODAL_SUBTITLE = "Are you sure you want to exit Builder mode?";
+        public const string EXIT_MODAL_CONFIRM_BUTTON = "EXIT";
+        public const string EXIT_MODAL_CANCEL_BUTTON = "CANCEL";
     }
 
     public static class ApplicationSettings
