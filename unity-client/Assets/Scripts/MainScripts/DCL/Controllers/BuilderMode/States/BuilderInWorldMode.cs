@@ -146,8 +146,10 @@ public class BuilderInWorldMode : MonoBehaviour
 
         foreach (DCLBuilderInWorldEntity decentralandEntityToEdit in selectedEntities)
         {
-            decentralandEntityToEdit.rootEntity.gameObject.transform.eulerAngles = Vector3.zero;
+            decentralandEntityToEdit.ResetTransfrom();
         }
+
+        CenterGameObjectToEdit();
     }
 
     public virtual Vector3 GetCreatedEntityPoint() { return Vector3.zero; }
