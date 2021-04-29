@@ -53,7 +53,7 @@ public class BIWCreatorController : BIWController
     {
         foreach (BIWLoadingPlaceHolder placeHolder in loadingGameObjects.Values)
         {
-            placeHolder.Disspose();
+            placeHolder.Dispose();
         }
 
         loadingGameObjects.Clear();
@@ -199,7 +199,7 @@ public class BIWCreatorController : BIWController
             return;
         BIWLoadingPlaceHolder loadingPlaceHolder = loadingGameObjects[entityId];
         loadingGameObjects.Remove(entityId);
-        loadingPlaceHolder.Disspose();
+        loadingPlaceHolder.Dispose();
     }
 
     #endregion

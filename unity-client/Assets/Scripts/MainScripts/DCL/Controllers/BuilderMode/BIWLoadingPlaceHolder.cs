@@ -12,7 +12,7 @@ public class BIWLoadingPlaceHolder : MonoBehaviour
     private const string EXIT_ANIMATION_NAME = "Exit";
 
     private Coroutine checkCoroutine;
-    public void Disspose()
+    public void Dispose()
     {
         if (checkCoroutine != null)
             CoroutineStarter.Stop(checkCoroutine);

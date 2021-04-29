@@ -103,7 +103,7 @@ public class VoxelController : MonoBehaviour
         }
     }
 
-    public void SetEditionGO(GameObject _editionGO) { editionGO = _editionGO; }
+    public void SetEditionGO(GameObject editionGO) { this.editionGO = editionGO; }
 
     public bool IsActive() { return isVoxelModelActivated; }
 
