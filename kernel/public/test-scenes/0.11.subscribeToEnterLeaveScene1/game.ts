@@ -1,4 +1,4 @@
-import { log, engine, Entity, BoxShape, Material, Color3, Transform, Vector3, onEnterScene, onLeaveScene } from 'decentraland-ecs/src'
+import { log, engine, Entity, BoxShape, Material, Color3, Transform, Vector3, onEnterSceneObservable, onLeaveSceneObservable } from 'decentraland-ecs/src'
 
 //Create entity and assign shape
 const box = new Entity()
@@ -18,12 +18,12 @@ box.addComponent(new Transform({
 
 engine.addEntity(box);
 
-onEnterScene.add(({ userId }) => {
+onEnterSceneObservable.add(({ userId }) => {
   material.albedoColor = Color3.Red()
-  log("onEnterScene: ", userId)
+  log("onEnterSceneObservable: ", userId)
 })
 
-onLeaveScene.add(({ userId }) => {
+onLeaveSceneObservable.add(({ userId }) => {
   material.albedoColor = Color3.Gray()
-  log("onLeaveScene: ", userId)
+  log("onLeaveSceneObservable: ", userId)
 })
