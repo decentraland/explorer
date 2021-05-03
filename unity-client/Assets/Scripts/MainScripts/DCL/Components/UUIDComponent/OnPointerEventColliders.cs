@@ -31,7 +31,7 @@ namespace DCL.Components
             if (rendererList == null || rendererList.Length == 0)
                 return;
 
-            if (AlreadyCreatedColliders(rendererList))
+            if (AreCollidersCreated(rendererList))
                 return;
 
             IShape shape = entity.meshesInfo.currentShape;
@@ -76,7 +76,7 @@ namespace DCL.Components
             return meshCollider;
         }
 
-        private bool AlreadyCreatedColliders(Renderer[] rendererList)
+        private bool AreCollidersCreated(Renderer[] rendererList)
         {
             if (colliders == null || colliders.Length == 0)
                 return false;
