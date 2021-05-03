@@ -181,6 +181,13 @@ export interface IEvents {
   }
 
   /**
+   * `idleStateChanged` is triggered when the user not moves for a defined period of time
+   */
+  idleStateChanged: {
+    isIdle: boolean
+  }
+
+  /**
    * `pointerUp` is triggered when the user releases an input pointer.
    * It could be a VR controller, a touch screen or the mouse.
    */
