@@ -29,10 +29,7 @@ namespace DCL
             public string type;
             public string payload;
 
-            public override string ToString()
-            {
-                return string.Format("type = {0}... payload = {1}...", type, payload);
-            }
+            public override string ToString() { return string.Format("type = {0}... payload = {1}...", type, payload); }
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -49,10 +46,7 @@ namespace DCL
             }
         }
 
-        protected override void OnError(ErrorEventArgs e)
-        {
-            base.OnError(e);
-        }
+        protected override void OnError(ErrorEventArgs e) { base.OnError(e); }
 
         protected override void OnClose(CloseEventArgs e)
         {
@@ -110,11 +104,9 @@ namespace DCL
         [System.NonSerialized]
         public static volatile bool queuedMessagesDirty;
 
-        public bool isServerReady
-        {
-            get { return ws.IsListening; }
-        }
+        public bool isServerReady { get { return ws.IsListening; } }
 
+        public string wssServerUrl = "ws://localhost:5000/";
         public bool openBrowserWhenStart;
 
         [Header("Kernel General Settings")]
@@ -143,11 +135,7 @@ namespace DCL
         public bool questsEnabled = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
-
-        private void Awake()
-        {
-            i = this;
-        }
+        private void Awake() { i = this; }
 
         private void Start()
         {
@@ -160,8 +148,10 @@ namespace DCL
 #if UNITY_EDITOR
             DCL.DataStore.i.debugConfig.isWssDebugMode = true;
 
-            ws = new WebSocketServer("ws://localhost:5000");
-            ws.AddWebSocketService<DCLWebSocketService>("/dcl");
+            string wssUrl = this.wssServerUrl;
+            string wssServiceId = "dcl";
+            ws = new WebSocketServer(wssUrl);
+            ws.AddWebSocketService<DCLWebSocketService>("/" + wssServiceId);
             ws.Start();
 
             if (openBrowserWhenStart)
@@ -239,7 +229,7 @@ namespace DCL
                 }
 
                 Application.OpenURL(
-                    $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl");
+                    $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=" + wssUrl + wssServiceId);
             }
 #endif
         }
@@ -435,7 +425,7 @@ namespace DCL
                                 DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
                                 break;
                             case "SetTutorialEnabledForUsersThatAlreadyDidTheTutorial":
-                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial();
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial(msg.payload);
                                 break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
@@ -488,6 +478,7 @@ namespace DCL
                                 bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             case "SetDisableAssetBundles":
+                            case "DumpRendererLockersInfo":
                                 //TODO(Brian): Move this to bridges
                                 Main.i.SendMessage(msg.type);
                                 break;

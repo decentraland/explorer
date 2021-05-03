@@ -7,6 +7,7 @@ public class BIWPublishController : BIWController
 {
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BuilderInWorldBridge builderInWorldBridge;
+    public BIWSaveController biwSaveController;
 
     private int checkerSceneLimitsOptimizationCounter = 0;
 
@@ -15,7 +16,10 @@ public class BIWPublishController : BIWController
     public override void Init()
     {
         if (HUDController.i.builderInWorldMainHud != null)
-            HUDController.i.builderInWorldMainHud.OnPublishAction += PublishScene;
+        {
+            HUDController.i.builderInWorldMainHud.OnPublishAction += StartPublishFlow;
+            HUDController.i.builderInWorldMainHud.OnConfirmPublishAction += ConfirmPublishScene;
+        }
     }
 
     protected override void FrameUpdate()
@@ -35,16 +39,19 @@ public class BIWPublishController : BIWController
     private void OnDestroy()
     {
         if (HUDController.i.builderInWorldMainHud != null)
-            HUDController.i.builderInWorldMainHud.OnPublishAction -= PublishScene;
+        {
+            HUDController.i.builderInWorldMainHud.OnPublishAction -= StartPublishFlow;
+            HUDController.i.builderInWorldMainHud.OnConfirmPublishAction -= ConfirmPublishScene;
+        }
     }
 
     public bool CanPublish()
     {
         if (!sceneToEdit.metricsController.IsInsideTheLimits())
-            return false;     
+            return false;
 
         if (!builderInWorldEntityHandler.AreAllEntitiesInsideBoundaries())
-            return false;        
+            return false;
         return true;
     }
 
@@ -56,11 +63,14 @@ public class BIWPublishController : BIWController
         HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(CanPublish());
     }
 
-    void PublishScene()
+    void StartPublishFlow()
     {
         if (!CanPublish())
             return;
-        builderInWorldBridge.PublishScene(sceneToEdit);
+
         HUDController.i.builderInWorldMainHud.PublishStart();
+        biwSaveController.ForceSave();
     }
+
+    void ConfirmPublishScene() { builderInWorldBridge.PublishScene(sceneToEdit); }
 }

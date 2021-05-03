@@ -1,5 +1,4 @@
 import { ReadOnlyVector3, ReadOnlyQuaternion, ReadOnlyColor4 } from './math'
-import { RaycastResponse } from './Events'
 
 /** @public */
 export type ModuleDescriptor = {
@@ -129,8 +128,23 @@ export type GlobalInputEventResult = InputEventResult & {
   type: InputEventType
 }
 
+/** @public */
+export type RaycastResponsePayload<T> = {
+  queryId: string
+  queryType: string
+  payload: T
+}
+
+/** @public */
+export enum CameraMode {
+  FirstPerson,
+  ThirdPerson,
+  BuildingToolGodMode
+}
+
 /**
  * @public
+ * Note: Don't use `on` prefix for IEvents to avoid redundancy with `event.on("onEventName")` syntax.
  */
 export interface IEvents {
   /**
@@ -160,6 +174,13 @@ export interface IEvents {
   }
 
   /**
+   * `cameraModeChanged` is triggered when the user changes the camera mode
+   */
+  cameraModeChanged: {
+    cameraMode: CameraMode
+  }
+
+  /**
    * `pointerUp` is triggered when the user releases an input pointer.
    * It could be a VR controller, a touch screen or the mouse.
    */
@@ -180,7 +201,7 @@ export interface IEvents {
   /**
    * `raycastResponse` is triggered in response to a raycast query
    */
-  raycastResponse: RaycastResponse<any>
+  raycastResponse: RaycastResponsePayload<any>
 
   /**
    * `chatMessage` is triggered when the user sends a message through chat entity.
@@ -268,6 +289,20 @@ export interface IEvents {
    */
   entityBackInScene: {
     entityId: string
+  }
+
+  /**
+   * This event gets triggered when the user enters the scene
+   */
+  onEnterScene: {
+    userId: string
+  }
+
+  /**
+   * This event gets triggered when the user leaves the scene
+   */
+  onLeaveScene: {
+    userId: string
   }
 
   /**

@@ -26,7 +26,9 @@ namespace Tests.BuildModeHUDViews
                 inspectorBtnController = Substitute.For<IInspectorBtnController>(),
                 catalogBtnController = Substitute.For<ICatalogBtnController>(),
                 inspectorController = Substitute.For<IInspectorController>(),
-                topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
+                buildModeConfirmationModalController = Substitute.For<IBuildModeConfirmationModalController>(),
+                topActionsButtonsController = Substitute.For<ITopActionsButtonsController>(),
+                saveHUDController =  Substitute.For<ISaveHUDController>()
             };
 
             buildModeHUDView = BuildModeHUDView.Create();
@@ -34,10 +36,7 @@ namespace Tests.BuildModeHUDViews
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            Object.Destroy(buildModeHUDView.gameObject);
-        }
+        public void TearDown() { Object.Destroy(buildModeHUDView.gameObject); }
 
         [Test]
         public void InitializeCorrectly()
@@ -69,29 +68,11 @@ namespace Tests.BuildModeHUDViews
             testControllers.inspectorController.Received(1).Initialize(buildModeHUDView.inspectorView);
             Assert.AreEqual(testControllers.topActionsButtonsController, buildModeHUDView.controllers.topActionsButtonsController, "The topActionsButtonsController does not match!");
             testControllers.topActionsButtonsController.Received(1).Initialize(buildModeHUDView.topActionsButtonsView, testControllers.tooltipController);
-        }
-
-        [Test]
-        public void PublishStartCorrectly()
-        {
-            // Act
-            buildModeHUDView.PublishStart();
-
-            // Assert
-            testControllers.publishPopupController.Received(1).PublishStart();
-        }
-
-        [Test]
-        public void PublishEndCorrectly()
-        {
-            // Arrange
-            string testText = "Test text";
-
-            // Act
-            buildModeHUDView.PublishEnd(testText);
-
-            // Assert
-            testControllers.publishPopupController.Received(1).PublishEnd(testText);
+            Assert.AreEqual(testControllers.buildModeConfirmationModalController, buildModeHUDView.controllers.buildModeConfirmationModalController, "The buildModeConfirmationModalController does not match!");
+            testControllers.buildModeConfirmationModalController.Received(1).Initialize(buildModeHUDView.buildModeConfirmationModalView);
+            testControllers.topActionsButtonsController.Received(1).Initialize(buildModeHUDView.topActionsButtonsView, testControllers.tooltipController);
+            Assert.AreEqual(testControllers.saveHUDController, buildModeHUDView.controllers.saveHUDController, "The SaveHUDController does not match!");
+            testControllers.saveHUDController.Received(1).Initialize(buildModeHUDView.saveView);
         }
 
         [Test]

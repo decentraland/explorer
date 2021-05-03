@@ -211,7 +211,14 @@ export class Shape extends ObservableComponent {
  * @public
  */
 @DisposableComponent('engine.shape', CLASS_ID.BOX_SHAPE)
-export class BoxShape extends Shape {}
+export class BoxShape extends Shape {
+  /**
+   * Sets the UV coordinates for the box.
+   * Used to map specific pieces of a Material's texture into the box's geometry.
+   */
+  @ObservableComponent.field
+  uvs?: number[]
+}
 
 /**
  * @public
@@ -506,6 +513,8 @@ export class Animator extends Shape {
     clip.onChange(() => {
       this.dirty = true
     })
+
+    clip.owner = this
     return this
   }
 
@@ -524,6 +533,50 @@ export class Animator extends Shape {
     const newClip = new AnimationState(clipName)
     this.addClip(newClip)
     return newClip
+  }
+
+  /**
+   * Resets and pauses the animation state, if the clip is null it will stop all animations on this animator
+   */
+  stop(clip?: AnimationState) {
+    if (clip) {
+      clip.playing = false
+      clip.shouldReset = true
+    } else {
+      for (let i = 0; i < this.states.length; i++) {
+        const animationState = this.states[i]
+        this.stop(animationState)
+      }
+    }
+  }
+
+  /**
+   * Starts the animation
+   */
+  play(clip: AnimationState, reset: boolean = false) {
+    for (let i = 0; i < this.states.length; i++) {
+      const animationState = this.states[i]
+      if (animationState.layer === clip.layer && clip !== animationState) {
+        this.pause(animationState)
+      }
+    }
+
+    if (reset) clip.shouldReset = true
+    clip.playing = true
+  }
+
+  /**
+   * Pauses the animation state, if the clip is null it will pause all animations on this animator
+   */
+  pause(clip?: AnimationState) {
+    if (clip) {
+      clip.playing = false
+    } else {
+      for (let i = 0; i < this.states.length; i++) {
+        const animationState = this.states[i]
+        this.pause(animationState)
+      }
+    }
   }
 }
 

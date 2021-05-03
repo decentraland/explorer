@@ -55,10 +55,17 @@ public static class BIWCatalogManager
 
         Dictionary<string, CatalogItemPack> assetPackDic = new Dictionary<string, CatalogItemPack>();
 
+        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+            assetPackDic.Add(BuilderInWorldSettings.ASSETS_COLLECTIBLES, DataStore.i.builderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES]);
+        else
+            CreateNewCollectiblePack();
+
         foreach (CatalogItemPack catalogAssetPack in assetPacks)
         {
             foreach (CatalogItem catalogItem in catalogAssetPack.assets)
             {
+                if (catalogItem.IsNFT())
+                    continue;
                 if (!assetPackDic.ContainsKey(catalogItem.category))
                 {
                     CatalogItemPack categoryAssetPack = new CatalogItemPack();
@@ -91,11 +98,14 @@ public static class BIWCatalogManager
 
     public static void AddSceneObject(SceneObject sceneObject)
     {
-        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(sceneObject.id))
+        if (DataStore.i.builderInWorld.catalogItemDict.ContainsKey(sceneObject.id))
             return;
 
         CatalogItem catalogItem = CreateCatalogItem(sceneObject);
-        DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
+
+        //TODO: SmartItems disabled until kernel has them implemented
+        if (!catalogItem.IsSmartItem())
+            DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
     }
 
     public static void AddSceneAssetPack(SceneAssetPack sceneAssetPack)
@@ -104,7 +114,9 @@ public static class BIWCatalogManager
             return;
 
         CatalogItemPack catalogItemPack = CreateCatalogItemPack(sceneAssetPack);
-        DataStore.i.builderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
+        //TODO: SmartItems disabled until kernel has them implemented
+        if (catalogItemPack.assets.Count != 0)
+            DataStore.i.builderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
     }
 
     public static void ConvertCollectiblesPack(List<NFTInfo> nftList)
@@ -116,12 +128,7 @@ public static class BIWCatalogManager
 
         if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
         {
-            collectiblesItemPack = new CatalogItemPack();
-            collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
-            collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
-            collectiblesItemPack.assets = new List<CatalogItem>();
-
-            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+            collectiblesItemPack = CreateNewCollectiblePack();
         }
         else
         {
@@ -144,6 +151,17 @@ public static class BIWCatalogManager
         }
     }
 
+    private static CatalogItemPack CreateNewCollectiblePack()
+    {
+        CatalogItemPack collectiblesItemPack = new CatalogItemPack();
+        collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+        collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+        collectiblesItemPack.assets = new List<CatalogItem>();
+        if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(collectiblesItemPack.id))
+            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+        return collectiblesItemPack;
+    }
+
     public static CatalogItemPack CreateCatalogItemPack(SceneAssetPack sceneAssetPack)
     {
         CatalogItemPack catalogItemPack = new CatalogItemPack();
@@ -157,7 +175,9 @@ public static class BIWCatalogManager
 
         foreach (SceneObject sceneObject in sceneAssetPack.assets)
         {
-            catalogItemPack.assets.Add(CreateCatalogItem(sceneObject));
+            //TODO: SmartItems disabled until kernel has them implemented
+            if (!sceneObject.IsSmartItem())
+                catalogItemPack.assets.Add(CreateCatalogItem(sceneObject));
         }
 
         return catalogItemPack;

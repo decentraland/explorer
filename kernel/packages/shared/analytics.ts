@@ -1,7 +1,7 @@
 import { DEBUG_ANALYTICS, getTLD } from 'config'
 
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { ReadOnlyVector3, Vector2, Vector3 } from 'decentraland-ecs/src'
+import { Vector2 } from 'decentraland-ecs/src'
 import { defaultLogger } from 'shared/logger'
 
 import { avatarMessageObservable } from './comms/peers'
@@ -18,9 +18,6 @@ export type SegmentEvent = {
 }
 
 const sessionId = uuid()
-
-const trackingQueue: SegmentEvent[] = []
-let tracking = false
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -84,7 +81,7 @@ export function identifyEmail(email: string, userId?: string) {
   }
 }
 
-export function queueTrackingEvent(eventName: string, eventData: any) {
+export function trackEvent(eventName: string, eventData: any) {
   const data = { ...eventData, time: new Date().toISOString(), sessionId, version: (window as any)['VERSION'] }
 
   if (DEBUG_ANALYTICS) {
@@ -94,35 +91,11 @@ export function queueTrackingEvent(eventName: string, eventData: any) {
   if (!window.analytics) {
     return
   }
-
-  trackingQueue.push({ name: eventName, data })
-  if (!tracking) {
-    startTracking()
-  }
-}
-
-function startTracking() {
-  if (trackingQueue.length > 0) {
-    tracking = true
-    track(trackingQueue.shift()!)
-  }
-}
-
-function track({ name, data }: SegmentEvent) {
-  window.analytics.track(name, data, { integrations: { Klaviyo: false } }, () => {
-    if (trackingQueue.length === 0) {
-      tracking = false
-      return
-    }
-    track(trackingQueue.shift()!)
-  })
+  window.analytics.track(eventName, data, { integrations: { Klaviyo: false } })
 }
 
 const TRACEABLE_AVATAR_EVENTS = [
   AvatarMessageType.ADD_FRIEND,
-  AvatarMessageType.USER_DATA,
-  AvatarMessageType.USER_EXPRESSION,
-  AvatarMessageType.USER_REMOVED,
   AvatarMessageType.SET_LOCAL_UUID,
   AvatarMessageType.USER_MUTED,
   AvatarMessageType.USER_UNMUTED,
@@ -136,37 +109,22 @@ function hookObservables() {
       return
     }
 
-    queueTrackingEvent(type, data)
+    trackEvent(type, data)
   })
 
   let lastTime: number = performance.now()
-  let seconds = 0
-  let distanceTraveled = 0
 
   let previousPosition: string | null = null
   const gridPosition = Vector2.Zero()
-  let previousWorldPosition: ReadOnlyVector3 | null = null
 
   positionObservable.add(({ position }) => {
-    if (previousWorldPosition === null) {
-      previousWorldPosition = { x: position.x, y: position.y, z: position.z }
-    }
-
-    if (seconds === 10 || distanceTraveled > 50) {
-      queueTrackingEvent('User Position', { position: position, distance: distanceTraveled })
-      seconds = 0
-      distanceTraveled = 0
-      previousWorldPosition = { x: position.x, y: position.y, z: position.z }
-    }
 
     // Update seconds variable and check if new parcel
     if (performance.now() - lastTime > 1000) {
-      distanceTraveled = Vector3.Distance(previousWorldPosition, position)
       worldToGrid(position, gridPosition)
       const currentPosition = `${gridPosition.x | 0},${gridPosition.y | 0}`
-      seconds++
       if (previousPosition !== currentPosition) {
-        queueTrackingEvent('Move to Parcel', { newParcel: currentPosition, oldParcel: previousPosition })
+        trackEvent('Move to Parcel', { newParcel: currentPosition, oldParcel: previousPosition, exactPosition: { x: position.x, y: position.y, z: position.z } })
         previousPosition = currentPosition
       }
       lastTime = performance.now()

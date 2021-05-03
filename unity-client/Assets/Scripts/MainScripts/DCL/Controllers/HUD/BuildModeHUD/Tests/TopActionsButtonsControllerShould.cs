@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.EventSystems;
@@ -18,10 +19,7 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            topActionsButtonsController.Dispose();
-        }
+        public void TearDown() { topActionsButtonsController.Dispose(); }
 
         [Test]
         public void ClickOnChangeModeCorrectly()
@@ -136,14 +134,28 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void ClickOnLogoutCorrectly()
+        public void ShowLogoutConfirmationCorrectly()
         {
             // Arrange
             bool clicked = false;
             topActionsButtonsController.OnLogOutClick += () => { clicked = true; };
 
             // Act
-            topActionsButtonsController.LogOutClicked();
+            topActionsButtonsController.LogoutClicked();
+
+            // Assert
+            Assert.IsTrue(clicked, "The clicked is false!");
+        }
+
+        [Test]
+        public void ConfirmLogoutCorrectly()
+        {
+            // Arrange
+            bool clicked = false;
+            topActionsButtonsController.OnLogOutClick += () => { clicked = true; };
+
+            // Act
+            topActionsButtonsController.ConfirmLogout(BuildModeModalType.EXIT);
 
             // Assert
             Assert.IsTrue(clicked, "The clicked is false!");
@@ -172,6 +184,43 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             topActionsButtonsController.tooltipController.Received(1).HideTooltip();
+        }
+
+        [Test]
+        public void TestSetGizmosActivetedCorrectly()
+        {
+            //Arrange
+            string gizmosActive =  BuilderInWorldSettings.TRANSLATE_GIZMO_NAME;
+
+            // Act
+            topActionsButtonsController.SetGizmosActive(gizmosActive);
+
+            // Assert
+            topActionsButtonsController.topActionsButtonsView.Received(1).SetGizmosActive(gizmosActive);
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestSeActionsInteractable(bool isInteractable)
+        {
+            //Act 
+            topActionsButtonsController.SetActionsInteractable(isInteractable);
+
+            //Assert
+            topActionsButtonsController.topActionsButtonsView.Received(1).SetActionsInteractable(isInteractable);
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestSnapModeChange(bool isActive)
+        {
+            //Act 
+            topActionsButtonsController.SetSnapActive(isActive);
+
+            //Assert
+            topActionsButtonsController.topActionsButtonsView.Received(1).SetSnapActive(isActive);
         }
     }
 }

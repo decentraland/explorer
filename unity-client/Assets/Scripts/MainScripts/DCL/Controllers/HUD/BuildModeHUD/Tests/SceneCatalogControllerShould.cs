@@ -20,10 +20,7 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            sceneCatalogController.Dispose();
-        }
+        public void TearDown() { sceneCatalogController.Dispose(); }
 
         [Test]
         public void ToggleCatalogExpanseCorrectly()
@@ -33,22 +30,6 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             sceneCatalogController.sceneCatalogView.Received(1).ToggleCatalogExpanse();
-        }
-
-        [Test]
-        public void AddNewSceneObjectCategoryToFilterCorrectly()
-        {
-            // Arrange
-            string testCategory = "testCategory";
-            CatalogItem testCatalogItem = new CatalogItem { category = testCategory };
-            sceneCatalogController.filterObjects.Clear();
-
-            // Act
-            sceneCatalogController.AddNewSceneObjectCategoryToFilter(testCatalogItem);
-
-            // Assert
-            Assert.AreEqual(1, sceneCatalogController.filterObjects.Count, "The number of filter objects does not match!");
-            Assert.IsTrue(sceneCatalogController.filterObjects[0].ContainsKey(testCategory), "The test category has not been found in the filter objects!");
         }
 
         [Test]
@@ -171,6 +152,16 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
+        public void CheckIfCatalogIsExpandedCorrectly()
+        {
+            // Act
+            sceneCatalogController.IsCatalogExpanded();
+
+            // Assert
+            sceneCatalogController.sceneCatalogView.Received(1).IsCatalogExpanded();
+        }
+
+        [Test]
         public void ShowCategoriesCorrectly()
         {
             // Arrange
@@ -182,6 +173,7 @@ namespace Tests.BuildModeHUDControllers
             // Assert
             Assert.IsTrue(sceneCatalogController.isShowingAssetPacks, "The isShowingAssetPacks is false!");
             sceneCatalogController.sceneCatalogView.Received(1).SetCatalogTitle(Arg.Any<string>());
+            sceneCatalogController.sceneCatalogView.Received(1).ShowBackButton(false);
         }
 
         [Test]
@@ -196,6 +188,7 @@ namespace Tests.BuildModeHUDControllers
             // Assert
             Assert.IsTrue(sceneCatalogController.isShowingAssetPacks, "The isShowingAssetPacks is false!");
             sceneCatalogController.sceneCatalogView.Received(1).SetCatalogTitle(Arg.Any<string>());
+            sceneCatalogController.sceneCatalogView.Received(1).ShowBackButton(false);
         }
 
         [Test]
@@ -208,7 +201,6 @@ namespace Tests.BuildModeHUDControllers
             sceneCatalogController.OpenCatalog();
 
             // Assert
-            sceneCatalogController.sceneCatalogView.Received(1).SetCatalogTitle(Arg.Any<string>());
             Assert.IsFalse(Utils.isCursorLocked, "The cursor is locked!");
             sceneCatalogController.sceneCatalogView.Received(1).SetActive(true);
         }

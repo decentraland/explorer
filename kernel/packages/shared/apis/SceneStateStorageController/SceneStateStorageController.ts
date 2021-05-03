@@ -6,13 +6,15 @@ import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
 import { defaultLogger } from '../../logger'
 import { DEBUG } from '../../../config'
-import { CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
+import { BuilderManifest, CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { Asset, AssetId, AssetManager } from './AssetManager'
+import { Asset, AssetId, BuilderServerAPIManager } from './BuilderServerAPIManager'
 import {
+  fromBuildertoStateDefinitionFormat,
   fromSerializedStateToStorableFormat,
   fromStorableFormatToSerializedState,
-  StorableSceneState
+  StorableSceneState,
+  toBuilderFromStateDefinitionFormat
 } from './StorableSceneStateTranslation'
 import { CLASS_ID } from 'decentraland-ecs/src'
 import { ParcelIdentity } from '../ParcelIdentity'
@@ -20,15 +22,114 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
+import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
+import { ExplorerIdentity } from 'shared/session/types'
+import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
+import { ISceneStateStorageController } from './ISceneStateStorageController'
 
-declare const window: any
+declare const globalThis: any
 
 @registerAPI('SceneStateStorageController')
-export class SceneStateStorageController extends ExposableAPI {
+export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
+  private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+  private builderManifest!: BuilderManifest
 
   @exposeMethod
-  async storeState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
+    const manifest = await this.builderApiManager.getBuilderManifestFromProjectId(projectId, this.getIdentity())
+
+    if (!manifest) return undefined
+
+    this.builderManifest = manifest
+    const definition = fromBuildertoStateDefinitionFormat(manifest.scene)
+    return serializeSceneState(definition)
+  }
+
+  @exposeMethod
+  async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
+    const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
+    if (newProject) {
+      this.builderManifest = newProject
+      const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
+      return serializeSceneState(translatedManifest)
+    }
+    return undefined
+  }
+
+  @exposeMethod
+  async createProjectWithCoords(coordinates: string): Promise<boolean> {
+    const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
+    this.builderManifest = newProject
+    return newProject ? true : false
+  }
+
+  @exposeMethod
+  async saveSceneState(serializedSceneState: SerializedSceneState): Promise<DeploymentResult> {
+    let result: DeploymentResult
+
+    try {
+      //Deserialize the scene state
+      const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
+
+      //Convert the scene state to builder scheme format
+      let builderManifest = toBuilderFromStateDefinitionFormat(sceneState, this.builderManifest)
+
+      //We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
+      let idArray: string[] = []
+      Object.values(builderManifest.scene.components).forEach((component) => {
+        if (component.type === 'GLTFShape') {
+          let found = false
+          Object.keys(builderManifest.scene.assets).forEach((assets) => {
+            if (assets === component.data.assetId) {
+              found = true
+            }
+          })
+          if (!found) {
+            idArray.push(component.data.assetId)
+          }
+        }
+      })
+
+      //We fetch all the assets that the scene contains since builder needs the assets
+      builderManifest.scene.assets = await this.builderApiManager.getAssets(idArray)
+
+      //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
+      //Unity handles this, so we will find only the same "ground" category. We can safely assume that we can search it and assign
+      let groundComponentId: string
+      Object.entries(builderManifest.scene.assets).forEach(([assetId, asset]) => {
+        if (asset?.category === 'ground') {
+          builderManifest.scene.ground.assetId = assetId
+          Object.entries(builderManifest.scene.components).forEach(([componentId, component]) => {
+            if (component.data.assetId === assetId){ 
+              builderManifest.scene.ground.componentId = componentId
+              groundComponentId = componentId
+            }
+          })
+        }
+      })
+
+      //We should disable the gizmos of the floor in the builder
+      Object.values(builderManifest.scene.entities).forEach(entity => {
+        Object.keys(entity.components).forEach((componentId) => {
+          if (componentId === groundComponentId){ 
+            entity.disableGizmos = true
+          }
+        })
+      })
+
+      //Update the manifest
+      this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+      result = { ok: true }
+    } catch (error) {
+      defaultLogger.error('Saving manifest failed', error)
+      result = { ok: false, error: `${error}` }
+    }
+    return result
+  }
+
+  @exposeMethod
+  async publishSceneState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
     let result: DeploymentResult
 
     // Convert to storable format
@@ -70,7 +171,7 @@ export class SceneStateStorageController extends ExposableAPI {
         )
 
         // Sign entity id
-        const store: Store<RootState> = window['globalStore']
+        const store: Store<RootState> = globalThis['globalStore']
         const identity = getCurrentIdentity(store.getState())
         if (!identity) {
           throw new Error('Identity not found when trying to deploy an entity')
@@ -87,8 +188,7 @@ export class SceneStateStorageController extends ExposableAPI {
         result = { ok: false, error: `${error}` }
       }
     }
-
-    window.unityInterface.SendPublishSceneResult(result)
+    globalThis.unityInterface.SendPublishSceneResult(result)
     return result
   }
 
@@ -100,7 +200,8 @@ export class SceneStateStorageController extends ExposableAPI {
         return fromStorableFormatToSerializedState(sceneState)
       }
       defaultLogger.warn(`Couldn't find a local scene state for scene ${sceneId}`)
-      return
+      // NOTE: RPC controllers should NEVER return undefined. Use null instead
+      return undefined
     }
 
     const contentClient = this.getContentClient()
@@ -126,25 +227,33 @@ export class SceneStateStorageController extends ExposableAPI {
     }
   }
 
+  private getIdentity(): ExplorerIdentity {
+    const store: Store<RootState> = globalThis['globalStore']
+    const identity = getCurrentIdentity(store.getState())
+    if (!identity) {
+      throw new Error('Identity not found when trying to deploy an entity')
+    }
+    return identity
+  }
+
   private getParcels(): Pointer[] {
     return this.parcelIdentity.land.sceneJsonData.scene.parcels
   }
 
   private getContentClient(): ContentClient {
-    const store: Store<RootState> = window['globalStore']
+    const store: Store<RootState> = globalThis['globalStore']
     const contentUrl = getUpdateProfileServer(store.getState())
     return new ContentClient(contentUrl, 'builder in-world')
   }
 
   private getAllAssets(state: SerializedSceneState): Promise<Map<AssetId, Asset>> {
-    const assetManager = new AssetManager()
     const assetIds: Set<AssetId> = new Set()
     for (const entity of state.entities) {
       entity.components
         .filter(({ type, value }) => type === CLASS_ID.GLTF_SHAPE && value.assetId)
         .forEach(({ value }) => assetIds.add(value.assetId))
     }
-    return assetManager.getAssets([...assetIds])
+    return this.builderApiManager.getConvertedAssets([...assetIds])
   }
 
   private async downloadAssetFiles(assets: Map<AssetId, Asset>): Promise<Map<string, Buffer>> {
@@ -182,3 +291,4 @@ function blobToBuffer(blob: Blob): Promise<Buffer> {
     })
   })
 }
+

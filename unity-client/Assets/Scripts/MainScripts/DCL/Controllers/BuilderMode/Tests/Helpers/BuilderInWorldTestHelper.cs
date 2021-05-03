@@ -17,12 +17,9 @@ public static class BuilderInWorldTestHelper
         if (model == null)
             model = new SmartItemComponent.Model();
 
-        string jsonModel = JsonUtility.ToJson(model);
-
         DCLBuilderInWorldEntity entity = entityHandler.CreateEmptyEntity(scene, Vector3.zero, Vector3.zero);
 
-        //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
-        scene.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+        scene.EntityComponentCreateOrUpdateWithModel(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, model);
 
         return entity;
     }
@@ -45,7 +42,7 @@ public static class BuilderInWorldTestHelper
 
     public static void CreateTestCatalogLocalMultipleFloorObjects()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/multipleSceneObjectsCatalog.json";
 
         if (File.Exists(jsonPath))
@@ -57,8 +54,20 @@ public static class BuilderInWorldTestHelper
 
     public static void CreateTestCatalogLocalSingleObject()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/sceneObjectCatalog.json";
+
+        if (File.Exists(jsonPath))
+        {
+            string jsonValue = File.ReadAllText(jsonPath);
+            AssetCatalogBridge.i.AddFullSceneObjectCatalog(jsonValue);
+        }
+    }
+
+    public static void CreateTestSmartItemCatalogLocalSingleObject()
+    {
+        AssetCatalogBridge.i.ClearCatalog();
+        string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/smartItemSceneObjectCatalog.json";
 
         if (File.Exists(jsonPath))
         {

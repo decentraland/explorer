@@ -28,6 +28,7 @@ namespace Tests.BuildModeHUDControllers
                 inspectorBtnController = Substitute.For<IInspectorBtnController>(),
                 catalogBtnController = Substitute.For<ICatalogBtnController>(),
                 inspectorController = Substitute.For<IInspectorController>(),
+                buildModeConfirmationModalController = Substitute.For<IBuildModeConfirmationModalController>(),
                 topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
             };
 
@@ -37,9 +38,7 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [TearDown]
-        public void TearDown()
-        {
-        }
+        public void TearDown() { }
 
         [Test]
         public void CreateBuildModeControllersCorrectly()
@@ -99,20 +98,93 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.PublishStart();
 
             // Assert
-            buildModeHUDController.view.Received(1).PublishStart();
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1)
+                                  .Configure(
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>());
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.PUBLISH);
         }
 
         [Test]
-        public void PublishEndCorrectly()
+        public void CancelPublishModalCorrectly()
         {
-            // Arrange
-            string testText = "Test text";
-
             // Act
-            buildModeHUDController.PublishEnd(testText);
+            buildModeHUDController.CancelPublishModal(BuildModeModalType.PUBLISH);
 
             // Assert
-            buildModeHUDController.view.Received(1).PublishEnd(testText);
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(false, BuildModeModalType.PUBLISH);
+        }
+
+        [Test]
+        public void ConfirmPublishModalCorrectly()
+        {
+            // Arrange
+            bool publishConfirmed = false;
+            buildModeHUDController.OnConfirmPublishAction += () => { publishConfirmed = true; };
+
+            // Act
+            buildModeHUDController.ConfirmPublishModal(BuildModeModalType.PUBLISH);
+
+            // Assert
+            buildModeHUDController.controllers.publishPopupController.Received(1).PublishStart();
+            Assert.IsTrue(publishConfirmed, "publishConfirmed is false!");
+        }
+
+        [Test]
+        public void ExitStartCorrectly()
+        {
+            // Act
+            buildModeHUDController.ExitStart();
+
+            // Assert
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1)
+                                  .Configure(
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>());
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.EXIT);
+        }
+
+        [Test]
+        public void CancelExitModalCorrectly()
+        {
+            // Act
+            buildModeHUDController.CancelExitModal(BuildModeModalType.EXIT);
+
+            // Assert
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(false, BuildModeModalType.EXIT);
+        }
+
+        [Test]
+        public void ConfirmExitModalCorrectly()
+        {
+            // Arrange
+            bool exitConfirmed = false;
+            buildModeHUDController.OnLogoutAction += () => { exitConfirmed = true; };
+
+            // Act
+            buildModeHUDController.ConfirmExitModal(BuildModeModalType.EXIT);
+
+            // Assert
+            Assert.IsTrue(exitConfirmed, "exitConfirmed is false!");
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void PublishEndCorrectly(bool isOk)
+        {
+            // Arrange
+            string testErrorMessage = "Test text";
+
+            // Act
+            buildModeHUDController.PublishEnd(isOk, testErrorMessage);
+
+            // Assert
+            buildModeHUDController.controllers.publishPopupController.Received(1).PublishEnd(isOk, testErrorMessage);
         }
 
         [Test]

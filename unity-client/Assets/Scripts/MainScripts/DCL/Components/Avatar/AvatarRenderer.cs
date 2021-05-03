@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DCL.Helpers;
 using UnityEngine;
 using static WearableLiterals;
 
@@ -27,7 +26,7 @@ namespace DCL
 
         public event Action<VisualCue> OnVisualCue;
         public event Action OnSuccessEvent;
-        public event Action OnFailEvent;
+        public event Action<bool> OnFailEvent;
 
         internal BodyShapeController bodyShapeController;
         internal Dictionary<WearableItem, WearableController> wearableControllers = new Dictionary<WearableItem, WearableController>();
@@ -35,13 +34,20 @@ namespace DCL
         internal FacialFeatureController eyebrowsController;
         internal FacialFeatureController mouthController;
         internal AvatarAnimatorLegacy animator;
+        internal StickersController stickersController;
+
+        private long lastStickerTimestamp = -1;
 
         internal bool isLoading = false;
 
         private Coroutine loadCoroutine;
         private List<string> wearablesInUse = new List<string>();
 
-        private void Awake() { animator = GetComponent<AvatarAnimatorLegacy>(); }
+        private void Awake()
+        {
+            animator = GetComponent<AvatarAnimatorLegacy>();
+            stickersController = GetComponent<StickersController>();
+        }
 
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
@@ -62,7 +68,7 @@ namespace DCL
 
             this.OnSuccessEvent += onSuccessWrapper;
 
-            void onFailWrapper()
+            void onFailWrapper(bool isFatalError)
             {
                 onFail?.Invoke();
                 this.OnFailEvent -= onFailWrapper;
@@ -143,17 +149,17 @@ namespace DCL
                 }
             }
 
-            if (!model.wearables.Contains(eyebrowsController.wearableId))
+            if (eyebrowsController != null && !model.wearables.Contains(eyebrowsController.wearableId))
             {
                 eyebrowsController.CleanUp();
             }
 
-            if (!model.wearables.Contains(eyesController.wearableId))
+            if (eyesController != null && !model.wearables.Contains(eyesController.wearableId))
             {
                 eyesController.CleanUp();
             }
 
-            if (!model.wearables.Contains(mouthController.wearableId))
+            if (mouthController != null && !model.wearables.Contains(mouthController.wearableId))
             {
                 mouthController.CleanUp();
             }
@@ -173,7 +179,7 @@ namespace DCL
             }
             else
             {
-                OnFailEvent?.Invoke();
+                OnFailEvent?.Invoke(true);
                 yield break;
             }
 
@@ -189,7 +195,6 @@ namespace DCL
 
             // In this point, all the requests related to the avatar's wearables have been collected and sent to the CatalogController to be sent to kernel as a unique request.
             // From here we wait for the response of the requested wearables and process them.
-
             if (avatarBodyPromise != null)
             {
                 yield return avatarBodyPromise;
@@ -206,6 +211,13 @@ namespace DCL
                 }
             }
 
+            if (resolvedBody == null)
+            {
+                isLoading = false;
+                OnFailEvent?.Invoke(true);
+                yield break;
+            }
+
             foreach (var avatarWearablePromise in avatarWearablePromises)
             {
                 yield return avatarWearablePromise;
@@ -220,13 +232,6 @@ namespace DCL
                     resolvedWearables.Add(avatarWearablePromise.value);
                     wearablesInUse.Add(avatarWearablePromise.value.id);
                 }
-            }
-
-            if (resolvedBody == null)
-            {
-                isLoading = false;
-                this.OnSuccessEvent?.Invoke();
-                yield break;
             }
 
             bool bodyIsDirty = false;
@@ -313,11 +318,14 @@ namespace DCL
             yield return new WaitUntil(() => bodyShapeController.isReady && wearableControllers.Values.All(x => x.isReady));
 
 
-            eyesController.Load(bodyShapeController, model.eyeColor);
-            eyebrowsController.Load(bodyShapeController, model.hairColor);
-            mouthController.Load(bodyShapeController, model.skinColor);
+            eyesController?.Load(bodyShapeController, model.eyeColor);
+            eyebrowsController?.Load(bodyShapeController, model.hairColor);
+            mouthController?.Load(bodyShapeController, model.skinColor);
 
-            yield return new WaitUntil(() => eyebrowsController.isReady && eyesController.isReady && mouthController.isReady);
+            yield return new WaitUntil(() =>
+                (eyebrowsController == null || (eyebrowsController != null && eyebrowsController.isReady)) &&
+                (eyesController == null || (eyesController != null && eyesController.isReady)) &&
+                (mouthController == null || (mouthController != null && mouthController.isReady)));
 
             if (bodyIsDirty || wearablesIsDirty)
             {
@@ -335,10 +343,15 @@ namespace DCL
 
             SetWearableBones();
             UpdateExpressions(model.expressionTriggerId, model.expressionTriggerTimestamp);
+            if (lastStickerTimestamp != model.stickerTriggerTimestamp && model.stickerTriggerId != null)
+            {
+                lastStickerTimestamp = model.stickerTriggerTimestamp;
+                stickersController?.PlayEmote(model.stickerTriggerId);
+            }
 
             if (loadSoftFailed)
             {
-                OnFailEvent?.Invoke();
+                OnFailEvent?.Invoke(false);
             }
             else
             {
@@ -350,18 +363,18 @@ namespace DCL
 
         void OnBodyShapeLoadingFail(WearableController wearableController)
         {
-            Debug.LogError($"Avatar: {model.name}  -  Failed loading bodyshape: {wearableController.id}");
+            Debug.LogError($"Avatar: {model?.name}  -  Failed loading bodyshape: {wearableController?.id}");
             CleanupAvatar();
-            OnFailEvent?.Invoke();
+            OnFailEvent?.Invoke(true);
         }
 
         void OnWearableLoadingFail(WearableController wearableController, int retriesCount = MAX_RETRIES)
         {
             if (retriesCount <= 0)
             {
-                Debug.LogError($"Avatar: {model.name}  -  Failed loading wearable: {wearableController.id}");
+                Debug.LogError($"Avatar: {model?.name}  -  Failed loading wearable: {wearableController?.id}");
                 CleanupAvatar();
-                OnFailEvent?.Invoke();
+                OnFailEvent?.Invoke(false);
                 return;
             }
 

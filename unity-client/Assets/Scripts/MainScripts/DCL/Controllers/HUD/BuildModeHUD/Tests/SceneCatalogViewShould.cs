@@ -10,16 +10,10 @@ namespace Tests.BuildModeHUDViews
         private SceneCatalogView sceneCatalogView;
 
         [SetUp]
-        public void SetUp()
-        {
-            sceneCatalogView = SceneCatalogView.Create();
-        }
+        public void SetUp() { sceneCatalogView = SceneCatalogView.Create(); }
 
         [TearDown]
-        public void TearDown()
-        {
-            Object.Destroy(sceneCatalogView.gameObject);
-        }
+        public void TearDown() { Object.Destroy(sceneCatalogView.gameObject); }
 
         [Test]
         public void HideCatalogClickCorrectly()
@@ -79,6 +73,21 @@ namespace Tests.BuildModeHUDViews
             Assert.AreEqual(sceneCatalogView.gameObject.activeSelf, isCatalogOpen, "The catalog activation property does not match!");
         }
 
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CheckIfCatalogIsExpandedCorrectly(bool isExpanded)
+        {
+            // Arrange
+            sceneCatalogView.isCatalogExpanded = isExpanded;
+
+            // Act
+            bool isCatalogExpanded = sceneCatalogView.IsCatalogExpanded();
+
+            // Assert
+            Assert.AreEqual(sceneCatalogView.isCatalogExpanded, isCatalogExpanded, "The catalog expanded property does not match!");
+        }
+
         [UnityTest]
         public IEnumerator CloseCatalogCorrectly()
         {
@@ -106,6 +115,21 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             Assert.AreEqual(isActive, sceneCatalogView.gameObject.activeSelf, "The catalog has not been activated properly!");
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void ShowBackButton(bool isActive)
+        {
+            // Arrange
+            sceneCatalogView.backgBtn.gameObject.SetActive(!isActive);
+
+            // Act
+            sceneCatalogView.ShowBackButton(isActive);
+
+            // Assert
+            Assert.AreEqual(isActive, sceneCatalogView.backgBtn.gameObject.activeSelf, "The back button has not been activated properly!");
         }
     }
 }

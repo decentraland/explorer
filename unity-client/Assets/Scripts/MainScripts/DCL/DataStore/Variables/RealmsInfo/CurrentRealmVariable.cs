@@ -20,24 +20,28 @@ namespace Variables.RealmsInfo
     {
         public string layer;
         public string serverName;
+        public string domain = string.Empty;
+        public string contentServerUrl = string.Empty;
 
         public bool Equals(CurrentRealmModel other)
         {
-            if (other == null) return false;
-            return Equals(other.serverName, other.layer);
+            if (other == null)
+                return false;
+            return Equals(other.serverName, other.layer, other.domain, other.contentServerUrl);
         }
 
-        public bool Equals(string serverName, string layer)
-        {
-            return this.serverName == serverName && this.layer == layer;
-        }
+        public bool Equals(string serverName, string layer, string domain, string contentServerUrl) { return Equals(serverName, layer) && this.domain == domain && this.contentServerUrl == contentServerUrl; }
+
+        public bool Equals(string serverName, string layer) { return this.serverName == serverName && this.layer == layer; }
 
         public CurrentRealmModel Clone()
         {
             return new CurrentRealmModel()
             {
                 serverName = serverName,
-                layer = layer
+                layer = layer,
+                domain = domain,
+                contentServerUrl = contentServerUrl
             };
         }
     }

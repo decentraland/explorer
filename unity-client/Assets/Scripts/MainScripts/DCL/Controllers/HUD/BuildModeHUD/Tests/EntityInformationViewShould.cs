@@ -8,16 +8,10 @@ namespace Tests.BuildModeHUDViews
         private EntityInformationView entityInformationView;
 
         [SetUp]
-        public void SetUp()
-        {
-            entityInformationView = EntityInformationView.Create();
-        }
+        public void SetUp() { entityInformationView = EntityInformationView.Create(); }
 
         [TearDown]
-        public void TearDown()
-        {
-            Object.Destroy(entityInformationView.gameObject);
-        }
+        public void TearDown() { Object.Destroy(entityInformationView.gameObject); }
 
         [Test]
         public void SetCurrentEntityCorrectly()
@@ -171,45 +165,23 @@ namespace Tests.BuildModeHUDViews
         }
 
         [Test]
-        public void SetTitleTextCorrectly()
-        {
-            // Arrange
-            string newText = "Test text";
-            entityInformationView.titleTxt.text = "";
-
-            // Act
-            entityInformationView.SeTitleText(newText);
-
-            // Assert
-            Assert.AreEqual(newText, entityInformationView.titleTxt.text, "The title text does not match!");
-        }
-
-        [Test]
         public void SeEntityLimitsLeftTextCorrectly()
         {
             // Arrange
             string newText = "Test text";
-            entityInformationView.entityLimitsLeftTxt.text = "";
+            string newText2 = "Test text2";
+            string newText3 = "Test text3";
+            entityInformationView.entityLimitsTrisTxt.text = "";
+            entityInformationView.entityLimitsMaterialsTxt.text = "";
+            entityInformationView.entityLimitsTextureTxt.text = "";
 
             // Act
-            entityInformationView.SeEntityLimitsLeftText(newText);
+            entityInformationView.SeEntityLimitsText(newText, newText2 , newText3);
 
             // Assert
-            Assert.AreEqual(newText, entityInformationView.entityLimitsLeftTxt.text, "The left limits text does not match!");
-        }
-
-        [Test]
-        public void SetEntityLimitsRightTextTextCorrectly()
-        {
-            // Arrange
-            string newText = "Test text";
-            entityInformationView.entityLimitsRightTxt.text = "";
-
-            // Act
-            entityInformationView.SeEntityLimitsRightText(newText);
-
-            // Assert
-            Assert.AreEqual(newText, entityInformationView.entityLimitsRightTxt.text, "The right limits text does not match!");
+            Assert.AreEqual(newText, entityInformationView.entityLimitsTrisTxt.text, "The left limits text does not match!");
+            Assert.AreEqual(newText2, entityInformationView.entityLimitsMaterialsTxt.text, "The left limits text does not match!");
+            Assert.AreEqual(newText3, entityInformationView.entityLimitsTextureTxt.text, "The left limits text does not match!");
         }
 
         [Test]
@@ -254,6 +226,41 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             Assert.AreEqual(isActive, entityInformationView.gameObject.activeSelf, "The active property does not match!");
+        }
+
+        [Test]
+        [TestCase(1)]
+        [TestCase(5)]
+        public void UpdateEntitiesSelectionCorrectly(int numberOfSelectedEntities)
+        {
+            // Arrange
+            if (numberOfSelectedEntities > 1)
+            {
+                entityInformationView.individualEntityPanel.SetActive(true);
+                entityInformationView.multipleEntitiesPanel.SetActive(false);
+                entityInformationView.multipleEntitiesText.text = "";
+            }
+            else
+            {
+                entityInformationView.individualEntityPanel.SetActive(false);
+                entityInformationView.multipleEntitiesPanel.SetActive(true);
+            }
+
+            // Act
+            entityInformationView.UpdateEntitiesSelection(numberOfSelectedEntities);
+
+            // Assert
+            if (numberOfSelectedEntities > 1)
+            {
+                Assert.IsFalse(entityInformationView.individualEntityPanel.activeInHierarchy, "The active property does not match!");
+                Assert.IsTrue(entityInformationView.multipleEntitiesPanel.activeInHierarchy, "The active property does not match!");
+                Assert.IsNotEmpty(entityInformationView.multipleEntitiesText.text, "The multipleEntitiesText text is empty!");
+            }
+            else
+            {
+                Assert.IsTrue(entityInformationView.individualEntityPanel.activeInHierarchy, "The active property does not match!");
+                Assert.IsFalse(entityInformationView.multipleEntitiesPanel.activeInHierarchy, "The active property does not match!");
+            }
         }
     }
 }

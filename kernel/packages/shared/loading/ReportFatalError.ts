@@ -9,11 +9,12 @@ import {
   NETWORK_MISMATCH,
   NEW_LOGIN,
   NO_WEBGL_COULD_BE_CREATED,
-  NOT_INVITED
+  NOT_INVITED,
+  AVATAR_LOADING_ERROR
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import Html from '../Html'
-import { queueTrackingEvent } from '../analytics'
+import { trackEvent } from '../analytics'
 
 declare const globalThis: StoreContainer
 
@@ -44,7 +45,10 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       ? 'newlogin'
       : event === NETWORK_MISMATCH
       ? 'networkmismatch'
+      : event === AVATAR_LOADING_ERROR
+      ? 'avatarerror'
       : 'fatal'
+
   globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
   Html.showErrorModal(targetError)
   aborted = true
@@ -63,7 +67,7 @@ export function ReportFatalError(event: ExecutionLifecycleEvent, errorInfo?: Fat
   if (ExecutionLifecycleEventsList.includes(event)) {
     return globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
   }
-  queueTrackingEvent('generic_error', {
+  trackEvent('generic_error', {
     message: event,
     errorInfo
   })
@@ -76,7 +80,7 @@ export function ReportSceneError(message: string, error: any) {
     message,
     position: new URLSearchParams(location.search).get('position')
   }
-  queueTrackingEvent('scene_error', eventData)
+  trackEvent('scene_error', eventData)
   if (window.Rollbar) {
     window.Rollbar.error(message, eventData)
   }
@@ -89,7 +93,7 @@ export function ReportRendererInterfaceError(message: string, error: any) {
     rendererInterface: true,
     position: new URLSearchParams(location.search).get('position')
   }
-  queueTrackingEvent('renderer_interface_error', eventData)
+  trackEvent('renderer_interface_error', eventData)
   if (window.Rollbar) {
     window.Rollbar.error(message, eventData)
   }

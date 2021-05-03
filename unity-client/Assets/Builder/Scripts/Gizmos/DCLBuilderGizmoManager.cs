@@ -12,6 +12,8 @@ namespace Builder.Gizmos
         public static event GizmoTransformDelegate OnGizmoTransformObject;
         public static event GizmoTransformDelegate OnGizmoTransformObjectEnd;
 
+        public event Action<Vector3> OnChangeTransformValue;
+
         public DCLBuilderRaycast builderRaycast;
 
         [SerializeField] private DCLBuilderGizmo[] gizmos = null;
@@ -61,8 +63,9 @@ namespace Builder.Gizmos
 
         private void OnDrag(Vector3 hitPoint, Vector2 mousePosition)
         {
-            activeGizmo.OnDrag(hitPoint, mousePosition);
+            float value = activeGizmo.OnDrag(hitPoint, mousePosition);
             OnGizmoTransformObject?.Invoke(activeGizmo.GetGizmoType());
+            OnChangeTransformValue?.Invoke(value * activeGizmo.GetActiveAxisVector());
         }
 
         private void OnEndDrag()
@@ -104,11 +107,15 @@ namespace Builder.Gizmos
             }
         }
 
-        public void HideGizmo()
+        public void HideGizmo(bool setInactiveGizmos = false)
         {
             if (activeGizmo != null)
             {
                 activeGizmo.gameObject.SetActive(false);
+            }
+            if (setInactiveGizmos)
+            {
+                SetGizmoType(DCL.Components.DCLGizmos.Gizmo.NONE);
             }
         }
 

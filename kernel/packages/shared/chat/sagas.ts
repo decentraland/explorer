@@ -1,7 +1,7 @@
 import { takeEvery, put, select } from 'redux-saga/effects'
 import { PayloadAction } from 'typesafe-actions'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
-import { UnityInterfaceContainer } from 'unity-interface/dcl'
+import { RendererInterfaces } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -13,7 +13,7 @@ import {
 import { uuid } from 'atomicHelpers/math'
 import { ChatMessageType, ChatMessage } from 'shared/types'
 import { EXPERIENCE_STARTED } from 'shared/loading/types'
-import { queueTrackingEvent } from 'shared/analytics'
+import { trackEvent } from 'shared/analytics'
 import { sendPublicChatMessage } from 'shared/comms'
 import { peerMap, avatarMessageObservable } from 'shared/comms/peers'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
@@ -32,7 +32,7 @@ import { fetchHotScenes } from 'shared/social/hotScenes'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 
-declare const globalThis: UnityInterfaceContainer & StoreContainer
+declare const globalThis: RendererInterfaces & StoreContainer
 
 interface IChatCommand {
   name: string
@@ -84,12 +84,12 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
   const { type, payload } = action
   switch (type) {
     case MESSAGE_RECEIVED: {
-      queueTrackingEvent('Chat message received', { length: payload.body.length })
+      trackEvent('Chat message received', { length: payload.body.length })
       break
     }
     case SEND_MESSAGE: {
       const { messageId, body } = payload
-      queueTrackingEvent('Send chat message', {
+      trackEvent('Send chat message', {
         messageId,
         length: body.length
       })

@@ -1,8 +1,12 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public interface IBuildModeHUDView
 {
     GameObject viewGO { get; }
+    SaveHUDView saveHud { get; }
     SceneCatalogView sceneCatalog { get; }
     EntityInformationView entityInformation { get; }
     bool isShowHideAnimatorVisible { get; }
@@ -10,8 +14,6 @@ public interface IBuildModeHUDView
     void AnimatorShow(bool isVisible);
     void HideToolTip();
     void Initialize(BuildModeHUDInitializationModel controllers);
-    void PublishEnd(string message);
-    void PublishStart();
     void RefreshCatalogAssetPack();
     void RefreshCatalogContent();
     void SetActive(bool isActive);
@@ -27,6 +29,7 @@ public interface IBuildModeHUDView
 public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
 {
     public GameObject viewGO => !isDestroyed ? gameObject : null;
+    public SaveHUDView saveHud  => saveView;
     public SceneCatalogView sceneCatalog => sceneCatalogView;
     public EntityInformationView entityInformation => entityInformationView;
     public bool isShowHideAnimatorVisible => showHideAnimator.isVisible;
@@ -52,6 +55,8 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
     [SerializeField] internal CatalogBtnView catalogBtnView;
     [SerializeField] internal InspectorView inspectorView;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
+    [SerializeField] internal BuildModeConfirmationModalView buildModeConfirmationModalView;
+    [SerializeField] internal SaveHUDView saveView;
 
     private bool isDestroyed = false;
     internal BuildModeHUDInitializationModel controllers;
@@ -81,7 +86,9 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         this.controllers.inspectorBtnController.Initialize(inspectorBtnView, this.controllers.tooltipController);
         this.controllers.catalogBtnController.Initialize(catalogBtnView, this.controllers.tooltipController);
         this.controllers.inspectorController.Initialize(inspectorView);
+        this.controllers.buildModeConfirmationModalController.Initialize(buildModeConfirmationModalView);
         this.controllers.topActionsButtonsController.Initialize(topActionsButtonsView, this.controllers.tooltipController);
+        this.controllers.saveHUDController.Initialize(saveView);
     }
 
     private void OnDestroy()
@@ -99,33 +106,16 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         controllers.inspectorBtnController.Dispose();
         controllers.catalogBtnController.Dispose();
         controllers.inspectorController.Dispose();
+        controllers.buildModeConfirmationModalController.Dispose();
         controllers.topActionsButtonsController.Dispose();
+        controllers.saveHUDController.Dispose();
     }
 
-    public void PublishStart()
-    {
-        controllers.publishPopupController.PublishStart();
-    }
+    public void SetPublishBtnAvailability(bool isAvailable) { controllers.publishBtnController.SetInteractable(isAvailable); }
 
-    public void PublishEnd(string message)
-    {
-        controllers.publishPopupController.PublishEnd(message);
-    }
+    public void RefreshCatalogAssetPack() { controllers.sceneCatalogController.RefreshAssetPack(); }
 
-    public void SetPublishBtnAvailability(bool isAvailable)
-    {
-        controllers.publishBtnController.SetInteractable(isAvailable);
-    }
-
-    public void RefreshCatalogAssetPack()
-    {
-        controllers.sceneCatalogController.RefreshAssetPack();
-    }
-
-    public void RefreshCatalogContent()
-    {
-        controllers.sceneCatalogController.RefreshCatalog();
-    }
+    public void RefreshCatalogContent() { controllers.sceneCatalogController.RefreshCatalog(); }
 
     public void SetVisibilityOfCatalog(bool isVisible)
     {
@@ -143,20 +133,15 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
             controllers.inspectorController.sceneLimitsController.Disable();
     }
 
-    public void SetVisibilityOfControls(bool isVisible)
-    {
-        controllers.shortcutsController.SetActive(isVisible);
-    }
+    public void SetVisibilityOfControls(bool isVisible) { controllers.shortcutsController.SetActive(isVisible); }
 
-    public void SetVisibilityOfExtraBtns(bool isVisible)
-    {
-        controllers.topActionsButtonsController.SetExtraActionsActive(isVisible);
-    }
+    public void SetVisibilityOfExtraBtns(bool isVisible) { controllers.topActionsButtonsController.SetExtraActionsActive(isVisible); }
 
     public void SetFirstPersonView()
     {
         firstPersonCanvasGO.SetActive(true);
         godModeCanvasGO.SetActive(false);
+        saveView.SetFirstPersonView();
         HideToolTip();
     }
 
@@ -164,18 +149,13 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
     {
         firstPersonCanvasGO.SetActive(false);
         godModeCanvasGO.SetActive(true);
+        saveView.SetGodModeView();
         HideToolTip();
     }
 
-    public void HideToolTip()
-    {
-        controllers.tooltipController.HideTooltip();
-    }
+    public void HideToolTip() { controllers.tooltipController.HideTooltip(); }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 
     public void AnimatorShow(bool isVisible)
     {
@@ -184,4 +164,5 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         else
             showHideAnimator.Hide();
     }
+
 }

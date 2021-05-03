@@ -1,7 +1,10 @@
+using DCL.Configuration;
 using DCL.Controllers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BuildModeHUDController : IHUD
 {
@@ -17,7 +20,9 @@ public class BuildModeHUDController : IHUD
     public event Action OnResumeInput;
     public event Action OnTutorialAction;
     public event Action OnPublishAction;
+    public event Action OnConfirmPublishAction;
     public event Action OnLogoutAction;
+    public event Action OnChangeSnapModeAction;
     public event Action<CatalogItem> OnCatalogItemSelected;
     public event Action<DCLBuilderInWorldEntity> OnEntityClick;
     public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
@@ -41,6 +46,10 @@ public class BuildModeHUDController : IHUD
     internal BuildModeHUDInitializationModel controllers;
     internal CatalogItemDropController catalogItemDropController;
 
+    internal static readonly Vector3 catalogItemTooltipOffset = new Vector3 (0, 25, 0);
+
+    private Coroutine publishProgressCoroutine = null;
+
     public void Initialize()
     {
         CreateBuildModeControllers();
@@ -56,13 +65,14 @@ public class BuildModeHUDController : IHUD
         ConfigureInspectorController();
         ConfigureTopActionsButtonsController();
         ConfigureCatalogItemDropController();
+        ConfigureSaveHUDController();
     }
 
     public void Initialize(BuildModeHUDInitializationModel controllers)
     {
         this.controllers = controllers;
         catalogItemDropController = new CatalogItemDropController();
-        
+
         CreateMainView();
     }
 
@@ -82,7 +92,9 @@ public class BuildModeHUDController : IHUD
             inspectorBtnController = new InspectorBtnController(),
             catalogBtnController = new CatalogBtnController(),
             inspectorController = new InspectorController(),
-            topActionsButtonsController = new TopActionsButtonsController()
+            buildModeConfirmationModalController = new BuildModeConfirmationModalController(),
+            topActionsButtonsController = new TopActionsButtonsController(),
+            saveHUDController = new SaveHUDController()
         };
 
         catalogItemDropController = new CatalogItemDropController();
@@ -91,7 +103,7 @@ public class BuildModeHUDController : IHUD
     internal void CreateMainView()
     {
         view = CreateView();
-        
+
         if (view.viewGO != null)
             view.viewGO.SetActive(false);
 
@@ -102,8 +114,11 @@ public class BuildModeHUDController : IHUD
     {
         controllers.sceneCatalogController.OnHideCatalogClicked += ChangeVisibilityOfCatalog;
         controllers.sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
-        controllers.sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
+        controllers.sceneCatalogController.OnStopInput += StopInput;
+
         controllers.sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
+        controllers.sceneCatalogController.OnPointerEnterInCatalogItemAdapter += ShowTooltipForCatalogItemAdapter;
+        controllers.sceneCatalogController.OnPointerExitInCatalogItemAdapter += (x, y) => controllers.tooltipController.HideTooltip();
     }
 
     private void ConfigureEntityInformationController()
@@ -115,35 +130,17 @@ public class BuildModeHUDController : IHUD
         controllers.entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
     }
 
-    private void ConfigureFirstPersonModeController()
-    {
-        controllers.firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
-    }
+    private void ConfigureFirstPersonModeController() { controllers.firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke(); }
 
-    private void ConfigureShortcutsController()
-    {
-        controllers.shortcutsController.OnCloseClick += ChangeVisibilityOfControls;
-    }
+    private void ConfigureShortcutsController() { controllers.shortcutsController.OnCloseClick += ChangeVisibilityOfControls; }
 
-    private void ConfigureDragAndDropSceneObjectController()
-    {
-        controllers.dragAndDropSceneObjectController.OnDrop += () => SceneObjectDroppedInView();
-    }
+    private void ConfigureDragAndDropSceneObjectController() { controllers.dragAndDropSceneObjectController.OnDrop += () => SceneObjectDroppedInView(); }
 
-    private void ConfigurePublishBtnController()
-    {
-        controllers.publishBtnController.OnClick += () => OnPublishAction?.Invoke();
-    }
+    private void ConfigurePublishBtnController() { controllers.publishBtnController.OnClick += () => OnPublishAction?.Invoke(); }
 
-    private void ConfigureInspectorBtnController()
-    {
-        controllers.inspectorBtnController.OnClick += () => ChangeVisibilityOfEntityList();
-    }
+    private void ConfigureInspectorBtnController() { controllers.inspectorBtnController.OnClick += () => ChangeVisibilityOfEntityList(); }
 
-    private void ConfigureCatalogBtnController()
-    {
-        controllers.catalogBtnController.OnClick += ChangeVisibilityOfCatalog;
-    }
+    private void ConfigureCatalogBtnController() { controllers.catalogBtnController.OnClick += ChangeVisibilityOfCatalog; }
 
     private void ConfigureInspectorController()
     {
@@ -165,7 +162,8 @@ public class BuildModeHUDController : IHUD
         controllers.topActionsButtonsController.OnResetClick += () => OnResetAction?.Invoke();
         controllers.topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectedAction?.Invoke();
         controllers.topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectedAction?.Invoke();
-        controllers.topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
+        controllers.topActionsButtonsController.OnSnapModeClick += () => OnChangeSnapModeAction?.Invoke();
+        controllers.topActionsButtonsController.OnLogOutClick += ExitStart;
         controllers.topActionsButtonsController.extraActionsController.OnControlsClick += ChangeVisibilityOfControls;
         controllers.topActionsButtonsController.extraActionsController.OnHideUIClick += ChangeVisibilityOfUI;
         controllers.topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
@@ -177,42 +175,154 @@ public class BuildModeHUDController : IHUD
         catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
     }
 
+    private void ConfigureSaveHUDController() { OnLogoutAction += controllers.saveHUDController.StopAnimation; }
+
+    public void SceneSaved() { controllers.saveHUDController.SceneStateSave(); }
+
     public void PublishStart()
     {
-        view.PublishStart();
+        UnsubscribeConfirmationModal();
+
+        controllers.buildModeConfirmationModalController.OnCancelExit += CancelPublishModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit += ConfirmPublishModal;
+
+        controllers.buildModeConfirmationModalController.Configure(
+            BuilderInWorldSettings.PUBLISH_MODAL_TITLE,
+            BuilderInWorldSettings.PUBLISH_MODAL_SUBTITLE,
+            BuilderInWorldSettings.PUBLISH_MODAL_CANCEL_BUTTON,
+            BuilderInWorldSettings.PUBLISH_MODAL_CONFIRM_BUTTON);
+        controllers.buildModeConfirmationModalController.SetActive(true, BuildModeModalType.PUBLISH);
     }
 
-    public void PublishEnd(string message)
+    internal void CancelPublishModal(BuildModeModalType modalType)
     {
-        view.PublishEnd(message);
+        if (modalType != BuildModeModalType.PUBLISH)
+            return;
+
+        controllers.buildModeConfirmationModalController.SetActive(false, BuildModeModalType.PUBLISH);
+
+        controllers.buildModeConfirmationModalController.OnCancelExit -= CancelPublishModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit -= ConfirmPublishModal;
     }
 
-    public void SetParcelScene(ParcelScene parcelScene)
+    internal void ConfirmPublishModal(BuildModeModalType modalType)
     {
-        controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene);
+        if (modalType != BuildModeModalType.PUBLISH)
+            return;
+
+        controllers.publishPopupController.PublishStart();
+        OnConfirmPublishAction?.Invoke();
+
+        // NOTE (Santi): This is temporal until we implement the way of return the publish progress from the kernel side.
+        //               Meanwhile we will display a fake progress.
+        publishProgressCoroutine = CoroutineStarter.Start(FakePublishProgress());
+
+        controllers.buildModeConfirmationModalController.OnCancelExit -= CancelPublishModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit -= ConfirmPublishModal;
     }
 
-    public void SetPublishBtnAvailability(bool isAvailable)
+    private IEnumerator FakePublishProgress()
     {
-        view.SetPublishBtnAvailability(isAvailable);
+        while (true)
+        {
+            float newPercentage = Mathf.Clamp(
+                controllers.publishPopupController.currentProgress + UnityEngine.Random.Range(10f, 30f),
+                controllers.publishPopupController.currentProgress,
+                99f);
+
+            controllers.publishPopupController.SetPercentage(newPercentage);
+
+            yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.5f));
+        }
     }
+
+    public void ExitStart()
+    {
+        UnsubscribeConfirmationModal();
+
+        controllers.buildModeConfirmationModalController.OnCancelExit += CancelExitModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit += ConfirmExitModal;
+
+        controllers.buildModeConfirmationModalController.Configure(
+            BuilderInWorldSettings.EXIT_MODAL_TITLE,
+            BuilderInWorldSettings.EXIT_MODAL_SUBTITLE,
+            BuilderInWorldSettings.EXIT_MODAL_CANCEL_BUTTON,
+            BuilderInWorldSettings.EXIT_MODAL_CONFIRM_BUTTON);
+        controllers.buildModeConfirmationModalController.SetActive(true, BuildModeModalType.EXIT);
+    }
+
+    internal void CancelExitModal(BuildModeModalType modalType)
+    {
+        if (modalType != BuildModeModalType.EXIT)
+            return;
+
+        controllers.buildModeConfirmationModalController.SetActive(false, BuildModeModalType.EXIT);
+
+        controllers.buildModeConfirmationModalController.OnCancelExit -= CancelExitModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit -= ConfirmExitModal;
+    }
+
+    internal void ConfirmExitModal(BuildModeModalType modalType)
+    {
+        if (modalType != BuildModeModalType.EXIT)
+            return;
+
+        OnLogoutAction?.Invoke();
+
+        controllers.buildModeConfirmationModalController.OnCancelExit -= CancelExitModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit -= ConfirmExitModal;
+    }
+
+    private void UnsubscribeConfirmationModal()
+    {
+        controllers.buildModeConfirmationModalController.OnCancelExit -= CancelPublishModal;
+        controllers.buildModeConfirmationModalController.OnCancelExit -= CancelExitModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit -= ConfirmPublishModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit -= ConfirmExitModal;
+    }
+
+    public void PublishEnd(bool isOk, string message)
+    {
+        if (publishProgressCoroutine != null)
+        {
+            CoroutineStarter.Stop(publishProgressCoroutine);
+            publishProgressCoroutine = null;
+        }
+
+        controllers.publishPopupController.PublishEnd(isOk, message);
+    }
+
+    public void SetGizmosActive(string gizmos) { controllers.topActionsButtonsController.SetGizmosActive(gizmos); }
+    public void SetParcelScene(ParcelScene parcelScene) { controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene); }
+
+    public void SetPublishBtnAvailability(bool isAvailable) { view.SetPublishBtnAvailability(isAvailable); }
 
     #region Catalog
 
-    public void RefreshCatalogAssetPack()
+    private void ShowTooltipForCatalogItemAdapter(PointerEventData data, CatalogItemAdapter adapter)
     {
-        view.RefreshCatalogAssetPack();
+        controllers.tooltipController.SetTooltipText(adapter.GetContent().name);
+        controllers.tooltipController.ShowTooltip(data, catalogItemTooltipOffset);
     }
 
-    public void RefreshCatalogContent()
+    public void RefreshCatalogAssetPack() { view.RefreshCatalogAssetPack(); }
+
+    public void RefreshCatalogContent() { view.RefreshCatalogContent(); }
+
+    public void StopInput()
     {
-        view.RefreshCatalogContent();
+        OnStopInput?.Invoke();
+
+        if (controllers.sceneCatalogController.IsCatalogExpanded())
+            controllers.sceneCatalogController.ToggleCatalogExpanse();
     }
 
     public void CatalogItemSelected(CatalogItem catalogItem)
     {
         OnCatalogItemSelected?.Invoke(catalogItem);
-        SetVisibilityOfCatalog(false);
+
+        if (controllers.sceneCatalogController.IsCatalogExpanded())
+            controllers.sceneCatalogController.ToggleCatalogExpanse();
     }
 
     public void SetVisibilityOfCatalog(bool isVisible)
@@ -240,10 +350,7 @@ public class BuildModeHUDController : IHUD
             ChangeVisibilityOfSceneInfo();
     }
 
-    public void UpdateSceneLimitInfo()
-    {
-        controllers.inspectorController.sceneLimitsController.UpdateInfo();
-    }
+    public void UpdateSceneLimitInfo() { controllers.inspectorController.sceneLimitsController.UpdateInfo(); }
 
     public void ChangeVisibilityOfSceneInfo(bool shouldBeVisibile)
     {
@@ -267,26 +374,17 @@ public class BuildModeHUDController : IHUD
 
     public void ActivateGodModeUI()
     {
-        if(view != null)
+        if (view != null)
             view.SetGodModeView();
     }
 
     #region EntityInformation
 
-    public void EntityInformationSetEntity(DCLBuilderInWorldEntity entity,ParcelScene scene)
-    {
-        controllers.entityInformationController.SetEntity(entity, scene);
-    }
+    public void EntityInformationSetEntity(DCLBuilderInWorldEntity entity, ParcelScene scene) { controllers.entityInformationController.SetEntity(entity, scene); }
 
-    public void ShowEntityInformation()
-    {
-        controllers.entityInformationController.Enable();
-    }
+    public void ShowEntityInformation() { controllers.entityInformationController.Enable(); }
 
-    public void HideEntityInformation()
-    {
-        controllers.entityInformationController.Disable();
-    }
+    public void HideEntityInformation() { controllers.entityInformationController.Disable(); }
 
     #endregion
 
@@ -301,6 +399,7 @@ public class BuildModeHUDController : IHUD
     public void ChangeVisibilityOfEntityList()
     {
         isEntityListVisible = !isEntityListVisible;
+        controllers.saveHUDController?.SetSaveViewByEntityListOpen(isEntityListVisible);
         if (isEntityListVisible)
         {
             OnEntityListVisible?.Invoke();
@@ -312,10 +411,7 @@ public class BuildModeHUDController : IHUD
         }
     }
 
-    public void ClearEntityList()
-    {
-        controllers.inspectorController.ClearList();
-    }
+    public void ClearEntityList() { controllers.inspectorController.ClearList(); }
 
     public void ChangeVisibilityOfControls()
     {
@@ -323,16 +419,27 @@ public class BuildModeHUDController : IHUD
         view.SetVisibilityOfControls(isControlsVisible);
     }
 
-    public void ChangeVisibilityOfUI()
-    {
-        SetVisibility(!IsVisible());
-    }
+    public void ChangeVisibilityOfUI() { SetVisibility(!IsVisible()); }
+
+    #region TopButtons
 
     public void ChangeVisibilityOfExtraBtns()
     {
         areExtraButtonsVisible = !areExtraButtonsVisible;
         view.SetVisibilityOfExtraBtns(areExtraButtonsVisible);
     }
+
+    public void HideExtraBtns()
+    {
+        areExtraButtonsVisible = false;
+        controllers.topActionsButtonsController.extraActionsController.SetActive(areExtraButtonsVisible);
+    }
+
+    public void SetActionsButtonsInteractable(bool isInteractable) { controllers.topActionsButtonsController.SetActionsInteractable(isInteractable); }
+
+    public void SetSnapModeActive(bool isActive) { controllers.topActionsButtonsController.SetSnapActive(isActive); }
+
+    #endregion
 
     public void SetVisibility(bool visible)
     {
@@ -360,10 +467,7 @@ public class BuildModeHUDController : IHUD
             UnityEngine.Object.Destroy(view.viewGO);
     }
 
-    public void ToggleVisibility()
-    {
-        SetVisibility(!IsVisible());
-    }
+    public void ToggleVisibility() { SetVisibility(!IsVisible()); }
 
     public bool IsVisible()
     {
@@ -373,10 +477,9 @@ public class BuildModeHUDController : IHUD
         return view.isShowHideAnimatorVisible;
     }
 
-    public void SceneObjectDroppedInView()
-    {
-        catalogItemDropController.CatalogitemDropped();
-    }
+    public void SceneObjectDroppedInView() { catalogItemDropController.CatalogitemDropped(); }
 
     internal virtual IBuildModeHUDView CreateView() => BuildModeHUDView.Create();
+
+    public void UpdateEntitiesSelection(int numberOfSelectedEntities) { controllers.entityInformationController.UpdateEntitiesSelection(numberOfSelectedEntities); }
 }

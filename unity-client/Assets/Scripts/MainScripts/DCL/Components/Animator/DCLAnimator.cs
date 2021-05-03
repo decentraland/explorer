@@ -29,7 +29,7 @@ namespace DCL.Components
 
                 public DCLAnimationState Clone()
                 {
-                    return (DCLAnimationState)this.MemberwiseClone();
+                    return (DCLAnimationState) this.MemberwiseClone();
                 }
             }
 
@@ -43,8 +43,7 @@ namespace DCL.Components
 
         [System.NonSerialized]
         public Animation animComponent = null;
-
-        Model.DCLAnimationState[] previousState;
+        
         Dictionary<string, AnimationClip> clipNameToClip = new Dictionary<string, AnimationClip>();
         Dictionary<AnimationClip, AnimationState> clipToState = new Dictionary<AnimationClip, AnimationState>();
 
@@ -70,10 +69,10 @@ namespace DCL.Components
 
         new public Model GetModel()
         {
-            return (Model)model;
+            return (Model) model;
         }
 
-        private void OnComponentUpdated(DecentralandEntity e)
+        private void OnComponentUpdated(IDCLEntity e)
         {
             UpdateAnimationState();
         }
@@ -96,7 +95,7 @@ namespace DCL.Components
             animComponent.Stop(); //NOTE(Brian): When the GLTF is created by GLTFSceneImporter a frame may be elapsed,
             //putting the component in play state if playAutomatically was true at that point.
             animComponent.clip?.SampleAnimation(animComponent.gameObject, 0);
-
+            
             foreach (AnimationState unityState in animComponent)
             {
                 clipNameToClip[unityState.clip.name] = unityState.clip;
@@ -115,7 +114,7 @@ namespace DCL.Components
             if (clipNameToClip.Count == 0 || animComponent == null)
                 return;
 
-            Model model = (Model)this.model;
+            Model model = (Model) this.model;
 
             if (model.states == null || model.states.Length == 0)
                 return;
@@ -135,23 +134,17 @@ namespace DCL.Components
                     state.clipReference = unityState.clip;
 
                     if (state.shouldReset)
-                    {
                         ResetAnimation(state);
-                    }
 
                     if (state.playing)
                     {
                         if (!animComponent.IsPlaying(state.clip))
-                        {
                             animComponent.Play(state.clip);
-                        }
                     }
                     else
                     {
                         if (animComponent.IsPlaying(state.clip))
-                        {
                             animComponent.Stop(state.clip);
-                        }
                     }
                 }
             }
@@ -173,7 +166,7 @@ namespace DCL.Components
 
         public Model.DCLAnimationState GetStateByString(string stateName)
         {
-            Model model = (Model)this.model;
+            Model model = (Model) this.model;
 
             for (var i = 0; i < model.states.Length; i++)
             {

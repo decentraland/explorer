@@ -1,6 +1,6 @@
 declare const global: any & StoreContainer
 declare const window: any
-;(window as any).reactVersion = false
+window.reactVersion = false
 
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.preview = window.preview = true
@@ -16,6 +16,7 @@ import { signalRendererInitialized } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { future, IFuture } from 'fp-future'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')
@@ -85,7 +86,7 @@ function sceneRenderable() {
 
 initializeUnity(container)
   .then(async (ret) => {
-    const i = (await ret.instancedJS).unityInterface
+    const i = unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
@@ -95,7 +96,6 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: QUESTS_ENABLED, visible: true })
 
     global.globalStore.dispatch(signalRendererInitialized())
 

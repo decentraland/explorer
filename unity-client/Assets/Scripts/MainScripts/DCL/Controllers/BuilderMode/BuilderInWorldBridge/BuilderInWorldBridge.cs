@@ -16,6 +16,9 @@ using Environment = DCL.Environment;
 /// </summary>
 public class BuilderInWorldBridge : MonoBehaviour
 {
+    //Note Adrian: OnKernelUpdated in not called in the update of the transform, since it will give a lot of 
+    //events and probably dont need to get called with that frecuency
+    public event Action OnKernelUpdated;
     public event Action OnPublishSuccess;
     public event Action<string> OnPublishError;
 
@@ -23,42 +26,47 @@ public class BuilderInWorldBridge : MonoBehaviour
     TransformComponent entityTransformComponentModel = new TransformComponent();
 
     StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
+    SaveSceneStateEvent saveSceneState = new SaveSceneStateEvent();
     ModifyEntityComponentEvent modifyEntityComponentEvent = new ModifyEntityComponentEvent();
     EntityPayload entityPayload = new EntityPayload();
     EntitySingleComponentPayload entitySingleComponentPayload = new EntitySingleComponentPayload();
 
     public void UpdateSmartItemComponent(DCLBuilderInWorldEntity entity, ParcelScene scene)
     {
-        SmartItemComponent smartItemComponent = entity.rootEntity.TryGetComponent<SmartItemComponent>(); 
+        SmartItemComponent smartItemComponent = entity.rootEntity.TryGetComponent<SmartItemComponent>();
         if (smartItemComponent == null)
-           return;
+            return;
 
 
         entitySingleComponentPayload.entityId = entity.rootEntity.entityId;
-        entitySingleComponentPayload.componentId = (int)CLASS_ID_COMPONENT.SMART_ITEM;
+        entitySingleComponentPayload.componentId = (int) CLASS_ID_COMPONENT.SMART_ITEM;
 
         entitySingleComponentPayload.data = smartItemComponent.GetValues();
 
         ChangeEntityComponent(entitySingleComponentPayload, scene);
     }
 
+    public void SaveSceneState(ParcelScene scene) { WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, saveSceneState); }
+
     public void PublishSceneResult(string payload)
     {
         PublishSceneResultPayload publishSceneResultPayload = JsonUtility.FromJson<PublishSceneResultPayload>(payload);
-        string message;
+        string errorMessage = "";
         if (publishSceneResultPayload.ok)
         {
-            //Note (Adrian): This is temporary until implement the UI
-            message = "Done!\nThe scene has been published";
             OnPublishSuccess?.Invoke();
+
+            AudioScriptableObjects.confirm.Play();
         }
         else
         {
-            message = publishSceneResultPayload.error;
+            errorMessage = publishSceneResultPayload.error;
             OnPublishError?.Invoke(publishSceneResultPayload.error);
+
+            AudioScriptableObjects.error.Play();
         }
 
-        HUDController.i.builderInWorldMainHud.PublishEnd(message);
+        HUDController.i.builderInWorldMainHud.PublishEnd(publishSceneResultPayload.ok, errorMessage);
     }
 
     public void ChangeEntityLockStatus(DCLBuilderInWorldEntity entity, ParcelScene scene)
@@ -67,7 +75,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID.LOCKED_ON_EDIT;
 
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.sharedComponents)
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
@@ -84,7 +92,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID.NAME;
 
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.sharedComponents)
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
@@ -112,12 +120,14 @@ public class BuilderInWorldBridge : MonoBehaviour
         });
 
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
+        OnKernelUpdated?.Invoke();
     }
 
-    public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
+    public void AddEntityOnKernel(IDCLEntity entity, ParcelScene scene)
     {
         List<ComponentPayload> list = new List<ComponentPayload>();
-        foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
+
+        foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> keyValuePair in entity.components)
         {
             ComponentPayload componentPayLoad = new ComponentPayload();
             componentPayLoad.componentId = Convert.ToInt32(keyValuePair.Key);
@@ -140,7 +150,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             list.Add(componentPayLoad);
         }
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.sharedComponents)
         {
             ComponentPayload componentPayLoad = new ComponentPayload();
 
@@ -170,7 +180,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
     }
 
-    public void EntityTransformReport(DecentralandEntity entity, ParcelScene scene)
+    public void EntityTransformReport(IDCLEntity entity, ParcelScene scene)
     {
         entitySingleComponentPayload.entityId = entity.entityId;
         entitySingleComponentPayload.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
@@ -191,7 +201,6 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
         string message = JsonConvert.SerializeObject(sceneEvent);
-
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
 
@@ -203,23 +212,16 @@ public class BuilderInWorldBridge : MonoBehaviour
         removeEntityEvent.payload = removeEntityPayLoad;
 
         WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, removeEntityEvent);
+        OnKernelUpdated?.Invoke();
     }
 
-    public void StartKernelEditMode(ParcelScene scene)
-    {
-        WebInterface.ReportControlEvent(new WebInterface.StartStatefulMode(scene.sceneData.id));
-    }
+    public void StartKernelEditMode(ParcelScene scene) { WebInterface.ReportControlEvent(new WebInterface.StartStatefulMode(scene.sceneData.id)); }
 
-    public void ExitKernelEditMode(ParcelScene scene)
-    {
-        WebInterface.ReportControlEvent(new WebInterface.StopStatefulMode(scene.sceneData.id));
-    }
+    public void ExitKernelEditMode(ParcelScene scene) { WebInterface.ReportControlEvent(new WebInterface.StopStatefulMode(scene.sceneData.id)); }
 
-    public void PublishScene(ParcelScene scene)
-    {
-        WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, storeSceneState);
-    }
+    public void PublishScene(ParcelScene scene) { WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, storeSceneState); }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     void SendNewEntityToKernel(string sceneId, string entityId, ComponentPayload[] componentsPayload)
     {
         AddEntityEvent addEntityEvent = new AddEntityEvent();
@@ -236,7 +238,7 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         //Note(Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
         string message = JsonConvert.SerializeObject(sceneEvent);
-
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
+        OnKernelUpdated?.Invoke();
     }
 }

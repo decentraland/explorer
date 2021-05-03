@@ -17,12 +17,18 @@ namespace Tests.BuildModeHUDControllers
         {
             entityInformationController = new EntityInformationController();
             entityInformationController.Initialize(Substitute.For<IEntityInformationView>());
+            Environment.i.platform.webRequest.Initialize(
+                genericWebRequest: new WebRequest(),
+                assetBundleWebRequest: new WebRequestAssetBundle(),
+                textureWebRequest: new WebRequestTexture(),
+                audioWebRequest: new WebRequestAudio());
         }
 
         [TearDown]
         public void TearDown()
         {
             entityInformationController.Dispose();
+            Environment.i.platform.webRequest.Dispose();
         }
 
         [Test]
@@ -78,7 +84,7 @@ namespace Tests.BuildModeHUDControllers
             string testText = "Test text";
             DCLBuilderInWorldEntity returnedEntity = null;
             string returnedText = "";
-            entityInformationController.OnNameChange += (entity, name) => 
+            entityInformationController.OnNameChange += (entity, name) =>
             {
                 returnedEntity = entity;
                 returnedText = name;
@@ -195,7 +201,6 @@ namespace Tests.BuildModeHUDControllers
             entityInformationController.UpdateEntityName(testEntity);
 
             // Assert
-            entityInformationController.entityInformationView.Received(1).SeTitleText(Arg.Any<string>());
             entityInformationController.entityInformationView.Received(1).SetNameIFText(Arg.Any<string>());
         }
 
@@ -224,8 +229,7 @@ namespace Tests.BuildModeHUDControllers
             entityInformationController.UpdateLimitsInformation(testCatalogItem);
 
             // Assert
-            entityInformationController.entityInformationView.Received(1).SeEntityLimitsLeftText(isCatalogNull ? "" : Arg.Any<string>());
-            entityInformationController.entityInformationView.Received(1).SeEntityLimitsRightText(isCatalogNull ? "" : Arg.Any<string>());
+            entityInformationController.entityInformationView.Received(1).SeEntityLimitsText(isCatalogNull ? "" : Arg.Any<string>(), isCatalogNull ? "" : Arg.Any<string>(), isCatalogNull ? "" : Arg.Any<string>());
         }
 
         [Test]
@@ -267,6 +271,18 @@ namespace Tests.BuildModeHUDControllers
             entityInformationController.entityInformationView.Received(1).SetPositionAttribute(Arg.Any<Vector3>());
             entityInformationController.entityInformationView.Received(1).SetRotationAttribute(Arg.Any<Vector3>());
             entityInformationController.entityInformationView.Received(1).SetScaleAttribute(Arg.Any<Vector3>());
+        }
+
+        [Test]
+        [TestCase(1)]
+        [TestCase(5)]
+        public void UpdateEntitiesSelectionCorrectly(int numberOfSelectedEntities)
+        {
+            // Act
+            entityInformationController.UpdateEntitiesSelection(numberOfSelectedEntities);
+
+            // Assert
+            entityInformationController.entityInformationView.Received(1).UpdateEntitiesSelection(numberOfSelectedEntities);
         }
     }
 }

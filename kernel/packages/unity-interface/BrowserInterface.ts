@@ -9,11 +9,11 @@ import { decentralandConfigurations, ethereumConfigurations, playerConfiguration
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
-import { aborted } from 'shared/loading/ReportFatalError'
+import { identifyEmail, trackEvent } from 'shared/analytics'
+import { aborted, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar } from 'shared/profiles/types'
+import { Avatar, ProfileType } from 'shared/profiles/types'
 import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
@@ -21,8 +21,13 @@ import {
   WorldPosition,
   LoadableParcelScene
 } from 'shared/types'
-import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
-import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
+import {
+  getSceneWorkerBySceneID,
+  setNewParcelScene,
+  stopParcelSceneWorker,
+  loadedSceneWorkers
+} from 'shared/world/parcelSceneManager'
+import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
@@ -53,10 +58,11 @@ import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 
-declare const DCL: any
-
-declare const globalThis: StoreContainer
+declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
 
 // ** TODO - move to friends related file - moliva - 15/07/2020
@@ -76,6 +82,23 @@ const positionEvent = {
 
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
+
+  // visitor pattern? anyone?
+  /**
+   * This is the only method that should be called publically in this class.
+   * It dispatches "renderer messages" to the correct handlers.
+   *
+   * It has a fallback that doesn't fail to support future versions of renderers
+   * and independant workflows for both teams.
+   */
+  public handleUnityMessage(type: string, message: any) {
+    if (type in this) {
+      // tslint:disable-next-line:semicolon
+      ;(this as any)[type](message)
+    } else {
+      defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
+    }
+  }
 
   /** Triggered when the camera moves */
   public ReportPosition(data: {
@@ -116,21 +139,26 @@ export class BrowserInterface {
     }
   }
 
+  public AllScenesEvent(data: { eventType: string; payload: any }) {
+    for (const [_key, scene] of loadedSceneWorkers) {
+      scene.emit(data.eventType as IEventNames, data.payload)
+    }
+  }
+
   public OpenWebURL(data: { url: string }) {
     const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
-    queueTrackingEvent('hiccup report', data)
-  }
-
-  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean }) {
+  public PerformanceReport(data: {
+    samples: string
+    fpsIsCapped: boolean
+    hiccupsInThousandFrames: number
+    hiccupsTime: number
+    totalTime: number
+  }) {
     const perfReport = getPerformanceInfo(data)
-    queueTrackingEvent('performance report', perfReport)
-
-    const rawPerfReport = getRawPerformanceInfo(data)
-    queueTrackingEvent('raw perf report', rawPerfReport)
+    trackEvent('performance report', perfReport)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -145,7 +173,7 @@ export class BrowserInterface {
       }
     }
 
-    queueTrackingEvent(data.name, properties)
+    trackEvent(data.name, properties)
   }
 
   public TriggerExpression(data: { id: string; timestamp: number }) {
@@ -445,16 +473,16 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
-    if (!DCL.gifProcessor) {
-      DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
+    if (!globalThis.gifProcessor) {
+      globalThis.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
 
-    DCL.gifProcessor.ProcessGIF(data)
+    globalThis.gifProcessor.ProcessGIF(data)
   }
 
   public DeleteGIF(data: { value: string }) {
-    if (DCL.gifProcessor) {
-      DCL.gifProcessor.DeleteGIF(data.value)
+    if (globalThis.gifProcessor) {
+      globalThis.gifProcessor.DeleteGIF(data.value)
     }
   }
 
@@ -499,6 +527,16 @@ export class BrowserInterface {
       collectionIds: this.arrayCleanup(filters.collectionIds)
     }
     globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
+  }
+
+  public RequestUserProfile(userIdPayload: { value: string }) {
+    ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
+      .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
+      .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
+  }
+
+  public ReportAvatarFatalError() {
+    ReportFatalError(AVATAR_LOADING_ERROR)
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {

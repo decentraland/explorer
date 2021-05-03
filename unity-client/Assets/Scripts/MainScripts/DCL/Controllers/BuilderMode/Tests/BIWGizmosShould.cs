@@ -18,6 +18,16 @@ public class BIWGizmosShould : IntegrationTestSuite_Legacy
     }
 
     [Test]
+    public void TestDesactivateGizmos()
+    {
+        //Act
+        gizmosController.HideGizmo(true);
+
+        //Assert
+        Assert.AreEqual(gizmosController.GetSelectedGizmo(), DCL.Components.DCLGizmos.Gizmo.NONE);
+    }
+
+    [Test]
     public void TestActivationTranslateGizmos()
     {
         //Act
@@ -41,10 +51,10 @@ public class BIWGizmosShould : IntegrationTestSuite_Legacy
     public void TestActivationScaleGizmos()
     {
         //Act
-        gizmosController.SetGizmoType(BuilderInWorldSettings.SCLAE_GIZMO_NAME);
+        gizmosController.SetGizmoType(BuilderInWorldSettings.SCALE_GIZMO_NAME);
 
         //Assert
-        Assert.AreEqual(gizmosController.GetSelectedGizmo(), BuilderInWorldSettings.SCLAE_GIZMO_NAME);
+        Assert.AreEqual(gizmosController.GetSelectedGizmo(), BuilderInWorldSettings.SCALE_GIZMO_NAME);
     }
 
     [Test]
@@ -73,7 +83,7 @@ public class BIWGizmosShould : IntegrationTestSuite_Legacy
     public void TestScaleGizmosType()
     {
         //Arrange
-        gizmosController.SetGizmoType(BuilderInWorldSettings.SCLAE_GIZMO_NAME);
+        gizmosController.SetGizmoType(BuilderInWorldSettings.SCALE_GIZMO_NAME);
         DCLBuilderGizmo gizmo = gizmosController.activeGizmo;
 
         //Assert

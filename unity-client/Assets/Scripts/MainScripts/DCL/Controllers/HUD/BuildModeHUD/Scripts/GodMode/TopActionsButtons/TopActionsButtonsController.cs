@@ -12,6 +12,7 @@ public interface ITopActionsButtonsController
     event Action OnDuplicateClick;
     event Action OnDeleteClick;
     event Action OnLogOutClick;
+    event Action OnSnapModeClick;
 
     IExtraActionsController extraActionsController { get; }
 
@@ -25,10 +26,14 @@ public interface ITopActionsButtonsController
     void ResetClicked();
     void DuplicateClicked();
     void DeleteClicked();
-    void LogOutClicked();
+    void LogoutClicked();
+    void ConfirmLogout(BuildModeModalType modalType);
     void TooltipPointerEntered(BaseEventData eventData, string tooltipText);
     void TooltipPointerExited();
     void SetExtraActionsActive(bool isActive);
+    void SetGizmosActive(string gizmos);
+    void SetActionsInteractable(bool isActive);
+    void SetSnapActive(bool isActive);
 }
 
 public class TopActionsButtonsController : ITopActionsButtonsController
@@ -42,6 +47,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public event Action OnDuplicateClick;
     public event Action OnDeleteClick;
     public event Action OnLogOutClick;
+    public event Action OnSnapModeClick;
 
     public IExtraActionsController extraActionsController { get; private set; }
 
@@ -61,7 +67,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnResetClicked += ResetClicked;
         topActionsButtonsView.OnDuplicateClicked += DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked += DeleteClicked;
-        topActionsButtonsView.OnLogOutClicked += LogOutClicked;
+        topActionsButtonsView.OnLogOutClicked += LogoutClicked;
         topActionsButtonsView.OnPointerExit += TooltipPointerExited;
         topActionsButtonsView.OnChangeCameraModePointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnTranslatePointerEnter += TooltipPointerEntered;
@@ -72,6 +78,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDeletePointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnMoreActionsPointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnSnapModeClicked += SnapModeClicked;
 
         extraActionsController = new ExtraActionsController();
         topActionsButtonsView.ConfigureExtraActions(extraActionsController);
@@ -88,7 +95,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnResetClicked -= ResetClicked;
         topActionsButtonsView.OnDuplicateClicked -= DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked -= DeleteClicked;
-        topActionsButtonsView.OnLogOutClicked -= LogOutClicked;
+        topActionsButtonsView.OnLogOutClicked -= LogoutClicked;
         topActionsButtonsView.OnPointerExit -= TooltipPointerExited;
         topActionsButtonsView.OnChangeCameraModePointerEnter -= TooltipPointerEntered;
         topActionsButtonsView.OnTranslatePointerEnter -= TooltipPointerEntered;
@@ -101,48 +108,30 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnLogoutPointerEnter -= TooltipPointerEntered;
     }
 
-    public void ChangeModeClicked()
-    {
-        OnChangeModeClick?.Invoke();
-    }
+    public void ChangeModeClicked() { OnChangeModeClick?.Invoke(); }
 
-    public void ExtraClicked()
-    {
-        OnExtraClick?.Invoke();
-    }
+    public void ExtraClicked() { OnExtraClick?.Invoke(); }
 
-    public void TranslateClicked()
-    {
-        OnTranslateClick?.Invoke();
-    }
+    public void TranslateClicked() { OnTranslateClick?.Invoke(); }
 
-    public void RotateClicked()
-    {
-        OnRotateClick?.Invoke();
-    }
+    public void RotateClicked() { OnRotateClick?.Invoke(); }
 
-    public void ScaleClicked()
-    {
-        OnScaleClick?.Invoke();
-    }
+    public void ScaleClicked() { OnScaleClick?.Invoke(); }
 
-    public void ResetClicked()
-    {
-        OnResetClick?.Invoke();
-    }
+    public void ResetClicked() { OnResetClick?.Invoke(); }
 
-    public void DuplicateClicked()
-    {
-        OnDuplicateClick?.Invoke();
-    }
+    public void DuplicateClicked() { OnDuplicateClick?.Invoke(); }
 
-    public void DeleteClicked()
-    {
-        OnDeleteClick?.Invoke();
-    }
+    public void DeleteClicked() { OnDeleteClick?.Invoke(); }
 
-    public void LogOutClicked()
+    public void LogoutClicked() { OnLogOutClick?.Invoke(); }
+    public void SnapModeClicked() { OnSnapModeClick?.Invoke(); }
+
+    public void ConfirmLogout(BuildModeModalType modalType)
     {
+        if (modalType != BuildModeModalType.EXIT)
+            return;
+
         OnLogOutClick?.Invoke();
     }
 
@@ -152,13 +141,10 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         tooltipController.SetTooltipText(tooltipText);
     }
 
-    public void TooltipPointerExited()
-    {
-        tooltipController.HideTooltip();
-    }
+    public void TooltipPointerExited() { tooltipController.HideTooltip(); }
 
-    public void SetExtraActionsActive(bool isActive)
-    {
-        extraActionsController.SetActive(isActive);
-    }
+    public void SetExtraActionsActive(bool isActive) { extraActionsController.SetActive(isActive); }
+    public void SetGizmosActive(string gizmos) { topActionsButtonsView.SetGizmosActive(gizmos); }
+    public void SetActionsInteractable(bool isActive) { topActionsButtonsView.SetActionsInteractable(isActive); }
+    public void SetSnapActive(bool isActive) { topActionsButtonsView.SetSnapActive(isActive); }
 }

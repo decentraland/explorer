@@ -20,13 +20,11 @@ public interface IEntityInformationView
     void ChangeEntityName(string newName);
     void Disable();
     void EndChangingName();
-    void SeEntityLimitsLeftText(string text);
-    void SeEntityLimitsRightText(string text);
+    void SeEntityLimitsText(string tris, string mats, string textures);
     void SetActive(bool isActive);
     void SetCurrentEntity(DCLBuilderInWorldEntity entity);
     void SetEntityThumbnailEnable(bool isEnable);
     void SetEntityThumbnailTexture(Texture2D texture);
-    void SeTitleText(string text);
     void SetNameIFText(string text);
     void SetPositionAttribute(Vector3 newPos);
     void SetRotationAttribute(Vector3 newRotation);
@@ -35,6 +33,7 @@ public interface IEntityInformationView
     void StartChangingName();
     void ToggleBasicInfo();
     void ToggleDetailsInfo();
+    void UpdateEntitiesSelection(int numberOfSelectedEntities);
 }
 
 public class EntityInformationView : MonoBehaviour, IEntityInformationView
@@ -44,9 +43,12 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     [SerializeField] internal Sprite closeMenuSprite;
 
     [Header("Prefab references")]
-    [SerializeField] internal TextMeshProUGUI titleTxt;
-    [SerializeField] internal TextMeshProUGUI entityLimitsLeftTxt;
-    [SerializeField] internal TextMeshProUGUI entityLimitsRightTxt;
+    [SerializeField] internal GameObject individualEntityPanel;
+    [SerializeField] internal GameObject multipleEntitiesPanel;
+    [SerializeField] internal TextMeshProUGUI multipleEntitiesText;
+    [SerializeField] internal TextMeshProUGUI entityLimitsTrisTxt;
+    [SerializeField] internal TextMeshProUGUI entityLimitsMaterialsTxt;
+    [SerializeField] internal TextMeshProUGUI entityLimitsTextureTxt;
     [SerializeField] internal TMP_InputField nameIF;
     [SerializeField] internal RawImage entitytTumbailImg;
     [SerializeField] internal AttributeXYZ positionAttribute;
@@ -58,7 +60,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     [SerializeField] internal Image basicToggleBtn;
     [SerializeField] internal SmartItemListView smartItemListView;
     [SerializeField] internal Button backButton;
-    [SerializeField] internal Button hideCatalogButton;
     [SerializeField] internal Button detailsToggleButton;
     [SerializeField] internal Button basicInfoTogglekButton;
 
@@ -88,7 +89,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     private void Awake()
     {
         backButton.onClick.AddListener(Disable);
-        hideCatalogButton.onClick.AddListener(Disable);
         detailsToggleButton.onClick.AddListener(ToggleDetailsInfo);
         basicInfoTogglekButton.onClick.AddListener(ToggleBasicInfo);
         nameIF.onEndEdit.AddListener((newName) => ChangeEntityName(newName));
@@ -99,7 +99,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     private void OnDestroy()
     {
         backButton.onClick.RemoveListener(Disable);
-        hideCatalogButton.onClick.RemoveListener(Disable);
         detailsToggleButton.onClick.RemoveListener(ToggleDetailsInfo);
         basicInfoTogglekButton.onClick.RemoveListener(ToggleBasicInfo);
         nameIF.onEndEdit.RemoveListener((newName) => ChangeEntityName(newName));
@@ -116,10 +115,7 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
             OnUpdateInfo?.Invoke(currentEntity);
     }
 
-    public void SetCurrentEntity(DCLBuilderInWorldEntity entity)
-    {
-        currentEntity = entity;
-    }
+    public void SetCurrentEntity(DCLBuilderInWorldEntity entity) { currentEntity = entity; }
 
     public void ToggleDetailsInfo()
     {
@@ -133,25 +129,13 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
         basicToggleBtn.sprite = basicsGO.activeSelf ? openMenuSprite : closeMenuSprite;
     }
 
-    public void StartChangingName()
-    {
-        OnStartChangingName?.Invoke();
-    }
+    public void StartChangingName() { OnStartChangingName?.Invoke(); }
 
-    public void EndChangingName()
-    {
-        OnEndChangingName?.Invoke();
-    }
+    public void EndChangingName() { OnEndChangingName?.Invoke(); }
 
-    public void ChangeEntityName(string newName)
-    {
-        OnNameChange?.Invoke(currentEntity, newName);
-    }
+    public void ChangeEntityName(string newName) { OnNameChange?.Invoke(currentEntity, newName); }
 
-    public void Disable()
-    {
-        OnDisable?.Invoke();
-    }
+    public void Disable() { OnDisable?.Invoke(); }
 
     public void SetEntityThumbnailEnable(bool isEnable)
     {
@@ -169,48 +153,37 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
         entitytTumbailImg.texture = texture;
     }
 
-    public void SeTitleText(string text)
+    public void SeEntityLimitsText(string tris, string mats, string textures)
     {
-        titleTxt.text = text;
+        entityLimitsTrisTxt.text = tris;
+        entityLimitsMaterialsTxt.text = mats;
+        entityLimitsTextureTxt.text = textures;
     }
 
-    public void SeEntityLimitsLeftText(string text)
-    {
-        entityLimitsLeftTxt.text = text;
-    }
+    public void SetSmartItemListViewActive(bool isActive) { smartItemListView.gameObject.SetActive(isActive); }
 
-    public void SeEntityLimitsRightText(string text)
-    {
-        entityLimitsRightTxt.text = text;
-    }
+    public void SetNameIFText(string text) { nameIF.SetTextWithoutNotify(text); }
 
-    public void SetSmartItemListViewActive(bool isActive)
-    {
-        smartItemListView.gameObject.SetActive(isActive);
-    }
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 
-    public void SetNameIFText(string text)
-    {
-        nameIF.SetTextWithoutNotify(text);
-    }
+    public void SetPositionAttribute(Vector3 newPos) { positionAttribute.SetValues(newPos); }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public void SetRotationAttribute(Vector3 newRotation) { rotationAttribute.SetValues(newRotation); }
 
-    public void SetPositionAttribute(Vector3 newPos)
-    {
-        positionAttribute.SetValues(newPos);
-    }
+    public void SetScaleAttribute(Vector3 newScale) { scaleAttribute.SetValues(newScale); }
 
-    public void SetRotationAttribute(Vector3 newRotation)
+    public void UpdateEntitiesSelection(int numberOfSelectedEntities)
     {
-        rotationAttribute.SetValues(newRotation);
-    }
-
-    public void SetScaleAttribute(Vector3 newScale)
-    {
-        scaleAttribute.SetValues(newScale);
+        if (numberOfSelectedEntities > 1)
+        {
+            individualEntityPanel.SetActive(false);
+            multipleEntitiesPanel.SetActive(true);
+            multipleEntitiesText.text = $"{numberOfSelectedEntities} entities selected";
+        }
+        else
+        {
+            individualEntityPanel.SetActive(true);
+            multipleEntitiesPanel.SetActive(false);
+        }
     }
 }

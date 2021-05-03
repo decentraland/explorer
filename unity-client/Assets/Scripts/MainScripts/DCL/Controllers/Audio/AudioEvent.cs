@@ -5,6 +5,9 @@ using ReorderableList;
 [System.Serializable, CreateAssetMenu(fileName = "AudioEvent", menuName = "AudioEvents/AudioEvent")]
 public class AudioEvent : ScriptableObject
 {
+    private static bool VERBOSE = false;
+
+
     [System.Serializable]
     public class AudioClipList : ReorderableArray<AudioClip>
     {
@@ -24,6 +27,9 @@ public class AudioEvent : ScriptableObject
 
     [Reorderable]
     public AudioClipList clips;
+
+    [Space(25)]
+    public AudioEvent stopEventOnPlay;
 
     [HideInInspector]
     public AudioSource source;
@@ -88,15 +94,20 @@ public class AudioEvent : ScriptableObject
 
     public virtual void Play(bool oneShot = false)
     {
+        if (stopEventOnPlay != null)
+            stopEventOnPlay.Stop();
+
         if (source == null)
         {
-            Debug.Log($"AudioEvent: Tried to play {name} with source equal to null.");
+            if (VERBOSE)
+                Debug.Log($"AudioEvent: Tried to play {name} with source equal to null.");
             return;
         }
 
         if (source.clip == null)
         {
-            Debug.Log($"AudioEvent: Tried to play {name} with audioClip equal to null.");
+            if (VERBOSE)
+                Debug.Log($"AudioEvent: Tried to play {name} with audioClip equal to null.");
             return;
         }
 
