@@ -29,7 +29,12 @@ namespace DCL.Components
             Renderer[] rendererList = entity?.meshesInfo?.renderers;
 
             if (rendererList == null || rendererList.Length == 0)
+            {
+                if (colliders != null && colliders.Length > 0)
+                    DestroyColliders();
+                
                 return;
+            }
 
             if (AreCollidersCreated(rendererList))
                 return;
@@ -117,6 +122,8 @@ namespace DCL.Components
                 if (collider != null)
                     UnityEngine.Object.Destroy(collider.gameObject);
             }
+
+            colliders = null;
         }
     }
 }
