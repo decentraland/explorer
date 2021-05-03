@@ -1,4 +1,4 @@
-import { log, engine, Entity, BoxShape, Material, Color3, Transform, Vector3, onEnterScene, onLeaveScene, onCameraModeChanged, Camera, CameraMode } from 'decentraland-ecs/src'
+import { log, engine, Entity, BoxShape, Material, Color3, Transform, Vector3, onEnterSceneObservable, onLeaveSceneObservable, onCameraModeChangedObservable, Camera, CameraMode } from 'decentraland-ecs/src'
 
 //Create entity and assign shape
 const floor = new Entity()
@@ -18,14 +18,14 @@ floor.addComponent(new Transform({
 
 engine.addEntity(floor);
 
-onEnterScene.add(({ userId }) => {
+onEnterSceneObservable.add(({ userId }) => {
   floorMaterial.albedoColor = Color3.Red()
-  log("onEnterScene: ", userId, " - CameraMode: ", Camera.instance.cameraMode)
+  log("onEnterSceneObservable: ", userId, " - CameraMode: ", Camera.instance.cameraMode)
 })
 
-onLeaveScene.add(({ userId }) => {
+onLeaveSceneObservable.add(({ userId }) => {
   floorMaterial.albedoColor = Color3.Gray()
-  log("onLeaveScene: ", userId)
+  log("onLeaveSceneObservable: ", userId)
 })
 
 
@@ -55,8 +55,8 @@ const setFloorMaterial = (cameraMode: CameraMode) => {
     boxMaterial.albedoColor = Color3.Blue()
 }
 
-onCameraModeChanged.add(({ cameraMode }) => {
-  log("onCameraModeChanged", cameraMode)
+onCameraModeChangedObservable.add(({ cameraMode }) => {
+  log("onCameraModeChangedObservable", cameraMode)
   setFloorMaterial(cameraMode)
 })
 
