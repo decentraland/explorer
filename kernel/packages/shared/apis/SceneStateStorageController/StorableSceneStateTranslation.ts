@@ -2,7 +2,14 @@ import { CLASS_ID } from 'decentraland-ecs/src'
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
 import { Component } from 'scene-system/stateful-scene/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
-import { BuilderComponent, BuilderEntity, BuilderManifest, BuilderScene, SerializedSceneState } from './types'
+import {
+  BuilderComponent,
+  BuilderEntity,
+  BuilderManifest,
+  BuilderScene,
+  SerializedSceneState,
+  UnityColor
+} from './types'
 
 const CURRENT_SCHEMA_VERSION = 1
 
@@ -40,6 +47,11 @@ export function toBuilderFromStateDefinitionFormat(
 
       let componentType = toHumanReadableType(component.componentId)
       builderComponentsIds.push(newId)
+
+      //This is a special case where we are assinging the builder url field for NFTs
+      if (componentType === 'NFTShape') {
+        component.data.url = component.data.src
+      }
 
       //we add the component to the builder format
       let builderComponent: BuilderComponent = {
@@ -83,10 +95,30 @@ export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneSt
     let components: Component[] = []
     for (let componentId of entity.components.values()) {
       if (componentMap.has(componentId)) {
+        var builderComponent = componentMap.get(componentId)
+        var componentData = builderComponent?.data
 
+        //Builder set different the NFTs so we need to create a model that Unity is capable to understand,
+        if (!componentData.hasOwnProperty('src') && builderComponent?.type === 'NFTShape') {
+          var newAssetId = componentData.url.replaceAll('ethereum://', '')
+          const index = newAssetId.indexOf('/')
+          const partToRemove = newAssetId.slice(index)
+          newAssetId = newAssetId.replaceAll(partToRemove, '')
+
+          const color: UnityColor = {
+            r: 0.6404918,
+            g: 0.611472,
+            b: 0.8584906,
+            a: 1
+          }
+          componentData.src = componentData.url
+          componentData.assetId = newAssetId
+          componentData.color = color
+          componentData.style = 0
+        }
         let component: Component = {
           componentId: fromHumanReadableType(componentMap.get(componentId)!.type),
-          data: componentMap.get(componentId)?.data
+          data: componentData
         }
         components.push(component)
       }
