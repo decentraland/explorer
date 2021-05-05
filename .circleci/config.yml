@@ -163,7 +163,7 @@ jobs:
       - run:
           name: Build deployment dist
           command: |
-            make update-renderer-master
+            make update-renderer
             make build-deploy
       - save_cache:
           name: Save the built files

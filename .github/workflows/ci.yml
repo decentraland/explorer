@@ -26,7 +26,7 @@ jobs:
 
       - name: "kernel: build"
         working-directory: kernel
-        run: make update-renderer-master build-deploy
+        run: make update-renderer build-deploy
 
       - name: "kernel: build test-scenes"
         working-directory: kernel
