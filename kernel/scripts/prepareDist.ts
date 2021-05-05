@@ -83,7 +83,7 @@ async function prepareDecentralandECS(folder: string) {
   copyFile(path.resolve(root, `static/images`), path.resolve(root, `${folder}/artifacts/images`))
 
   // unity
-  copyFile(path.resolve(root, `static/unity`), path.resolve(root, `${folder}/artifacts/unity`))
+  copyFile(path.resolve(root, `static/unity-renderer`), path.resolve(root, `${folder}/artifacts/unity-renderer`))
 
   await fs.copy(path.resolve(root, `static/default-profile`), path.resolve(root, `${folder}/artifacts/default-profile`))
   await validatePackage(folder)

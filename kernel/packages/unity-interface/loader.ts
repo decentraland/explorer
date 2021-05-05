@@ -25,18 +25,6 @@ export type UnityGame = {
   Quit(): Promise<void>
 }
 
-/**
- * This function is used by preview, instead of using "." as root,
- * preview uses '/@/artifacts'
- */
-function getRendererArtifactsRoot() {
-  if (typeof globalThis.RENDERER_ARTIFACTS_ROOT === 'undefined') {
-    throw new Error('RENDERER_ARTIFACTS_ROOT is undefined')
-  } else {
-    return new URL(globalThis.RENDERER_ARTIFACTS_ROOT, document.location.toString()).toString()
-  }
-}
-
 // TODO: return type DclRenderer
 async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
   const scriptUrl = new URL('index.js', baseUrl).toString()
@@ -56,27 +44,26 @@ async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
     baseUrl
   }
 }
-// TODO: return type DclRenderer
+
 async function loadDefaultRenderer(): Promise<LoadRendererResult> {
-  // TODO: after we remove unity from this folder, remove the following
-  // block and uncomment the block next to it
-  {
-    const scriptUrl = new URL('DCLUnityLoader.js', getRendererArtifactsRoot()).toString()
-    await injectScript(scriptUrl)
-    if (typeof globalThis.createUnityInstance === 'undefined') {
-      throw new Error('Error while loading the renderer from ' + scriptUrl)
-    }
-    return {
-      DclRenderer: globalThis.DclRenderer,
-      createUnityInstance: globalThis.createUnityInstance,
-      baseUrl: getRendererArtifactsRoot()
+  // PAY ATTENTION:
+  //  Whenever we decide to not bundle the renderer anymore and have independant
+  //  release cycles for the explorer, replace this whole function by the following commented line
+  //
+  // return loadRendererByBranch('master')
+
+  function getRendererArtifactsRoot() {
+    // This function is used by preview, instead of using "." as root,
+    // preview uses '/@/artifacts'
+    if (typeof globalThis.RENDERER_ARTIFACTS_ROOT === 'undefined') {
+      throw new Error('RENDERER_ARTIFACTS_ROOT is undefined')
+    } else {
+      return new URL(globalThis.RENDERER_ARTIFACTS_ROOT, document.location.toString()).toString()
     }
   }
 
-  // 1 {
-  //   // Load the renderer from the artifacts root folder
-  // 1  return await injectRenderer(getRendererArtifactsRoot())
-  // 1 }
+  // Load the embeded renderer from the artifacts root folder
+  return await injectRenderer(getRendererArtifactsRoot())
 }
 
 async function loadRendererByBranch(branch: string): Promise<LoadRendererResult> {
@@ -84,7 +71,6 @@ async function loadRendererByBranch(branch: string): Promise<LoadRendererResult>
   return injectRenderer(baseUrl)
 }
 
-// TODO: return type DclRenderer
 export async function loadUnity(urn?: string): Promise<LoadRendererResult> {
   if (!urn) {
     return loadDefaultRenderer()

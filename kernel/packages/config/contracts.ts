@@ -120,7 +120,8 @@ export const contracts = {
     'RootChainProxy': '0x86E4Dc95c7FBdBf52e33D563BbDB00823894C287',
     'RTFKTXAtari': '0x6b47e7066c7db71aa04a1d5872496fe05c4c331f',
     'RACBasics': '0x68e139552c4077ce5c9ab929c7e18ca721ffff00',
-    'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a'
+    'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a',
+    'DGAtariDillonFrancis': '0x51e0b1afe5da0c038fc93a3fc8e11cf7a238b40b'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',

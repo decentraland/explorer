@@ -22,7 +22,7 @@ ENV_CONTENT = ENV_CONTENT.filter((l) => {
 
 const commitVersion = childProcess.execSync("git rev-parse HEAD").toString().trim()
 
-const loaderVersion = md5File.sync(path.resolve("./public/unity/Build/DCLUnityLoader.js"))
+const loaderVersion = md5File.sync(path.resolve("./public/unity-renderer/index.js"))
 const websiteVersion = md5File.sync(path.resolve("./public/website.js"))
 
 ENV_CONTENT.push("REACT_APP_EXPLORER_VERSION=" + commitVersion)
