@@ -74,7 +74,7 @@ docs: $(DECENTRALAND_ECS_TYPEDEF_FILE) ## Generate `decentraland-ecs` documentat
 empty-parcels:
 	cd static/loader/empty-scenes && node generate_all.js
 
-build-essentials: $(COMPILED_SUPPORT_JS_FILES) dcl-amd $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(GIF_PROCESSOR) $(VOICE_CHAT_CODEC_WORKER) update-renderer empty-parcels generate-mocks ## Build the basic required files for the explorer
+build-essentials: $(COMPILED_SUPPORT_JS_FILES) dcl-amd $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(GIF_PROCESSOR) $(VOICE_CHAT_CODEC_WORKER) empty-parcels generate-mocks ## Build the basic required files for the explorer
 # Hellmap scenes
 
 HELLMAP_SOURCE_FILES := $(wildcard public/hell-map/*/game.ts)
@@ -271,7 +271,7 @@ fetchSceneContents: scripts/fetchSceneContents.js
 clean: ## Clean all generated files
 	@$(COMPILER) targets/clean.json
 
-update-renderer: ## Update the renderer
+update-renderer:  ## Update the renderer
 	npm install @dcl/unity-renderer@latest
 	cp -r node_modules/@dcl/unity-renderer static
 	@cd $(PWD)/static; npm install --save-dev --save-bundle $(shell npm list --depth 0 | grep -Po --color=never "@dcl/unity-renderer.*")
