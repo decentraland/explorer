@@ -88,22 +88,13 @@ jobs:
           name: Install Puppeteer dependencies
           command: |
             sudo apt-get -y -qq install libxss1
-      - run:
-          name: Get the hash of source files
-          command: |
-            find packages -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
-      - restore_cache:
-          name: Restore built files
-          keys:
-            - kernel-build-{{ checksum "../.kernelsources-checksum" }}
       - restore_cache:
           name: Restoring node_modules
           keys:
             - v1-dependencies-{{ checksum "package-lock.json" }}
       - run:
-          name: Install differences in node_modules
-          command: |
-            npm i
+          name: npm ci
+          command: npm ci
       - save_cache:
           name: Store node_modules cache
           paths:
