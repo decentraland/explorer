@@ -10,6 +10,7 @@ import {
   SerializedSceneState,
   UnityColor
 } from './types'
+import { BuilderServerAPIManager } from './BuilderServerAPIManager'
 
 const CURRENT_SCHEMA_VERSION = 1
 
@@ -28,10 +29,11 @@ type StorableComponent = {
   value: any
 }
 
-export function toBuilderFromStateDefinitionFormat(
+export async function toBuilderFromStateDefinitionFormat(
   scene: SceneStateDefinition,
-  builderManifest: BuilderManifest
-): BuilderManifest {
+  builderManifest: BuilderManifest,
+  builderApiManager: BuilderServerAPIManager
+): Promise<BuilderManifest> {
   let entities: Record<string, BuilderEntity> = {}
   let builderComponents: Record<string, BuilderComponent> = {}
 
@@ -83,6 +85,50 @@ export function toBuilderFromStateDefinitionFormat(
   }
 
   builderManifest.scene = sceneState
+
+  //We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
+  let idArray: string[] = []
+  Object.values(builderManifest.scene.components).forEach((component) => {
+    if (component.type === 'GLTFShape') {
+      let found = false
+      Object.keys(builderManifest.scene.assets).forEach((assets) => {
+        if (assets === component.data.assetId) {
+          found = true
+        }
+      })
+      if (!found) {
+        idArray.push(component.data.assetId)
+      }
+    }
+  })
+
+  //We fetch all the assets that the scene contains since builder needs the assets
+  builderManifest.scene.assets = await builderApiManager.getAssets(idArray)
+
+  //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
+  //Unity handles this, so we will find only the same "ground" category. We can safely assume that we can search it and assign
+  let groundComponentId: string
+  Object.entries(builderManifest.scene.assets).forEach(([assetId, asset]) => {
+    if (asset?.category === 'ground') {
+      builderManifest.scene.ground.assetId = assetId
+      Object.entries(builderManifest.scene.components).forEach(([componentId, component]) => {
+        if (component.data.assetId === assetId) {
+          builderManifest.scene.ground.componentId = componentId
+          groundComponentId = componentId
+        }
+      })
+    }
+  })
+
+  //We should disable the gizmos of the floor in the builder
+  Object.values(builderManifest.scene.entities).forEach((entity) => {
+    Object.keys(entity.components).forEach((componentId) => {
+      if (componentId === groundComponentId) {
+        entity.disableGizmos = true
+      }
+    })
+  })
+
   return builderManifest
 }
 
