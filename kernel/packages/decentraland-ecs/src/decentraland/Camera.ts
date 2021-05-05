@@ -47,7 +47,6 @@ export class Camera {
 
   // @internal
   private _playerHeight: number = 1.6
-
   // @internal
   private _cameraMode: CameraMode = CameraMode.FirstPerson
 
@@ -55,7 +54,7 @@ export class Camera {
     if (typeof dcl !== 'undefined') {
       dcl.subscribe('positionChanged')
       dcl.subscribe('rotationChanged')
-      dcl.subscribe('onCameraModeChanged')
+      dcl.subscribe('cameraModeChanged')
 
       dcl.onEvent(event => {
         switch (event.type) {
@@ -65,7 +64,7 @@ export class Camera {
           case 'rotationChanged':
             this.rotationChanged(event.data as any)
             break
-          case 'onCameraModeChanged':
+          case 'cameraModeChanged':
             this.cameraModeChanged(event.data as any)
             break
         }
@@ -138,7 +137,7 @@ export class Camera {
   }
 
   // @internal
-  private cameraModeChanged(e: IEvents['onCameraModeChanged']) {
+  private cameraModeChanged(e: IEvents['cameraModeChanged']) {
     this._cameraMode = e.cameraMode
   }
 }

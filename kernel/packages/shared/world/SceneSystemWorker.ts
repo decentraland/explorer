@@ -3,7 +3,7 @@ import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { playerConfigurations } from 'config'
 import { SceneWorker } from './SceneWorker'
 import { Vector3, Quaternion } from 'decentraland-ecs/src/decentraland/math'
-import { PositionReport, positionObservable, cameraModeObservable } from './positionThings'
+import { PositionReport, positionObservable } from './positionThings'
 import { Observer } from 'decentraland-ecs/src'
 import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
 import { renderStateObservable, isRendererEnabled } from './worldState'
@@ -30,7 +30,6 @@ export class SceneSystemWorker extends SceneWorker {
   private sceneLifeCycleObserver: Observer<any> | null = null
   private renderStateObserver: Observer<any> | null = null
   private sceneChangeObserver: Observer<any> | null = null
-  private cameraModeChangedObserver: Observer<any> | null = null
 
   private sceneReady: boolean = false
 
@@ -45,7 +44,6 @@ export class SceneSystemWorker extends SceneWorker {
     this.subscribeToWorldRunningEvents()
     this.subscribeToPositionEvents()
     this.subscribeToSceneChangeEvents()
-    this.subscribeToCameraChangeEvents()
   }
 
   private static buildWebWorkerTransport(parcelScene: ParcelSceneAPI): ScriptingTransport {
@@ -87,10 +85,6 @@ export class SceneSystemWorker extends SceneWorker {
     if (this.sceneChangeObserver) {
       sceneObservable.remove(this.sceneChangeObserver)
       this.sceneChangeObserver = null
-    }
-    if (this.cameraModeChangedObserver) {
-      cameraModeObservable.remove(this.cameraModeChangedObserver)
-      this.cameraModeChangedObserver = null
     }
   }
 
@@ -158,14 +152,6 @@ export class SceneSystemWorker extends SceneWorker {
         this.sceneReady = true
         sceneLifeCycleObservable.remove(this.sceneLifeCycleObserver)
         this.sendSceneReadyIfNecessary()
-      }
-    })
-  }
-
-  private subscribeToCameraChangeEvents() {
-    this.cameraModeChangedObserver = cameraModeObservable.add((cameraMode) => {
-      if (this.engineAPI && 'onCameraModeChanged' in this.engineAPI.subscribedEvents) {
-        this.engineAPI.sendSubscriptionEvent('onCameraModeChanged', { cameraMode })
       }
     })
   }

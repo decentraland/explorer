@@ -48,19 +48,25 @@ function createSubscriber(eventName: keyof IEvents) {
  * This event is triggered when you change your camera between 1st and 3rd person
  * @public
  */
-export const onCameraModeChanged = new Observable<IEvents['onCameraModeChanged']>(createSubscriber('onCameraModeChanged'))
+export const onCameraModeChangedObservable = new Observable<IEvents['cameraModeChanged']>(createSubscriber('cameraModeChanged'))
 
 /**
  * These events are triggered after your character enters the scene.
  * @public
  */
-export const onEnterScene = new Observable<IEvents['onEnterScene']>(createSubscriber('onEnterScene'))
+export const onEnterSceneObservable = new Observable<IEvents['onEnterScene']>(createSubscriber('onEnterScene'))
+
+/* @deprecated Use onEnterSceneObservable instead. */
+export const onEnterScene = onEnterSceneObservable
 
 /**
  * These events are triggered after your character leaves the scene.
  * @public
  */
-export const onLeaveScene = new Observable<IEvents['onLeaveScene']>(createSubscriber('onLeaveScene'))
+export const onLeaveSceneObservable = new Observable<IEvents['onLeaveScene']>(createSubscriber('onLeaveScene'))
+
+/* @deprecated Use onLeaveSceneObservable instead. */
+export const onLeaveScene = onLeaveSceneObservable
 
 /**
  * @internal
@@ -75,15 +81,15 @@ export function _initEventObservables(dcl: DecentralandInterface) {
     internalDcl.onEvent((event) => {
       switch (event.type) {
         case 'onEnterScene': {
-          onEnterScene.notifyObservers(event.data as IEvents['onEnterScene'])
+          onEnterSceneObservable.notifyObservers(event.data as IEvents['onEnterScene'])
           return
         }
         case 'onLeaveScene': {
-          onLeaveScene.notifyObservers(event.data as IEvents['onLeaveScene'])
+          onLeaveSceneObservable.notifyObservers(event.data as IEvents['onLeaveScene'])
           return
         }
-        case 'onCameraModeChanged': {
-          onCameraModeChanged.notifyObservers(event.data as IEvents['onCameraModeChanged'])
+        case 'cameraModeChanged': {
+          onCameraModeChangedObservable.notifyObservers(event.data as IEvents['cameraModeChanged'])
           return
         }
       }

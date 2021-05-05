@@ -144,6 +144,7 @@ export enum CameraMode {
 
 /**
  * @public
+ * Note: Don't use `on` prefix for IEvents to avoid redundancy with `event.on("onEventName")` syntax.
  */
 export interface IEvents {
   /**
@@ -173,9 +174,9 @@ export interface IEvents {
   }
 
   /**
-   * `onCameraModeChanged` is triggered when the user changes the camera mode
+   * `cameraModeChanged` is triggered when the user changes the camera mode
    */
-  onCameraModeChanged: {
+  cameraModeChanged: {
     cameraMode: CameraMode
   }
 
