@@ -50,7 +50,7 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   //  Whenever we decide to not bundle the renderer anymore and have independant
   //  release cycles for the explorer, replace this whole function by the following commented line
   //
-  // return loadRendererByBranch('master')
+  // > return loadRendererByBranch('master')
 
   function getRendererArtifactsRoot() {
     // This function is used by preview, instead of using "." as root,
@@ -63,7 +63,7 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   }
 
   // Load the embeded renderer from the artifacts root folder
-  return await injectRenderer(getRendererArtifactsRoot())
+  return injectRenderer(getRendererArtifactsRoot())
 }
 
 async function loadRendererByBranch(branch: string): Promise<LoadRendererResult> {
