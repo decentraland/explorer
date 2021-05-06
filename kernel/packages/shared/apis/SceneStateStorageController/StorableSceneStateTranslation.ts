@@ -3,6 +3,7 @@ import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefi
 import { Component } from 'scene-system/stateful-scene/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import {
+  BuilderAsset,
   BuilderComponent,
   BuilderEntity,
   BuilderManifest,
@@ -103,7 +104,27 @@ export async function toBuilderFromStateDefinitionFormat(
   })
 
   //We fetch all the assets that the scene contains since builder needs the assets
-  builderManifest.scene.assets = await builderApiManager.getAssets(idArray)
+  const newAssets = await builderApiManager.getAssets(idArray)
+  for (const [key, value] of Object.entries(newAssets)) {
+    builderManifest.scene.assets[key] = value
+  }
+
+  //We remove unused assets
+  let newRecords: Record<string, BuilderAsset> = {}
+  for (const [key, value] of Object.entries(builderManifest.scene.assets)) {
+    let found = false
+    Object.values(builderManifest.scene.components).forEach((component) => {
+      if (component.type === 'GLTFShape') {
+        if (component.data.assetId == key) found = true
+      }
+    })
+
+    if (found && value !== undefined) {
+      newRecords[key] = value
+    }
+  }
+
+  builderManifest.scene.assets = newRecords
 
   //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
   //Unity handles this, so we will find only the same "ground" category. We can safely assume that we can search it and assign
@@ -122,7 +143,7 @@ export async function toBuilderFromStateDefinitionFormat(
 
   //We should disable the gizmos of the floor in the builder
   Object.values(builderManifest.scene.entities).forEach((entity) => {
-    Object.keys(entity.components).forEach((componentId) => {
+    Object.values(entity.components).forEach((componentId) => {
       if (componentId === groundComponentId) {
         entity.disableGizmos = true
       }
