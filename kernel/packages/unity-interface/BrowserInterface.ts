@@ -80,6 +80,15 @@ const positionEvent = {
   immediate: false // By default the renderer lerps avatars position
 }
 
+type SystemInfoPayload = {
+  graphicsDeviceName: string
+  graphicsDeviceVersion: string
+  graphicsMemorySize: number
+  processorType: string
+  processorCount: number
+  systemMemorySize: number
+}
+
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
@@ -159,6 +168,10 @@ export class BrowserInterface {
   }) {
     const perfReport = getPerformanceInfo(data)
     trackEvent('performance report', perfReport)
+  }
+
+  public SystemInfoReport(data: SystemInfoPayload) {
+    trackEvent('system info report', data)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
