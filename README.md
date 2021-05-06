@@ -147,27 +147,13 @@ This is the most useful debugging scenario for advanced feature implementation.
 
 ## Debug with browsers + local Unity build
 
-### Why you should care
-
-Use this approach if you want to ensure your Unity modifications run well in the wasm targeted unity build, but don't want to wait for the CI to kick in. This is also useful for remote profiling.
-
-When the steps are followed, you will be able to run the local Unity build by going to `localhost:3000` without the need of CI.
-
-### Steps
-
-1. Make sure you have the proper Unity version up and running
-2. Make sure you are running kernel through `make watch` command.
-3. Produce a Unity wasm targeted build using the Build menu.
-4. When the build finishes, only copy all the files with the `unityweb` extension to `static/unity/Build` folder within the `kernel` project. **Do not** copy the `UnityLoader.js` and `unity.json` files.
-5. Run the browser explorer through `localhost:3000`. Now, it should use your local Unity build.
-6. If you need a Unity re-build, you can just replace the files and reload the browser the without restarting the `make watch` process.
+See https://github.com/decentraland/unity-renderer/ for instructions regarding Unity testing.
 
 ## Technical how-to guides and explainers
 
 - [How to create new SDK components](docs/how-to-create-new-sdk-components.md)
 - [How to debug with local test parcels and preview scenes](docs/how-to-test-parcels-and-preview-scenes.md)
 - [How to use Unity visual tests](docs/how-to-use-unity-visual-tests.md)
-- [How to profile a local Unity build remotely](docs/how-to-profile-a-local-unity-build-remotely.md)
 - [Kernel-unity native interface explainer and maintenance guide](docs/kernel-unity-native-interface-explainer.md)
 - [How to create typescript workers](docs/how-to-create-typescript-workers.md)
 - [How to add/update protobuf-compiled components](docs/how-to-add-or-update-protobuf-compiled-components.md)
