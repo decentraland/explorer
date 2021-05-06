@@ -83,14 +83,16 @@ async function prepareDecentralandECS(folder: string) {
   copyFile(path.resolve(root, `static/images`), path.resolve(root, `${folder}/artifacts/images`))
 
   // unity
-  copyFile(path.resolve(root, `static/unity-renderer`), path.resolve(root, `${folder}/artifacts/unity-renderer`))
+  copyFile(
+    path.resolve(root, `node_modules/@dcl/unity-renderer`),
+    path.resolve(root, `${folder}/artifacts/unity-renderer`)
+  )
 
   await fs.copy(path.resolve(root, `static/default-profile`), path.resolve(root, `${folder}/artifacts/default-profile`))
   await validatePackage(folder)
 
   // build-ecs is embeded inside decentraland-ecs, therefore, it needs the same dependencies
   copyFile(path.resolve(root, `packages/build-ecs/index.js`), path.resolve(root, `${folder}/artifacts/build-ecs.js`))
-  await injectDependencies(folder, ['typescript', 'terser'], false)
 }
 
 async function validatePackage(folder: string) {
@@ -137,6 +139,11 @@ async function validatePackage(folder: string) {
 // tslint:disable-next-line:semicolon
 ;(async function () {
   await prepareDecentralandECS('packages/decentraland-ecs')
+
+  // Update versions in package.json
+  await injectDependencies('packages/decentraland-ecs', ['typescript', 'terser'], false)
+  await injectDependencies('packages/decentraland-ecs', ['@dcl/unity-renderer'], true)
+  await injectDependencies('static', ['@dcl/unity-renderer'], true)
   await injectDependencies('packages/build-ecs', ['typescript', 'terser'], false)
 })().catch((e) => {
   // tslint:disable-next-line:no-console

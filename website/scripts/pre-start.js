@@ -12,7 +12,7 @@ let files = [
   { origin: "/static/dist/3.js", dest: "./public/3.js" },
   { origin: "/static/loader", dest: "./public/loader" },
   { origin: "/static/systems", dest: "./public/systems" },
-  { origin: "/static/unity-renderer", dest: "./public/unity-renderer" },
+  { origin: "/node_modules/@dcl/unity-renderer", dest: "./public/unity-renderer" },
   { origin: "/static/voice-chat-codec", dest: "./public/voice-chat-codec" },
 ]
 

@@ -93,10 +93,6 @@ jobs:
           command: |
             find . -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
       - restore_cache:
-          name: Restore built files
-          keys:
-            - kernel-build-{{ checksum "../.kernelsources-checksum" }}
-      - restore_cache:
           name: Restoring node_modules
           keys:
             - v1-dependencies-{{ checksum "package-lock.json" }}
@@ -154,24 +150,16 @@ jobs:
           command: |
             make test-ci
             npx codecov
-      - store_artifacts:
-          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
-          when: on_fail
-      - store_artifacts:
-          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
-          when: on_fail
       - run:
           name: Build deployment dist
           command: |
             make update-renderer
             make build-deploy
-      - save_cache:
-          name: Save the built files
-          paths:
-            - static/dist
-            - static/loader
-            - static/systems
-          key: kernel-build-{{ checksum "../.kernelsources-checksum" }}
+
+      - store_artifacts:
+          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
+      - store_artifacts:
+          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:

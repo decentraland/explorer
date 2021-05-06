@@ -6,6 +6,6 @@
     "@dcl/unity-renderer"
   ],
   "devDependencies": {
-    "@dcl/unity-renderer": "^1.0.813"
+    "@dcl/unity-renderer": "latest"
   }
 }

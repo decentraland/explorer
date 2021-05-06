@@ -210,7 +210,7 @@ npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd 
 	ln -sf $(CWD)/static/preview.html packages/decentraland-ecs/artifacts/preview.html
 	ln -sf $(CWD)/static/fonts packages/decentraland-ecs/artifacts/fonts
 	ln -sf $(CWD)/static/images packages/decentraland-ecs/artifacts/images
-	ln -sf $(CWD)/static/unity-renderer packages/decentraland-ecs/artifacts/unity-renderer
+	ln -sf $(CWD)/node_modules/@dcl/unity-renderer packages/decentraland-ecs/artifacts/unity-renderer
 	ln -sf $(CWD)/static/default-profile packages/decentraland-ecs/artifacts/default-profile
 	ln -sf $(CWD)/static/unity-preview.html packages/decentraland-ecs/artifacts/unity-preview.html
 	cd packages/decentraland-ecs; npm link
@@ -274,8 +274,6 @@ clean: ## Clean all generated files
 update-renderer:  ## Update the renderer
 	npm install @dcl/unity-renderer@latest
 	cp -r node_modules/@dcl/unity-renderer static
-	@cd $(PWD)/static; npm install --save-dev --save-bundle $(shell npm list --depth 0 | grep -Po --color=never "@dcl/unity-renderer.*")
-	@cd $(PWD)/packages/decentraland-ecs; npm install --save-dev --save-bundle $(shell npm list --depth 0 | grep -Po --color=never "@dcl/unity-renderer.*")
 
 # Makefile
 
