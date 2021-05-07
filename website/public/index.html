@@ -197,7 +197,7 @@
         captureUncaught: true,
         captureUnhandledRejections: true,
         payload: {
-          environment: "production"
+          environment: document.domain.endsWith(".org") ? "production" : "development"
         }
       };
       if (document.domain.endsWith(".org")) {
@@ -209,7 +209,7 @@
     </script>
 
     <script>
-      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity/Build/";
+      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity-renderer/";
     </script>
 
     <script src="%PUBLIC_URL%/website.js?%REACT_APP_WEBSITE_VERSION%"></script>

@@ -91,7 +91,7 @@ jobs:
       - run:
           name: Get the hash of source files
           command: |
-            find packages -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
+            find . -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
       - restore_cache:
           name: Restore built files
           keys:
@@ -103,7 +103,7 @@ jobs:
       - run:
           name: Install differences in node_modules
           command: |
-            npm i
+            npm ci
       - save_cache:
           name: Store node_modules cache
           paths:
@@ -154,17 +154,15 @@ jobs:
           command: |
             make test-ci
             npx codecov
-      - store_artifacts:
-          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
-          when: on_fail
-      - store_artifacts:
-          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
-          when: on_fail
       - run:
           name: Build deployment dist
           command: |
-            make update-renderer-master
+            make update-renderer
             make build-deploy
+      - store_artifacts:
+          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
+      - store_artifacts:
+          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
       - save_cache:
           name: Save the built files
           paths:
