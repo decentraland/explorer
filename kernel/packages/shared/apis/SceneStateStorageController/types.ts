@@ -91,3 +91,10 @@ export type BuilderGround = {
   assetId: string
   componentId: string
 }
+
+export type UnityColor = {
+  r: number,
+  g: number,
+  b: number,
+  a: number
+}

@@ -27,8 +27,9 @@ export class BuilderServerAPIManager {
     if (unknownAssets.length > 0) {
       const queryParams = 'assets?id=' + unknownAssets.join('&id=')
       try {
+        const url = `${BASE_BUILDER_SERVER_URL}${queryParams}`
         // Fetch unknown assets
-        const response = await fetch(`${this.getBaseUrl()}${queryParams}`)
+        const response = await fetch(url)
         const { data }: { data: BuilderAsset[] } = await response.json()
         data.map((builderAsset) => builderAsset).forEach((asset) => this.assets.set(asset.id, asset))
       } catch (e) {
