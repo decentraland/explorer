@@ -94,7 +94,6 @@ Note that the Unity version used by this approach will be the latest version dep
 The unity build used when accessing through localhost can be changed with several commands:
 
 - `make update-renderer` downloads the renderer build for the master branch and installs it, overwriting the previous build.
-- `make watch` triggers a `make update-renderer` during its local server startup process.
 
 Keep in mind that a `make watch` should be run and keep the server up before updating the local build, otherwise it will be replaced by the `make watch` command.
 
