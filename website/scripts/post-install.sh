@@ -10,7 +10,7 @@ cp -r ./node_modules/decentraland-kernel/dist/2.js ./public;
 cp -r ./node_modules/decentraland-kernel/dist/3.js ./public;
 cp -r ./node_modules/decentraland-kernel/loader ./public;
 cp -r ./node_modules/decentraland-kernel/systems ./public;
-cp -r ./node_modules/decentraland-kernel/unity ./public;
+cp -r ./node_modules/decentraland-kernel/unity-renderer ./public;
 cp -r ./node_modules/decentraland-kernel/voice-chat-codec ./public;
 
 echo "Setting kernel version"

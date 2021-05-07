@@ -24,7 +24,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # kernel files
-/public/unity
+/public/unity-renderer
 /public/loader
 /public/systems
 /public/website.js
