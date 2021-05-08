@@ -14,6 +14,8 @@ import {
   UUID
 } from 'shared/comms/interface/types'
 
+import { defaultLogger } from 'shared/logger'
+
 export const avatarMessageObservable = new Observable<AvatarMessage>()
 
 const avatarMap = new Map<string, AvatarEntity>()
@@ -122,6 +124,7 @@ export class AvatarEntity extends Entity {
  * @param uuid
  */
 function ensureAvatar(uuid: UUID): AvatarEntity {
+  defaultLogger.log("ensureAvatar", uuid)
   let avatar = avatarMap.get(uuid)
 
   if (avatar) {
