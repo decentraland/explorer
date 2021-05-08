@@ -78,7 +78,7 @@ export const onLeaveScene = onLeaveSceneObservable
  * This event is triggered once the scene should start.
  * @public
  */
- export const onSceneStartObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
+export const onSceneStartObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
 
 /**
  * @internal
