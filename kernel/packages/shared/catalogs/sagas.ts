@@ -201,7 +201,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
     result.push(...wearables)
   }
 
-  return yield call(mapCatalystWearableIntoV2, result)
+  return result.map(mapCatalystWearableIntoV2)
 }
 
 function fetchOwnedWearables(ethAddress: string, client: CatalystClient) {
@@ -387,7 +387,10 @@ export function sendWearablesCatalog(wearables: WearableV2[], context: string | 
 }
 
 export function* ensureBaseCatalogs() {
-  while (!(yield select(baseCatalogsLoaded))) {
+  const shouldUseV2: boolean =
+    WORLD_EXPLORER && isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.WEARABLES_V2, false)
+
+  while (!shouldUseV2 && !(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
 }
