@@ -45,7 +45,7 @@ import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 
 const logger = createLogger('website.ts: ')
 
-function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
+function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean, builderInWorldEnabled: boolean) {
   i.ConfigureHUDElement(
     HUDElementID.TASKBAR,
     { active: true, visible: true },
@@ -59,6 +59,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL, { active: builderInWorldEnabled, visible: false })
 }
 
 namespace webApp {
@@ -134,12 +135,11 @@ namespace webApp {
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
         i.SetKernelConfiguration(configForRenderer)
 
-        configureTaskbarDependentHUD(i, voiceChatEnabled)
+        configureTaskbarDependentHUD(i, voiceChatEnabled, builderInWorldEnabled)
 
         i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-        i.ConfigureHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL, { active: builderInWorldEnabled, visible: false })
 
         ensureRendererEnabled().then(() => {
           globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
@@ -163,7 +163,7 @@ namespace webApp {
       })
       .catch((e) => {
         logger.error('error on configuring taskbar & friends hud / tutorial. Trying to default to simple taskbar', e)
-        configureTaskbarDependentHUD(i, false)
+        configureTaskbarDependentHUD(i, false, false)
       })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
