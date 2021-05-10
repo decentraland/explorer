@@ -10,6 +10,7 @@ export type Wearable = {
   category: string
   baseUrl: string
   baseUrlBundles: string
+  description: string
   tags: string[]
   hides?: string[]
   replaces?: string[]
@@ -24,6 +25,7 @@ export type WearableV2 = {
   rarity: string
   i18n: { code: string; text: string }[]
   thumbnail: string
+  description: string
   data: {
     category: string
     tags: string[]

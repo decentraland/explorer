@@ -2,6 +2,7 @@ import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 
 import {
   getServerConfigurations,
+  getWearablesSafeURL,
   PIN_CATALYST,
   WSS_ENABLED,
   TEST_WEARABLES_OVERRIDE,
@@ -69,7 +70,7 @@ function overrideBaseUrl(wearable: PartialWearableV2): PartialWearableV2 {
   if (!TEST_WEARABLES_OVERRIDE) {
     return {
       ...wearable,
-      baseUrl: undefined // We set it to undefined, so that it is overwritten later
+      baseUrl: getWearablesSafeURL() + '/contents/'
     }
   } else {
     return wearable
@@ -213,12 +214,25 @@ async function fetchWearablesByFilters(filters: WearablesRequestFilters, client:
 }
 
 function mapV1WearableIntoV2(wearable: Wearable): PartialWearableV2 {
-  const { category, tags, hides, replaces, representations, id, rarity, i18n, thumbnail, baseUrl } = wearable
+  const {
+    category,
+    tags,
+    hides,
+    replaces,
+    representations,
+    id,
+    rarity,
+    i18n,
+    thumbnail,
+    baseUrl,
+    description
+  } = wearable
   return {
     id: mapLegacyIdToUrn(id),
     rarity,
     i18n,
     thumbnail,
+    description,
     data: {
       category,
       tags,
@@ -248,7 +262,7 @@ function mapCatalystRepresentationIntoV2(representation: any): BodyShapeRepresen
 }
 
 function mapCatalystWearableIntoV2(v2Wearable: any): PartialWearableV2 {
-  const { id, data, rarity, i18n, thumbnail } = v2Wearable
+  const { id, data, rarity, i18n, thumbnail, description } = v2Wearable
   const { category, tags, hides, replaces, representations } = data
   const newRepresentations: BodyShapeRepresentationV2[] = representations.map(mapCatalystRepresentationIntoV2)
   const index = thumbnail.lastIndexOf('/')
@@ -260,6 +274,7 @@ function mapCatalystWearableIntoV2(v2Wearable: any): PartialWearableV2 {
     rarity,
     i18n,
     thumbnail: newThumbnail,
+    description,
     data: {
       category,
       tags,
