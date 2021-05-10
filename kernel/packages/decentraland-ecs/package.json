@@ -26,5 +26,10 @@
     "artifacts"
   ],
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@dcl/unity-renderer": "latest"
+  },
+  "bundleDependencies": [
+    "@dcl/unity-renderer"
+  ]
 }

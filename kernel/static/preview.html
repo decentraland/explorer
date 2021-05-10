@@ -657,16 +657,18 @@
       const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${document.location.host}`)
 
       ws.addEventListener('message', msg => {
-        console.log('Sending new message to engine.', msg.data)
-        if (msg.data === 'update') {
-          handleServerMessage({
-            type: 'update'
-          })
-        } else if (msg.data.startsWith('{')) {
-          handleServerMessage(JSON.parse(msg.data))
+        if (typeof handleServerMessage !== 'undefined') {
+          console.log('Sending new message to engine.', msg.data)
+          if (msg.data === 'update') {
+            handleServerMessage({
+              type: 'update'
+            })
+          } else if (msg.data.startsWith('{')) {
+            handleServerMessage(JSON.parse(msg.data))
+          }
         }
       })
-      var RENDERER_ARTIFACTS_ROOT = '/@/artifacts/unity/Build/'
+      var RENDERER_ARTIFACTS_ROOT = '/@/artifacts/unity-renderer/'
     </script>
   </body>
   <script defer async src="/@/artifacts/preview.js"></script>

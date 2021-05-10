@@ -10,7 +10,7 @@ import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../dec
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
-import { aborted } from 'shared/loading/ReportFatalError'
+import { aborted, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, ProfileType } from 'shared/profiles/types'
@@ -21,7 +21,12 @@ import {
   WorldPosition,
   LoadableParcelScene
 } from 'shared/types'
-import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import {
+  getSceneWorkerBySceneID,
+  setNewParcelScene,
+  stopParcelSceneWorker,
+  loadedSceneWorkers
+} from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
@@ -55,6 +60,7 @@ import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -72,6 +78,15 @@ const positionEvent = {
   playerHeight: playerConfigurations.height,
   mousePosition: Vector3.Zero(),
   immediate: false // By default the renderer lerps avatars position
+}
+
+type SystemInfoPayload = {
+  graphicsDeviceName: string
+  graphicsDeviceVersion: string
+  graphicsMemorySize: number
+  processorType: string
+  processorCount: number
+  systemMemorySize: number
 }
 
 export class BrowserInterface {
@@ -133,14 +148,30 @@ export class BrowserInterface {
     }
   }
 
+  public AllScenesEvent(data: { eventType: string; payload: any }) {
+    for (const [_key, scene] of loadedSceneWorkers) {
+      scene.emit(data.eventType as IEventNames, data.payload)
+    }
+  }
+
   public OpenWebURL(data: { url: string }) {
     const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean, hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
+  public PerformanceReport(data: {
+    samples: string
+    fpsIsCapped: boolean
+    hiccupsInThousandFrames: number
+    hiccupsTime: number
+    totalTime: number
+  }) {
     const perfReport = getPerformanceInfo(data)
     trackEvent('performance report', perfReport)
+  }
+
+  public SystemInfoReport(data: SystemInfoPayload) {
+    trackEvent('system info report', data)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -515,6 +546,10 @@ export class BrowserInterface {
     ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
       .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
       .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
+  }
+
+  public ReportAvatarFatalError() {
+    ReportFatalError(AVATAR_LOADING_ERROR)
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {

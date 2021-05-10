@@ -38,7 +38,7 @@ export type BuilderProject = {
   cols: number
   created_at: string
   updated_at: string
-  created_location: string
+  creation_coords: string
 }
 
 export type BuilderScene = {
@@ -54,6 +54,7 @@ export type BuilderScene = {
 export type BuilderEntity = {
   id: string
   components: string[]
+  disableGizmos: boolean
 }
 
 export type BuilderComponent = {
@@ -89,4 +90,11 @@ export type BuilderMetric = {
 export type BuilderGround = {
   assetId: string
   componentId: string
+}
+
+export type UnityColor = {
+  r: number,
+  g: number,
+  b: number,
+  a: number
 }

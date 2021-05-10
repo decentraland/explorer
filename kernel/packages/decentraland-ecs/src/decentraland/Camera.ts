@@ -1,5 +1,5 @@
 import { Vector3, Quaternion, ReadOnlyVector3, ReadOnlyQuaternion } from './math'
-import { DecentralandInterface, IEvents } from './Types'
+import { DecentralandInterface, IEvents, CameraMode } from './Types'
 
 declare let dcl: DecentralandInterface | void
 
@@ -32,6 +32,11 @@ export class Camera {
     return this._playerHeight
   }
 
+  /** Get Camera Mode. */
+  get cameraMode(): CameraMode {
+    return this._cameraMode
+  }
+
   // @internal
   private lastEventPosition: ReadOnlyVector3 = { x: 0, y: 0, z: 0 }
   // @internal
@@ -42,11 +47,14 @@ export class Camera {
 
   // @internal
   private _playerHeight: number = 1.6
+  // @internal
+  private _cameraMode: CameraMode = CameraMode.FirstPerson
 
   constructor() {
     if (typeof dcl !== 'undefined') {
       dcl.subscribe('positionChanged')
       dcl.subscribe('rotationChanged')
+      dcl.subscribe('cameraModeChanged')
 
       dcl.onEvent(event => {
         switch (event.type) {
@@ -55,6 +63,9 @@ export class Camera {
             break
           case 'rotationChanged':
             this.rotationChanged(event.data as any)
+            break
+          case 'cameraModeChanged':
+            this.cameraModeChanged(event.data as any)
             break
         }
       })
@@ -123,5 +134,10 @@ export class Camera {
   // @internal
   private rotationChanged(e: IEvents['rotationChanged']) {
     this.lastEventRotation = e.quaternion
+  }
+
+  // @internal
+  private cameraModeChanged(e: IEvents['cameraModeChanged']) {
+    this._cameraMode = e.cameraMode
   }
 }

@@ -584,3 +584,8 @@ export type CurrentRealmInfoForRenderer = {
   domain: string
   contentServerUrl: string
 }
+
+export type TutorialInitializationMessage = {
+  fromDeepLink: boolean
+  enableNewTutorialCamera: boolean
+}

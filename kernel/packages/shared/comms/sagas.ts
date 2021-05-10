@@ -76,8 +76,10 @@ function* listenToWhetherSceneSupportsVoiceChat() {
     const previouslyEnabled = previousScene
       ? isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, previousScene.sceneJsonData)
       : undefined
-    const nowEnabled = isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
-    if (previouslyEnabled !== nowEnabled) {
+    const nowEnabled = newScene
+      ? isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
+      : undefined
+    if (previouslyEnabled !== nowEnabled && nowEnabled !== undefined) {
       unityInterface.SetVoiceChatEnabledByScene(nowEnabled)
       if (!nowEnabled) {
         // We want to stop any potential recordings when a user enters a new scene
