@@ -1,4 +1,4 @@
-import { log, engine, Entity, Transform, Vector3, onSceneStartObservable, TextShape } from 'decentraland-ecs/src'
+import { log, engine, Entity, Transform, Vector3, onSceneReadyObservable, TextShape } from 'decentraland-ecs/src'
 
 //Create entity and assign shape
 const text = new Entity()
@@ -12,7 +12,7 @@ text.addComponent(new Transform({
 
 engine.addEntity(text);
 
-onSceneStartObservable.add(() => {
-  log("onSceneStartObservable")
+onSceneReadyObservable.add(() => {
+  log("onSceneReadyObservable")
   shape.value = "Scene ready!"
 })

@@ -75,10 +75,10 @@ export const onLeaveSceneObservable = new Observable<IEvents['onLeaveScene']>(cr
 export const onLeaveScene = onLeaveSceneObservable
 
 /**
- * This event is triggered once the scene should start.
+ * This event is triggered after all the resources of the scene were loaded (models, textures, etc...)
  * @public
  */
-export const onSceneStartObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
+export const onSceneReadyObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
 
 /**
  * @internal
@@ -109,7 +109,7 @@ export function _initEventObservables(dcl: DecentralandInterface) {
           return
         }
         case 'sceneStart': {
-          onSceneStartObservable.notifyObservers(event.data as IEvents['sceneStart'])
+          onSceneReadyObservable.notifyObservers(event.data as IEvents['sceneStart'])
           return
         }
       }
