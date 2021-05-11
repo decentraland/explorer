@@ -158,7 +158,7 @@ jobs:
           name: Build deployment dist
           command: |
             make update-renderer
-            make build-deploy
+            make build-release build-deploy
       - run:
           name: pack decentraland-ecs npm package
           working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
