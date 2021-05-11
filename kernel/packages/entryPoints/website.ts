@@ -35,8 +35,8 @@ import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
-import { WorldConfig } from 'shared/meta/types'
-import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { FeatureFlags, WorldConfig } from 'shared/meta/types'
+import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { unityInterface, UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
@@ -45,7 +45,7 @@ import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 
 const logger = createLogger('website.ts: ')
 
-function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
+function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean, builderInWorldEnabled: boolean) {
   i.ConfigureHUDElement(
     HUDElementID.TASKBAR,
     { active: true, visible: true },
@@ -59,6 +59,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL, { active: builderInWorldEnabled, visible: false })
 }
 
 namespace webApp {
@@ -126,12 +127,15 @@ namespace webApp {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+        const builderInWorldEnabled =
+          identity.hasConnectedWeb3 &&
+          isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
 
         const configForRenderer = kernelConfigForRenderer()
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
         i.SetKernelConfiguration(configForRenderer)
 
-        configureTaskbarDependentHUD(i, voiceChatEnabled)
+        configureTaskbarDependentHUD(i, voiceChatEnabled, builderInWorldEnabled)
 
         i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
@@ -159,7 +163,7 @@ namespace webApp {
       })
       .catch((e) => {
         logger.error('error on configuring taskbar & friends hud / tutorial. Trying to default to simple taskbar', e)
-        configureTaskbarDependentHUD(i, false)
+        configureTaskbarDependentHUD(i, false, false)
       })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
