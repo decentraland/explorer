@@ -159,6 +159,12 @@ jobs:
           command: |
             make update-renderer
             make build-deploy
+      - run:
+          name: pack decentraland-ecs npm package
+          working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
+          command: npm pack
+      - store_artifacts:
+          path: packages/decentraland-ecs/decentraland-ecs-1.0.0.tgz
       - store_artifacts:
           path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
       - store_artifacts:
@@ -177,6 +183,7 @@ jobs:
           paths:
             - kernel/static
             - kernel/dist
+            - kernel/packages/decentraland-ecs/decentraland-ecs-1.0.0.tgz
 
   build-website:
     <<: *base_website_env
@@ -246,7 +253,7 @@ jobs:
       - run:
           name: pack decentraland-ecs npm package
           working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
-          command: npm pack && cp decentraland-ecs-1.0.0.tgz /tmp/explorer/website/build/decentraland-ecs.tgz
+          command: cp decentraland-ecs-1.0.0.tgz /tmp/explorer/website/build/decentraland-ecs.tgz
       - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
           command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
