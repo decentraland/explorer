@@ -20,7 +20,7 @@ import { Engine } from './ecs/Engine'
 import { Entity } from './ecs/Entity'
 
 const entity = new Entity('scene')
-; (entity as any).uuid = '0'
+;(entity as any).uuid = '0'
 
 // Initialize engine
 /** @public */
@@ -51,12 +51,12 @@ engine.addSystem(pointerEventSystem)
 engine.addSystem(raycastEventSystem)
 
 // DECENTRALAND DEPENDENCIES
+export * from './decentraland/math'
 export * from './decentraland/Types'
 export * from './decentraland/Components'
 export * from './decentraland/Systems'
 export * from './decentraland/Events'
 export * from './decentraland/Camera'
-export * from './decentraland/math'
 export * from './decentraland/AnimationState'
 export * from './decentraland/Input'
 export * from './decentraland/Audio'
