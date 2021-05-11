@@ -75,6 +75,12 @@ export const onLeaveSceneObservable = new Observable<IEvents['onLeaveScene']>(cr
 export const onLeaveScene = onLeaveSceneObservable
 
 /**
+ * This event is triggered after all the resources of the scene were loaded (models, textures, etc...)
+ * @public
+ */
+export const onSceneReadyObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
+
+/**
  * @internal
  * This function adds _one_ listener to the onEvent event of dcl interface.
  * Leveraging a switch to route events to the Observable handlers.
@@ -100,6 +106,10 @@ export function _initEventObservables(dcl: DecentralandInterface) {
         }
         case 'idleStateChanged': {
           onIdleStateChangedObservable.notifyObservers(event.data as IEvents['idleStateChanged'])
+          return
+        }
+        case 'sceneStart': {
+          onSceneReadyObservable.notifyObservers(event.data as IEvents['sceneStart'])
           return
         }
       }
