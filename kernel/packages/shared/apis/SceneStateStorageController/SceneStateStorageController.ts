@@ -1,6 +1,6 @@
 import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { ContentClient, DeploymentBuilder } from 'dcl-catalyst-client'
+import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType, Pointer, ContentFileHash } from 'dcl-catalyst-commons'
 import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
@@ -117,15 +117,17 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           ...models
         ])
 
+        // Deploy
+        const contentClient = this.getContentClient()
+
         // Build the entity
         const parcels = this.getParcels()
-        const { files, entityId } = await DeploymentBuilder.buildEntity(
-          EntityType.SCENE,
-          parcels,
-          entityFiles,
-          sceneJson,
-          Date.now()
-        )
+        const { files, entityId } = await contentClient.buildEntity({
+          type: EntityType.SCENE,
+          pointers: parcels,
+          files: entityFiles,
+          metadata: sceneJson
+        })
 
         // Sign entity id
         const store: Store<RootState> = globalThis['globalStore']
@@ -135,8 +137,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         }
         const authChain = Authenticator.signPayload(identity, entityId)
 
-        // Deploy
-        const contentClient = this.getContentClient()
+
         await contentClient.deployEntity({ files, entityId, authChain })
 
         result = { ok: true }
@@ -248,4 +249,3 @@ function blobToBuffer(blob: Blob): Promise<Buffer> {
     })
   })
 }
-
