@@ -1,6 +1,6 @@
 import { Store } from 'redux'
 import { EntityType, Hashing } from 'dcl-catalyst-commons'
-import { CatalystClient, ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
+import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, select, takeEvery } from 'redux-saga/effects'
 
 import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL, ALL_WEARABLES } from 'config'
@@ -501,14 +501,15 @@ async function deploy(
   contentFiles: Map<string, Buffer>,
   contentHashes: Map<string, string>
 ) {
-  // Build entity and group all files
-  const preparationData = await (contentFiles.size
-    ? DeploymentBuilder.buildEntity(EntityType.PROFILE, [identity.address], contentFiles, metadata)
-    : DeploymentBuilder.buildEntityWithoutNewFiles(EntityType.PROFILE, [identity.address], contentHashes, metadata))
-  // sign the entity id
-  const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the client
   const catalyst = new ContentClient(url, 'explorer-kernel-profile')
+
+  // Build entity and group all files
+  const preparationData = await (contentFiles.size
+    ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
+    : catalyst.buildEntityWithoutNewFiles({ type: EntityType.PROFILE, pointers: [identity.address], hashesByKey: contentHashes, metadata }))
+  // sign the entity id
+  const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data
   const deployData: DeploymentData = { ...preparationData, authChain }
   // Deploy the actual entity
