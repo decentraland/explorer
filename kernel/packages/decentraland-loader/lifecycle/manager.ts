@@ -14,6 +14,7 @@ import { ILand } from 'shared/types'
 import { getFetchContentServer, getCatalystServer, getFetchMetaContentService } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
 import { StoreContainer } from 'shared/store/rootTypes'
+import { Adapter } from "./lib/adapter"
 
 declare const globalThis: StoreContainer & { workerManager: LifecycleManager }
 
@@ -26,6 +27,7 @@ const worker: Worker = new (Worker as any)(lifecycleWorkerUrl, { name: 'Lifecycl
 worker.onerror = (e) => defaultLogger.error('Loader worker error', e)
 
 export class LifecycleManager extends TransportBasedServer {
+  public workerConnector: Adapter = new Adapter(WebWorkerTransport(worker))
   sceneIdToRequest: Map<string, IFuture<ILand>> = new Map()
   positionToRequest: Map<string, IFuture<string>> = new Map()
 
@@ -95,7 +97,6 @@ export class LifecycleManager extends TransportBasedServer {
 }
 
 let server: LifecycleManager
-
 export const getServer = () => server
 
 export async function initParcelSceneWorker() {

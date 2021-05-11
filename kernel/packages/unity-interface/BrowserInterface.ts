@@ -54,6 +54,7 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
+import { getServer } from "../decentraland-loader/lifecycle/manager"
 import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
@@ -337,6 +338,12 @@ export class BrowserInterface {
 
   public SetDelightedSurveyEnabled(data: { enabled: boolean }) {
     setDelightedSurveyEnabled(data.enabled)
+  }
+
+  public SetScenesLoadRadius(data: { newRadius: number }) {
+    data.newRadius = Math.floor(data.newRadius)
+
+    getServer().workerConnector.notify('SetScenesLoadRadius', { newRadius: data.newRadius })
   }
 
   public ReportScene(sceneId: string) {
