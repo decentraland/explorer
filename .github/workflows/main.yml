@@ -12,5 +12,10 @@ jobs:
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@master
         with:
-          message: "This branch can be previewed at [https://play.decentraland.zone/branch/${{ github.head_ref }}/index.html](https://play.decentraland.zone/branch/${{ github.head_ref }}/index.html?ENV=org)"
+          message: |
+            After the CI passes,
+
+            - This branch can be previewed at [https://play.decentraland.zone/branch/${{ github.head_ref }}/index.html](https://play.decentraland.zone/branch/${{ github.head_ref }}/index.html?ENV=org)
+            - The `decentraland-ecs` package can be tested by installing `npm install https://play.decentraland.zone/branch/${{ github.head_ref }}/decentraland-ecs.tgz`
+
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
