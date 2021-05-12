@@ -11,7 +11,7 @@ import { ParcelSceneAPI } from './ParcelSceneAPI'
 
 export abstract class SceneWorker {
   protected engineAPI: EngineAPI | null = null
-  protected readonly system = future<ScriptingHost>()
+  private readonly system = future<ScriptingHost>()
   private enabled = true
 
   constructor(private readonly parcelScene: ParcelSceneAPI, transport: ScriptingTransport) {
