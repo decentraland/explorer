@@ -42,21 +42,21 @@ export async function toBuilderFromStateDefinitionFormat(
   for (const [entityId, components] of scene.getState().entries()) {
     let builderComponentsIds: string[] = []
 
-    //Iterate the entity components to transform them to the builder format
+    // Iterate the entity components to transform them to the builder format
     const mappedComponents = Array.from(components.entries()).map(([componentId, data]) => ({ componentId, data }))
     for (let component of mappedComponents) {
-      //We generate a new uuid for the component since there is no uuid for components in the stateful scheme
+      // We generate a new uuid for the component since there is no uuid for components in the stateful scheme
       let newId = uuid()
 
       let componentType = toHumanReadableType(component.componentId)
       builderComponentsIds.push(newId)
 
-      //This is a special case where we are assinging the builder url field for NFTs
+      // This is a special case where we are assinging the builder url field for NFTs
       if (componentType === 'NFTShape') {
         component.data.url = component.data.src
       }
 
-      //we add the component to the builder format
+      // we add the component to the builder format
       let builderComponent: BuilderComponent = {
         id: newId,
         type: componentType,
@@ -65,7 +65,7 @@ export async function toBuilderFromStateDefinitionFormat(
       builderComponents[builderComponent.id] = builderComponent
     }
 
-    //we add the entity to builder format
+    // we add the entity to builder format
     let builderEntity: BuilderEntity = {
       id: entityId,
       components: builderComponentsIds,
@@ -87,7 +87,7 @@ export async function toBuilderFromStateDefinitionFormat(
 
   builderManifest.scene = sceneState
 
-  //We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
+  // We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
   let idArray: string[] = []
   Object.values(builderManifest.scene.components).forEach((component) => {
     if (component.type === 'GLTFShape') {
@@ -103,31 +103,31 @@ export async function toBuilderFromStateDefinitionFormat(
     }
   })
 
-  //We fetch all the assets that the scene contains since builder needs the assets
+  // We fetch all the assets that the scene contains since builder needs the assets
   const newAssets = await builderApiManager.getAssets(idArray)
   for (const [key, value] of Object.entries(newAssets)) {
     builderManifest.scene.assets[key] = value
   }
 
-  //We remove unused assets
+  // We remove unused assets
   let newRecords: Record<string, BuilderAsset> = {}
   for (const [key, value] of Object.entries(builderManifest.scene.assets)) {
     let found = false
     Object.values(builderManifest.scene.components).forEach((component) => {
       if (component.type === 'GLTFShape') {
-        if (component.data.assetId == key) found = true
+        if (component.data.assetId === key) found = true
       }
     })
 
-    if (found && value !== undefined) {
+    if (found) {
       newRecords[key] = value
     }
   }
 
   builderManifest.scene.assets = newRecords
 
-  //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
-  //Unity handles this, so we will find only the same "ground" category. We can safely assume that we can search it and assign
+  // This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
+  // Unity handles this, so we will find only the same "ground" category. We can safely assume that we can search it and assign
   let groundComponentId: string
   Object.entries(builderManifest.scene.assets).forEach(([assetId, asset]) => {
     if (asset?.category === 'ground') {
@@ -141,7 +141,7 @@ export async function toBuilderFromStateDefinitionFormat(
     }
   })
 
-  //We should disable the gizmos of the floor in the builder
+  // We should disable the gizmos of the floor in the builder
   Object.values(builderManifest.scene.entities).forEach((entity) => {
     Object.values(entity.components).forEach((componentId) => {
       if (componentId === groundComponentId) {
@@ -162,12 +162,12 @@ export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneSt
     let components: Component[] = []
     for (let componentId of entity.components.values()) {
       if (componentMap.has(componentId)) {
-        var builderComponent = componentMap.get(componentId)
-        var componentData = builderComponent?.data
+        const builderComponent = componentMap.get(componentId)
+        const componentData = builderComponent?.data
 
-        //Builder set different the NFTs so we need to create a model that Unity is capable to understand,
+        // Builder set different the NFTs so we need to create a model that Unity is capable to understand,
         if (!componentData.hasOwnProperty('src') && builderComponent?.type === 'NFTShape') {
-          var newAssetId = componentData.url.replaceAll('ethereum://', '')
+          let newAssetId = componentData.url.replaceAll('ethereum://', '')
           const index = newAssetId.indexOf('/')
           const partToRemove = newAssetId.slice(index)
           newAssetId = newAssetId.replaceAll(partToRemove, '')
