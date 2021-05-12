@@ -1,4 +1,4 @@
-import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
+import { exposeMethod } from 'decentraland-rpc/lib/host'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType, Pointer, ContentFileHash } from 'dcl-catalyst-commons'
@@ -29,7 +29,6 @@ import { ISceneStateStorageController } from './ISceneStateStorageController'
 
 declare const globalThis: any
 
-@registerAPI('SceneStateStorageController')
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
   private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
@@ -73,7 +72,11 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
 
       //Convert the scene state to builder scheme format
-      let builderManifest = await toBuilderFromStateDefinitionFormat(sceneState, this.builderManifest, this.builderApiManager)
+      let builderManifest = await toBuilderFromStateDefinitionFormat(
+        sceneState,
+        this.builderManifest,
+        this.builderApiManager
+      )
 
       //Update the manifest
       this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
