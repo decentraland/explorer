@@ -68,18 +68,18 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     let result: DeploymentResult
 
     try {
-      //Deserialize the scene state
+      // Deserialize the scene state
       const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
 
-      //Convert the scene state to builder scheme format
+      // Convert the scene state to builder scheme format
       let builderManifest = await toBuilderFromStateDefinitionFormat(
         sceneState,
         this.builderManifest,
         this.builderApiManager
       )
 
-      //Update the manifest
-      this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+      // Update the manifest
+      await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
       result = { ok: true }
     } catch (error) {
       defaultLogger.error('Saving manifest failed', error)
@@ -139,7 +139,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           throw new Error('Identity not found when trying to deploy an entity')
         }
         const authChain = Authenticator.signPayload(identity, entityId)
-
 
         await contentClient.deployEntity({ files, entityId, authChain })
 

@@ -4,6 +4,7 @@ import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import { ContentMapping } from '../../types'
 import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
 import { getDefaultTLD } from 'config'
+import { defaultLogger } from '../../logger'
 
 export type AssetId = string
 
@@ -20,6 +21,7 @@ const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
 
 export class BuilderServerAPIManager {
   private readonly assets: Map<AssetId, BuilderAsset> = new Map()
+  private readonly AUTH_CHAIN_HEADER_PREFIX = 'x-identity-auth-chain-'
 
   async getAssets(assetIds: AssetId[]): Promise<Record<string, BuilderAsset>> {
     const unknownAssets = assetIds.filter((assetId) => !this.assets.has(assetId))
@@ -33,7 +35,7 @@ export class BuilderServerAPIManager {
         const { data }: { data: BuilderAsset[] } = await response.json()
         data.map((builderAsset) => builderAsset).forEach((asset) => this.assets.set(asset.id, asset))
       } catch (e) {
-        console.trace(e)
+        defaultLogger.error(e)
       }
     }
     const assets: Record<string, BuilderAsset> = {}
@@ -47,15 +49,6 @@ export class BuilderServerAPIManager {
   async getConvertedAssets(assetIds: AssetId[]): Promise<Map<AssetId, Asset>> {
     await this.getAssets(assetIds)
     return new Map(assetIds.map((assetId) => [assetId, this.builderAssetToLocalAsset(this.assets.get(assetId)!)]))
-  }
-
-  private builderAssetToLocalAsset(webAsset: BuilderAsset): Asset {
-    return {
-      id: webAsset.id,
-      model: webAsset.model,
-      mappings: Object.entries(webAsset.contents).map(([file, hash]) => ({ file, hash })),
-      baseUrl: BASE_DOWNLOAD_URL
-    }
   }
 
   async getBuilderManifestFromProjectId(
@@ -80,7 +73,7 @@ export class BuilderServerAPIManager {
       if (manifest) this.addAssetsFromManifest(manifest)
       return manifest
     } catch (e) {
-      console.trace(e)
+      defaultLogger.error(e)
       return undefined
     }
   }
@@ -106,39 +99,48 @@ export class BuilderServerAPIManager {
       }
       const manifest: BuilderManifest = data.data[0]
 
-      //If this manifest contains assets, we add them so we don't need to fetch them
+      // If this manifest contains assets, we add them so we don't need to fetch them
       if (manifest) this.addAssetsFromManifest(manifest)
 
       return manifest
     } catch (e) {
-      console.trace(e)
+      defaultLogger.error(e)
       return undefined
     }
   }
 
   async updateProjectManifest(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
     try {
-      this.setManifestOnServer(builderManifest, identity)
+      await this.setManifestOnServer(builderManifest, identity)
     } catch (e) {
-      console.trace(e)
+      defaultLogger.error(e)
     }
   }
 
   async createProjectWithCoords(coordinates: string, identity: ExplorerIdentity): Promise<BuilderManifest> {
     const builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
     try {
-      this.setManifestOnServer(builderManifest, identity)
+      await this.setManifestOnServer(builderManifest, identity)
     } catch (e) {
-      console.trace(e)
+      defaultLogger.error(e)
     }
     return builderManifest
+  }
+
+  private builderAssetToLocalAsset(webAsset: BuilderAsset): Asset {
+    return {
+      id: webAsset.id,
+      model: webAsset.model,
+      mappings: Object.entries(webAsset.contents).map(([file, hash]) => ({ file, hash })),
+      baseUrl: BASE_DOWNLOAD_URL
+    }
   }
 
   private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
     // TODO: We should delete this when we enter in production or we won't be able to set the project in production
     if (getDefaultTLD() === 'org') {
-      console.log('Project saving is disable in org for the momment!')
-      return
+      defaultLogger.log('Project saving is disable in org for the moment!')
+      return undefined
     }
     const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
@@ -171,7 +173,7 @@ export class BuilderServerAPIManager {
     })
   }
 
-  private createEmptyDefaultBuilderScene(land: string, eth_address: string): BuilderManifest {
+  private createEmptyDefaultBuilderScene(land: string, ethAddress: string): BuilderManifest {
     let today = new Date().toISOString().slice(0, 10)
     let projectId = uuid()
     let sceneId = uuid()
@@ -181,7 +183,7 @@ export class BuilderServerAPIManager {
       description: 'Scene created from the explorer builder',
       is_public: false,
       scene_id: sceneId,
-      eth_address: eth_address,
+      eth_address: ethAddress,
       rows: 1,
       cols: 1,
       created_at: today,
@@ -259,18 +261,7 @@ export class BuilderServerAPIManager {
     return builderManifest
   }
 
-  private readonly AUTH_CHAIN_HEADER_PREFIX = 'x-identity-auth-chain-'
-
-  createHeaders(idToken: string) {
-    if (!idToken) return {}
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${idToken}`
-    }
-    return headers
-  }
-
-  authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
+  private authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
     const headers: Record<string, string> = {}
 
     if (identity) {
