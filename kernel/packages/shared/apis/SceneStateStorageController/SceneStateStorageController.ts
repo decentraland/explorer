@@ -1,4 +1,4 @@
-import { exposeMethod } from 'decentraland-rpc/lib/host'
+import { exposeMethod, setAPIName } from 'decentraland-rpc/lib/host'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType, Pointer, ContentFileHash } from 'dcl-catalyst-commons'
@@ -241,6 +241,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     return new Map(result)
   }
 }
+setAPIName('SceneStateStorageController', SceneStateStorageController)
 
 const toBuffer = require('blob-to-buffer')
 function blobToBuffer(blob: Blob): Promise<Buffer> {
