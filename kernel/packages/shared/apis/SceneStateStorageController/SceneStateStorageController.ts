@@ -1,4 +1,4 @@
-import { exposeMethod } from 'decentraland-rpc/lib/host'
+import { APIOptions, exposeMethod, setAPIName } from 'decentraland-rpc/lib/host'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType, Pointer, ContentFileHash } from 'dcl-catalyst-commons'
@@ -33,6 +33,11 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest
+
+  constructor(options: APIOptions) {
+    super(options)
+    setAPIName('name', SceneStateStorageController)
+  }
 
   @exposeMethod
   async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
