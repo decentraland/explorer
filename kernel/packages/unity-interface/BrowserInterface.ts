@@ -8,7 +8,7 @@ import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
-import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
 import { aborted, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
@@ -54,7 +54,6 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
-import { getServer } from "../decentraland-loader/lifecycle/manager"
 import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
@@ -341,9 +340,9 @@ export class BrowserInterface {
   }
 
   public SetScenesLoadRadius(data: { newRadius: number }) {
-    data.newRadius = Math.floor(data.newRadius)
-
-    getServer().workerConnector.notify('SetScenesLoadRadius', { newRadius: data.newRadius })
+    renderDistanceObservable.notifyObservers({
+      distanceInParcels: Math.ceil(data.newRadius)
+    })
   }
 
   public ReportScene(sceneId: string) {

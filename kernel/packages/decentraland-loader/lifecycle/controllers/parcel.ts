@@ -21,7 +21,7 @@ export class ParcelLifeCycleController extends EventEmitter {
     this.config = config
   }
 
-  public setLineOfSightRadius (newRadius: number): ParcelSightSeeingReport | undefined {
+  public setLineOfSightRadius(newRadius: number): ParcelSightSeeingReport | undefined {
     if (newRadius === this.config.lineOfSightRadius) return undefined
 
     this.config.lineOfSightRadius = newRadius
@@ -47,7 +47,7 @@ export class ParcelLifeCycleController extends EventEmitter {
     const sightedParcels = parcelsInScope(this.config.lineOfSightRadius, this.currentPosition)
     const sightedParcelsSet = new Set<string>()
 
-    const newlySightedParcels = sightedParcels.filter(parcel => {
+    const newlySightedParcels = sightedParcels.filter((parcel) => {
       sightedParcelsSet.add(parcel)
       return this.parcelSighted(parcel)
     })
@@ -57,10 +57,10 @@ export class ParcelLifeCycleController extends EventEmitter {
     const currentlyPlusNewlySightedParcels = [...this.currentlySightedParcels] // this.currentlySightedParcels from t - 1 + newSightedParcels (added on this#parcelSighted)
 
     const newlyOOSParcels = currentlyPlusNewlySightedParcels
-        .filter(parcel => !secureParcels.has(parcel))
-        .filter(parcel => this.switchParcelToOutOfSight(parcel))
+      .filter((parcel) => !secureParcels.has(parcel))
+      .filter((parcel) => this.switchParcelToOutOfSight(parcel))
 
-    this.currentlySightedParcels = new Set(currentlyPlusNewlySightedParcels.filter($ => secureParcels.has($)))
+    this.currentlySightedParcels = new Set(currentlyPlusNewlySightedParcels.filter(($) => secureParcels.has($)))
 
     this.emit('Sighted', newlySightedParcels)
     this.emit('Lost sight', newlyOOSParcels)

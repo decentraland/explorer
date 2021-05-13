@@ -10,7 +10,7 @@ import { ILand, InstancedSpawnPoint } from 'shared/types'
 import { SceneDataDownloadManager, TileIdPair } from './controllers/download'
 import { ParcelLifeCycleController } from './controllers/parcel'
 import { PositionLifecycleController } from './controllers/position'
-import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
+import { NewDrawingDistanceReport, SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
 import { Adapter } from './lib/adapter'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
@@ -60,7 +60,6 @@ let downloadManager: SceneDataDownloadManager
         lineOfSightRadius: options.lineOfSightRadius,
         secureRadius: options.secureRadius
       })
-
       sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
       positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
       parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
@@ -121,8 +120,8 @@ let downloadManager: SceneDataDownloadManager
         sceneController.reportStatus(data.sceneId, data.status)
       })
 
-      connector.on('SetScenesLoadRadius', (data: { newRadius: number }) => {
-        const parcels = parcelController.setLineOfSightRadius(data.newRadius)
+      connector.on('SetScenesLoadRadius', (data: NewDrawingDistanceReport) => {
+        const parcels = parcelController.setLineOfSightRadius(data.distanceInParcels)
         positionController.updateSightedParcels(parcels)
       })
     }
