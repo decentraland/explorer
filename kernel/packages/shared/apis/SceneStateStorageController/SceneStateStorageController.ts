@@ -36,7 +36,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
   constructor(options: APIOptions) {
     super(options)
-    setAPIName('name', SceneStateStorageController)
+    setAPIName('SceneStateStorageController', SceneStateStorageController)
   }
 
   @exposeMethod
