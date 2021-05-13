@@ -30,9 +30,6 @@ import { ISceneStateStorageController } from './ISceneStateStorageController'
 declare const globalThis: any
 
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
-  // @ts-ignore
-  static name = 'SceneStateStorageController'
-
   private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest

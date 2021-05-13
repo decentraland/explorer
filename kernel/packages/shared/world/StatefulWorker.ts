@@ -13,7 +13,9 @@ export class StatefulWorker extends SceneWorker {
   constructor(parcelScene: ParcelSceneAPI) {
     super(parcelScene, StatefulWorker.buildWebWorkerTransport(parcelScene))
 
-    this.getAPIInstance(SceneStateStorageController).catch((error) =>
+    const klass = SceneStateStorageController
+    Object.defineProperty(klass, 'name', SceneStateStorageController)
+    this.getAPIInstance(klass).catch((error) =>
       defaultLogger.error('Failed to load the SceneStateStorageController', error)
     )
   }
