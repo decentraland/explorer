@@ -341,7 +341,7 @@ export class BrowserInterface {
 
   public SetScenesLoadRadius(data: { newRadius: number }) {
     renderDistanceObservable.notifyObservers({
-      distanceInParcels: Math.ceil(data.newRadius)
+      distanceInParcels: Math.floor(data.newRadius)
     })
   }
 
