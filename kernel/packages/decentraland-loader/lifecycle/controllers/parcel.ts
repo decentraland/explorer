@@ -37,7 +37,8 @@ export class ParcelLifeCycleController extends EventEmitter {
 
     this.currentPosition = position
 
-    return this.updateLoadedParcels(this.config.secureRadius)
+    const secureRadius = this.config.lineOfSightRadius
+    return this.updateLoadedParcels(secureRadius)
   }
 
   updateLoadedParcels(secureRadius: number = 0): ParcelSightSeeingReport | undefined {

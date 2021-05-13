@@ -5,7 +5,7 @@ import { avatarMessageObservable } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
+import { decentralandConfigurations, ethereumConfigurations, parcelLimits, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -340,8 +340,10 @@ export class BrowserInterface {
   }
 
   public SetScenesLoadRadius(data: { newRadius: number }) {
+    parcelLimits.visibleRadius = Math.round(data.newRadius)
+
     renderDistanceObservable.notifyObservers({
-      distanceInParcels: Math.floor(data.newRadius)
+      distanceInParcels: parcelLimits.visibleRadius
     })
   }
 

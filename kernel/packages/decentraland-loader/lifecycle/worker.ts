@@ -44,7 +44,6 @@ let downloadManager: SceneDataDownloadManager
       contentServerBundles: string
       rootUrl: string
       lineOfSightRadius: number
-      secureRadius: number
       emptyScenes: boolean
       worldConfig: WorldConfig
     }) => {
@@ -57,8 +56,7 @@ let downloadManager: SceneDataDownloadManager
         rootUrl: options.rootUrl
       })
       parcelController = new ParcelLifeCycleController({
-        lineOfSightRadius: options.lineOfSightRadius,
-        secureRadius: options.secureRadius
+        lineOfSightRadius: options.lineOfSightRadius
       })
       sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
       positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
