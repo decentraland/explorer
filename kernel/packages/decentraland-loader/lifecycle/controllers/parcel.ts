@@ -53,6 +53,7 @@ export class ParcelLifeCycleController extends EventEmitter {
     })
 
     const secureParcels = new Set(parcelsInScope(this.config.lineOfSightRadius + secureRadius, this.currentPosition))
+    console.log('PRAVS - Kernel - Update loaded parcels with LOS...' + this.config.lineOfSightRadius)
 
     const currentlyPlusNewlySightedParcels = [...this.currentlySightedParcels] // this.currentlySightedParcels from t - 1 + newSightedParcels (added on this#parcelSighted)
 
