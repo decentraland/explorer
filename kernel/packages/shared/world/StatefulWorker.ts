@@ -4,6 +4,7 @@ import { SceneWorker } from './SceneWorker'
 import { CustomWebWorkerTransport } from './CustomWebWorkerTransport'
 import { SceneStateStorageController } from 'shared/apis/SceneStateStorageController/SceneStateStorageController'
 import { defaultLogger } from 'shared/logger'
+import { setAPIName } from 'decentraland-rpc/lib/host'
 
 const gamekitWorkerRaw = require('raw-loader!../../../static/systems/stateful.scene.system.js')
 const gamekitWorkerBLOB = new Blob([gamekitWorkerRaw])
@@ -13,9 +14,8 @@ export class StatefulWorker extends SceneWorker {
   constructor(parcelScene: ParcelSceneAPI) {
     super(parcelScene, StatefulWorker.buildWebWorkerTransport(parcelScene))
 
-    const klass = SceneStateStorageController
-    Object.defineProperty(klass, 'name', SceneStateStorageController)
-    this.getAPIInstance(klass).catch((error) =>
+    setAPIName('name', SceneStateStorageController)
+    this.getAPIInstance(SceneStateStorageController).catch((error) =>
       defaultLogger.error('Failed to load the SceneStateStorageController', error)
     )
   }
