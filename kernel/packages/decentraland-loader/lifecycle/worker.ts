@@ -60,6 +60,7 @@ let downloadManager: SceneDataDownloadManager
         lineOfSightRadius: options.lineOfSightRadius,
         secureRadius: options.secureRadius
       })
+
       sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
       positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
       parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
@@ -118,6 +119,11 @@ let downloadManager: SceneDataDownloadManager
 
       connector.on('Scene.status', (data: SceneLifeCycleStatusReport) => {
         sceneController.reportStatus(data.sceneId, data.status)
+      })
+
+      connector.on('SetScenesLoadRadius', (data: { newRadius: number }) => {
+        const parcels = parcelController.setLineOfSightRadius(data.newRadius)
+        positionController.updateSightedParcels(parcels)
       })
     }
   )
