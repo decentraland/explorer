@@ -6,7 +6,7 @@
     "start": "make watch",
     "build": "make build-essentials",
     "test": "make test-ci",
-    "postinstall": "make update-renderer"
+    "postinstall": "make post-install"
   },
   "prettier": {
     "semi": false,
