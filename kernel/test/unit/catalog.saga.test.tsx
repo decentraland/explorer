@@ -5,11 +5,15 @@ import { wearablesFailure, wearablesRequest, wearablesSuccess } from 'shared/cat
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from 'shared/catalogs/selectors'
 import { ensureRenderer } from 'shared/renderer/sagas'
 import { throwError } from 'redux-saga-test-plan/providers'
+import { getFetchContentServer } from 'shared/dao/selectors'
 
+const serverUrl = 'https://server.com'
 const wearableId1 = 'WearableId1'
-const wearable1 = { id: wearableId1 } as any
+const wearable1 = { id: wearableId1, baseUrl: serverUrl + 'contents/', baseUrlBundles: "https://content-assets-as-bundle.decentraland.zone/" } as any
+
 const userId = 'userId'
 const context = 'someContext'
+
 
 describe('Wearables Saga', () => {
 
@@ -17,6 +21,7 @@ describe('Wearables Saga', () => {
     return expectSaga(handleWearablesRequest, wearablesRequest({ wearableIds: [wearableId1] }, context))
       .put(wearablesSuccess([wearable1], context))
       .provide([
+        [select(getFetchContentServer), serverUrl],
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
@@ -29,6 +34,7 @@ describe('Wearables Saga', () => {
     return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: userId }, context))
       .put(wearablesSuccess(wearables, context))
       .provide([
+        [select(getFetchContentServer), serverUrl],
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
@@ -42,6 +48,7 @@ describe('Wearables Saga', () => {
     return expectSaga(handleWearablesRequest, wearablesRequest({ collectionIds: [BASE_AVATARS_COLLECTION_ID] }, context))
       .put(wearablesSuccess(baseWearables, context))
       .provide([
+        [select(getFetchContentServer), serverUrl],
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), { [wearableId1]: wearable1 }],
         [select(getExclusiveCatalog), {}],
@@ -67,6 +74,7 @@ describe('Wearables Saga', () => {
     return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: userId }, context))
       .put(wearablesFailure(context, errorMessage))
       .provide([
+        [select(getFetchContentServer), serverUrl],
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), {}],

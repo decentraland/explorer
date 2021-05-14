@@ -25,7 +25,15 @@ import {
   WEARABLES_SUCCESS
 } from './actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
-import { Catalog, Wearable, Collection, WearableId, WearablesRequestFilters, BodyShapeRepresentation } from './types'
+import {
+  Wearable,
+  Collection,
+  WearableId,
+  WearablesRequestFilters,
+  WearableV2,
+  BodyShapeRepresentationV2,
+  PartialWearableV2
+} from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
 import { RendererInterfaces } from 'unity-interface/dcl'
@@ -36,7 +44,6 @@ import { ensureRenderer } from 'shared/renderer/sagas'
 import { isFeatureEnabled } from 'shared/meta/selectors'
 import { FeatureFlags } from 'shared/meta/types'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
-import { parseUrn } from '@dcl/urn-resolver'
 import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
@@ -59,12 +66,11 @@ export function* catalogsSaga(): any {
   yield takeEvery(WEARABLES_FAILURE, handleWearablesFailure)
 }
 
-function overrideBaseUrl(wearable: Wearable) {
+function overrideBaseUrl(wearable: PartialWearableV2): PartialWearableV2 {
   if (!TEST_WEARABLES_OVERRIDE) {
     return {
       ...wearable,
-      baseUrl: getWearablesSafeURL() + '/contents/',
-      baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
+      baseUrl: getWearablesSafeURL() + '/contents/'
     }
   } else {
     return wearable
@@ -74,7 +80,9 @@ function overrideBaseUrl(wearable: Wearable) {
 function* initialLoad() {
   yield call(ensureRealmInitialized)
 
-  if (WORLD_EXPLORER) {
+  const shouldUseV2 = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
+
+  if (WORLD_EXPLORER && !shouldUseV2) {
     try {
       const catalogUrl = getServerConfigurations().avatar.catalog
 
@@ -101,18 +109,19 @@ function* initialLoad() {
           }
         }
       }
-      const catalog: Wearable[] = collections!
+      const catalog: PartialWearableV2[] = collections!
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
         .filter((wearable) => !!wearable)
+        .map(mapV1WearableIntoV2)
         .map(overrideBaseUrl)
-      const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
-      const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
+      const baseAvatars = catalog.filter((_: PartialWearableV2) => _.data.tags && !_.data.tags.includes('exclusive'))
+      const baseExclusive = catalog.filter((_: PartialWearableV2) => _.data.tags && _.data.tags.includes('exclusive'))
       yield put(catalogLoaded('base-avatars', baseAvatars))
       yield put(catalogLoaded('base-exclusive', baseExclusive))
     } catch (error) {
       defaultLogger.error('[FATAL]: Could not load catalog!', error)
     }
-  } else {
+  } else if (!WORLD_EXPLORER) {
     let baseCatalog = []
     try {
       const catalogPath = '/default-profile/basecatalog.json'
@@ -139,12 +148,19 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   if (valid) {
     try {
       const shouldUseV2 = WORLD_EXPLORER && (yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false))
+      const downloadUrl = yield select(getFetchContentServer)
 
-      const response: Wearable[] = shouldUseV2
+      const response: PartialWearableV2[] = shouldUseV2
         ? yield call(fetchWearablesV2, filters)
         : yield call(fetchWearablesV1, filters)
 
-      yield put(wearablesSuccess(response, context))
+      const v2Wearables: WearableV2[] = response.map((wearable) => ({
+        ...wearable,
+        baseUrl: wearable.baseUrl ?? downloadUrl + '/contents/',
+        baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
+      }))
+
+      yield put(wearablesSuccess(v2Wearables, context))
     } catch (error) {
       yield put(wearablesFailure(context, error.message))
     }
@@ -155,7 +171,6 @@ export function* handleWearablesRequest(action: WearablesRequest) {
 
 function* fetchWearablesV2(filters: WearablesRequestFilters) {
   const catalystUrl = yield select(getCatalystServer)
-  const downloadUrl = yield select(getFetchContentServer)
   const client: CatalystClient = new CatalystClient(catalystUrl, 'EXPLORER')
 
   const result: any[] = []
@@ -167,11 +182,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
       const orgClient: CatalystClient = yield CatalystClient.connectedToCatalystIn('mainnet', 'EXPLORER')
       const zoneWearables = yield client.fetchWearables({ collectionIds })
       const orgWearables = yield orgClient.fetchWearables({ collectionIds })
-      const orgWearablesWithBaseUrl = orgWearables.map((wearable: any) => ({
-        ...wearable,
-        baseUrl: `${orgClient.getContentUrl()}/contents/`
-      }))
-      result.push(...zoneWearables, ...orgWearablesWithBaseUrl)
+      result.push(...zoneWearables, ...orgWearables)
     } else {
       const ownedWearables: OwnedWearablesWithDefinition[] = yield call(
         fetchOwnedWearables,
@@ -191,12 +202,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
     result.push(...wearables)
   }
 
-  const v1Wearables = yield call(mapV2WearablesIntoV1, result)
-  return v1Wearables.map((wearable: Wearable) => ({
-    ...wearable,
-    baseUrl: wearable.baseUrl ?? downloadUrl + '/contents/',
-    baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
-  }))
+  return result.map(mapCatalystWearableIntoV2)
 }
 
 function fetchOwnedWearables(ethAddress: string, client: CatalystClient) {
@@ -204,99 +210,96 @@ function fetchOwnedWearables(ethAddress: string, client: CatalystClient) {
 }
 
 async function fetchWearablesByFilters(filters: WearablesRequestFilters, client: CatalystClient) {
-  // This is necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
-  const newIds = filters?.wearableIds ? await mapLegacyIdsToUrn(filters.wearableIds) : undefined
-  return client.fetchWearables({
-    ...filters,
-    wearableIds: newIds
-  })
+  return client.fetchWearables(filters)
 }
 
-async function mapV2RepresentationIntoV1(representation: any): Promise<BodyShapeRepresentation> {
-  const { contents, bodyShapes, ...other } = representation
-
-  // This is necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
-  const newBodyShapes = await mapUrnsToLegacyId(bodyShapes)
-  const newContents = contents.map(({ key, url }: { key: string; url: string }) => ({
-    file: key,
-    hash: url.substring(url.lastIndexOf('/') + 1)
-  }))
-  return {
-    ...other,
-    bodyShapes: newBodyShapes,
-    contents: newContents
-  }
-}
-
-/** We need to map the v2 wearable format into the v1 format, that is accepted by the renderer */
-function mapV2WearablesIntoV1(v2Wearables: any[]): Promise<Wearable[]> {
-  return Promise.all(v2Wearables.map(mapV2WearableIntoV1))
-}
-
-async function mapV2WearableIntoV1(v2Wearable: any): Promise<Wearable> {
-  const { id, data, rarity, i18n, thumbnail, baseUrl, baseUrlBundles } = v2Wearable
-  const { category, tags, hides, replaces, representations } = data
-  const newId = await mapUrnToLegacyId(id)
-  const newRepresentations: BodyShapeRepresentation[] = await Promise.all(
-    representations.map(mapV2RepresentationIntoV1)
-  )
-  const newThumbnail = thumbnail.substring(thumbnail.lastIndexOf('/') + 1)
-
-  return {
-    id: newId ?? id,
-    type: 'wearable',
+function mapV1WearableIntoV2(wearable: Wearable): PartialWearableV2 {
+  const {
     category,
     tags,
     hides,
     replaces,
+    representations,
+    id,
     rarity,
-    representations: newRepresentations,
     i18n,
-    thumbnail: newThumbnail,
+    thumbnail,
     baseUrl,
-    baseUrlBundles
+    description
+  } = wearable
+  return {
+    id: mapLegacyIdToUrn(id),
+    rarity,
+    i18n,
+    thumbnail,
+    description,
+    data: {
+      category,
+      tags,
+      hides,
+      replaces,
+      representations: representations.map(({ bodyShapes, contents, ...other }) => ({
+        ...other,
+        bodyShapes: mapLegacyIdsToUrn(bodyShapes),
+        contents: contents.map(({ file, hash }) => ({ key: file, hash }))
+      }))
+    },
+    baseUrl
   }
 }
 
-async function mapLegacyIdsToUrn(wearableIds: WearableId[]): Promise<WearableId[]> {
-  const mappedIds = await Promise.all(wearableIds.map(mapLegacyIdToUrn))
-  return mappedIds.filter((mappedId): mappedId is WearableId => !!mappedId)
+function mapCatalystRepresentationIntoV2(representation: any): BodyShapeRepresentationV2 {
+  const { contents, ...other } = representation
+
+  const newContents = contents.map(({ key, url }: { key: string; url: string }) => ({
+    key,
+    hash: url.substring(url.lastIndexOf('/') + 1)
+  }))
+  return {
+    ...other,
+    contents: newContents
+  }
 }
 
-async function mapLegacyIdToUrn(wearableId: WearableId): Promise<WearableId | undefined> {
+function mapCatalystWearableIntoV2(v2Wearable: any): PartialWearableV2 {
+  const { id, data, rarity, i18n, thumbnail, description } = v2Wearable
+  const { category, tags, hides, replaces, representations } = data
+  const newRepresentations: BodyShapeRepresentationV2[] = representations.map(mapCatalystRepresentationIntoV2)
+  const index = thumbnail.lastIndexOf('/')
+  const newThumbnail = thumbnail.substring(index + 1)
+  const baseUrl = thumbnail.substring(0, index + 1)
+
+  return {
+    id,
+    rarity,
+    i18n,
+    thumbnail: newThumbnail,
+    description,
+    data: {
+      category,
+      tags,
+      hides,
+      replaces,
+      representations: newRepresentations
+    },
+    baseUrl
+  }
+}
+
+export function mapLegacyIdsToUrn(wearableIds: WearableId[]): WearableId[] {
+  return wearableIds.map(mapLegacyIdToUrn)
+}
+
+export function mapLegacyIdToUrn(wearableId: WearableId): WearableId {
   if (!wearableId.startsWith('dcl://')) {
     return wearableId
   }
-  try {
-    const result = await parseUrn(wearableId)
-    if (result?.type === 'off-chain' || result?.type === 'blockchain-collection-v1-asset') {
-      return result.uri.toString()
-    }
-  } catch {
-    return undefined
-  }
-  return undefined
-}
-
-export async function mapUrnsToLegacyId(wearableIds: WearableId[]): Promise<WearableId[]> {
-  const mappedIds = await Promise.all(wearableIds.map(mapUrnToLegacyId))
-  return mappedIds.filter((mappedId): mappedId is WearableId => !!mappedId)
-}
-
-export async function mapUrnToLegacyId(wearableId: WearableId): Promise<WearableId | undefined> {
-  if (wearableId.startsWith('dcl://')) {
-    return wearableId
-  }
-
-  try {
-    const result = await parseUrn(wearableId)
-    if (result?.type === 'off-chain') {
-      return `dcl://${result.registry}/${result.id}`
-    } else if (result?.type === 'blockchain-collection-v1-asset') {
-      return `dcl://${result.collectionName}/${result.id}`
-    }
-  } catch {
-    return undefined
+  if (wearableId.startsWith('dcl://base-avatars')) {
+    const name = wearableId.substring(wearableId.lastIndexOf('/') + 1)
+    return `urn:decentraland:off-chain:base-avatars:${name}`
+  } else {
+    const [collectionName, wearableName] = wearableId.replace('dcl://', '').split('/')
+    return `urn:decentraland:ethereum:collections-v1:${collectionName}:${wearableName}`
   }
 }
 
@@ -306,12 +309,14 @@ function* fetchWearablesV1(filters: WearablesRequestFilters) {
   const platformCatalog = yield select(getPlatformCatalog)
   const exclusiveCatalog = yield select(getExclusiveCatalog)
 
-  let response: Wearable[]
+  let response: PartialWearableV2[]
   if (filters.wearableIds) {
     // Filtering by ids
     response = filters.wearableIds
       .map((wearableId) =>
-        wearableId === 'dcl://base-avatars/SchoolShoes' ? 'dcl://base-avatars/Moccasin' : wearableId
+        wearableId === 'urn:decentraland:off-chain:base-avatars:SchoolShoes'
+          ? 'urn:decentraland:off-chain:base-avatars:Moccasin'
+          : wearableId
       )
       .map((wearableId) =>
         wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
@@ -392,12 +397,15 @@ export function informRequestFailure(error: string, context: string | undefined)
   globalThis.unityInterface.WearablesRequestFailed(error, context)
 }
 
-export function sendWearablesCatalog(catalog: Catalog, context: string | undefined) {
-  globalThis.unityInterface.AddWearablesToCatalog(catalog, context)
+export function sendWearablesCatalog(wearables: WearableV2[], context: string | undefined) {
+  globalThis.unityInterface.AddWearablesToCatalog(wearables, context)
 }
 
 export function* ensureBaseCatalogs() {
-  while (!(yield select(baseCatalogsLoaded))) {
+  const shouldUseV2: boolean =
+    WORLD_EXPLORER && isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.WEARABLES_V2, false)
+
+  while (!shouldUseV2 && !(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
 }
@@ -412,5 +420,5 @@ export async function fetchInventoryItemsByAddress(address: string): Promise<Wea
   }
   const inventory: { id: string }[] = await result.json()
 
-  return inventory.map((wearable) => wearable.id)
+  return mapLegacyIdsToUrn(inventory.map((wearable) => wearable.id))
 }
