@@ -1,4 +1,4 @@
-import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
+import { exposeMethod, setAPIName } from 'decentraland-rpc/lib/host'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType, Pointer, ContentFileHash } from 'dcl-catalyst-commons'
@@ -29,7 +29,6 @@ import { ISceneStateStorageController } from './ISceneStateStorageController'
 
 declare const globalThis: any
 
-@registerAPI('SceneStateStorageController')
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
   private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
@@ -69,14 +68,18 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     let result: DeploymentResult
 
     try {
-      //Deserialize the scene state
+      // Deserialize the scene state
       const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
 
-      //Convert the scene state to builder scheme format
-      let builderManifest = await toBuilderFromStateDefinitionFormat(sceneState, this.builderManifest, this.builderApiManager)
+      // Convert the scene state to builder scheme format
+      let builderManifest = await toBuilderFromStateDefinitionFormat(
+        sceneState,
+        this.builderManifest,
+        this.builderApiManager
+      )
 
-      //Update the manifest
-      this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+      // Update the manifest
+      await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
       result = { ok: true }
     } catch (error) {
       defaultLogger.error('Saving manifest failed', error)
@@ -136,7 +139,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           throw new Error('Identity not found when trying to deploy an entity')
         }
         const authChain = Authenticator.signPayload(identity, entityId)
-
 
         await contentClient.deployEntity({ files, entityId, authChain })
 
@@ -239,6 +241,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     return new Map(result)
   }
 }
+setAPIName('SceneStateStorageController', SceneStateStorageController)
 
 const toBuffer = require('blob-to-buffer')
 function blobToBuffer(blob: Blob): Promise<Buffer> {
