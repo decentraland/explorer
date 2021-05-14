@@ -96,6 +96,9 @@ jobs:
           name: Restore built files
           keys:
             - kernel-build-{{ checksum "../.kernelsources-checksum" }}
+      - run:
+          name: "show package-lock 1"
+          command: cat package-lock.json
       - restore_cache:
           name: Restoring node_modules
           keys:
@@ -104,6 +107,9 @@ jobs:
           name: Install differences in node_modules
           command: |
             npm i
+      - run:
+          name: "show package-lock 2"
+          command: cat package-lock.json
       - save_cache:
           name: Store node_modules cache
           paths:
