@@ -127,6 +127,7 @@ function* initialLoad() {
       const catalogPath = '/default-profile/basecatalog.json'
       const response = yield fetch(getResourcesURL() + catalogPath)
       baseCatalog = yield response.json()
+      baseCatalog = baseCatalog.map(mapV1WearableIntoV2)
 
       if (WSS_ENABLED) {
         for (let item of baseCatalog) {
