@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { CatalogState, Wearable, WearableId } from './types'
+import { CatalogState, PartialWearableV2, WearableId } from './types'
 import { CATALOG_LOADED, CatalogLoadedAction } from './actions'
 
 const INITIAL_CATALOG_STATE: CatalogState = {
@@ -17,7 +17,7 @@ export function catalogsReducer(state?: CatalogState, action?: AnyAction): Catal
     case CATALOG_LOADED:
       const { payload } = action as CatalogLoadedAction
       const { name, catalog } = payload
-      const catalogObject: Record<WearableId, Wearable> = {}
+      const catalogObject: Record<WearableId, PartialWearableV2> = {}
       catalog.forEach((wearable) => (catalogObject[wearable.id] = wearable))
       return {
         ...state,

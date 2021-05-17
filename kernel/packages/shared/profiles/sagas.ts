@@ -56,8 +56,8 @@ import { ensureRenderer } from 'shared/renderer/sagas'
 import {
   ensureBaseCatalogs,
   fetchInventoryItemsByAddress,
-  mapUrnToLegacyId,
-  mapUrnsToLegacyId
+  mapLegacyIdToUrn,
+  mapLegacyIdsToUrn
 } from 'shared/catalogs/sagas'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
@@ -323,19 +323,14 @@ export async function profileServerRequest(userId: string) {
   } else {
     const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
     profile = await response.json()
-  }
-  // These mappings are necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
-  const avatar = profile?.avatars[0]?.avatar
-  if (avatar?.bodyShape) {
-    const mappedBodyShape = await mapUrnToLegacyId(avatar.bodyShape)
-    if (mappedBodyShape) {
-      avatar.bodyShape = mappedBodyShape
+    const avatar = profile?.avatars[0]?.avatar
+    if (avatar?.bodyShape) {
+      avatar.bodyShape = mapLegacyIdToUrn(avatar.bodyShape)
     }
-  }
 
-  if (avatar?.wearables) {
-    const mappedWearables = await mapUrnsToLegacyId(avatar.wearables)
-    avatar.wearables = mappedWearables
+    if (avatar?.wearables) {
+      avatar.wearables = mapLegacyIdsToUrn(avatar.wearables)
+    }
   }
   return profile
 }

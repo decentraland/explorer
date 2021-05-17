@@ -43,8 +43,7 @@ export namespace parcelLimits {
   export const halfParcelSize = parcelSize / 2 /* meters */
   export const centimeter = 0.01
 
-  export const visibleRadius = 4
-  export const secureRadius = 4
+  export let visibleRadius = 4
 
   export const maxX = 3000
   export const maxZ = 3000

@@ -1,6 +1,9 @@
 import { initParcelSceneWorker } from 'decentraland-loader/lifecycle/manager'
 import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
+import {
+  sceneLifeCycleObservable,
+  renderDistanceObservable
+} from '../../decentraland-loader/lifecycle/controllers/scene'
 import { trackEvent } from '../analytics'
 import { globalSignalSceneFail, globalSignalSceneLoad, globalSignalSceneStart } from '../loading/actions'
 import { clearForegroundTimeout, setForegroundTimeout } from '../timers/index'
@@ -156,6 +159,10 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
 
   teleportObservable.add((position: { x: number; y: number }) => {
     ret.notify('User.setPosition', { position, teleported: true })
+  })
+
+  renderDistanceObservable.add((event) => {
+    ret.notify('SetScenesLoadRadius', event)
   })
 
   parcelObservable.add((obj) => {
