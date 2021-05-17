@@ -5,7 +5,13 @@ import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { decentralandConfigurations, ethereumConfigurations, parcelLimits, playerConfigurations, WORLD_EXPLORER } from 'config'
+import {
+  decentralandConfigurations,
+  ethereumConfigurations,
+  parcelLimits,
+  playerConfigurations,
+  WORLD_EXPLORER
+} from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -190,13 +196,20 @@ export class BrowserInterface {
   }
 
   public TriggerExpression(data: { id: string; timestamp: number }) {
-
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_EXPRESSION,
-      uuid: localProfileUUID || "non-local-profile-uuid",
+      uuid: localProfileUUID || 'non-local-profile-uuid',
       expressionId: data.id,
       timestamp: data.timestamp
     })
+
+    this.AllScenesEvent({
+      eventType: 'playerExpression',
+      payload: {
+        expressionId: data.id
+      }
+    })
+
     const messageId = uuid()
     const body = `␐${data.id} ${data.timestamp}`
 

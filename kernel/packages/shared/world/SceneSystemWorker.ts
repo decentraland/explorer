@@ -11,8 +11,6 @@ import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { CustomWebWorkerTransport } from './CustomWebWorkerTransport'
 import { sceneObservable } from 'shared/world/sceneState'
 import { UserIdentity } from 'shared/apis/UserIdentity'
-import { avatarMessageObservable, getUser } from 'shared/comms/peers'
-import { AvatarMessageType } from 'shared/comms/interface/types'
 
 const gamekitWorkerRaw = require('raw-loader!../../../static/systems/scene.system.js')
 const gamekitWorkerBLOB = new Blob([gamekitWorkerRaw])
@@ -46,7 +44,6 @@ export class SceneSystemWorker extends SceneWorker {
     this.subscribeToWorldRunningEvents()
     this.subscribeToPositionEvents()
     this.subscribeToSceneChangeEvents()
-    this.subscribeToAvatarMessageEvents()
   }
 
   private static buildWebWorkerTransport(parcelScene: ParcelSceneAPI): ScriptingTransport {
@@ -137,22 +134,10 @@ export class SceneSystemWorker extends SceneWorker {
           }
         })
       })
-      .catch(e => {
+      .catch((e) => {
         // @ts-ignore
         console['error'](e)
       })
-  }
-
-  private subscribeToAvatarMessageEvents() {
-    avatarMessageObservable.add((evt) => {
-      if (evt.type === AvatarMessageType.USER_EXPRESSION) {
-        let userId = getUser(evt.uuid)?.userId
-        if (userId) {
-          let expressionId = evt.expressionId
-          this.engineAPI!.sendSubscriptionEvent('playerExpression', { userId, expressionId })
-        }
-      }
-    })
   }
 
   private subscribeToWorldRunningEvents() {

@@ -188,7 +188,6 @@ export interface IEvents {
   }
 
   playerExpression: {
-    userId: string
     expressionId: string
   }
 
