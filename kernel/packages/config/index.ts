@@ -289,7 +289,8 @@ export function getServerConfigurations() {
   const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
   const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
 
-  const QUESTS_SERVER_URL = qs.QUESTS_SERVER_URL ?? `https://quests-api.decentraland.${notToday}`
+  const QUESTS_SERVER_URL =
+    qs.QUESTS_SERVER_URL ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
     contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
