@@ -61,7 +61,7 @@ async function main() {
           }
           const fileStream = fs.createWriteStream(`${scenePath}/${content.file}`)
 
-          await new Promise((resolve, reject) => {
+          await new Promise<void>((resolve, reject) => {
             response.body.pipe(fileStream)
             response.body.on('error', (e) => {
               delete pending[content.file]
