@@ -42,6 +42,7 @@ import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRende
 import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
+import { isWaitingTutorial } from 'shared/loading/selectors'
 
 const logger = createLogger('website.ts: ')
 
@@ -141,16 +142,18 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
-        ensureRendererEnabled().then(() => {
-          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-          globalThis.globalStore.dispatch(experienceStarted())
-          globalThis.globalStore.dispatch(setLoadingScreen(false))
-          Html.switchGameContainer(true)
-        }).catch(logger.error)
+        ensureRendererEnabled()
+          .then(() => {
+            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            globalThis.globalStore.dispatch(experienceStarted())
+            globalThis.globalStore.dispatch(setLoadingScreen(false))
+            Html.switchGameContainer(true)
+          })
+          .catch(logger.error)
 
         const tutorialConfig = {
           fromDeepLink: HAS_INITIAL_POSITION_MARK,
-          enableNewTutorialCamera: enableNewTutorialCamera,
+          enableNewTutorialCamera: enableNewTutorialCamera
         }
 
         EnsureProfile(identity.address)
@@ -158,6 +161,10 @@ namespace webApp {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+
+            if (isWaitingTutorial(globalThis.globalStore.getState())) {
+              teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+            }
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
@@ -194,13 +201,17 @@ namespace webApp {
     })
 
     if (!NO_MOTD) {
-      waitForMessageOfTheDay().then((messageOfTheDay) => {
-        i.ConfigureHUDElement(
-          HUDElementID.MESSAGE_OF_THE_DAY,
-          { active: !!messageOfTheDay, visible: false },
-          messageOfTheDay
-        )
-      }).catch(() => {/*noop*/})
+      waitForMessageOfTheDay()
+        .then((messageOfTheDay) => {
+          i.ConfigureHUDElement(
+            HUDElementID.MESSAGE_OF_THE_DAY,
+            { active: !!messageOfTheDay, visible: false },
+            messageOfTheDay
+          )
+        })
+        .catch(() => {
+          /*noop*/
+        })
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
