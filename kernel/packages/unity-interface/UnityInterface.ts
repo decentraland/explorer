@@ -119,6 +119,10 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
   }
 
+  public RunPerformanceMeterTool(durationInMilliseconds: number) {
+    this.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInMilliseconds)
+  }
+
   public CreateGlobalScene(data: {
     id: string
     name: string
