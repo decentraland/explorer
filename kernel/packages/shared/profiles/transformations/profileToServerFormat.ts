@@ -2,6 +2,7 @@ import { analizeColorPart, stripAlpha } from './analizeColorPart'
 import { isValidBodyShape } from './isValidBodyShape'
 import { Profile, Snapshots } from '../types'
 import { WearableId } from 'decentraland-ecs/src'
+import { mapLegacyIdsToUrn, mapLegacyIdToUrn } from 'shared/catalogs/sagas'
 
 export function ensureServerFormat(profile: Profile): ServerFormatProfile {
   const { avatar } = profile
@@ -25,12 +26,12 @@ export function ensureServerFormat(profile: Profile): ServerFormatProfile {
   return {
     ...profile,
     avatar: {
-      bodyShape: avatar.bodyShape,
+      bodyShape: mapLegacyIdToUrn(avatar.bodyShape),
       snapshots: avatar.snapshots,
       eyes: { color: eyes },
       hair: { color: hair },
       skin: { color: skin },
-      wearables: avatar.wearables
+      wearables: mapLegacyIdsToUrn(avatar.wearables)
     }
   }
 }
