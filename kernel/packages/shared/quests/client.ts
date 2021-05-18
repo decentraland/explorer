@@ -13,7 +13,13 @@ export async function questsClient() {
   })
 }
 
-export async function questsRequest<T>(request: (client: QuestsClient) => Promise<ClientResponse<T>>) {
-  const client = await questsClient()
-  return request(client)
+export async function questsRequest<T>(
+  request: (client: QuestsClient) => Promise<ClientResponse<T>>
+): Promise<ClientResponse<T>> {
+  try {
+    const client = await questsClient()
+    return await request(client)
+  } catch (e) {
+    return { ok: false, status: 0, body: { status: 'unknown error', message: e.message } }
+  }
 }
