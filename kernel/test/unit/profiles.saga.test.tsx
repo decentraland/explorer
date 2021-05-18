@@ -13,6 +13,7 @@ import { isRealmInitialized, getResizeService } from '../../packages/shared/dao/
 import { getServerConfigurations } from 'config'
 import { sleep } from 'atomicHelpers/sleep'
 import { fetchInventoryItemsByAddress } from 'shared/catalogs/sagas'
+import { ensureRenderer } from 'shared/renderer/sagas'
 
 const profile = { data: 'profile' }
 
@@ -27,6 +28,7 @@ const delayedProfile = delayed({ avatars: [profile] })
 describe('fetchProfile behavior', () => {
   it('completes once for more than one request of same user', () => {
     return expectSaga(profileSaga)
+      .provide([[call(ensureRenderer), true]])
       .put(profileSuccess('user|1', 'passport' as any, true))
       .not.put(profileSuccess('user|1', 'passport' as any, true))
       .dispatch(profileRequest('user|1'))
@@ -44,6 +46,7 @@ describe('fetchProfile behavior', () => {
 
   it('runs one request for each user', () => {
     return expectSaga(profileSaga)
+      .provide([[call(ensureRenderer), true]])
       .put(profileSuccess('user|1', 'passport1' as any, true))
       .put(profileSuccess('user|2', 'passport2' as any, true))
       .not.put(profileSuccess('user|1', 'passport1' as any))
@@ -60,7 +63,7 @@ describe('fetchProfile behavior', () => {
         [call(profileServerRequest, 'user|2'), delayedProfile],
         [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [call(processServerProfile, 'user|2', profile), 'passport2'],
-        [call(fetchInventoryItemsByAddress, 'user|2'), []],
+        [call(fetchInventoryItemsByAddress, 'user|2'), []]
       ])
       .run()
   })
