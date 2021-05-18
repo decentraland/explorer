@@ -5,7 +5,6 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getRealm } from 'shared/dao/selectors'
 import { getServerConfigurations, PREVIEW } from 'config'
-import { buildNumber } from 'shared/meta/env'
 
 type EnvironmentRealm = {
   domain: string
@@ -15,8 +14,7 @@ type EnvironmentRealm = {
 }
 
 type ExplorerData = {
-  clientUrl: string
-  buildNumber: number
+  clientUri: string
   configurations: Record<string, any>
 }
 
@@ -67,8 +65,7 @@ export class EnvironmentAPI extends ExposableAPI {
   @exposeMethod
   async getExplorerData(): Promise<ExplorerData> {
     return {
-      clientUrl: location.href,
-      buildNumber,
+      clientUri: location.href,
       configurations: {
         questsServerUrl: getServerConfigurations().questsUrl
       }

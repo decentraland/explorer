@@ -7,8 +7,7 @@ declare module '@decentraland/EnvironmentAPI' {
   }
 
   export type ExplorerData = {
-    clientUrl: string
-    buildNumber: number
+    clientUri: string
     configurations: Record<string, any>
   }
 
