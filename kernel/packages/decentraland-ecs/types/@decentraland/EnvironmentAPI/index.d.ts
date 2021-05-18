@@ -5,6 +5,13 @@ declare module '@decentraland/EnvironmentAPI' {
     serverName: string
     displayName: string
   }
+
+  export type ExplorerData = {
+    clientUrl: string
+    buildNumber: number
+    configurations: Record<string, any>
+  }
+
   /**
    * Returns the current connected realm
    */
@@ -14,4 +21,10 @@ declare module '@decentraland/EnvironmentAPI' {
    * Returns whether the scene is running in preview mode or not
    */
   export function isPreviewMode(): Promise<boolean>
+
+
+  /**
+   * Returns explorer configuration and environment information
+   */
+  export function getExplorerData(): Promise<ExplorerData>
 }

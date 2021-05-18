@@ -4,13 +4,20 @@ import { EnvironmentData } from 'shared/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getRealm } from 'shared/dao/selectors'
-import { PREVIEW } from 'config'
+import { getServerConfigurations, PREVIEW } from 'config'
+import { buildNumber } from 'shared/meta/env'
 
 type EnvironmentRealm = {
   domain: string
   layer: string
   serverName: string
   displayName: string
+}
+
+type ExplorerData = {
+  clientUrl: string
+  buildNumber: number
+  configurations: Record<string, any>
 }
 
 declare const window: any
@@ -51,6 +58,20 @@ export class EnvironmentAPI extends ExposableAPI {
       layer,
       serverName,
       displayName: `${serverName}-${layer}`
+    }
+  }
+
+  /**
+   * Returns explorer configuration and environment information
+   */
+  @exposeMethod
+  async getExplorerData(): Promise<ExplorerData> {
+    return {
+      clientUrl: location.href,
+      buildNumber,
+      configurations: {
+        questsServerUrl: getServerConfigurations().questsUrl
+      }
     }
   }
 }
