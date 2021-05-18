@@ -89,6 +89,11 @@ type SystemInfoPayload = {
   systemMemorySize: number
 }
 
+type GenericAnalyticPayload = {
+  eventName: string
+  data: any
+}
+
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
@@ -172,6 +177,10 @@ export class BrowserInterface {
 
   public SystemInfoReport(data: SystemInfoPayload) {
     trackEvent('system info report', data)
+  }
+
+  public GenericAnalytic(payload: GenericAnalyticPayload) {
+    trackEvent(payload.eventName, payload.data)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
