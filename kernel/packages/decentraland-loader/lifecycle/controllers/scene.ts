@@ -6,8 +6,10 @@ import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import defaultLogger from 'shared/logger'
 
 export type SceneLifeCycleStatusReport = { sceneId: string; status: SceneLifeCycleStatusType }
+export type NewDrawingDistanceReport = { distanceInParcels: number }
 
 export const sceneLifeCycleObservable = new Observable<Readonly<SceneLifeCycleStatusReport>>()
+export const renderDistanceObservable = new Observable<Readonly<NewDrawingDistanceReport>>()
 
 type SceneId = string
 

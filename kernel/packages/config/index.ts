@@ -43,8 +43,7 @@ export namespace parcelLimits {
   export const halfParcelSize = parcelSize / 2 /* meters */
   export const centimeter = 0.01
 
-  export const visibleRadius = 4
-  export const secureRadius = 4
+  export let visibleRadius = 4
 
   export const maxX = 3000
   export const maxZ = 3000
@@ -56,8 +55,10 @@ export namespace parcelLimits {
   export const minParcelX = -150
   export const minParcelZ = -150
 
-  export const descriptiveValidWorldRanges = getWorld().validWorldRanges
-    .map((range) => `(X from ${range.xMin} to ${range.xMax}, and Y from ${range.yMin} to ${range.yMax})`)
+  export const descriptiveValidWorldRanges = getWorld()
+    .validWorldRanges.map(
+      (range) => `(X from ${range.xMin} to ${range.xMax}, and Y from ${range.yMin} to ${range.yMax})`
+    )
     .join(' or ')
 }
 export namespace playerConfigurations {
@@ -150,8 +151,6 @@ export const TEST_WEARABLES_OVERRIDE = location.search.includes('TEST_WEARABLES'
 export const QUESTS_ENABLED = location.search.includes('QUESTS_ENABLED')
 
 const META_CONFIG_URL = qs.META_CONFIG_URL
-
-const QUESTS_SERVER_URL = qs.QUESTS_SERVER_URL ?? 'https://quests-api.decentraland.io'
 
 export namespace commConfigurations {
   export const debug = true
@@ -288,6 +287,9 @@ export function getServerConfigurations() {
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
   const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
   const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
+
+  const QUESTS_SERVER_URL =
+    qs.QUESTS_SERVER_URL ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
     contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
