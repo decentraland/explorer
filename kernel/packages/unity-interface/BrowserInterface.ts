@@ -89,11 +89,6 @@ type SystemInfoPayload = {
   systemMemorySize: number
 }
 
-type GenericAnalyticPayload = {
-  eventName: string
-  data: any
-}
-
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
@@ -179,16 +174,12 @@ export class BrowserInterface {
     trackEvent('system info report', data)
   }
 
-  public GenericAnalytic(payload: GenericAnalyticPayload) {
-    trackEvent(payload.eventName, payload.data)
-  }
-
   public PreloadFinished(data: { sceneId: string }) {
     // stub. there is no code about this in unity side yet
   }
 
-  public Track(data: { name: string; properties: { key: string; value: string }[] | null }) {
-    const properties: Record<string, string> = {}
+  public Track(data: { name: string; properties: { key: string; value: any }[] | null }) {
+    const properties: Record<string, any> = {}
     if (data.properties) {
       for (const property of data.properties) {
         properties[property.key] = property.value
