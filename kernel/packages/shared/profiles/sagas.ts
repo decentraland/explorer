@@ -98,6 +98,8 @@ const localProfilesRepo = new LocalProfilesRepository()
  * It's *very* important for the renderer to never receive a passport with items that have not been loaded into the catalog.
  */
 export function* profileSaga(): any {
+  yield call(ensureRenderer)
+
   yield takeEvery(USER_AUTHENTIFIED, initialProfileLoad)
 
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
@@ -363,7 +365,6 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     }
   }
 
-  yield call(ensureRenderer)
   yield call(ensureBaseCatalogs)
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(sendLoadProfile, profile)
@@ -507,7 +508,12 @@ async function deploy(
   // Build entity and group all files
   const preparationData = await (contentFiles.size
     ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
-    : catalyst.buildEntityWithoutNewFiles({ type: EntityType.PROFILE, pointers: [identity.address], hashesByKey: contentHashes, metadata }))
+    : catalyst.buildEntityWithoutNewFiles({
+        type: EntityType.PROFILE,
+        pointers: [identity.address],
+        hashesByKey: contentHashes,
+        metadata
+      }))
   // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data
