@@ -1,7 +1,7 @@
 import { future, IFuture } from 'fp-future'
 import { ILand } from 'shared/types'
 import { CatalystClient } from 'dcl-catalyst-client'
-import { EntityType } from 'dcl-catalyst-commons'
+import { EntityType, Fetcher } from 'dcl-catalyst-commons'
 import { EmptyParcelController } from './EmptyParcelController'
 import { WorldConfig } from 'shared/meta/types'
 
@@ -39,7 +39,12 @@ export class SceneDataDownloadManager {
     }
   ) {
     this.emptyParcelController = new EmptyParcelController(options)
-    this.catalyst = new CatalystClient(options.catalystServer, 'EXPLORER')
+    this.catalyst = new CatalystClient(
+      options.catalystServer,
+      'EXPLORER',
+      // @ts-ignore
+      new Fetcher({ headers: { 'User-Agent': undefined } })
+    )
   }
 
   async resolveSceneSceneIds(tiles: string[]): Promise<TileIdPair[]> {
