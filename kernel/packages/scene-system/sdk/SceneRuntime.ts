@@ -110,7 +110,7 @@ export abstract class SceneRuntime extends Script {
     super(transport, opt)
   }
 
-  abstract async runCode(source: string, env: any): Promise<void>
+  abstract runCode(source: string, env: any): Promise<void>
   abstract onError(error: Error): void
   abstract onLog(...messages: any[]): void
   abstract startLoop(): void
