@@ -233,15 +233,6 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
         profile = localProfile
       }
 
-      const avatar = profile?.avatars[0]?.avatar
-      if (avatar?.bodyShape) {
-        avatar.bodyShape = mapLegacyIdToUrn(avatar.bodyShape)
-      }
-
-      if (avatar?.wearables) {
-        avatar.wearables = mapLegacyIdsToUrn(avatar.wearables)
-      }
-
       const identity: ExplorerIdentity = yield select(getCurrentIdentity)
       profile.ethAddress = identity.rawAddress
     }
@@ -516,12 +507,7 @@ async function deploy(
   // Build entity and group all files
   const preparationData = await (contentFiles.size
     ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
-    : catalyst.buildEntityWithoutNewFiles({
-        type: EntityType.PROFILE,
-        pointers: [identity.address],
-        hashesByKey: contentHashes,
-        metadata
-      }))
+    : catalyst.buildEntityWithoutNewFiles({ type: EntityType.PROFILE, pointers: [identity.address], hashesByKey: contentHashes, metadata }))
   // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data
