@@ -6,7 +6,7 @@ declare module '@decentraland/EnvironmentAPI' {
     displayName: string
   }
 
-  export type ExplorerData = {
+  export type ExplorerConfiguration = {
     clientUri: string
     configurations: Record<string, string | number | boolean>
   }
@@ -25,5 +25,5 @@ declare module '@decentraland/EnvironmentAPI' {
   /**
    * Returns explorer configuration and environment information
    */
-  export function getExplorerConfiguration(): Promise<ExplorerData>
+  export function getExplorerConfiguration(): Promise<ExplorerConfiguration>
 }
