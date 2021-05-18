@@ -506,14 +506,22 @@ async function deploy(
   const catalyst = new ContentClient(url, 'explorer-kernel-profile')
 
   // Build entity and group all files
-  const preparationData = await (contentFiles.size
-    ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
-    : catalyst.buildEntityWithoutNewFiles({
-        type: EntityType.PROFILE,
-        pointers: [identity.address],
-        hashesByKey: contentHashes,
-        metadata
-      }))
+  const hashes = {
+    type: EntityType.PROFILE,
+    pointers: [identity.address],
+    hashesByKey: contentHashes,
+    metadata
+  }
+  const pointers = {
+    type: EntityType.PROFILE,
+    pointers: [identity.address],
+    files: contentFiles,
+    metadata
+  }
+  const preparationPromise = contentFiles.size
+    ? catalyst.buildEntity(pointers)
+    : catalyst.buildEntityWithoutNewFiles(hashes)
+  const preparationData = await preparationPromise
   // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data
