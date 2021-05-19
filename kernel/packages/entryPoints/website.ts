@@ -96,7 +96,7 @@ namespace webApp {
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
     const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
     const questEnabled = isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS_ENABLED, false);
-    console.log("QuestEnabled: " + questEnabled)
+
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, {
