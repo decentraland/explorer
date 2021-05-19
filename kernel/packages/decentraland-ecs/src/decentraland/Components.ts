@@ -563,6 +563,8 @@ export class Animator extends Shape {
 
     if (reset) clip.shouldReset = true
     clip.playing = true
+    clip.dirty = true
+    clip.data.nonce = Math.random()
   }
 
   /**

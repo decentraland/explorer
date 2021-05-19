@@ -9,7 +9,7 @@ import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
 
 import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
-import { SceneJsonData, ILand, HUDElementID, BuilderConfiguration, Wearable } from '../shared/types'
+import { SceneJsonData, ILand, HUDElementID, BuilderConfiguration, WearableV2 } from '../shared/types'
 import { normalizeContentMappings } from '../shared/selectors'
 import { SceneWorker } from '../shared/world/SceneWorker'
 import { initializeUnity } from '../unity-interface/initializer'
@@ -274,7 +274,7 @@ namespace editor {
     }
   }
 
-  export function addWearablesToCatalog(wearables: Wearable[]) {
+  export function addWearablesToCatalog(wearables: WearableV2[]) {
     unityInterface.AddWearablesToCatalog(wearables)
   }
 

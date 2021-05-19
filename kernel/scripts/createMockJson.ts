@@ -24,7 +24,7 @@ glob
   .sync(path.resolve(__dirname, '../public/test-scenes/*/scene.json'), { absolute: true })
   .concat(glob.sync(path.resolve(__dirname, '../public/ecs-scenes/*/scene.json'), { absolute: true }))
   .concat(glob.sync(path.resolve(__dirname, '../public/hell-map/*/scene.json'), { absolute: true }))
-  .forEach(file => {
+  .forEach((file) => {
     const manifest = require(file)
     const dirName = path.dirname(file)
     const rootCid = hash(dirName.replace(process.cwd(), ''))
@@ -59,9 +59,9 @@ function catchAll(err) {
 fs.writeFile(ipfsMockFilename, JSON.stringify(ipfsMock, null, 2), catchAll)
 
 Promise.all(
-  parcelInfos.map(info => {
-    return new Promise((resolve, reject) =>
-      fs.writeFile(path.join(parcelInfoDir, info.rootCid), JSON.stringify(info.mappingData, null, 2), err =>
+  parcelInfos.map((info) => {
+    return new Promise<void>((resolve, reject) =>
+      fs.writeFile(path.join(parcelInfoDir, info.rootCid), JSON.stringify(info.mappingData, null, 2), (err) =>
         err ? reject(err) : resolve()
       )
     )
@@ -69,9 +69,9 @@ Promise.all(
 ).catch(catchAll)
 
 Promise.all(
-  sceneMappings.map(mapping => {
-    return new Promise((resolve, reject) =>
-      fs.writeFile(path.join(sceneMappingDir, mapping.parcelPosition), JSON.stringify(mapping), err =>
+  sceneMappings.map((mapping) => {
+    return new Promise<void>((resolve, reject) =>
+      fs.writeFile(path.join(sceneMappingDir, mapping.parcelPosition), JSON.stringify(mapping), (err) =>
         err ? reject(err) : resolve()
       )
     )
@@ -92,7 +92,7 @@ function generateIPFSMock(folder: string) {
 
   const files = new Set<string>(glob.sync(folder + '/**/*', { absolute: true }))
 
-  files.forEach(file => {
+  files.forEach((file) => {
     try {
       if (!fs.statSync(file).isFile()) return
     } catch (err) {
