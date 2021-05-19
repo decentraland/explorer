@@ -162,9 +162,9 @@ namespace webApp {
             i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 
-            if (isWaitingTutorial(globalThis.globalStore.getState())) {
-              teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
-            }
+            // NOTE: here we make sure that if signup (tutorial) just finished
+            // the player is set in the correct spawn position plus we make sure that the proper scene is loaded
+            setUserPositionAfterTutorial()
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
@@ -227,6 +227,12 @@ namespace webApp {
   export const utils = {
     isBadWord,
     filterInvalidNameCharacters
+  }
+
+  function setUserPositionAfterTutorial() {
+    if (isWaitingTutorial(globalThis.globalStore.getState())) {
+      teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+    }
   }
 }
 
