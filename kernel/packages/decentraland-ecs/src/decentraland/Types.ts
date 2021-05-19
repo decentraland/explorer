@@ -187,6 +187,10 @@ export interface IEvents {
     isIdle: boolean
   }
 
+  playerExpression: {
+    expressionId: string
+  }
+
   /**
    * `pointerUp` is triggered when the user releases an input pointer.
    * It could be a VR controller, a touch screen or the mouse.
