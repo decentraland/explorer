@@ -8,10 +8,10 @@ import { toRendererQuest } from '@dcl/ecs-quests/@dcl/mappings'
 import { rendererInitialized } from 'shared/renderer'
 import { getPreviousQuests, getQuests } from './selectors'
 import { deepEqual } from 'atomicHelpers/deepEqual'
-import {isFeatureEnabled} from "../meta/selectors";
-import {FeatureFlags} from "../meta/types";
-import {RendererInterfaces} from "../../unity-interface/dcl";
-import {StoreContainer} from "../store/rootTypes";
+import { isFeatureEnabled } from "../meta/selectors"
+import { FeatureFlags } from "../meta/types"
+import { RendererInterfaces } from "../../unity-interface/dcl"
+import { StoreContainer } from "../store/rootTypes"
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
 const QUESTS_REFRESH_INTERVAL = 30000
