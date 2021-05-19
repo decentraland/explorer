@@ -163,7 +163,7 @@ namespace webApp {
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 
             // NOTE: here we make sure that if signup (tutorial) just finished
-            // the player is set in the correct spawn position plus we make sure that the proper scene is loaded
+            // the player is set to the correct spawn position plus we make sure that the proper scene is loaded
             setUserPositionAfterTutorial()
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
