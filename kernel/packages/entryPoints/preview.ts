@@ -89,7 +89,7 @@ function sceneRenderable() {
 
 initializeUnity(container)
   .then(async (ret) => {
-    const questEnabled = isFeatureEnabled(global.globalStore.getState(), FeatureFlags.QUESTS_ENABLED, false)
+    const questEnabled = isFeatureEnabled(global.globalStore.getState(), FeatureFlags.QUESTS, false)
     const i = unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })

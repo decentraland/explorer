@@ -17,7 +17,7 @@ declare const globalThis: Window & RendererInterfaces & StoreContainer
 const QUESTS_REFRESH_INTERVAL = 30000
 
 export function* questsSaga(): any {
-  if (isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS_ENABLED, false)) {
+  if (isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)) {
     yield takeEvery(USER_AUTHENTIFIED, initializeQuests)
     yield takeEvery(QUESTS_INITIALIZED, initUpdateQuestsInterval)
   }
