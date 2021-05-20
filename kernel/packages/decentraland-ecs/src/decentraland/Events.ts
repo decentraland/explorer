@@ -81,6 +81,11 @@ export const onLeaveScene = onLeaveSceneObservable
 export const onSceneReadyObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
 
 /**
+ * @public
+ */
+export const onPlayerExpressionObservable = new Observable<IEvents['playerExpression']>(createSubscriber('playerExpression'))
+
+/**
  * @internal
  * This function adds _one_ listener to the onEvent event of dcl interface.
  * Leveraging a switch to route events to the Observable handlers.
@@ -110,6 +115,10 @@ export function _initEventObservables(dcl: DecentralandInterface) {
         }
         case 'sceneStart': {
           onSceneReadyObservable.notifyObservers(event.data as IEvents['sceneStart'])
+          return
+        }
+        case 'playerExpression': {
+          onPlayerExpressionObservable.notifyObservers(event.data as IEvents['playerExpression'])
           return
         }
       }

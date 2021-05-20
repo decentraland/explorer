@@ -37,11 +37,13 @@ import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { FeatureFlags, WorldConfig } from 'shared/meta/types'
 import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { unityInterface, UnityInterface } from 'unity-interface/UnityInterface'
+import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
+import { isWaitingTutorial } from 'shared/loading/selectors'
+import { ensureUnityInterface } from 'shared/renderer'
 
 const logger = createLogger('website.ts: ')
 
@@ -78,7 +80,10 @@ namespace webApp {
       }
     })
 
-    return initializeUnity(container).catch((err) => {
+    try {
+      await initializeUnity(container)
+      await loadWebsiteSystems()
+    } catch (err) {
       document.body.classList.remove('dcl-loading')
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
         ReportFatalError(NOT_INVITED)
@@ -87,11 +92,11 @@ namespace webApp {
         ReportFatalError(FAILED_FETCHING_UNITY)
       }
       throw err
-    })
+    }
   }
 
-  export async function loadUnity() {
-    const i = unityInterface
+  async function loadWebsiteSystems() {
+    const i = (await ensureUnityInterface()).unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
     const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
@@ -141,16 +146,18 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
-        ensureRendererEnabled().then(() => {
-          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-          globalThis.globalStore.dispatch(experienceStarted())
-          globalThis.globalStore.dispatch(setLoadingScreen(false))
-          Html.switchGameContainer(true)
-        }).catch(logger.error)
+        ensureRendererEnabled()
+          .then(() => {
+            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            globalThis.globalStore.dispatch(experienceStarted())
+            globalThis.globalStore.dispatch(setLoadingScreen(false))
+            Html.switchGameContainer(true)
+          })
+          .catch(logger.error)
 
         const tutorialConfig = {
           fromDeepLink: HAS_INITIAL_POSITION_MARK,
-          enableNewTutorialCamera: enableNewTutorialCamera,
+          enableNewTutorialCamera: enableNewTutorialCamera
         }
 
         EnsureProfile(identity.address)
@@ -158,6 +165,10 @@ namespace webApp {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+
+            // NOTE: here we make sure that if signup (tutorial) just finished
+            // the player is set to the correct spawn position plus we make sure that the proper scene is loaded
+            setUserPositionAfterTutorial()
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
@@ -194,13 +205,17 @@ namespace webApp {
     })
 
     if (!NO_MOTD) {
-      waitForMessageOfTheDay().then((messageOfTheDay) => {
-        i.ConfigureHUDElement(
-          HUDElementID.MESSAGE_OF_THE_DAY,
-          { active: !!messageOfTheDay, visible: false },
-          messageOfTheDay
-        )
-      }).catch(() => {/*noop*/})
+      waitForMessageOfTheDay()
+        .then((messageOfTheDay) => {
+          i.ConfigureHUDElement(
+            HUDElementID.MESSAGE_OF_THE_DAY,
+            { active: !!messageOfTheDay, visible: false },
+            messageOfTheDay
+          )
+        })
+        .catch(() => {
+          /*noop*/
+        })
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
@@ -216,6 +231,12 @@ namespace webApp {
   export const utils = {
     isBadWord,
     filterInvalidNameCharacters
+  }
+
+  function setUserPositionAfterTutorial() {
+    if (isWaitingTutorial(globalThis.globalStore.getState())) {
+      teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+    }
   }
 }
 
