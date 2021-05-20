@@ -25,7 +25,7 @@ const delayed = (result: any) =>
 const delayedProfile = delayed({ avatars: [profile] })
 
 describe('fetchProfile behavior', () => {
-  it.skip('completes once for more than one request of same user', () => {
+  it('completes once for more than one request of same user', () => {
     return expectSaga(profileSaga)
       .put(profileSuccess('user|1', 'passport' as any, true))
       .not.put(profileSuccess('user|1', 'passport' as any, true))
@@ -42,7 +42,7 @@ describe('fetchProfile behavior', () => {
       .run()
   })
 
-  it.skip('runs one request for each user', () => {
+  it('runs one request for each user', () => {
     return expectSaga(profileSaga)
       .put(profileSuccess('user|1', 'passport1' as any, true))
       .put(profileSuccess('user|2', 'passport2' as any, true))
@@ -60,7 +60,7 @@ describe('fetchProfile behavior', () => {
         [call(profileServerRequest, 'user|2'), delayedProfile],
         [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [call(processServerProfile, 'user|2', profile), 'passport2'],
-        [call(fetchInventoryItemsByAddress, 'user|2'), []]
+        [call(fetchInventoryItemsByAddress, 'user|2'), []],
       ])
       .run()
   })
@@ -144,4 +144,3 @@ describe('fetchProfile behavior', () => {
       })
   })
 })
-
