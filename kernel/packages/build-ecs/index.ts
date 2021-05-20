@@ -124,7 +124,11 @@ async function compile() {
   }
 
   // First time around, emit all files
-  await emitFile(cfg.fileNames[0], services, cfg)
+  const diagnostics = await emitFile(cfg.fileNames[0], services, cfg)
+
+  if (!WATCH && diagnostics.length) {
+    throw new Error(`! Error: compilation finished with ${diagnostics.length} errors`)
+  }
 }
 
 function watchFile(fileName: string, services: ts.LanguageService, files: FileMap, cfg: ProjectConfig) {
@@ -184,7 +188,7 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
     console.log(`> processing ${fileName.replace(ts.sys.getCurrentDirectory(), '')} failed`)
   }
 
-  logErrors(services)
+  const diagnostics = logErrors(services)
 
   type OutFile = {
     readonly path: string
@@ -335,6 +339,8 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
   if (WATCH) {
     console.log('\nThe compiler is watching file changes...\n')
   }
+
+  return diagnostics
 }
 
 function logErrors(services: ts.LanguageService) {
@@ -345,6 +351,8 @@ function logErrors(services: ts.LanguageService) {
     .concat(services.getProgram()!.getSyntacticDiagnostics())
 
   allDiagnostics.forEach(printDiagnostic)
+
+  return allDiagnostics
 }
 
 function getConfiguration(packageJson: PackageJson | null, sceneJson: SceneJson | null): ProjectConfig {
@@ -471,7 +479,7 @@ function getConfiguration(packageJson: PackageJson | null, sceneJson: SceneJson 
     if (resolved) {
       try {
         const libPackageJson = JSON.parse(ts.sys.readFile(resolved)!)
-        const decentralandLibrary = libPackageJson.decentralandLibrary;
+        const decentralandLibrary = libPackageJson.decentralandLibrary
 
         let main: string | null = null
         let typings: string | null = null
