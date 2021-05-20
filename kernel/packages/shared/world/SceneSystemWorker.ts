@@ -134,7 +134,7 @@ export class SceneSystemWorker extends SceneWorker {
           }
         })
       })
-      .catch(e => {
+      .catch((e) => {
         // @ts-ignore
         console['error'](e)
       })

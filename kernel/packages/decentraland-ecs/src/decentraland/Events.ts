@@ -1,7 +1,9 @@
 import { EventConstructor } from '../ecs/EventManager'
 import { Observable } from '../ecs/Observable'
+import { ReadOnlyQuaternion, ReadOnlyVector3 } from './math'
 import { DecentralandInterface, IEvents, RaycastResponsePayload, CameraMode } from './Types'
 export { CameraMode }
+export { ReadOnlyVector3, ReadOnlyQuaternion }
 
 /**
  * @public
@@ -81,6 +83,25 @@ export const onLeaveScene = onLeaveSceneObservable
 export const onSceneReadyObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
 
 /**
+ * This event is triggered when the position of the camera changes
+ * This event is throttled to 10 times per second.
+ * @public
+ */
+export const onPositionChangedObservable = new Observable<IEvents['positionChanged']>(createSubscriber('positionChanged'))
+
+/**
+ * This event is triggered when the rotation of the camera changes.
+ * This event is throttled to 10 times per second.
+ * @public
+ */
+export const onRotationChangedObservable = new Observable<IEvents['rotationChanged']>(createSubscriber('rotationChanged'))
+
+/**
+ * @public
+ */
+export const onPlayerExpressionObservable = new Observable<IEvents['playerExpression']>(createSubscriber('playerExpression'))
+
+/**
  * @internal
  * This function adds _one_ listener to the onEvent event of dcl interface.
  * Leveraging a switch to route events to the Observable handlers.
@@ -110,6 +131,18 @@ export function _initEventObservables(dcl: DecentralandInterface) {
         }
         case 'sceneStart': {
           onSceneReadyObservable.notifyObservers(event.data as IEvents['sceneStart'])
+          return
+        }
+        case 'positionChanged': {
+          onPositionChangedObservable.notifyObservers(event.data as IEvents['positionChanged'])
+          return
+        }
+        case 'rotationChanged': {
+          onRotationChangedObservable.notifyObservers(event.data as IEvents['rotationChanged'])
+          return
+        }
+        case 'playerExpression': {
+          onPlayerExpressionObservable.notifyObservers(event.data as IEvents['playerExpression'])
           return
         }
       }
