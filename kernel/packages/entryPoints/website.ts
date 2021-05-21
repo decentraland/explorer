@@ -37,12 +37,13 @@ import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { FeatureFlags, WorldConfig } from 'shared/meta/types'
 import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { unityInterface, UnityInterface } from 'unity-interface/UnityInterface'
+import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 import { isWaitingTutorial } from 'shared/loading/selectors'
+import { ensureUnityInterface } from 'shared/renderer'
 
 const logger = createLogger('website.ts: ')
 
@@ -79,7 +80,10 @@ namespace webApp {
       }
     })
 
-    return initializeUnity(container).catch((err) => {
+    try {
+      await initializeUnity(container)
+      await loadWebsiteSystems()
+    } catch (err) {
       document.body.classList.remove('dcl-loading')
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
         ReportFatalError(NOT_INVITED)
@@ -88,11 +92,11 @@ namespace webApp {
         ReportFatalError(FAILED_FETCHING_UNITY)
       }
       throw err
-    })
+    }
   }
 
-  export async function loadUnity() {
-    const i = unityInterface
+  async function loadWebsiteSystems() {
+    const i = (await ensureUnityInterface()).unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
     const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false

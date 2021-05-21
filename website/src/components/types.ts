@@ -1,19 +1,18 @@
-import { Store } from "redux";
+import { Store } from "redux"
 
 export type InitializeUnityResult = {
-  container: HTMLElement;
-};
+  container: HTMLElement
+}
 
 type KernelWebApp = {
-  createStore: () => Store<any>;
-  initWeb: (container: HTMLElement) => Promise<InitializeUnityResult>;
-  loadUnity: (r: InitializeUnityResult) => Promise<boolean>;
+  createStore: () => Store<any>
+  initWeb: (container: HTMLElement) => Promise<InitializeUnityResult>
   utils: {
-    isBadWord: (word: string) => boolean;
-    filterInvalidNameCharacters: (name: string) => string;
-  };
-};
+    isBadWord: (word: string) => boolean
+    filterInvalidNameCharacters: (name: string) => string
+  }
+}
 
 export type Kernel = typeof window & {
-  webApp: KernelWebApp;
-};
+  webApp: KernelWebApp
+}
