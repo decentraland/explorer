@@ -111,18 +111,6 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'SetRenderProfile', JSON.stringify({ id: id }))
   }
 
-  public DumpScenesLoadInfo() {
-    this.SendMessageToUnity('Main', 'DumpScenesLoadInfo')
-  }
-
-  public DumpRendererLockersInfo() {
-    this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
-  }
-
-  public RunPerformanceMeterTool(durationInMilliseconds: number) {
-    this.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInMilliseconds)
-  }
-
   public CreateGlobalScene(data: {
     id: string
     name: string
@@ -543,4 +531,25 @@ export class UnityInterface {
   }
 }
 
+export class ClientDebug {
+  unityInterface: UnityInterface
+
+  public constructor(unityInterface: UnityInterface) {
+    this.unityInterface = unityInterface
+  }
+
+  public DumpScenesLoadInfo() {
+    this.unityInterface.SendMessageToUnity('Main', 'DumpScenesLoadInfo')
+  }
+
+  public DumpRendererLockersInfo() {
+    this.unityInterface.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
+  }
+
+  public RunPerformanceMeterTool(durationInMilliseconds: number) {
+    this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInMilliseconds)
+  }
+}
+
 export let unityInterface: UnityInterface = new UnityInterface()
+export let clientDebug: ClientDebug = new ClientDebug(unityInterface)
