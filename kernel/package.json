@@ -96,6 +96,7 @@
   },
   "dependencies": {
     "@dcl/ecs-quests": "^1.2.3-20210422200033.commit-48c967e",
+    "@dcl/es5-context": "^1.1.0",
     "@dcl/schemas": "^1.2.0",
     "@dcl/urn-resolver": "^1.1.0",
     "bignumber.js": "^9.0.0",

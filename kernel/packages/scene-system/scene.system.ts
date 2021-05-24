@@ -3,7 +3,7 @@ import { inject } from 'decentraland-rpc/lib/client/Script'
 import { defaultLogger } from 'shared/logger'
 import { SceneRuntime } from './sdk/SceneRuntime'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
-import { customEval, getES5Context } from './sdk/sandbox'
+import { customEval } from './sdk/sandbox'
 import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 
 /**
@@ -32,7 +32,7 @@ class WebWorkerScene extends SceneRuntime {
   }
 
   async runCode(source: string, env: any): Promise<void> {
-    await customEval(source, getES5Context(env))
+    await customEval(source, env, this.isPreview)
   }
 
   async systemDidEnable() {

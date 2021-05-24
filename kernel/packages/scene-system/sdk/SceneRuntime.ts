@@ -532,7 +532,18 @@ export abstract class SceneRuntime extends Script {
       }
 
       try {
-        await this.runCode((source as any) as string, { dcl })
+        await this.runCode((source as any) as string, {
+          dcl,
+          fetch,
+          WebSocket,
+          Request,
+          Response,
+          FormData,
+          Map,
+          Set,
+          WeakMap,
+          WeakSet
+        })
 
         let modulesNotLoaded: string[] = []
 
