@@ -532,7 +532,7 @@ export class UnityInterface {
 }
 
 export class ClientDebug {
-  unityInterface: UnityInterface
+  private unityInterface: UnityInterface
 
   public constructor(unityInterface: UnityInterface) {
     this.unityInterface = unityInterface
