@@ -31,7 +31,7 @@ export function createLogger(prefix: string): ILogger {
   return {
     error(message: string | Error, ...args: any[]): void {
       if (typeof message === 'object' && message.stack) {
-        console.error(prefix + message, ...args, message.stack)
+        console.error(prefix + message.stack, ...args)
       } else {
         console.error(prefix + message, ...args)
       }
