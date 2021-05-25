@@ -1,3 +1,5 @@
+import {isFeatureEnabled} from "../shared/meta/selectors";
+
 declare const global: any & StoreContainer
 declare const window: any
 window.reactVersion = false
@@ -8,7 +10,7 @@ global.enableWeb3 = window.enableWeb3
 
 import { initializeUnity } from 'unity-interface/initializer'
 import { loadPreviewScene } from 'unity-interface/dcl'
-import { DEBUG_WS_MESSAGES, FORCE_RENDERING_STYLE, QUESTS_ENABLED } from 'config'
+import { DEBUG_WS_MESSAGES, FORCE_RENDERING_STYLE } from 'config'
 import defaultLogger from 'shared/logger'
 import { ILand, HUDElementID } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
@@ -17,6 +19,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { future, IFuture } from 'fp-future'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { FeatureFlags } from "../shared/meta/types";
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')
@@ -86,6 +89,7 @@ function sceneRenderable() {
 
 initializeUnity(container)
   .then(async (ret) => {
+    const questEnabled = isFeatureEnabled(global.globalStore.getState(), FeatureFlags.QUESTS, false)
     const i = unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
@@ -94,8 +98,8 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: questEnabled, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: questEnabled, visible: true })
 
     global.globalStore.dispatch(signalRendererInitialized())
 
