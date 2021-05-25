@@ -25,7 +25,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
 import { loginCompleted } from 'shared/ethereum/provider'
-import { UnityInterface, unityInterface } from './UnityInterface'
+import { ClientDebug, clientDebug, UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
@@ -35,7 +35,7 @@ import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { TeleportController } from 'shared/world/TeleportController'
 
-declare const globalThis: RendererInterfaces & StoreContainer & { analytics: any; delighted: any }
+declare const globalThis: RendererInterfaces & StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
 
 export type RendererInterfaces = {
   unityInterface: UnityInterface
@@ -44,6 +44,7 @@ export type RendererInterfaces = {
 
 globalThis.browserInterface = browserInterface
 globalThis.unityInterface = unityInterface
+globalThis.clientDebug = clientDebug
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
