@@ -1,23 +1,27 @@
 import { ObservableComponent } from '../ecs/Component'
 import { newId } from '../ecs/helpers'
+import { Animator } from './Components'
 
 /** @public */
 export type AnimationParams = {
   looping?: boolean
   speed?: number
   weight?: number
+  layer?: number
 }
 
-const defaultParams: Required<Pick<AnimationParams, 'looping' | 'speed' | 'weight'>> = {
+const defaultParams: Required<Pick<AnimationParams, 'looping' | 'speed' | 'weight' | 'layer'>> = {
   looping: true,
   speed: 1.0,
-  weight: 1.0
+  weight: 1.0,
+  layer: 0
 }
 
 /**
  * @public
  */
 export class AnimationState extends ObservableComponent {
+
   // @internal
   public isAnimationClip: boolean = true
 
@@ -61,6 +65,14 @@ export class AnimationState extends ObservableComponent {
   @ObservableComponent.readonly
   readonly name: string = newId('AnimClip')
 
+  /**
+   * Layering allows you to have two or more levels of animation on an object's parameters at the same time
+   */
+  public layer: number = defaultParams.layer
+
+  // @internal
+  public owner?: Animator
+
   constructor(clip: string, params: AnimationParams = defaultParams) {
     super()
     this.clip = clip
@@ -73,6 +85,8 @@ export class AnimationState extends ObservableComponent {
   setParams(params: AnimationParams) {
     this.looping = params.looping !== undefined ? params.looping : this.looping
     this.speed = params.speed || this.speed
+    this.weight = params.weight || this.weight
+    this.layer = params.layer || this.layer
     return this
   }
 
@@ -87,15 +101,15 @@ export class AnimationState extends ObservableComponent {
   /**
    * Starts the animation
    */
-  play() {
-    this.playing = true
+  play(reset: boolean = false) {
+    this.owner?.play(this, reset)
   }
 
   /**
    * Pauses the animation
    */
   pause() {
-    this.playing = false
+    this.owner?.pause(this)
   }
 
   /**
@@ -109,7 +123,6 @@ export class AnimationState extends ObservableComponent {
    * Resets and pauses the animation
    */
   stop() {
-    this.reset()
-    this.pause()
+    this.owner?.stop(this)
   }
 }

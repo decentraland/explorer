@@ -127,14 +127,14 @@ export class SceneSystemWorker extends SceneWorker {
       .then((userData) => userData!.userId)
       .then((userId) => {
         this.sceneChangeObserver = sceneObservable.add((report) => {
-          if (report.newScene.sceneId === this.getSceneId()) {
+          if (report.newScene?.sceneId === this.getSceneId()) {
             this.engineAPI!.sendSubscriptionEvent('onEnterScene', { userId })
           } else if (report.previousScene?.sceneId === this.getSceneId()) {
             this.engineAPI!.sendSubscriptionEvent('onLeaveScene', { userId })
           }
         })
       })
-      .catch(e => {
+      .catch((e) => {
         // @ts-ignore
         console['error'](e)
       })

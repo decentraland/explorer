@@ -135,8 +135,16 @@ export type RaycastResponsePayload<T> = {
   payload: T
 }
 
+/** @public */
+export enum CameraMode {
+  FirstPerson,
+  ThirdPerson,
+  BuildingToolGodMode
+}
+
 /**
  * @public
+ * Note: Don't use `on` prefix for IEvents to avoid redundancy with `event.on("onEventName")` syntax.
  */
 export interface IEvents {
   /**
@@ -163,6 +171,24 @@ export interface IEvents {
     rotation: ReadOnlyVector3
     /** Rotation quaternion, useful in some scenarios. */
     quaternion: ReadOnlyQuaternion
+  }
+
+  /**
+   * `cameraModeChanged` is triggered when the user changes the camera mode
+   */
+  cameraModeChanged: {
+    cameraMode: CameraMode
+  }
+
+  /**
+   * `idleStateChanged` is triggered when the user not moves for a defined period of time
+   */
+  idleStateChanged: {
+    isIdle: boolean
+  }
+
+  playerExpression: {
+    expressionId: string
   }
 
   /**

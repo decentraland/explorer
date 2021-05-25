@@ -1,5 +1,5 @@
 import { action } from 'typesafe-actions'
-import { Catalog, Wearable, WearablesRequestFilters } from './types'
+import { Catalog, WearablesRequestFilters, WearableV2 } from './types'
 
 export const CATALOG_LOADED = 'Catalog Loaded'
 export const catalogLoaded = (name: string, catalog: Catalog) => action(CATALOG_LOADED, { name, catalog })
@@ -11,7 +11,7 @@ export const wearablesRequest = (filters: WearablesRequestFilters, context?: str
 export type WearablesRequest = ReturnType<typeof wearablesRequest>
 
 export const WEARABLES_SUCCESS = '[Success] Wearable fetch'
-export const wearablesSuccess = (wearables: Wearable[], context: string | undefined) =>
+export const wearablesSuccess = (wearables: WearableV2[], context: string | undefined) =>
   action(WEARABLES_SUCCESS, { wearables, context })
 export type WearablesSuccess = ReturnType<typeof wearablesSuccess>
 

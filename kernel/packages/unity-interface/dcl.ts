@@ -49,8 +49,8 @@ type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
 }
 
-const rendererVersion = require('decentraland-renderer')
-window['console'].log('Renderer version: ' + rendererVersion)
+const rendererVersion = require('@dcl/unity-renderer/package.json')
+window['console'].log('Renderer version: ' + rendererVersion.version)
 
 export let gameInstance!: GameInstance
 export let isTheFirstLoading = true

@@ -1,29 +1,28 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 import { ProviderType } from "decentraland-connect/dist/types"
-import { WalletSelector } from "./wallet/WalletSelector";
-import { LoginHeader } from "./LoginHeader";
-import { Spinner } from "../common/Spinner";
-import { Avatars } from "../common/Avatars";
-import "./EthLogin.css";
+import { WalletSelector } from "./wallet/WalletSelector"
+import { LoginHeader } from "./LoginHeader"
+import { Spinner } from "../common/Spinner"
+import { Avatars } from "../common/Avatars"
+import "./EthLogin.css"
 
 export interface EthLoginProps {
-  loading: boolean;
-  availableProviders: ProviderType[];
-  onLogin: (provider: ProviderType | null) => void;
+  loading: boolean
+  availableProviders: ProviderType[]
+  onLogin: (provider: ProviderType | null) => void
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
-  const [showWalletSelector, setShowWalletSelector] = useState(false);
-  const hasWallet = !!(props.availableProviders && props.availableProviders.includes(ProviderType.INJECTED))
-  const isLoading = props.loading || showWalletSelector;
+  const [showWalletSelector, setShowWalletSelector] = useState(false)
+  const isLoading = props.loading || showWalletSelector
 
   function handlePlay() {
-    setShowWalletSelector(true);
+    setShowWalletSelector(true)
   }
 
   function handlePlayAsGuest() {
     if (props.onLogin) {
-      props.onLogin(null);
+      props.onLogin(null)
     }
   }
 
@@ -38,14 +37,9 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
             <button className="eth-login-confirm-button" onClick={handlePlay}>
               Play
             </button>
-            {!hasWallet && (
-              <button
-                className="eth-login-guest-button"
-                onClick={handlePlayAsGuest}
-              >
-                Enter as Guest
-              </button>
-            )}
+            <button className="eth-login-guest-button" onClick={handlePlayAsGuest}>
+              Enter as Guest
+            </button>
           </React.Fragment>
         )}
       </div>
@@ -57,5 +51,5 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
         onCancel={() => setShowWalletSelector(false)}
       />
     </div>
-  );
-};
+  )
+}

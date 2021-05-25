@@ -9,12 +9,12 @@ export type SceneReport = {
   /** Scene where the user was */
   previousScene?: ILand
   /** Scene the user just entered */
-  newScene: ILand
+  newScene?: ILand
 }
 
 // Called each time the user changes scene
 export const sceneObservable = new Observable<SceneReport>()
-export let lastPlayerScene: ILand
+export let lastPlayerScene: ILand | undefined
 
 // TODO: fetchSceneIds and fetchSceneJson don't work on preview mode, so we are disabling this for now. We need to figure out a way to make those queries in a way that they work in preview mode also
 if (WORLD_EXPLORER) {
@@ -28,6 +28,9 @@ if (WORLD_EXPLORER) {
         const land = (await fetchSceneJson([sceneId]))[0]
         sceneObservable.notifyObservers({ previousScene: lastPlayerScene, newScene: land })
         lastPlayerScene = land
+      } else {
+        sceneObservable.notifyObservers({ previousScene: lastPlayerScene })
+        lastPlayerScene = undefined
       }
     }
   })

@@ -120,7 +120,9 @@ export const contracts = {
     'RootChainProxy': '0x86E4Dc95c7FBdBf52e33D563BbDB00823894C287',
     'RTFKTXAtari': '0x6b47e7066c7db71aa04a1d5872496fe05c4c331f',
     'RACBasics': '0x68e139552c4077ce5c9ab929c7e18ca721ffff00',
-    'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a'
+    'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a',
+    'DGAtariDillonFrancis': '0x51e0b1afe5da0c038fc93a3fc8e11cf7a238b40b',
+    'DAOVotingPower': '0xcf9b305b4cd210079f5648f17ede69e666c0c8d4'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',
@@ -136,7 +138,8 @@ export const contracts = {
     'Multisig': '0x0de35b8b47b129877e0efca24e294b61d7e7eee3',
     'MANAMiniMeToken': '0xfb2712a1246f712b889692c7ce55fec25c06bc33',
     'LANDMiniMeToken': '0x576c4577aAd561EA79acbd49215a0cC1473BfCCA',
-    'EstateMiniMeToken': '0x2b98C125733035cDE09d311F988845808EE270E6'
+    'EstateMiniMeToken': '0x2b98C125733035cDE09d311F988845808EE270E6',
+    'DAOVotingPower': '0xe65835cd7c9311866ae5d260a1eb7b963899ca14'
   },
   'goerli': {
     'MANAToken': '0xe7fDae84ACaba2A5Ba817B6E6D8A2d415DBFEdbe',

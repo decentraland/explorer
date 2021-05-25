@@ -33,3 +33,7 @@ Assembly-UnityScript.unityProj
 ehthumbs.db
 Thumbs.db
 unity-client/debug.log
+website/public/gif-processor
+kernel/static/gif-processor
+kernel/static/voice-chat-codec
+kernel/packages/decentraland-ecs/decentraland-ecs*.tgz

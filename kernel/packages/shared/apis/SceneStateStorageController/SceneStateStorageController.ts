@@ -1,18 +1,20 @@
-import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
+import { exposeMethod, setAPIName } from 'decentraland-rpc/lib/host'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { ContentClient, DeploymentBuilder } from 'dcl-catalyst-client'
+import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType, Pointer, ContentFileHash } from 'dcl-catalyst-commons'
 import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
 import { defaultLogger } from '../../logger'
 import { DEBUG } from '../../../config'
-import { CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
+import { BuilderManifest, CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { Asset, AssetId, AssetManager } from './AssetManager'
+import { Asset, AssetId, BuilderServerAPIManager } from './BuilderServerAPIManager'
 import {
+  fromBuildertoStateDefinitionFormat,
   fromSerializedStateToStorableFormat,
   fromStorableFormatToSerializedState,
-  StorableSceneState
+  StorableSceneState,
+  toBuilderFromStateDefinitionFormat
 } from './StorableSceneStateTranslation'
 import { CLASS_ID } from 'decentraland-ecs/src'
 import { ParcelIdentity } from '../ParcelIdentity'
@@ -20,16 +22,74 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
+import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
+import { ExplorerIdentity } from 'shared/session/types'
+import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from './ISceneStateStorageController'
 
 declare const globalThis: any
 
-@registerAPI('SceneStateStorageController')
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
+  private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+  private builderManifest!: BuilderManifest
 
   @exposeMethod
-  async storeState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
+    const manifest = await this.builderApiManager.getBuilderManifestFromProjectId(projectId, this.getIdentity())
+
+    if (!manifest) return undefined
+
+    this.builderManifest = manifest
+    const definition = fromBuildertoStateDefinitionFormat(manifest.scene)
+    return serializeSceneState(definition)
+  }
+
+  @exposeMethod
+  async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
+    const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
+    if (newProject) {
+      this.builderManifest = newProject
+      const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
+      return serializeSceneState(translatedManifest)
+    }
+    return undefined
+  }
+
+  @exposeMethod
+  async createProjectWithCoords(coordinates: string): Promise<boolean> {
+    const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
+    this.builderManifest = newProject
+    return newProject ? true : false
+  }
+
+  @exposeMethod
+  async saveSceneState(serializedSceneState: SerializedSceneState): Promise<DeploymentResult> {
+    let result: DeploymentResult
+
+    try {
+      // Deserialize the scene state
+      const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
+
+      // Convert the scene state to builder scheme format
+      let builderManifest = await toBuilderFromStateDefinitionFormat(
+        sceneState,
+        this.builderManifest,
+        this.builderApiManager
+      )
+
+      // Update the manifest
+      await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+      result = { ok: true }
+    } catch (error) {
+      defaultLogger.error('Saving manifest failed', error)
+      result = { ok: false, error: `${error}` }
+    }
+    return result
+  }
+
+  @exposeMethod
+  async publishSceneState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
     let result: DeploymentResult
 
     // Convert to storable format
@@ -60,15 +120,17 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           ...models
         ])
 
+        // Deploy
+        const contentClient = this.getContentClient()
+
         // Build the entity
         const parcels = this.getParcels()
-        const { files, entityId } = await DeploymentBuilder.buildEntity(
-          EntityType.SCENE,
-          parcels,
-          entityFiles,
-          sceneJson,
-          Date.now()
-        )
+        const { files, entityId } = await contentClient.buildEntity({
+          type: EntityType.SCENE,
+          pointers: parcels,
+          files: entityFiles,
+          metadata: sceneJson
+        })
 
         // Sign entity id
         const store: Store<RootState> = globalThis['globalStore']
@@ -78,8 +140,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         }
         const authChain = Authenticator.signPayload(identity, entityId)
 
-        // Deploy
-        const contentClient = this.getContentClient()
         await contentClient.deployEntity({ files, entityId, authChain })
 
         result = { ok: true }
@@ -88,7 +148,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         result = { ok: false, error: `${error}` }
       }
     }
-
     globalThis.unityInterface.SendPublishSceneResult(result)
     return result
   }
@@ -128,6 +187,15 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     }
   }
 
+  private getIdentity(): ExplorerIdentity {
+    const store: Store<RootState> = globalThis['globalStore']
+    const identity = getCurrentIdentity(store.getState())
+    if (!identity) {
+      throw new Error('Identity not found when trying to deploy an entity')
+    }
+    return identity
+  }
+
   private getParcels(): Pointer[] {
     return this.parcelIdentity.land.sceneJsonData.scene.parcels
   }
@@ -139,14 +207,13 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   private getAllAssets(state: SerializedSceneState): Promise<Map<AssetId, Asset>> {
-    const assetManager = new AssetManager()
     const assetIds: Set<AssetId> = new Set()
     for (const entity of state.entities) {
       entity.components
         .filter(({ type, value }) => type === CLASS_ID.GLTF_SHAPE && value.assetId)
         .forEach(({ value }) => assetIds.add(value.assetId))
     }
-    return assetManager.getAssets([...assetIds])
+    return this.builderApiManager.getConvertedAssets([...assetIds])
   }
 
   private async downloadAssetFiles(assets: Map<AssetId, Asset>): Promise<Map<string, Buffer>> {
@@ -174,6 +241,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     return new Map(result)
   }
 }
+setAPIName('SceneStateStorageController', SceneStateStorageController)
 
 const toBuffer = require('blob-to-buffer')
 function blobToBuffer(blob: Blob): Promise<Buffer> {

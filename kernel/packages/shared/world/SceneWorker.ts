@@ -18,8 +18,8 @@ export abstract class SceneWorker {
     parcelScene.registerWorker(this)
 
     this.startSystem(transport)
-      .then($ => this.system.resolve($))
-      .catch($ => this.system.reject($))
+      .then(($) => this.system.resolve($))
+      .catch(($) => this.system.reject($))
   }
 
   abstract setPosition(position: Vector3): void
@@ -38,8 +38,8 @@ export abstract class SceneWorker {
     this.parcelScene.emit(event, data)
   }
 
-  getAPIInstance<X>(api: { new(options: APIOptions): X }): Promise<X> {
-    return this.system.then(system => system.getAPIInstance(api))
+  getAPIInstance<X>(api: { new (options: APIOptions): X }): Promise<X> {
+    return this.system.then((system) => system.getAPIInstance(api))
   }
 
   sendSubscriptionEvent<K extends IEventNames>(event: K, data: IEvents[K]) {
@@ -53,14 +53,14 @@ export abstract class SceneWorker {
 
       // Unmount the system
       this.system
-        .then(system => {
+        .then((system) => {
           try {
             system.unmount()
           } catch (e) {
             defaultLogger.error('Error unmounting system', e)
           }
         })
-        .catch(e => defaultLogger.error('Unable to unmount system', e))
+        .catch((e) => defaultLogger.error('Unable to unmount system', e))
 
       this.parcelScene.dispose()
     }

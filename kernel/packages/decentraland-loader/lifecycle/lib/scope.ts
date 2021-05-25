@@ -2,7 +2,6 @@ import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 export interface ParcelConfigurationOptions {
   lineOfSightRadius: number
-  secureRadius: number
 }
 
 export function squareAndSum(a: number, b: number) {

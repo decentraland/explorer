@@ -2,7 +2,7 @@ import type { Vector3Component, Vector2Component } from '../atomicHelpers/landHe
 import type { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
 export { Avatar, Profile, ColorString } from './profiles/types'
-export { WearableId, Wearable } from './catalogs/types'
+export { WearableId, Wearable, WearableV2 } from './catalogs/types'
 
 export type MappingsResponse = {
   parcel_id: string
@@ -446,7 +446,7 @@ export enum HUDElementID {
   BUILD_MODE = 24,
   QUESTS_PANEL = 26,
   QUESTS_TRACKER = 27,
-  QUESTS_NOTIFICATIONS = 28
+  BUILDER_PROJECTS_PANEL = 28
 }
 
 export type HUDConfiguration = {
@@ -562,17 +562,13 @@ export type KernelConfigForRenderer = {
   features: {
     enableBuilderInWorld: boolean
   }
-  gifSupported: boolean,
-  tld: string,
+  gifSupported: boolean
+  tld: string
   validWorldRanges: Object
 }
 
 export type RealmsInfoForRenderer = {
-  current: {
-    layer: string
-    serverName: string
-    domain: string
-  }
+  current: CurrentRealmInfoForRenderer
   realms: {
     layer: string
     serverName: string
@@ -581,6 +577,13 @@ export type RealmsInfoForRenderer = {
     usersMax: number
     userParcels: [number, number][]
   }[]
+}
+
+export type CurrentRealmInfoForRenderer = {
+  layer: string
+  serverName: string
+  domain: string
+  contentServerUrl: string
 }
 
 export type TutorialInitializationMessage = {

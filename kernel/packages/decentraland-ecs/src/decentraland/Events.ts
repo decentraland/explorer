@@ -1,6 +1,7 @@
 import { EventConstructor } from '../ecs/EventManager'
 import { Observable } from '../ecs/Observable'
-import { DecentralandInterface, IEvents, RaycastResponsePayload } from './Types'
+import { DecentralandInterface, IEvents, RaycastResponsePayload, CameraMode } from './Types'
+export { CameraMode }
 
 /**
  * @public
@@ -44,16 +45,45 @@ function createSubscriber(eventName: keyof IEvents) {
 }
 
 /**
+ * This event is triggered when you change your camera between 1st and 3rd person
+ * @public
+ */
+export const onCameraModeChangedObservable = new Observable<IEvents['cameraModeChanged']>(createSubscriber('cameraModeChanged'))
+
+/**
+ * This event is triggered when you change your camera between 1st and 3rd person
+ * @public
+ */
+export const onIdleStateChangedObservable = new Observable<IEvents['idleStateChanged']>(createSubscriber('idleStateChanged'))
+
+/**
  * These events are triggered after your character enters the scene.
  * @public
  */
-export const onEnterScene = new Observable<IEvents['onEnterScene']>(createSubscriber('onEnterScene'))
+export const onEnterSceneObservable = new Observable<IEvents['onEnterScene']>(createSubscriber('onEnterScene'))
+
+/* @deprecated Use onEnterSceneObservable instead. */
+export const onEnterScene = onEnterSceneObservable
 
 /**
  * These events are triggered after your character leaves the scene.
  * @public
  */
-export const onLeaveScene = new Observable<IEvents['onLeaveScene']>(createSubscriber('onLeaveScene'))
+export const onLeaveSceneObservable = new Observable<IEvents['onLeaveScene']>(createSubscriber('onLeaveScene'))
+
+/* @deprecated Use onLeaveSceneObservable instead. */
+export const onLeaveScene = onLeaveSceneObservable
+
+/**
+ * This event is triggered after all the resources of the scene were loaded (models, textures, etc...)
+ * @public
+ */
+export const onSceneReadyObservable = new Observable<IEvents['sceneStart']>(createSubscriber('sceneStart'))
+
+/**
+ * @public
+ */
+export const onPlayerExpressionObservable = new Observable<IEvents['playerExpression']>(createSubscriber('playerExpression'))
 
 /**
  * @internal
@@ -68,11 +98,27 @@ export function _initEventObservables(dcl: DecentralandInterface) {
     internalDcl.onEvent((event) => {
       switch (event.type) {
         case 'onEnterScene': {
-          onEnterScene.notifyObservers(event.data as IEvents['onEnterScene'])
+          onEnterSceneObservable.notifyObservers(event.data as IEvents['onEnterScene'])
           return
         }
         case 'onLeaveScene': {
-          onLeaveScene.notifyObservers(event.data as IEvents['onLeaveScene'])
+          onLeaveSceneObservable.notifyObservers(event.data as IEvents['onLeaveScene'])
+          return
+        }
+        case 'cameraModeChanged': {
+          onCameraModeChangedObservable.notifyObservers(event.data as IEvents['cameraModeChanged'])
+          return
+        }
+        case 'idleStateChanged': {
+          onIdleStateChangedObservable.notifyObservers(event.data as IEvents['idleStateChanged'])
+          return
+        }
+        case 'sceneStart': {
+          onSceneReadyObservable.notifyObservers(event.data as IEvents['sceneStart'])
+          return
+        }
+        case 'playerExpression': {
+          onPlayerExpressionObservable.notifyObservers(event.data as IEvents['playerExpression'])
           return
         }
       }

@@ -3,7 +3,6 @@ version: 2.0
 references:
   .workspace_root: &workspace_root /tmp/explorer
   .workspace_kernel: &workspace_kernel /tmp/explorer/kernel
-  .workspace_unity: &workspace_unity /tmp/explorer/unity-client
   .workspace_website: &workspace_website /tmp/explorer/website
 
   .attach_root: &attach_root
@@ -15,8 +14,6 @@ references:
 
   .working_directory_root: &working_directory_root
     working_directory: *workspace_root
-  .working_directory_unity: &working_directory_unity
-    working_directory: *workspace_unity
 
   .base_kernel_env: &base_kernel_env
     docker:
@@ -82,110 +79,6 @@ jobs:
             - .circleci
             - kernel
             - website
-            - unity-client
-
-  run-unity-tests:
-    <<: *working_directory_unity
-    resource_class: xlarge
-    docker:
-      - image: decentraland/renderer-build:2020.3.0
-        environment:
-          BUILD_TARGET: WebGL
-          BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
-          BUILD_NAME: unity
-    steps:
-      - <<: *attach_root
-      - run:
-          name: Get the hash of source files
-          command: |
-            find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas -o -iname \*.asset  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
-      - restore_cache:
-          name: Restore test results if they exist
-          keys:
-            - unity-tests-{{ checksum "../.unitysources-checksum" }}
-      - restore_cache:
-          name: Restore library if exists
-          keys:
-            - library-2020-3-0-{{ .Branch }}
-      - run:
-          name: Run tests
-          command: |
-            if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
-                exit 0
-            else
-                bash before-ci.sh
-                bash test-ci.sh
-                exit $?
-            fi;
-          no_output_timeout: 30m
-      - save_cache:
-          name: Store test results
-          key: unity-tests-{{ checksum "../.unitysources-checksum" }}
-          paths:
-            - /tmp/explorer/unity-client/testlog/log.txt
-            - /tmp/explorer/unity-client/TestResources/VisualTests/CurrentTestImages/*.png
-      - store_artifacts:
-          name: Store tests result as artifacts
-          path: /tmp/explorer/unity-client/testlog
-      - store_artifacts:
-          name: Store visual tests result as artifacts
-          path: /tmp/explorer/unity-client/TestResources/VisualTests/CurrentTestImages
-
-  build-unity:
-    <<: *working_directory_unity
-    resource_class: xlarge
-    docker:
-      - image: decentraland/renderer-build:2020.3.0
-        environment:
-          BUILD_TARGET: WebGL
-          BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
-          BUILD_NAME: unity
-    steps:
-      - <<: *attach_root
-      - run:
-          name: Get the hash of source files
-          command: |
-            find Assets -type f \( -iname \*.unity -o -iname \*.cs -o -iname \*.fbx -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas -o -iname \*.asset  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
-      - restore_cache:
-          name: Restore decentraland-renderer if exists
-          keys:
-            - unity-build-{{ checksum "../.unitysources-checksum" }}
-      - restore_cache:
-          name: Restore library if exists
-          keys:
-            - library-2020-3-0-{{ .Branch }}
-      - run:
-          name: Build decentraland-renderer
-          command: |
-            if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-                mkdir -p ${BUILD_PATH}
-                bash before-ci.sh
-                (./build-ci.sh & echo $! > /tmp/explorer/build.pid &)
-                pid=`cat /tmp/explorer/build.pid`
-                while [ -e /proc/$pid -a /proc/$pid/exe ]; do
-                    echo "Running Unity Build..."
-                    sleep 60
-                done
-            fi;
-      - save_cache:
-          name: Store decentraland-renderer build
-          key: unity-build-{{ checksum "../.unitysources-checksum" }}
-          paths:
-            - /tmp/explorer/unity-client/Builds/
-      - save_cache:
-          name: Store library
-          key: library-2020-3-0-{{ .Branch }}-{{ epoch }}
-          paths:
-            - /tmp/explorer/unity-client/Library
-      - store_artifacts:
-          name: Store logs
-          path: /tmp/buildlog.txt
-
-      # persist to workspace to use in downstream jobs
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - unity-client/Builds/unity/Build
 
   build-kernel:
     <<: *base_kernel_env
@@ -198,7 +91,7 @@ jobs:
       - run:
           name: Get the hash of source files
           command: |
-            find packages -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
+            find . -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
       - restore_cache:
           name: Restore built files
           keys:
@@ -261,16 +154,20 @@ jobs:
           command: |
             make test-ci
             npx codecov
-      - store_artifacts:
-          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
-          when: on_fail
-      - store_artifacts:
-          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
-          when: on_fail
       - run:
           name: Build deployment dist
           command: |
-            make build-deploy
+            make build-release build-deploy
+      - run:
+          name: pack decentraland-ecs npm package
+          working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
+          command: npm pack
+      - store_artifacts:
+          path: packages/decentraland-ecs/decentraland-ecs-1.0.0.tgz
+      - store_artifacts:
+          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
+      - store_artifacts:
+          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
       - save_cache:
           name: Save the built files
           paths:
@@ -285,6 +182,7 @@ jobs:
           paths:
             - kernel/static
             - kernel/dist
+            - kernel/packages/decentraland-ecs/decentraland-ecs-1.0.0.tgz
 
   build-website:
     <<: *base_website_env
@@ -325,39 +223,6 @@ jobs:
           paths:
             - website/build
 
-  package:
-    <<: *working_directory_root
-    docker:
-      - <<: *image_kernel
-    steps:
-      - <<: *attach_root
-      - run:
-          name: Copy renderer to kernel
-          command: |
-            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb /tmp/explorer/kernel/static/unity/Build/
-
-      # persist to workspace to use in downstream jobs
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - kernel/static/unity/Build
-
-  publish-renderer:
-    <<: *working_directory_unity
-    docker:
-      - <<: *image_kernel
-        environment:
-          BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
-    steps:
-      - <<: *attach_root
-      - run:
-          name: Set up NPM access tokens
-          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          when: on_success
-      - run:
-          name: Publish a new version of decentraland-renderer
-          command: /tmp/explorer/.circleci/publish.sh
-
   publish-ecs:
     <<: *base_kernel_env
     steps:
@@ -385,8 +250,13 @@ jobs:
           command: |
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
+          name: pack decentraland-ecs npm package
+          working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
+          command: cp decentraland-ecs-1.0.0.tgz /tmp/explorer/website/build/decentraland-ecs.tgz
+      - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
           command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -460,43 +330,21 @@ workflows:
       - checkout:
           <<: *all_branches_and_tags
 
-      - run-unity-tests:
-          <<: *all_branches_and_tags
-          requires:
-            - checkout
-      - build-unity:
-          <<: *all_branches_and_tags
-          requires:
-            - checkout
-
       - build-kernel:
           <<: *all_branches_and_tags
           requires:
             - checkout
 
-      - package:
-          <<: *all_branches_and_tags
-          requires:
-            - build-kernel
-            - build-unity
-
       - build-website:
           <<: *all_branches_and_tags
           requires:
-            - package
-
-      - publish-renderer:
-          requires:
-            - package
-          filters:
-            branches:
-              only: /(.*)/ # run on all branches, but no tags
+            - build-kernel
 
       # ecs publishing
       - hold-ecs:
           type: approval
           requires:
-            - package
+            - build-kernel
           filters:
             branches:
               ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
@@ -504,7 +352,7 @@ workflows:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
       - publish-ecs:
           requires:
-            - package
+            - build-kernel
             - hold-ecs # on tags we wait until there's an approval
           filters:
             branches:
@@ -515,28 +363,28 @@ workflows:
       # deployments
       - deploy-dev:
           requires:
-            - package
+            - build-kernel
             - "build-website"
           filters:
             branches:
               only: master
       - deploy-stg:
           requires:
-            - package
+            - build-kernel
             - "build-website"
           filters:
             branches:
               only: staging
       - deploy-prd:
           requires:
-            - package
+            - build-kernel
             - "build-website"
           filters:
             branches:
               only: release
       - deploy-on-pr:
           requires:
-            - package
+            - build-kernel
             - "build-website"
           filters:
             branches:

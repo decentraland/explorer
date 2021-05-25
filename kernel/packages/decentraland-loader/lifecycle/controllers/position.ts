@@ -1,7 +1,7 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { SceneLifeCycleController } from './scene'
 import { EventEmitter } from 'events'
-import { ParcelLifeCycleController } from './parcel'
+import {ParcelLifeCycleController, ParcelSightSeeingReport} from './parcel'
 import { SceneDataDownloadManager } from './download'
 import { worldToGrid, gridToWorld } from '../../../atomicHelpers/parcelScenePositions'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
@@ -64,15 +64,18 @@ export class PositionLifecycleController extends EventEmitter {
     }
 
     const parcels = this.parcelController.reportCurrentPosition(resolvedPosition)
-
-    if (parcels) {
-      const newlySightedScenes = await this.sceneController.reportSightedParcels(parcels.sighted, parcels.lostSight)
-      if (!this.eqSet(this.currentlySightedScenes, newlySightedScenes.sighted)) {
-        this.currentlySightedScenes = newlySightedScenes.sighted
-      }
-    }
+    await this.updateSightedParcels(parcels)
 
     this.checkPositionSettlement()
+  }
+
+  public async updateSightedParcels(parcels: ParcelSightSeeingReport | undefined) {
+    if (parcels === undefined) return
+
+    const newlySightedScenes = await this.sceneController.reportSightedParcels(parcels.sighted, parcels.lostSight)
+    if (!this.eqSet(this.currentlySightedScenes, newlySightedScenes.sighted)) {
+      this.currentlySightedScenes = newlySightedScenes.sighted
+    }
   }
 
   private eqSet(as: Array<any>, bs: Array<any>) {

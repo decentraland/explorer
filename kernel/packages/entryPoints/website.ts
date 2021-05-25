@@ -35,17 +35,19 @@ import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
-import { WorldConfig } from 'shared/meta/types'
-import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { unityInterface, UnityInterface } from 'unity-interface/UnityInterface'
+import { FeatureFlags, WorldConfig } from 'shared/meta/types'
+import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
+import { isWaitingTutorial } from 'shared/loading/selectors'
+import { ensureUnityInterface } from 'shared/renderer'
 
 const logger = createLogger('website.ts: ')
 
-function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
+function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean, builderInWorldEnabled: boolean) {
   i.ConfigureHUDElement(
     HUDElementID.TASKBAR,
     { active: true, visible: true },
@@ -59,6 +61,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL, { active: builderInWorldEnabled, visible: false })
 }
 
 namespace webApp {
@@ -77,7 +80,10 @@ namespace webApp {
       }
     })
 
-    return initializeUnity(container).catch((err) => {
+    try {
+      await initializeUnity(container)
+      await loadWebsiteSystems()
+    } catch (err) {
       document.body.classList.remove('dcl-loading')
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
         ReportFatalError(NOT_INVITED)
@@ -86,11 +92,11 @@ namespace webApp {
         ReportFatalError(FAILED_FETCHING_UNITY)
       }
       throw err
-    })
+    }
   }
 
-  export async function loadUnity() {
-    const i = unityInterface
+  async function loadWebsiteSystems() {
+    const i = (await ensureUnityInterface()).unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
     const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
@@ -115,7 +121,6 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: QUESTS_ENABLED, visible: true })
 
     // NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //              so ensuring meta configuration is initialized in this stage is a must
@@ -127,27 +132,32 @@ namespace webApp {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+        const builderInWorldEnabled =
+          identity.hasConnectedWeb3 &&
+          isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
 
         const configForRenderer = kernelConfigForRenderer()
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
         i.SetKernelConfiguration(configForRenderer)
 
-        configureTaskbarDependentHUD(i, voiceChatEnabled)
+        configureTaskbarDependentHUD(i, voiceChatEnabled, builderInWorldEnabled)
 
         i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
-        ensureRendererEnabled().then(() => {
-          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-          globalThis.globalStore.dispatch(experienceStarted())
-          globalThis.globalStore.dispatch(setLoadingScreen(false))
-          Html.switchGameContainer(true)
-        }).catch(logger.error)
+        ensureRendererEnabled()
+          .then(() => {
+            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            globalThis.globalStore.dispatch(experienceStarted())
+            globalThis.globalStore.dispatch(setLoadingScreen(false))
+            Html.switchGameContainer(true)
+          })
+          .catch(logger.error)
 
         const tutorialConfig = {
           fromDeepLink: HAS_INITIAL_POSITION_MARK,
-          enableNewTutorialCamera: enableNewTutorialCamera,
+          enableNewTutorialCamera: enableNewTutorialCamera
         }
 
         EnsureProfile(identity.address)
@@ -155,12 +165,16 @@ namespace webApp {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+
+            // NOTE: here we make sure that if signup (tutorial) just finished
+            // the player is set to the correct spawn position plus we make sure that the proper scene is loaded
+            setUserPositionAfterTutorial()
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
       .catch((e) => {
         logger.error('error on configuring taskbar & friends hud / tutorial. Trying to default to simple taskbar', e)
-        configureTaskbarDependentHUD(i, false)
+        configureTaskbarDependentHUD(i, false, false)
       })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
@@ -191,13 +205,17 @@ namespace webApp {
     })
 
     if (!NO_MOTD) {
-      waitForMessageOfTheDay().then((messageOfTheDay) => {
-        i.ConfigureHUDElement(
-          HUDElementID.MESSAGE_OF_THE_DAY,
-          { active: !!messageOfTheDay, visible: false },
-          messageOfTheDay
-        )
-      }).catch(() => {/*noop*/})
+      waitForMessageOfTheDay()
+        .then((messageOfTheDay) => {
+          i.ConfigureHUDElement(
+            HUDElementID.MESSAGE_OF_THE_DAY,
+            { active: !!messageOfTheDay, visible: false },
+            messageOfTheDay
+          )
+        })
+        .catch(() => {
+          /*noop*/
+        })
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
@@ -213,6 +231,12 @@ namespace webApp {
   export const utils = {
     isBadWord,
     filterInvalidNameCharacters
+  }
+
+  function setUserPositionAfterTutorial() {
+    if (isWaitingTutorial(globalThis.globalStore.getState())) {
+      teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+    }
   }
 }
 
