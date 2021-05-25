@@ -6,14 +6,18 @@ import { questsRequest } from './client'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { toRendererQuest } from '@dcl/ecs-quests/@dcl/mappings'
 import { rendererInitialized } from 'shared/renderer'
-import { QUESTS_ENABLED } from 'config'
 import { getPreviousQuests, getQuests } from './selectors'
 import { deepEqual } from 'atomicHelpers/deepEqual'
+import { isFeatureEnabled } from "../meta/selectors"
+import { FeatureFlags } from "../meta/types"
+import { RendererInterfaces } from "../../unity-interface/dcl"
+import { StoreContainer } from "../store/rootTypes"
 
+declare const globalThis: Window & RendererInterfaces & StoreContainer
 const QUESTS_REFRESH_INTERVAL = 30000
 
 export function* questsSaga(): any {
-  if (QUESTS_ENABLED) {
+  if (isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)) {
     yield takeEvery(USER_AUTHENTIFIED, initializeQuests)
     yield takeEvery(QUESTS_INITIALIZED, initUpdateQuestsInterval)
   }
