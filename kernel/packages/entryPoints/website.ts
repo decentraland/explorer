@@ -17,7 +17,7 @@ import {
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, QUESTS_ENABLED } from '../config/index'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
@@ -53,7 +53,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
     { active: true, visible: true },
     {
       enableVoiceChat: voiceChatEnabled,
-      enableQuestPanel: QUESTS_ENABLED
+      enableQuestPanel: isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)
     }
   )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
@@ -100,6 +100,7 @@ namespace webApp {
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
     const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
+    const questEnabled = isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false);
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -119,8 +120,8 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
-    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: questEnabled, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: questEnabled, visible: true })
 
     // NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //              so ensuring meta configuration is initialized in this stage is a must
