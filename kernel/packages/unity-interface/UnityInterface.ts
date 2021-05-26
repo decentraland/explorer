@@ -31,6 +31,7 @@ import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
+import { Observable } from 'decentraland-ecs/src'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -60,6 +61,7 @@ export class UnityInterface {
   public gameInstance: any
   public Module: any
   public currentHeight: number = 1080
+  public onCrashPayloadResponse: Observable<string> = new Observable<string>()
 
   public SetTargetHeight(height: number): void {
     if (EDITOR) {
@@ -188,6 +190,30 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'SetDisableAssetBundles')
   }
 
+  public async CrashPayloadRequest(): Promise<string> {
+    // Over wasm this should come back on the same call stack frame because
+    // the response comes within the CrashPayloadRequest method body.
+
+    // For websocket this should take more frames, so we need promises.
+    let promise = new Promise<string>((resolve, reject) => {
+      let crashListener = (payload: string) => {
+        resolve(payload)
+      }
+
+      this.onCrashPayloadResponse.addOnce(crashListener)
+
+      // We solve on timeout anyways to simplify usage.
+      setTimeout(() => {
+        this.onCrashPayloadResponse.removeCallback(crashListener)
+        resolve('Crash payload request failed')
+      }, 1000)
+
+      this.SendMessageToUnity('Main', 'CrashPayloadRequest')
+    })
+
+    return promise
+  }
+
   public ActivateRendering() {
     this.SendMessageToUnity('Main', 'ActivateRendering')
   }
@@ -277,7 +303,11 @@ export class UnityInterface {
   }
 
   public SetTutorialEnabledForUsersThatAlreadyDidTheTutorial(tutorialConfig: TutorialInitializationMessage) {
-    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial', JSON.stringify(tutorialConfig))
+    this.SendMessageToUnity(
+      'TutorialController',
+      'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial',
+      JSON.stringify(tutorialConfig)
+    )
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -551,7 +581,15 @@ export class ClientDebug {
   }
 
   public DumpCrashPayload() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpCrashPayload')
+    this.unityInterface
+      .CrashPayloadRequest()
+      .then((payload: string) => {
+        defaultLogger.log(`DumpCrashPayload result:\n${payload}`)
+        defaultLogger.log(`DumpCrashPayload length:${payload.length}`)
+      })
+      .catch((x) => {
+        //
+      })
   }
 }
 
