@@ -549,6 +549,10 @@ export class ClientDebug {
   public RunPerformanceMeterTool(durationInMilliseconds: number) {
     this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInMilliseconds)
   }
+
+  public DumpCrashPayload() {
+    this.unityInterface.SendMessageToUnity('Main', 'DumpCrashPayload')
+  }
 }
 
 export let unityInterface: UnityInterface = new UnityInterface()
