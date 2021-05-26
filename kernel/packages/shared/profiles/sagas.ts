@@ -34,7 +34,7 @@ import { generateRandomUserProfile } from './generateRandomUserProfile'
 import { getProfile, hasConnectedWeb3 } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
-import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
+import { buildServerMetadata, ensureServerFormat, ServerFormatProfile } from './transformations/profileToServerFormat'
 import { Profile, ContentFile, Avatar, ProfileType } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
@@ -118,7 +118,7 @@ function* initialProfileLoad() {
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
   const userId = identity.address
 
-  let profile = undefined
+  let profile: Profile
 
   try {
     profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
@@ -132,7 +132,7 @@ function* initialProfileLoad() {
 
     if (!profile.hasClaimedName) {
       const net: keyof typeof ethereumConfigurations = yield select(getCurrentNetwork)
-      const names = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
+      const names: string[] = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
       // patch profile to re-add missing name
       profile = { ...profile, name: names[0], hasClaimedName: true }
@@ -143,8 +143,8 @@ function* initialProfileLoad() {
       }
     }
 
-    const isFace128Resized = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face128)
-    const isFace256Resized = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face256)
+    const isFace128Resized: string | null = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face128)
+    const isFace256Resized: string | null = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face256)
 
     if (isFace128Resized || isFace256Resized) {
       // setting dirty profile, as at least one of the face images are taken from a local blob
@@ -200,7 +200,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   const { userId, profileType } = action.payload
 
   const currentId = yield select(getCurrentUserId)
-  let profile: any
+  let profile: ServerFormatProfile | null = null
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
@@ -211,7 +211,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
           profile.hasClaimedName = false // for now, comms profiles can't have claimed names
         }
       } else {
-        const profiles: { avatars: object[] } = yield call(profileServerRequest, userId)
+        const profiles: { avatars: ServerFormatProfile[] } = yield call(profileServerRequest, userId)
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]
@@ -232,22 +232,23 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
       if (!profile || (localProfile && profile.version < localProfile.version)) {
         profile = localProfile
       }
-
-      const identity: ExplorerIdentity = yield select(getCurrentIdentity)
-      profile.ethAddress = identity.rawAddress
-    }
-
-    if (!profile) {
-      defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
-      profile = yield call(generateRandomUserProfile, userId)
+      if (profile) {
+        const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+        profile.ethAddress = identity.rawAddress
+      }
     }
   } else {
     const baseUrl = yield call(getResourcesURL)
     profile = yield call(backupProfile, baseUrl + '/default-profile/snapshots', userId)
   }
 
+  if (!profile) {
+    defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
+    profile = yield call(generateRandomUserProfile, userId)
+  }
+
   if (currentId === userId) {
-    profile.email = ''
+    profile!.email = ''
   }
 
   yield populateFaceIfNecessary(profile, '256')
@@ -291,7 +292,7 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
       let faceUrl = `${resizeServiceUrl}/${path}`
 
       // head to resize url in the current catalyst before populating
-      let response = yield call(fetch, faceUrl, { method: 'HEAD' })
+      let response: Response = yield call(fetch, faceUrl, { method: 'HEAD' })
       if (!response.ok) {
         // if resize service is not available for this image, try with fallback server
         const fallbackServiceUrl = getServerConfigurations().fallbackResizeServiceUrl
@@ -343,8 +344,8 @@ function* handleRandomAsSuccess(action: ProfileRandomAction): any {
 function* handleLocalProfile(action: LocalProfileReceived) {
   const { userId, profile } = action.payload
 
-  const existingProfile = yield select(getProfile, userId)
-  const connectedWeb3 = yield select(hasConnectedWeb3, userId)
+  const existingProfile: Profile | null = yield select(getProfile, userId)
+  const connectedWeb3: boolean = yield select(hasConnectedWeb3, userId)
 
   if (!existingProfile || existingProfile.version < profile.version) {
     yield put(profileSuccess(userId, profile, connectedWeb3))
@@ -380,15 +381,18 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
 function* sendLoadProfile(profile: Profile) {
   yield call(ensureBaseCatalogs)
 
-  const identity = yield select(getCurrentIdentity)
+  const identity: ExplorerIdentity | undefined = yield select(getCurrentIdentity)
+  if (!identity) throw new Error('identity not ready in function sendLoadProfile')
   const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
 
 function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
-  const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
-
+  const userId: string | undefined = saveAvatar.payload.userId
+    ? saveAvatar.payload.userId
+    : yield select(getCurrentUserId)
+  if (userId == undefined) throw new Error('userId is undefined in handleSaveAvatar')
   try {
     const savedProfile: Profile | null = yield select(getProfile, userId)
     const currentVersion: number = savedProfile?.version && savedProfile?.version > 0 ? savedProfile?.version : 0
@@ -507,7 +511,12 @@ async function deploy(
   // Build entity and group all files
   const preparationData = await (contentFiles.size
     ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
-    : catalyst.buildEntityWithoutNewFiles({ type: EntityType.PROFILE, pointers: [identity.address], hashesByKey: contentHashes, metadata }))
+    : catalyst.buildEntityWithoutNewFiles({
+        type: EntityType.PROFILE,
+        pointers: [identity.address],
+        hashesByKey: contentHashes,
+        metadata
+      }))
   // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data

@@ -42,7 +42,7 @@ export function buildServerMetadata(profile: Profile) {
   return metadata
 }
 
-type ServerFormatProfile = Omit<Profile, 'avatar'> & {
+export type ServerFormatProfile = Omit<Profile, 'avatar'> & {
   avatar: ServerProfileAvatar
 }
 
@@ -52,7 +52,7 @@ type Color3 = {
   b: number
 }
 
-type ServerProfileAvatar = {
+export type ServerProfileAvatar = {
   bodyShape: WearableId
   eyes: { color: Color3 }
   hair: { color: Color3 }
