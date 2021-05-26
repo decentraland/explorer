@@ -2,7 +2,6 @@ import { ProviderType } from "decentraland-connect/dist/types"
 import { Kernel } from "../components/types";
 
 const kernel = (window as Kernel).webApp;
-const analytics = window.analytics;
 const ethereum = window.ethereum as any;
 
 export function filterInvalidNameCharacters(name: string) {
@@ -45,8 +44,8 @@ export type TrackEvents = {
 }
 
 export function track<E extends keyof TrackEvents>(event: E, properties?: TrackEvents[E]) {
-  if (analytics) {
+  if (window.analytics) {
     const wallet = getWalletName()
-    analytics.track(event, { wallet, ...properties })
+    window.analytics.track(event, { wallet, ...properties })
   }
 }
