@@ -1,5 +1,3 @@
-import {isFeatureEnabled} from "../shared/meta/selectors";
-
 declare const global: any & StoreContainer
 declare const window: any
 window.reactVersion = false
@@ -19,7 +17,8 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { future, IFuture } from 'fp-future'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { unityInterface } from 'unity-interface/UnityInterface'
-import { FeatureFlags } from "../shared/meta/types";
+import { FeatureFlags } from '../shared/meta/types'
+import { isFeatureEnabled } from '../shared/meta/selectors'
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')
