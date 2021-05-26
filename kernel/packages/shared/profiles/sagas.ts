@@ -392,7 +392,7 @@ function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   const userId: string | undefined = saveAvatar.payload.userId
     ? saveAvatar.payload.userId
     : yield select(getCurrentUserId)
-  if (userId == undefined) throw new Error('userId is undefined in handleSaveAvatar')
+  if (userId === undefined) throw new Error('userId is undefined in handleSaveAvatar')
   try {
     const savedProfile: Profile | null = yield select(getProfile, userId)
     const currentVersion: number = savedProfile?.version && savedProfile?.version > 0 ? savedProfile?.version : 0
@@ -508,15 +508,24 @@ async function deploy(
   // Build the client
   const catalyst = new ContentClient(url, 'explorer-kernel-profile')
 
+  const buildEntityPayload = {
+    type: EntityType.PROFILE,
+    pointers: [identity.address],
+    files: contentFiles,
+    metadata
+  }
+  const buildEntityWithoutNewFilesPayload = {
+    type: EntityType.PROFILE,
+    pointers: [identity.address],
+    hashesByKey: contentHashes,
+    metadata
+  }
+
   // Build entity and group all files
   const preparationData = await (contentFiles.size
-    ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
-    : catalyst.buildEntityWithoutNewFiles({
-        type: EntityType.PROFILE,
-        pointers: [identity.address],
-        hashesByKey: contentHashes,
-        metadata
-      }))
+    ? catalyst.buildEntity(buildEntityPayload)
+    : catalyst.buildEntityWithoutNewFiles(buildEntityWithoutNewFilesPayload))
+
   // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data
