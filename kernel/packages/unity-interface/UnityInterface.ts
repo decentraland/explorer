@@ -61,7 +61,7 @@ export class UnityInterface {
   public gameInstance: any
   public Module: any
   public currentHeight: number = 1080
-  public onCrashPayloadResponse: Observable<string> = new Observable<string>()
+  public crashPayloadResponseObservable: Observable<string> = new Observable<string>()
 
   public SetTargetHeight(height: number): void {
     if (EDITOR) {
@@ -196,17 +196,15 @@ export class UnityInterface {
 
     // For websocket this should take more frames, so we need promises.
     let promise = new Promise<string>((resolve, reject) => {
-      let crashListener = (payload: string) => {
+      let crashListener = this.crashPayloadResponseObservable.addOnce((payload) => {
         resolve(payload)
-      }
-
-      this.onCrashPayloadResponse.addOnce(crashListener)
+      })
 
       // We solve on timeout anyways to simplify usage.
       setTimeout(() => {
-        this.onCrashPayloadResponse.removeCallback(crashListener)
+        this.crashPayloadResponseObservable.remove(crashListener)
         resolve('Crash payload request failed')
-      }, 1000)
+      }, 10000)
 
       this.SendMessageToUnity('Main', 'CrashPayloadRequest')
     })
