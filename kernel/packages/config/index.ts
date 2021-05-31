@@ -108,6 +108,7 @@ export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
+export const POI_SERVICE = qs.POI_SERVICE
 export const REALM = qs.realm
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
@@ -147,8 +148,6 @@ export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST)
 export const FORCE_RENDERING_STYLE = qs.FORCE_RENDERING_STYLE
 
 export const TEST_WEARABLES_OVERRIDE = location.search.includes('TEST_WEARABLES')
-
-export const QUESTS_ENABLED = location.search.includes('QUESTS_ENABLED')
 
 const META_CONFIG_URL = qs.META_CONFIG_URL
 

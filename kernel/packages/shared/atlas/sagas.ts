@@ -37,10 +37,10 @@ import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 import { getPois } from '../meta/selectors'
 import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
-import { retrieve, store } from 'shared/cache'
-import { getUpdateProfileServer } from 'shared/dao/selectors'
-import { Store } from 'redux'
-import { RootDaoState } from 'shared/dao/types'
+import { retrieve, store as cacheStore } from 'shared/cache'
+import { getPOIService, getUpdateProfileServer } from 'shared/dao/selectors'
+import { store } from 'shared/store/store'
+import { realmInitialized } from 'shared/dao'
 
 declare const window: {
   unityInterface: {
@@ -95,7 +95,7 @@ function* loadMarketplace(config: MarketplaceConfig) {
 
       if (etag) {
         // if we get an etag from the response => cache both etag & data
-        yield store(cachedKey, { version: etag, data })
+        yield cacheStore(cachedKey, { version: etag, data })
       }
     }
 
@@ -155,8 +155,17 @@ function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
 
 function* initializePois() {
   const pois: Vector2Component[] = yield select(getPois)
-  const poiTiles = pois.map((position) => `${position.x},${position.y}`)
-  yield put(initializePoiTiles(poiTiles))
+  const metaPOIs = pois.map((position) => `${position.x},${position.y}`)
+
+  yield realmInitialized()
+  const daoPOIs: string[] | undefined = yield fetchPOIsFromDAO()
+
+  if (daoPOIs) {
+    const pois = [...new Set(metaPOIs.concat(daoPOIs))]
+    yield put(initializePoiTiles(pois))
+  } else {
+    yield put(initializePoiTiles(metaPOIs))
+  }
 }
 
 type stringOrNull = string | null
@@ -189,7 +198,6 @@ function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
 }
 
 function* reportScenes(sceneIds: string[]): any {
-  const store: Store<RootDaoState> = (window as any)['globalStore']
   yield call(waitForPoiTilesInitialization)
   const pois = yield select(getPoiTiles)
 
@@ -219,7 +227,11 @@ function* reportScenes(sceneIds: string[]): any {
       minimapSceneInfoResult.push({
         owner: getOwnerNameFromJsonData(scene.sceneJsonData),
         description: getSceneDescriptionFromJsonData(scene.sceneJsonData),
-        previewImageUrl: getThumbnailUrlFromJsonDataAndContent(scene.sceneJsonData, scene.contents, getUpdateProfileServer(store.getState())),
+        previewImageUrl: getThumbnailUrlFromJsonDataAndContent(
+          scene.sceneJsonData,
+          scene.contents,
+          getUpdateProfileServer(store.getState())
+        ),
         name: scene.name,
         type: scene.type,
         parcels,
@@ -228,4 +240,17 @@ function* reportScenes(sceneIds: string[]): any {
     })
 
   window.unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
+}
+
+async function fetchPOIsFromDAO(): Promise<string[] | undefined> {
+  const url = getPOIService(store.getState())
+  try {
+    const response = await fetch(url)
+    if (response.ok) {
+      const result = await response.json()
+      return result
+    }
+  } catch (error) {
+    defaultLogger.warn(`Error while fetching POIs from DAO ${error}`)
+  }
 }
