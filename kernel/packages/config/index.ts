@@ -108,6 +108,7 @@ export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
+export const POI_SERVICE = qs.POI_SERVICE
 export const REALM = qs.realm
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
