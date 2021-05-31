@@ -546,8 +546,8 @@ export class ClientDebug {
     this.unityInterface.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
   }
 
-  public RunPerformanceMeterTool(durationInMilliseconds: number) {
-    this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInMilliseconds)
+  public RunPerformanceMeterTool(durationInSeconds: number) {
+    this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInSeconds)
   }
 }
 
