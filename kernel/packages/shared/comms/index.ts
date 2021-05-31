@@ -10,7 +10,7 @@ import {
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType, SceneFeatureToggles } from 'shared/types'
-import { positionObservable, PositionReport, lastPlayerPosition } from 'shared/world/positionThings'
+import {positionObservable, PositionReport, lastPlayerPosition, lastPlayerParcel} from 'shared/world/positionThings'
 import { lastPlayerScene } from 'shared/world/sceneState'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
@@ -105,6 +105,7 @@ import { isFriend } from 'shared/friends/selectors'
 import { EncodedFrame } from 'voice-chat-codec/types'
 import Html from 'shared/Html'
 import { isFeatureToggleEnabled } from 'shared/selectors'
+import {Vector3} from "../../decentraland-ecs";
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -128,10 +129,12 @@ export const MORDOR_POSITION: Position = [
 type CommsContainer = {
   printCommsInformation: () => void
   bots: {
-    create: () => string
+    create: (botsAmount: number, targetWorldPos: Vector3 | undefined) => string[]
+    createAtWorldPos: (botsAmount: number, targetArea: { xPos: number | undefined, yPos: number | undefined, zPos: number | undefined, areaWidth: number | undefined, areaDepth: number | undefined }) => string[]
+    createAtCoords: (botsAmount: number, targetArea: { xCoord: number | undefined, yCoord: number | undefined, areaWidth: number | undefined, areaDepth: number | undefined }) => string[]
     list: () => string[]
     remove: (id: string) => boolean
-    reposition: (id: string) => void
+    // reposition: (id: string) => void
   }
 }
 
@@ -1278,27 +1281,81 @@ type Bot = { id: string; handle: any }
 const bots: Bot[] = []
 
 globalThis.bots = {
-  create: () => {
-    const id = uuid()
-    processProfileMessage(context!, id, id, {
-      type: 'profile',
-      time: Date.now(),
-      data: {
-        version: '1',
-        user: id,
-        type: ProfileType.DEPLOYED
-      }
-    })
-    const position = { ...lastPlayerPosition }
-    const handle = setInterval(() => {
-      processPositionMessage(context!, id, {
-        type: 'position',
+  create: (botsAmount: number = 1, targetWorldPos: Vector3 | undefined = undefined) => {
+    const botsCreated: string[] = []
+    if (botsAmount <= 0) return botsCreated
+
+    for (let i = 0; i < botsAmount; i++) {
+      const id = uuid()
+
+      processProfileMessage(context!, id, id, {
+        type: 'profile',
         time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
+        data: {
+          version: '1',
+          user: id,
+          type: ProfileType.DEPLOYED
+        }
       })
-    }, 1000)
-    bots.push({ id, handle })
-    return id
+
+      const position = targetWorldPos === undefined ? { ...lastPlayerPosition } : targetWorldPos
+      const handle = setInterval(() => {
+        processPositionMessage(context!, id, {
+          type: 'position',
+          time: Date.now(),
+          data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
+        })
+      }, 1000)
+      bots.push({ id, handle })
+      botsCreated.push(id)
+    }
+
+    return botsCreated
+  },
+  createAtWorldPos: (botsAmount: number = 1, targetArea: { xPos: number | undefined, yPos: number | undefined, zPos: number | undefined, areaWidth: number | undefined, areaDepth: number | undefined }) => {
+    let botsCreated: string[] = []
+    if (botsAmount <= 0 || !this) return botsCreated
+
+    const lastPlayerPos = { ...lastPlayerPosition }
+
+    // Patch targetArea
+    if (targetArea.areaWidth === undefined) {
+      targetArea.areaWidth = 0
+    }
+    if (targetArea.areaDepth === undefined) {
+      targetArea.areaDepth = 0
+    }
+    if (targetArea.xPos === undefined) {
+      targetArea.xPos = lastPlayerPos.x
+    }
+    if (targetArea.yPos === undefined) {
+      targetArea.yPos = lastPlayerPos.y - 1.7 // player camera height
+    }
+    if (targetArea.zPos === undefined) {
+      targetArea.zPos = lastPlayerPos.z
+    }
+
+    for (let i = 0; i < botsAmount; i++) {
+      const basePos = new Vector3(targetArea.xPos, targetArea.yPos, targetArea.zPos)
+      const randomPos = new Vector3(basePos.x + (Math.random() * targetArea.areaWidth),
+                                    basePos.y,
+                                    basePos.z + (Math.random() * targetArea.areaDepth))
+
+      botsCreated = botsCreated.concat(globalThis.bots.create(1, randomPos))
+    }
+
+    return botsCreated
+  },
+  createAtCoords: (botsAmount: number = 1, targetArea: { xCoord: number | undefined, yCoord: number | undefined, areaWidth: number | undefined, areaDepth: number | undefined }) => {
+    const worldPosTargetArea = {
+      xPos: (targetArea.xCoord !== undefined ? targetArea.xCoord : lastPlayerParcel.x) * parcelLimits.parcelSize,
+      yPos: undefined,
+      zPos: (targetArea.yCoord !== undefined ? targetArea.yCoord : lastPlayerParcel.y) * parcelLimits.parcelSize,
+      areaWidth: targetArea.areaWidth,
+      areaDepth: targetArea.areaDepth
+    }
+
+    return globalThis.bots.createAtWorldPos(botsAmount, worldPosTargetArea)
   },
   remove: (id: string | undefined) => {
     let bot
@@ -1314,7 +1371,7 @@ globalThis.bots = {
     }
     return false
   },
-  reposition: (id: string) => {
+  /*reposition: (id: string) => {
     // to test immediate repositioning
     let bot = bots.find((bot) => bot.id === id)
     if (bot) {
@@ -1326,7 +1383,7 @@ globalThis.bots = {
         data: [position.x, position.y, position.z, 0, 0, 0, 0, true]
       })
     }
-  },
+  },*/
   list: () => bots.map((bot) => bot.id)
 }
 
