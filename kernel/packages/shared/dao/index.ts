@@ -22,6 +22,8 @@ import { realmToString } from './utils/realmToString'
 import { PIN_CATALYST } from 'config'
 const qs: any = require('query-string')
 
+const DEFAULT_TIMEOUT = 5000
+
 const v = 50
 const score = ({ usersCount, maxUsers = 50 }: Layer) => {
   if (usersCount === 0) {
@@ -122,8 +124,15 @@ export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Pr
 }
 
 async function fetchPeerHealthStatus(node: CatalystNode) {
+  const abortController = new AbortController()
+
+  const signal = abortController.signal
   try {
-    const response = await (await fetch(peerHealthStatusUrl(node.domain))).json()
+    setTimeout(() => {
+      abortController.abort()
+    }, DEFAULT_TIMEOUT)
+
+    const response = await (await fetch(peerHealthStatusUrl(node.domain), { signal })).json()
 
     return response
   } catch {
@@ -132,9 +141,12 @@ async function fetchPeerHealthStatus(node: CatalystNode) {
 }
 
 export function isPeerHealthy(peerStatus: Record<string, HealthStatus>) {
-  return !Object.keys(peerStatus).some((server) => {
-    return peerStatus[server] !== HealthStatus.HEALTHY
-  })
+  return (
+    Object.keys(peerStatus).length > 0 &&
+    !Object.keys(peerStatus).some((server) => {
+      return peerStatus[server] !== HealthStatus.HEALTHY
+    })
+  )
 }
 
 export function peerHealthStatusUrl(domain: string) {
