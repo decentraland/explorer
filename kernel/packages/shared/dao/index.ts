@@ -1,6 +1,6 @@
 import defaultLogger from '../logger'
 import future, { IFuture } from 'fp-future'
-import { Layer, Realm, Candidate, RootDaoState, ServerConnectionStatus, PingResult } from './types'
+import { Layer, Realm, Candidate, RootDaoState, ServerConnectionStatus, PingResult, HealthStatus } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
 import {
@@ -112,7 +112,23 @@ export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Pr
     throw new Error('no nodes are available in the DAO for the current network')
   }
 
-  return fetchCatalystStatuses(nodes)
+  const healthyNodes = (await Promise.all(nodes.map(fetchPeerHealthStatus))).filter((peerStatus) =>
+    isPeerHealthy(peerStatus)
+  )
+
+  return fetchCatalystStatuses(healthyNodes)
+}
+
+async function fetchPeerHealthStatus(node: CatalystNode) {
+  return await (await fetch(peerHealthStatusUrl(node.domain))).json()
+}
+
+export function isPeerHealthy(peerStatus: Record<string, HealthStatus>) {
+  return !Object.keys(peerStatus).some((server) => peerStatus[server] !== HealthStatus.HEALTHY)
+}
+
+export function peerHealthStatusUrl(domain: string) {
+  return `${domain}/lambdas/health`
 }
 
 export function commsStatusUrl(domain: string, includeLayers: boolean = false) {
