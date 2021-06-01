@@ -40,12 +40,11 @@ import {
   Session,
   setStoredSession
 } from './index'
-import { ExplorerIdentity, LoginStage, SignUpStage, StoredSession } from './types'
+import { ExplorerIdentity, LoginStage, StoredSession } from './types'
 import {
   AUTHENTICATE,
   AuthenticateAction,
   changeLoginStage,
-  changeSignUpStage,
   INIT_SESSION,
   loginCompleted as loginCompletedAction,
   LOGOUT,
@@ -54,7 +53,6 @@ import {
   signInSigning,
   SIGNUP,
   SIGNUP_CANCEL,
-  SIGNUP_COME_BACK_TO_AVATAR_EDITOR,
   signUpClearData,
   signUpSetIdentity,
   signUpSetIsSignUp,
@@ -90,7 +88,6 @@ export function* sessionSaga(): any {
   yield takeLatest(SIGNUP_CANCEL, cancelSignUp)
   yield takeLatest(AUTHENTICATE, authenticate)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
-  yield takeLatest(SIGNUP_COME_BACK_TO_AVATAR_EDITOR, showAvatarEditor)
 }
 
 function* initialize() {
@@ -209,7 +206,6 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
 function* showAvatarEditor() {
   yield put(setLoadingScreen(true))
   yield put(changeLoginStage(LoginStage.SIGN_UP))
-  yield put(changeSignUpStage(SignUpStage.AVATAR))
 
   const profile = yield select(getSignUpProfile)
 

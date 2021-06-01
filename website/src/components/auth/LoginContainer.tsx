@@ -6,7 +6,6 @@ import { Navbar } from "../common/Navbar"
 import { EthLogin } from "./EthLogin"
 import { EthConnectAdvice } from "./EthConnectAdvice"
 import { EthSignAdvice } from "./EthSignAdvice"
-import SignUpContainer from "./SignUpContainer"
 import { Container } from "../common/Container"
 import { BeginnersGuide } from "./BeginnersGuide"
 import { BigFooter } from "../common/BigFooter"
@@ -15,7 +14,6 @@ import "./LoginContainer.css"
 export enum LoginStage {
   LOADING = "loading",
   SIGN_IN = "signIn",
-  SIGN_UP = "signUp",
   CONNECT_ADVICE = "connect_advice",
   SIGN_ADVICE = "sign_advice",
   COMPLETED = "completed",
@@ -77,7 +75,6 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && <EthConnectAdvice onLogin={props.onLogin} />}
               {props.stage === LoginStage.SIGN_ADVICE && <EthSignAdvice />}
-              {props.stage === LoginStage.SIGN_UP && <SignUpContainer />}
             </Container>
           </main>
 
