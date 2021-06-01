@@ -273,7 +273,7 @@ export class BrowserInterface {
     }
   }
 
-  public SendPassport(passport: {name: string, email: string}) {    
+  public SendPassport(passport: {name: string, email: string}) {
     globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
     globalThis.globalStore.dispatch(signUp())
   }
