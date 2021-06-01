@@ -120,7 +120,7 @@ export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Pr
 }
 
 async function fetchPeerHealthStatus(node: CatalystNode) {
-  return await (await fetch(peerHealthStatusUrl(node.domain))).json()
+  return (await fetch(peerHealthStatusUrl(node.domain))).json()
 }
 
 export function isPeerHealthy(peerStatus: Record<string, HealthStatus>) {
