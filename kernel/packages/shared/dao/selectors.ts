@@ -32,3 +32,4 @@ export const isResizeServiceUrl = (store: RootDaoState, url: string | undefined)
 
 export const getHotScenesService = (store: RootDaoState) => store.dao.hotScenesService
 export const getExploreRealmsService = (store: RootDaoState) => store.dao.exploreRealmsService
+export const getPOIService = (store: RootDaoState) => store.dao.poiService
