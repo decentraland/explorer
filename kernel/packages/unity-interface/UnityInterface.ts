@@ -549,6 +549,29 @@ export class ClientDebug {
   public RunPerformanceMeterTool(durationInSeconds: number) {
     this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInSeconds)
   }
+
+  public InstantiateBotsAtWorldPos(amount: number, xPos: number, yPos: number, zPos: number, areaWidth: number, areaDepth: number) {
+    const payload = {
+      amount: amount,
+      xPos: xPos,
+      yPos: yPos,
+      zPos: zPos,
+      areaWidth: areaWidth,
+      areaDepth: areaDepth
+    }
+    this.unityInterface.SendMessageToUnity('Main', 'InstantiateBotsAtWorldPos', JSON.stringify(payload))
+  }
+
+  public InstantiateBotsAtCoords(amount: number, xCoord: number, yCoord: number, areaWidth: number, areaDepth: number) {
+    const payload = {
+      amount: amount,
+      xCoord: xCoord,
+      yCoord: yCoord,
+      areaWidth: areaWidth,
+      areaDepth: areaDepth
+    }
+    this.unityInterface.SendMessageToUnity('Main', 'InstantiateBotsAtCoords', JSON.stringify(payload))
+  }
 }
 
 export let unityInterface: UnityInterface = new UnityInterface()
