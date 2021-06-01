@@ -112,19 +112,29 @@ export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Pr
     throw new Error('no nodes are available in the DAO for the current network')
   }
 
-  const healthyNodes = (await Promise.all(nodes.map(fetchPeerHealthStatus))).filter((peerStatus) =>
-    isPeerHealthy(peerStatus)
+  const responses = await Promise.all(
+    nodes.map(async (node) => ({ ...node, health: await fetchPeerHealthStatus(node) }))
   )
+
+  const healthyNodes = responses.filter((node) => isPeerHealthy(node.health))
 
   return fetchCatalystStatuses(healthyNodes)
 }
 
 async function fetchPeerHealthStatus(node: CatalystNode) {
-  return (await fetch(peerHealthStatusUrl(node.domain))).json()
+  try {
+    const response = await (await fetch(peerHealthStatusUrl(node.domain))).json()
+
+    return response
+  } catch {
+    return {}
+  }
 }
 
 export function isPeerHealthy(peerStatus: Record<string, HealthStatus>) {
-  return !Object.keys(peerStatus).some((server) => peerStatus[server] !== HealthStatus.HEALTHY)
+  return !Object.keys(peerStatus).some((server) => {
+    return peerStatus[server] !== HealthStatus.HEALTHY
+  })
 }
 
 export function peerHealthStatusUrl(domain: string) {

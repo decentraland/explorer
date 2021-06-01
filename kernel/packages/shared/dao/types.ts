@@ -87,7 +87,7 @@ export type PingResult = {
 }
 
 export enum HealthStatus {
-  HEALTHY = 'HEALTHY',
-  UNHEALTHY = 'UNHEALTHY',
-  DOWN = 'DOWN'
+  HEALTHY = 'Healthy',
+  UNHEALTHY = 'Unhealthy',
+  DOWN = 'Down'
 }
