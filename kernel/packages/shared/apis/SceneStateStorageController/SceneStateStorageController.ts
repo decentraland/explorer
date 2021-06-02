@@ -49,6 +49,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
     const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
     if (newProject) {
+      globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description)
       this.builderManifest = newProject
       const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
       return serializeSceneState(translatedManifest)
@@ -59,6 +60,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   @exposeMethod
   async createProjectWithCoords(coordinates: string): Promise<boolean> {
     const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
+    globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description)
     this.builderManifest = newProject
     return newProject ? true : false
   }
