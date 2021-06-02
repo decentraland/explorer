@@ -27,7 +27,6 @@ import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
-import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
@@ -526,7 +525,6 @@ export class UnityInterface {
     if (isError) {
       const error = `Error while sending Message to Unity. Object: ${object}. Method: ${method}. Payload: ${payload}.`
       defaultLogger.error(error)
-      ReportRendererInterfaceError(error, error)
     }
   }
 }
