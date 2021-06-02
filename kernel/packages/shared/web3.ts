@@ -9,7 +9,7 @@ import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
 import { NETWORK_MISMATCH, setTLDError } from './loading/types'
-import { ReportFatalError } from './loading/ReportFatalError'
+import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { StoreContainer } from './store/rootTypes'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
@@ -50,7 +50,7 @@ export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
   if (tldNet !== web3Net) {
     globalThis.globalStore.dispatch(setTLDError({ tld, web3Net, tldNet }))
     Html.updateTLDInfo(tld, web3Net, tldNet as string)
-    ReportFatalError(NETWORK_MISMATCH)
+    BringDownClientAndShowError(NETWORK_MISMATCH)
     return true
   }
 
