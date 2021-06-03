@@ -130,6 +130,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
         // Prepare scene.json
         const sceneJson = this.parcelIdentity.land.sceneJsonData
+        sceneJson.display = { title: sceneName, description: sceneDescription }
 
         // Group all entity files
         const entityFiles: Map<string, Buffer> = new Map([
