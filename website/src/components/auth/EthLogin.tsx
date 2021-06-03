@@ -4,6 +4,7 @@ import { WalletSelector } from "./wallet/WalletSelector"
 import { LoginHeader } from "./LoginHeader"
 import { Spinner } from "../common/Spinner"
 import { Avatars } from "../common/Avatars"
+import { track } from "../../utils"
 import "./EthLogin.css"
 
 export interface EthLoginProps {
@@ -17,13 +18,19 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const isLoading = props.loading || showWalletSelector
 
   function handlePlay() {
+    track('open_login_popup')
     setShowWalletSelector(true)
   }
 
-  function handlePlayAsGuest() {
+  function handleLogin(provider: ProviderType | null) {
+    track('click_login_button', { provider_type: provider || 'guest' })
     if (props.onLogin) {
-      props.onLogin(null)
+      props.onLogin(provider)
     }
+  }
+
+  function handlePlayAsGuest() {
+    handleLogin(null)
   }
 
   return (
@@ -46,7 +53,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
       <WalletSelector
         open={showWalletSelector}
         loading={props.loading}
-        onLogin={props.onLogin}
+        onLogin={handleLogin}
         availableProviders={props.availableProviders}
         onCancel={() => setShowWalletSelector(false)}
       />
