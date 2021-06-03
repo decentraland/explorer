@@ -94,7 +94,7 @@ export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(globa
 const qs = queryString.parse(location.search)
 
 // Development
-export const ENABLE_WEB3 = qs.ENABLE_WEB3 ? !!qs.ENABLE_WEB3 : location.search.includes('ENABLE_WEB3') || !!(global as any).enableWeb3 // Accept ENABLE_WEB3, ENABLE_WEB3=true/false
+export const ENABLE_WEB3 = qs.ENABLE_WEB3 !== 'false' && (qs.ENABLE_WEB3 === 'true' || qs.ENABLE_WEB3 === '' || !!(global as any).enableWeb3) // Accept ENABLE_WEB3, ENABLE_WEB3=true/false
 export const ENV_OVERRIDE = location.search.includes('ENV')
 export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
 
