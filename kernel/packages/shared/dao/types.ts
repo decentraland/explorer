@@ -85,3 +85,9 @@ export type PingResult = {
   status?: ServerConnectionStatus
   result?: CatalystLayers
 }
+
+export enum HealthStatus {
+  HEALTHY = 'Healthy',
+  UNHEALTHY = 'Unhealthy',
+  DOWN = 'Down'
+}
