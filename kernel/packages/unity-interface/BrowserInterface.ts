@@ -180,6 +180,10 @@ export class BrowserInterface {
     trackEvent('system info report', data)
   }
 
+  public CrashPayloadResponse(data: { payload: any }) {
+    unityInterface.crashPayloadResponseObservable.notifyObservers(JSON.stringify(data))
+  }
+
   public PreloadFinished(data: { sceneId: string }) {
     // stub. there is no code about this in unity side yet
   }
