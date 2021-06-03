@@ -64,9 +64,10 @@ class StatefulWebWorkerScene extends Script {
   private listenToEvents(sceneId: string): void {
     // Listen to publish requests
     this.eventSubscriber.on('stateEvent', ({ data }) => {
-      if (data.type === 'PublishSceneState') {
+      const { type, payload } = data
+      if (type === 'PublishSceneState') {
         this.sceneStateStorage
-          .publishSceneState(sceneId, serializeSceneState(this.sceneDefinition))
+          .publishSceneState(sceneId, payload.title, payload.description, serializeSceneState(this.sceneDefinition))
           .catch((error) => this.error(`Failed to store the scene's state`, error))
       }
     })

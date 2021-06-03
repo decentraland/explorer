@@ -1,7 +1,7 @@
 import { SerializedSceneState, DeploymentResult } from './types'
 
 export interface ISceneStateStorageController {
-  publishSceneState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult>
+  publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneState: SerializedSceneState): Promise<DeploymentResult>
   getStoredState(sceneId: string): Promise<SerializedSceneState | undefined>
   saveSceneState(serializedSceneState: SerializedSceneState): Promise<DeploymentResult>
   getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined>

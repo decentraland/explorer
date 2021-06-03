@@ -91,8 +91,25 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async publishSceneState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
     let result: DeploymentResult
+
+    // Deserialize the scene state
+    const deserializedSceneState: SceneStateDefinition = deserializeSceneState(sceneState)
+
+    // Convert the scene state to builder scheme format
+    let builderManifest = await toBuilderFromStateDefinitionFormat(
+      deserializedSceneState,
+      this.builderManifest,
+      this.builderApiManager
+    )
+
+    // Update the project info
+    builderManifest.project.title = sceneName
+    builderManifest.project.description = sceneDescription
+
+    // Update the manifest
+    await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
 
     // Convert to storable format
     const storableFormat = fromSerializedStateToStorableFormat(sceneState)
