@@ -104,11 +104,11 @@ namespace webApp {
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, {
       active: true,
       visible: OPEN_AVATAR_EDITOR
     })
+    i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
