@@ -9,7 +9,7 @@ import { getFetchContentServer } from 'shared/dao/selectors'
 
 const serverUrl = 'https://server.com'
 const wearableId1 = 'WearableId1'
-const wearable1 = { id: wearableId1, baseUrl: serverUrl + 'contents/', baseUrlBundles: "https://content-assets-as-bundle.decentraland.zone/" } as any
+const wearable1 = { id: wearableId1, baseUrl: serverUrl + 'contents/', baseUrlBundles: "https://content-assets-as-bundle.decentraland.org/" } as any
 
 const userId = 'userId'
 const context = 'someContext'

@@ -1,5 +1,5 @@
 global['isRunningTests'] = true
-
+global['enableWeb3'] = true
 /**
  * Hello, this file is the tests entry point.
  * You should import all your tests here.
