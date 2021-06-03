@@ -103,7 +103,7 @@ export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorCon
 export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, context: ErrorContextTypes) {
   try {
     let payload = await unityInterface.CrashPayloadRequest()
-    ReportFatalError(error, context, JSON.parse(payload))
+    ReportFatalError(error, context, { "rendererPayload": payload } )
   } catch (e) {
     ReportFatalError(error, context)
   }
