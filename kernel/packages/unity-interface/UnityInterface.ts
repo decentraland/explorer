@@ -199,11 +199,10 @@ export class UnityInterface {
         resolve(payload)
       })
 
-      // We solve on timeout anyways to simplify usage.
       setTimeout(() => {
         this.crashPayloadResponseObservable.remove(crashListener)
-        resolve('Crash payload request failed')
-      }, 10000)
+        reject()
+      }, 2000)
 
       this.SendMessageToUnity('Main', 'CrashPayloadRequest')
     })
@@ -584,7 +583,7 @@ export class ClientDebug {
         defaultLogger.log(`DumpCrashPayload length:${payload.length}`)
       })
       .catch((x) => {
-        //
+        defaultLogger.log(`DumpCrashPayload result: timeout`)
       })
   }
 }

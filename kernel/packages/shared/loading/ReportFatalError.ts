@@ -16,6 +16,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import Html from '../Html'
 import { trackEvent } from '../analytics'
 import { action } from 'typesafe-actions'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 declare const globalThis: StoreContainer
 
@@ -80,16 +81,24 @@ export type ErrorContextTypes =
   | typeof ErrorContext.RENDERER_ERRORHANDLER
 
 export function ReportFatalErrorWithCatalystPayload(error: Error, context: ErrorContextTypes) {
+  // TODO(Brian): Get some useful catalyst payload to append here
   ReportFatalError(error, context)
 }
 
 export function ReportFatalErrorWithCommsPayload(error: Error, context: ErrorContextTypes) {
+  // TODO(Brian): Get some useful comms payload to append here
   ReportFatalError(error, context)
 }
 
 export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorContextTypes) {
-  const unityPayload = {}
-  ReportFatalError(error, context, unityPayload)
+  unityInterface
+    .CrashPayloadRequest()
+    .then((payload) => {
+      ReportFatalError(error, context, JSON.parse(payload))
+    })
+    .catch(() => {
+      ReportFatalError(error, context)
+    })
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
