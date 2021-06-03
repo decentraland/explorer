@@ -556,37 +556,4 @@ export class UnityInterface {
   }
 }
 
-export class ClientDebug {
-  private unityInterface: UnityInterface
-
-  public constructor(unityInterface: UnityInterface) {
-    this.unityInterface = unityInterface
-  }
-
-  public DumpScenesLoadInfo() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpScenesLoadInfo')
-  }
-
-  public DumpRendererLockersInfo() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
-  }
-
-  public RunPerformanceMeterTool(durationInSeconds: number) {
-    this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInSeconds)
-  }
-
-  public DumpCrashPayload() {
-    this.unityInterface
-      .CrashPayloadRequest()
-      .then((payload: string) => {
-        defaultLogger.log(`DumpCrashPayload result:\n${payload}`)
-        defaultLogger.log(`DumpCrashPayload length:${payload.length}`)
-      })
-      .catch((x) => {
-        defaultLogger.log(`DumpCrashPayload result: timeout`)
-      })
-  }
-}
-
 export let unityInterface: UnityInterface = new UnityInterface()
-export let clientDebug: ClientDebug = new ClientDebug(unityInterface)

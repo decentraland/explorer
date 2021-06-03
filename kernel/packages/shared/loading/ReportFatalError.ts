@@ -91,14 +91,22 @@ export function ReportFatalErrorWithCommsPayload(error: Error, context: ErrorCon
 }
 
 export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorContextTypes) {
-  unityInterface
-    .CrashPayloadRequest()
-    .then((payload) => {
-      ReportFatalError(error, context, JSON.parse(payload))
+  ReportFatalErrorWithUnityPayloadAsync(error, context)
+    .then((x) => {
+      //
     })
     .catch(() => {
-      ReportFatalError(error, context)
+      //
     })
+}
+
+export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, context: ErrorContextTypes) {
+  try {
+    let payload = await unityInterface.CrashPayloadRequest()
+    ReportFatalError(error, context, JSON.parse(payload))
+  } catch (e) {
+    ReportFatalError(error, context)
+  }
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
