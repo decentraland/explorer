@@ -1,6 +1,6 @@
 import defaultLogger from '../logger'
 import future, { IFuture } from 'fp-future'
-import { Layer, Realm, Candidate, RootDaoState, ServerConnectionStatus, PingResult } from './types'
+import { Layer, Realm, Candidate, RootDaoState, ServerConnectionStatus, PingResult, HealthStatus } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
 import {
@@ -21,6 +21,8 @@ import { zip } from './utils/zip'
 import { realmToString } from './utils/realmToString'
 import { PIN_CATALYST } from 'config'
 const qs: any = require('query-string')
+
+const DEFAULT_TIMEOUT = 5000
 
 const v = 50
 const score = ({ usersCount, maxUsers = 50 }: Layer) => {
@@ -112,7 +114,43 @@ export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Pr
     throw new Error('no nodes are available in the DAO for the current network')
   }
 
-  return fetchCatalystStatuses(nodes)
+  const responses = await Promise.all(
+    nodes.map(async (node) => ({ ...node, health: await fetchPeerHealthStatus(node) }))
+  )
+
+  const healthyNodes = responses.filter((node) => isPeerHealthy(node.health))
+
+  return fetchCatalystStatuses(healthyNodes)
+}
+
+async function fetchPeerHealthStatus(node: CatalystNode) {
+  const abortController = new AbortController()
+
+  const signal = abortController.signal
+  try {
+    setTimeout(() => {
+      abortController.abort()
+    }, DEFAULT_TIMEOUT)
+
+    const response = await (await fetch(peerHealthStatusUrl(node.domain), { signal })).json()
+
+    return response
+  } catch {
+    return {}
+  }
+}
+
+export function isPeerHealthy(peerStatus: Record<string, HealthStatus>) {
+  return (
+    Object.keys(peerStatus).length > 0 &&
+    !Object.keys(peerStatus).some((server) => {
+      return peerStatus[server] !== HealthStatus.HEALTHY
+    })
+  )
+}
+
+export function peerHealthStatusUrl(domain: string) {
+  return `${domain}/lambdas/health`
 }
 
 export function commsStatusUrl(domain: string, includeLayers: boolean = false) {
