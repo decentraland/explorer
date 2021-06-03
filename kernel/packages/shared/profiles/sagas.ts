@@ -3,7 +3,7 @@ import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, select, takeEvery } from 'redux-saga/effects'
 
-import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL, ALL_WEARABLES } from 'config'
+import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL, ALL_WEARABLES, ENABLE_WEB3 } from 'config'
 
 import defaultLogger from 'shared/logger'
 import {
@@ -202,7 +202,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   const currentId = yield select(getCurrentUserId)
   let profile: any
   let hasConnectedWeb3 = false
-  if (WORLD_EXPLORER) {
+  if (WORLD_EXPLORER && ENABLE_WEB3) {
     try {
       if (profileType === ProfileType.LOCAL && currentId !== userId) {
         const peerProfile: Profile = yield requestLocalProfileToPeers(userId)

@@ -91,12 +91,12 @@ export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR')
 
 export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(global as any).staticWorld || EDITOR
 
+const qs = queryString.parse(location.search)
+
 // Development
-export const ENABLE_WEB3 = location.search.includes('ENABLE_WEB3') || !!(global as any).enableWeb3
+export const ENABLE_WEB3 = qs.ENABLE_WEB3 ? !!qs.ENABLE_WEB3 : location.search.includes('ENABLE_WEB3') || !!(global as any).enableWeb3 // Accept ENABLE_WEB3, ENABLE_WEB3=true/false
 export const ENV_OVERRIDE = location.search.includes('ENV')
 export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
-
-const qs = queryString.parse(location.search)
 
 // Comms
 export const USE_LOCAL_COMMS = location.search.includes('LOCAL_COMMS') || PREVIEW

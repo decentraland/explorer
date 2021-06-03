@@ -119,11 +119,11 @@ function* initSession() {
   if (ENABLE_WEB3) {
     yield checkPreviousSession()
     Html.showEthLogin()
+    yield put(changeLoginStage(LoginStage.SIGN_IN))
   } else {
     yield previewAutoSignIn()
+    yield put(changeLoginStage(LoginStage.COMPLETED))
   }
-
-  yield put(changeLoginStage(LoginStage.SIGN_IN))
 
   if (ENABLE_WEB3) {
     const connecetor = getEthConnector()
