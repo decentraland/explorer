@@ -26,6 +26,7 @@ import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefi
 import { ExplorerIdentity } from 'shared/session/types'
 import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from './ISceneStateStorageController'
+import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 
 declare const globalThis: any
 
@@ -91,7 +92,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneScreenshot: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
     let result: DeploymentResult
 
     // Deserialize the scene state
@@ -130,13 +131,18 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
         // Prepare scene.json
         const sceneJson = this.parcelIdentity.land.sceneJsonData
-        sceneJson.display = { title: sceneName, description: sceneDescription }
+        sceneJson.display = { 
+          title: sceneName,
+          description: sceneDescription,
+          navmapThumbnail: CONTENT_PATH.SCENE_THUMBNAIL
+        }
 
         // Group all entity files
         const entityFiles: Map<string, Buffer> = new Map([
           [CONTENT_PATH.DEFINITION_FILE, Buffer.from(JSON.stringify(storableFormat))],
           [CONTENT_PATH.BUNDLED_GAME_FILE, Buffer.from(gameFile)],
           [CONTENT_PATH.SCENE_FILE, Buffer.from(JSON.stringify(sceneJson))],
+          [CONTENT_PATH.SCENE_THUMBNAIL, await blobToBuffer(base64ToBlob(sceneScreenshot))],
           ...models
         ])
 
