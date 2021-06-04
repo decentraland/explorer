@@ -112,8 +112,9 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
   const finalPayload = GetErrorPayload(context, payload)
   trackEvent('error_fatal', {
+    context: context,
     message: error.message,
-    payload: finalPayload
+    stack: error.stack?.slice(0, 10000)
   })
 
   ReportRollbarError(error, finalPayload)
