@@ -103,7 +103,7 @@ export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorCon
 export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, context: ErrorContextTypes) {
   try {
     let payload = await unityInterface.CrashPayloadRequest()
-    ReportFatalError(error, context, { "rendererPayload": payload } )
+    ReportFatalError(error, context, { rendererPayload: payload })
   } catch (e) {
     ReportFatalError(error, context)
   }
@@ -111,7 +111,7 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
   const finalPayload = GetErrorPayload(context, payload)
-  trackEvent('error_generic', {
+  trackEvent('error_fatal', {
     message: error.message,
     payload: finalPayload
   })
