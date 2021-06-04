@@ -131,7 +131,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
         // Prepare scene.json
         const sceneJson = this.parcelIdentity.land.sceneJsonData
-        sceneJson.display = { 
+        sceneJson.display = {
           title: sceneName,
           description: sceneDescription,
           navmapThumbnail: CONTENT_PATH.SCENE_THUMBNAIL
