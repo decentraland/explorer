@@ -91,6 +91,8 @@ export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR')
 
 export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(global as any).staticWorld || EDITOR
 
+export const ENTER_AS_A_GUEST = location.search.includes('ENTER_AS_A_GUEST')
+
 // Development
 export const ENABLE_WEB3 = location.search.includes('ENABLE_WEB3') || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.includes('ENV')

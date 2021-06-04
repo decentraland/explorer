@@ -4,7 +4,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, ETHEREUM_NETWORK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
+import { ENABLE_WEB3, ENTER_AS_A_GUEST, ETHEREUM_NETWORK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -74,6 +74,7 @@ import { ensureRealmInitialized } from '../dao/sagas'
 import { ensureBaseCatalogs } from '../catalogs/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
+import { ensureUnityInterface } from 'shared/renderer'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -115,7 +116,17 @@ function* scheduleAwaitingSignaturePrompt() {
 
 function* initSession() {
   yield ensureRealmInitialized()
-  yield checkConnector()
+
+  if (ENTER_AS_A_GUEST) {
+    const connector = getEthConnector()
+    yield connector.connect(null)
+    yield ensureUnityInterface()
+    yield put(authenticateAction(null))
+    return
+  } else {
+    yield checkConnector()
+  }
+
   if (ENABLE_WEB3) {
     yield checkPreviousSession()
     Html.showEthLogin()
@@ -126,9 +137,9 @@ function* initSession() {
   yield put(changeLoginStage(LoginStage.SIGN_IN))
 
   if (ENABLE_WEB3) {
-    const connecetor = getEthConnector()
-    if (connecetor.isConnected()) {
-      yield put(authenticateAction(connecetor.getType()))
+    const connector = getEthConnector()
+    if (connector.isConnected()) {
+      yield put(authenticateAction(connector.getType()))
       return
     }
   }
@@ -137,12 +148,12 @@ function* initSession() {
 }
 
 function* checkConnector() {
-  const connecetor = getEthConnector()
-  yield call(() => connecetor.restoreConnection())
+  const connector = getEthConnector()
+  yield call(() => connector.restoreConnection())
 }
 
 function* checkPreviousSession() {
-  const connecetor = getEthConnector()
+  const connector = getEthConnector()
   const session = getLastSessionWithoutWallet()
   if (!isSessionExpired(session) && session) {
     const identity = session.identity
@@ -152,7 +163,7 @@ function* checkPreviousSession() {
   } else {
 
     try {
-      yield call(() => connecetor.disconnect())
+      yield call(() => connector.disconnect())
     } catch (e) {
       logger.error(e)
     }
