@@ -16,7 +16,7 @@ import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../dec
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
-import { aborted, ReportFatalError } from 'shared/loading/ReportFatalError'
+import { aborted, BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithUnityPayload } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, ProfileType } from 'shared/profiles/types'
@@ -575,7 +575,9 @@ export class BrowserInterface {
   }
 
   public ReportAvatarFatalError() {
-    ReportFatalError(AVATAR_LOADING_ERROR)
+    // TODO(Brian): Add more parameters?
+    BringDownClientAndShowError(AVATAR_LOADING_ERROR)
+    ReportFatalErrorWithUnityPayload(new Error(AVATAR_LOADING_ERROR), ErrorContext.RENDERER_AVATARS)
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {

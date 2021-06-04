@@ -4,7 +4,7 @@ import './apis/index'
 import './events'
 
 import { initializeUrlRealmObserver } from './dao'
-import { ReportFatalError } from './loading/ReportFatalError'
+import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED } from './loading/types'
 import { buildStore } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
@@ -23,7 +23,7 @@ export function initShared() {
   startSagas()
 
   if (isMobile()) {
-    ReportFatalError(MOBILE_NOT_SUPPORTED)
+    BringDownClientAndShowError(MOBILE_NOT_SUPPORTED)
     return
   }
 
