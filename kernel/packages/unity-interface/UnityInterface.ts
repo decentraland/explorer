@@ -572,6 +572,14 @@ export class ClientDebug {
     }
     this.unityInterface.SendMessageToUnity('Main', 'InstantiateBotsAtCoords', JSON.stringify(payload))
   }
+
+  public RemoveBot(targetEntityId: string) {
+    this.unityInterface.SendMessageToUnity('Main', 'RemoveBot', targetEntityId)
+  }
+
+  public ClearBots() {
+    this.unityInterface.SendMessageToUnity('Main', 'ClearBots')
+  }
 }
 
 export let unityInterface: UnityInterface = new UnityInterface()
