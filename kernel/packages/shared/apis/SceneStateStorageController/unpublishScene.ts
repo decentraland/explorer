@@ -2,13 +2,18 @@ import { Store } from 'redux'
 import { Authenticator } from 'dcl-crypto'
 import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType } from 'dcl-catalyst-commons'
-import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { RootState } from 'shared/store/rootTypes'
+import { SceneWorker } from 'shared/world/SceneWorker'
+import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { getCurrentIdentity } from 'shared/session/selectors'
+import { EMPTY_PARCEL_NAME } from 'shared/atlas/selectors'
+import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
+import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { DeploymentResult, CONTENT_PATH, SceneDeploymentSourceMetadata } from './types'
 import { defaultLogger } from '../../logger'
 import { ContentMapping, SceneJsonData } from '../../types'
 import { jsonFetch } from '../../../atomicHelpers/jsonFetch'
+import { blobToBuffer } from './SceneStateStorageController'
 
 declare const globalThis: any
 
@@ -22,8 +27,6 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
 
   try {
     const { sceneJson, sceneFiles } = await getEmptySceneFiles(coordinates)
-    debugger
-    // NOTE: await deploy(sceneData.sceneJsonData.scene.base, scene)
 
     const contentClient = getContentClient()
 
@@ -51,7 +54,22 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
 
     await contentClient.deployEntity({ files, entityId, authChain })
 
-    debugger
+    // Reload scene if running
+    fetchSceneIds([coordinates])
+      .then((scenesId) => {
+        if (scenesId && scenesId[0]) {
+          const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
+          const sceneId = scenesId[0]
+
+          if (sceneWorkers.get(sceneId)) {
+            reloadScene(sceneId).catch((error) =>
+              defaultLogger.error(`Failed reloading scene for coordinates ${coordinates}`, error)
+            )
+          }
+        }
+      })
+      .catch((error) => defaultLogger.error(`Failed fetching sceneId for coordinates ${coordinates}`, error))
+
     result = { ok: true, error: '' }
   } catch (error) {
     result = { ok: false, error: `Unpublish failed ${error}` }
@@ -72,13 +90,14 @@ async function getEmptySceneFiles(coordinates: string): Promise<SceneDeployment>
 
   const emptySceneName: string = scenesNames[randomSceneIndex]
   const emptySceneBaseUrl: string = fullRootUrl + emptySceneName
+  const emptySceneContentUrl: string = fullRootUrl + 'contents'
   const emptySceneMappings: ContentMapping[] = scenesContents[randomSceneIndex]
   const emptySceneJsonFile: string | undefined = emptySceneMappings.find(
     (content) => content.file === CONTENT_PATH.SCENE_FILE
   )?.hash
   const emptySceneGameFile: string | undefined = emptySceneMappings.find(
     (content) => content.file === CONTENT_PATH.BUNDLED_GAME_FILE
-  )?.file
+  )?.hash
 
   if (!emptySceneJsonFile) {
     throw Error(`empty-scene ${CONTENT_PATH.SCENE_FILE} file not found`)
@@ -91,9 +110,10 @@ async function getEmptySceneFiles(coordinates: string): Promise<SceneDeployment>
   const newSceneJson: SceneJsonData = await (await fetch(`${emptySceneBaseUrl}/${emptySceneJsonFile}`)).json()
   newSceneJson.scene.parcels = [coordinates]
   newSceneJson.scene.base = coordinates
+  newSceneJson.display!.title = EMPTY_PARCEL_NAME
 
-  const newSceneGameJS = await (await fetch(`${emptySceneBaseUrl}/${emptySceneGameFile}`)).text()
-  const newSceneModels = await getModelsFiles(emptySceneBaseUrl, emptySceneMappings)
+  const newSceneGameJS = await (await fetch(`${emptySceneContentUrl}/${emptySceneGameFile}`)).text()
+  const newSceneModels = await getModelsFiles(emptySceneContentUrl, emptySceneMappings)
 
   const entityFiles: Map<string, Buffer> = new Map([
     [CONTENT_PATH.BUNDLED_GAME_FILE, Buffer.from(newSceneGameJS)],
@@ -118,45 +138,6 @@ async function getModelsFiles(baseUrl: string, mappings: ContentMapping[]) {
 
   const result = await Promise.all(promises)
   return new Map(result)
-}
-
-// async function deploy(baseParcel: string, scene: SceneDeployment) {
-//   const contentClient = getContentClient()
-
-//   const { files, entityId } = await contentClient.buildEntity({
-//     type: EntityType.SCENE,
-//     pointers: [baseParcel],
-//     files: scene.sceneFiles,
-//     metadata: {
-//       ...scene.sceneJson,
-//       source: {
-//         origin: 'builder-in-world',
-//         version: 1,
-//         isEmpty: true
-//       } as SceneDeploymentSourceMetadata
-//     }
-//   })
-
-//   // Sign entity id
-//   const store: Store<RootState> = globalThis['globalStore']
-//   const identity = getCurrentIdentity(store.getState())
-//   if (!identity) {
-//     throw new Error('Identity not found when trying to deploy an entity')
-//   }
-//   const authChain = Authenticator.signPayload(identity, entityId)
-
-//   await contentClient.deployEntity({ files, entityId, authChain })
-// }
-
-// NOTE: duplicated
-const toBuffer = require('blob-to-buffer')
-function blobToBuffer(blob: Blob): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    toBuffer(blob, (err: Error, buffer: Buffer) => {
-      if (err) reject(err)
-      resolve(buffer)
-    })
-  })
 }
 
 function getContentClient(): ContentClient {

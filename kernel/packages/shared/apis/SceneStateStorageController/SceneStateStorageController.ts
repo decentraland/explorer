@@ -250,7 +250,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 setAPIName('SceneStateStorageController', SceneStateStorageController)
 
 const toBuffer = require('blob-to-buffer')
-function blobToBuffer(blob: Blob): Promise<Buffer> {
+export function blobToBuffer(blob: Blob): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     toBuffer(blob, (err: Error, buffer: Buffer) => {
       if (err) reject(err)
