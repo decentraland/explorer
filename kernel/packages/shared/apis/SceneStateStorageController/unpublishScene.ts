@@ -85,7 +85,7 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
 
 async function getEmptySceneFiles(coordinates: string): Promise<SceneDeployment> {
   const fullRootUrl =
-    `${location.protocol}//${location.host}${location.pathname}`.replace('index.html', '') + 'loader/empty-scenes/'
+    new URL('loader/empty-scenes/', location).toString()
 
   const scenes = await jsonFetch(fullRootUrl + 'mappings.json')
   const scenesContents: ContentMapping[][] = Object.values(scenes)
