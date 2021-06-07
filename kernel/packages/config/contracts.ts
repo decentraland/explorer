@@ -149,11 +149,28 @@ export const contracts = {
   },
   'matic': {
     'MANAToken': '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4',
-    'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
+    'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
+    'Multisig': '0x0E659A116e161d8e502F9036bAbDA51334F2667E',
+    'CollectionImplementation': '0x006080C6061C4aF79b39Da0842a3a22A7b3f185e',
+    'Rarities': '0xbdA0Cf0678E6873774b3536dB1bA1d25B09F60ab',
+    'Committee': '0x71d9350Ef44E1e451F00e447C0DfF2d1FB75510a',
+    'CollectionManager ': '0x9D32AaC179153A991e832550d9F96441Ea27763A',
+    'Forwarder': '0xBF6755A83C0dCDBB2933A96EA778E00b717d7004',
+    'CollectionFactory': '0xB549B2442b2BD0a53795BC5cDcBFE0cAF7ACA9f8',
+    'CollectionStore': '0x214ffC0f0103735728dc66b61A22e4F163e275ae',
+    'Marketplace': '0x02080031b45A3c67d338Dd4A2CC309D28756A160'
   },
   'mumbai': {
     'MetaTxForwarder': '0xBF6755A83C0dCDBB2933A96EA778E00b717d7004',
     'MANAToken': '0x882Da5967c435eA5cC6b09150d55E8304B838f45',
-    'ChildChainManagerProxy': '0xb5505a6d998549090530911180f38aC5130101c6'
+    'ChildChainManagerProxy': '0xb5505a6d998549090530911180f38aC5130101c6',
+    'CollectionImplementation': '0x89c4Ad77066d9EE8aD281D5Fd995690D91436644',
+    'Rarities': '0x8eabF06f6cf667915bfF30138be70543bCE2901A',
+    'Committee': '0x4bb5ACe5ceB3Dd51ea35fa01a8f9B5507c234270',
+    'CollectionManager ': '0xe539E0AED3C1971560517D58277f8dd9aC296281',
+    'Forwarder': '0x71e56Ad57eca3fAAe5077b7F9ea731a25785fF92',
+    'CollectionFactory': '0x2A72Ec4241Ac4fBc915ae98aC5a5b01AdE721f4B',
+    'CollectionStore': '0x6ddF1b1924DAD850AdBc1C02026535464Be06B0c',
+    'Marketplace': '0x2a09a000224f5dbe0E17214cA95CDe506DA7CB74'
   }
 }

@@ -1,29 +1,36 @@
 declare var window: Window & { Rollbar: any }
-import { action } from 'typesafe-actions'
+
 import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
   fatalError,
   ExecutionLifecycleEvent,
-  ExecutionLifecycleEventsList,
   MOBILE_NOT_SUPPORTED,
   NETWORK_MISMATCH,
   NEW_LOGIN,
   NO_WEBGL_COULD_BE_CREATED,
   NOT_INVITED,
-  AVATAR_LOADING_ERROR
+  AVATAR_LOADING_ERROR,
+  ExecutionLifecycleEventsList
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import Html from '../Html'
 import { trackEvent } from '../analytics'
+import { action } from 'typesafe-actions'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 declare const globalThis: StoreContainer
 
 export let aborted = false
 
-export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
+export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   if (aborted) {
     return
   }
+
+  if (ExecutionLifecycleEventsList.includes(event)) {
+    globalThis.globalStore.dispatch(action(event))
+  }
+
   const body = document.body
   const container = document.getElementById('gameContainer')
   container!.setAttribute('style', 'display: none !important')
@@ -54,47 +61,84 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   aborted = true
 }
 
-export type FatalErrorInfo = {
-  type: string
-  message: string
-  stack?: string
-  sagaStack?: string
-  filename?: string
+export namespace ErrorContext {
+  export const WEBSITE_INIT = `website#init`
+  export const COMMS_INIT = `comms#init`
+  export const KERNEL_INIT = `kernel#init`
+  export const KERNEL_SAGA = `kernel#saga`
+  export const KERNEL_SCENE = `kernel#scene`
+  export const RENDERER_AVATARS = `renderer#avatars`
+  export const RENDERER_ERRORHANDLER = `renderer#errorHandler`
 }
 
-export function ReportFatalError(event: ExecutionLifecycleEvent, errorInfo?: FatalErrorInfo) {
-  bringDownClientAndShowError(event)
-  if (ExecutionLifecycleEventsList.includes(event)) {
-    return globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
+export type ErrorContextTypes =
+  | typeof ErrorContext.WEBSITE_INIT
+  | typeof ErrorContext.COMMS_INIT
+  | typeof ErrorContext.KERNEL_INIT
+  | typeof ErrorContext.KERNEL_SAGA
+  | typeof ErrorContext.KERNEL_SCENE
+  | typeof ErrorContext.RENDERER_AVATARS
+  | typeof ErrorContext.RENDERER_ERRORHANDLER
+
+export function ReportFatalErrorWithCatalystPayload(error: Error, context: ErrorContextTypes) {
+  // TODO(Brian): Get some useful catalyst payload to append here
+  ReportFatalError(error, context)
+}
+
+export function ReportFatalErrorWithCommsPayload(error: Error, context: ErrorContextTypes) {
+  // TODO(Brian): Get some useful comms payload to append here
+  ReportFatalError(error, context)
+}
+
+export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorContextTypes) {
+  ReportFatalErrorWithUnityPayloadAsync(error, context)
+    .then((x) => {
+      //
+    })
+    .catch(() => {
+      //
+    })
+}
+
+export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, context: ErrorContextTypes) {
+  try {
+    let payload = await unityInterface.CrashPayloadRequest()
+    ReportFatalError(error, context, { rendererPayload: payload })
+  } catch (e) {
+    ReportFatalError(error, context)
   }
-  trackEvent('generic_error', {
-    message: event,
-    errorInfo
+}
+
+export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
+  const finalPayload = GetErrorPayload(context, payload)
+  trackEvent('error_fatal', {
+    context: context,
+    message: error.message,
+    stack: error.stack?.slice(0, 10000)
   })
+
+  ReportRollbarError(error, finalPayload)
 }
 
-export function ReportSceneError(message: string, error: any) {
-  const eventData = {
-    error,
-    scene: true,
-    message,
-    position: new URLSearchParams(location.search).get('position')
-  }
-  trackEvent('scene_error', eventData)
-  if (window.Rollbar) {
-    window.Rollbar.error(message, eventData)
-  }
+export function ReportSceneError(message: string, payload: any) {
+  const finalPayload = GetErrorPayload(ErrorContext.KERNEL_SCENE, payload)
+  trackEvent('error_scene', {
+    message: message,
+    payload: finalPayload
+  })
+  ReportRollbarError(new Error(message), finalPayload)
 }
 
-export function ReportRendererInterfaceError(message: string, error: any) {
-  const eventData = {
-    error,
-    message,
-    rendererInterface: true,
-    position: new URLSearchParams(location.search).get('position')
+function GetErrorPayload(context: ErrorContextTypes, additionalPayload: any) {
+  const result = {
+    context: context,
+    ...additionalPayload
   }
-  trackEvent('renderer_interface_error', eventData)
+  return result
+}
+
+function ReportRollbarError(error: Error, payload: any) {
   if (window.Rollbar) {
-    window.Rollbar.error(message, eventData)
+    window.Rollbar.critical(error, payload)
   }
 }

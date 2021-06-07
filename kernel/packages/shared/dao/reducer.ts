@@ -16,7 +16,8 @@ import {
   COMMS_SERVICE,
   RESIZE_SERVICE,
   PIN_CATALYST,
-  HOTSCENES_SERVICE
+  HOTSCENES_SERVICE,
+  POI_SERVICE
 } from 'config'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
@@ -31,6 +32,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       resizeService: '',
       hotScenesService: '',
       exploreRealmsService: '',
+      poiService: '',
       realm: undefined,
       candidates: [],
       addedCandidates: [],
@@ -123,6 +125,7 @@ function realmProperties(realm: Realm, configOverride: boolean = true): Partial<
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     resizeService: RESIZE_SERVICE && configOverride ? RESIZE_SERVICE : domain + '/lambdas/images',
     hotScenesService: HOTSCENES_SERVICE && configOverride ? HOTSCENES_SERVICE : domain + '/lambdas/explore/hot-scenes',
+    poiService: POI_SERVICE && configOverride ? POI_SERVICE : domain + '/lambdas/contracts/pois',
     exploreRealmsService: domain + '/lambdas/explore/realms',
     realm
   }

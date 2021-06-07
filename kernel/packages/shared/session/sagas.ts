@@ -19,7 +19,7 @@ import {
   requestProvider as requestEthProvider
 } from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
   AWAITING_USER_SIGNATURE,
@@ -264,7 +264,8 @@ function* authorize() {
       }
     } catch (e) {
       logger.error(e)
-      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
+      ReportFatalError(e, ErrorContext.KERNEL_INIT)
+      BringDownClientAndShowError(AUTH_ERROR_LOGGED_OUT)
       throw e
     }
   } else {
