@@ -9,6 +9,7 @@ import { getCurrentIdentity } from 'shared/session/selectors'
 import { EMPTY_PARCEL_NAME } from 'shared/atlas/selectors'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
+import { invalidateScene } from 'decentraland-loader/lifecycle/utils/invalidateScene'
 import { DeploymentResult, CONTENT_PATH, SceneDeploymentSourceMetadata } from './types'
 import { defaultLogger } from '../../logger'
 import { ContentMapping, SceneJsonData } from '../../types'
@@ -26,6 +27,12 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
   let result
 
   try {
+    const sceneId: string | null = (await fetchSceneIds([coordinates]))[0]
+
+    if (!sceneId) {
+      throw Error(`Failed fetching sceneId for coordinates ${coordinates}`)
+    }
+
     const { sceneJson, sceneFiles } = await getEmptySceneFiles(coordinates)
 
     const contentClient = getContentClient()
@@ -54,21 +61,15 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
 
     await contentClient.deployEntity({ files, entityId, authChain })
 
-    // Reload scene if running
-    fetchSceneIds([coordinates])
-      .then((scenesId) => {
-        if (scenesId && scenesId[0]) {
-          const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
-          const sceneId = scenesId[0]
+    await invalidateScene(sceneId)
 
-          if (sceneWorkers.get(sceneId)) {
-            reloadScene(sceneId).catch((error) =>
-              defaultLogger.error(`Failed reloading scene for coordinates ${coordinates}`, error)
-            )
-          }
-        }
-      })
-      .catch((error) => defaultLogger.error(`Failed fetching sceneId for coordinates ${coordinates}`, error))
+    // Reload scene if running
+    const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
+    if (sceneWorkers.get(sceneId)) {
+      reloadScene(sceneId).catch((error) =>
+        defaultLogger.error(`Failed reloading scene for coordinates ${coordinates}`, error)
+      )
+    }
 
     result = { ok: true, error: '' }
   } catch (error) {
