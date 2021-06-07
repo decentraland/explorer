@@ -27,12 +27,7 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
   let result
 
   try {
-    const sceneId: string | null = (await fetchSceneIds([coordinates]))[0]
-
-    if (!sceneId) {
-      throw Error(`Failed fetching sceneId for coordinates ${coordinates}`)
-    }
-
+    // Get random empty scene files
     const { sceneJson, sceneFiles } = await getEmptySceneFiles(coordinates)
 
     const contentClient = getContentClient()
@@ -51,7 +46,7 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
       }
     })
 
-    // Sign entity id
+    // Sign entity id and depploy
     const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
@@ -61,15 +56,23 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
 
     await contentClient.deployEntity({ files, entityId, authChain })
 
-    await invalidateScene(sceneId)
+    // Invalidate previous scene and reload it if running
+    fetchSceneIds([coordinates])
+      .then(async (scenesId) => {
+        if (scenesId && scenesId[0]) {
+          const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
+          const sceneId = scenesId[0]
 
-    // Reload scene if running
-    const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
-    if (sceneWorkers.get(sceneId)) {
-      reloadScene(sceneId).catch((error) =>
-        defaultLogger.error(`Failed reloading scene for coordinates ${coordinates}`, error)
-      )
-    }
+          await invalidateScene(sceneId)
+
+          if (sceneWorkers.get(sceneId)) {
+            reloadScene(sceneId).catch((error) =>
+              defaultLogger.error(`Failed reloading scene for coordinates ${coordinates}`, error)
+            )
+          }
+        }
+      })
+      .catch((error) => defaultLogger.error(`Failed fetching sceneId for coordinates ${coordinates}`, error))
 
     result = { ok: true, error: '' }
   } catch (error) {
