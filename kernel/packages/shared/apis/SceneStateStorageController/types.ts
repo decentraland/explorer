@@ -113,5 +113,6 @@ export type UnityColor = {
 export type SceneDeploymentSourceMetadata = {
   version: number
   origin: string
+  projectId?: string
   isEmpty?: boolean
 }

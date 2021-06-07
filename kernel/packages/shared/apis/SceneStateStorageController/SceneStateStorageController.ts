@@ -133,7 +133,8 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
             ...sceneJson,
             source: {
               origin: 'builder-in-world',
-              version: 1
+              version: 1,
+              projectId: this.builderManifest.project.id
             } as SceneDeploymentSourceMetadata
           }
         })
