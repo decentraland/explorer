@@ -27,10 +27,10 @@ import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
-import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
+import { Observable } from 'decentraland-ecs/src'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -60,6 +60,7 @@ export class UnityInterface {
   public gameInstance: any
   public Module: any
   public currentHeight: number = 1080
+  public crashPayloadResponseObservable: Observable<string> = new Observable<string>()
 
   public SetTargetHeight(height: number): void {
     if (EDITOR) {
@@ -188,6 +189,27 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'SetDisableAssetBundles')
   }
 
+  public async CrashPayloadRequest(): Promise<string> {
+    // Over wasm this should come back on the same call stack frame because
+    // the response comes within the CrashPayloadRequest method body.
+
+    // For websocket this should take more frames, so we need promises.
+    let promise = new Promise<string>((resolve, reject) => {
+      let crashListener = this.crashPayloadResponseObservable.addOnce((payload) => {
+        resolve(payload)
+      })
+
+      setTimeout(() => {
+        this.crashPayloadResponseObservable.remove(crashListener)
+        reject()
+      }, 2000)
+
+      this.SendMessageToUnity('Main', 'CrashPayloadRequest')
+    })
+
+    return promise
+  }
+
   public ActivateRendering() {
     this.SendMessageToUnity('Main', 'ActivateRendering')
   }
@@ -277,7 +299,11 @@ export class UnityInterface {
   }
 
   public SetTutorialEnabledForUsersThatAlreadyDidTheTutorial(tutorialConfig: TutorialInitializationMessage) {
-    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial', JSON.stringify(tutorialConfig))
+    this.SendMessageToUnity(
+      'TutorialController',
+      'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial',
+      JSON.stringify(tutorialConfig)
+    )
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -530,30 +556,8 @@ export class UnityInterface {
     if (isError) {
       const error = `Error while sending Message to Unity. Object: ${object}. Method: ${method}. Payload: ${payload}.`
       defaultLogger.error(error)
-      ReportRendererInterfaceError(error, error)
     }
   }
 }
 
-export class ClientDebug {
-  private unityInterface: UnityInterface
-
-  public constructor(unityInterface: UnityInterface) {
-    this.unityInterface = unityInterface
-  }
-
-  public DumpScenesLoadInfo() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpScenesLoadInfo')
-  }
-
-  public DumpRendererLockersInfo() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
-  }
-
-  public RunPerformanceMeterTool(durationInSeconds: number) {
-    this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInSeconds)
-  }
-}
-
 export let unityInterface: UnityInterface = new UnityInterface()
-export let clientDebug: ClientDebug = new ClientDebug(unityInterface)
