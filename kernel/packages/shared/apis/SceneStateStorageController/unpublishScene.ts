@@ -15,6 +15,7 @@ import { defaultLogger } from '../../logger'
 import { ContentMapping, SceneJsonData } from '../../types'
 import { jsonFetch } from '../../../atomicHelpers/jsonFetch'
 import { blobToBuffer } from './SceneStateStorageController'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 declare const globalThis: any
 
@@ -79,6 +80,8 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
     result = { ok: false, error: `Unpublish failed ${error}` }
     defaultLogger.error('Unpublish failed', error)
   }
+
+  unityInterface.SendUnpublishSceneResult(result)
 
   return result
 }
