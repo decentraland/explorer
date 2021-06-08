@@ -581,8 +581,8 @@ export class BrowserInterface {
     ReportFatalErrorWithUnityPayload(new Error(AVATAR_LOADING_ERROR), ErrorContext.RENDERER_AVATARS)
   }
 
-  public UnpublishScene(coordinates: string) {
-    unpublishSceneByCoords(coordinates).catch((error) => defaultLogger.log(error))
+  public UnpublishScene(data: { coordinates: string }) {
+    unpublishSceneByCoords(data.coordinates).catch((error) => defaultLogger.log(error))
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
