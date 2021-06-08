@@ -62,7 +62,7 @@ import {
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
 import { getProfileType } from './getProfileType'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
@@ -123,7 +123,8 @@ function* initialProfileLoad() {
   try {
     profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
   } catch (e) {
-    ReportFatalError(UNEXPECTED_ERROR)
+    ReportFatalError(e, ErrorContext.KERNEL_INIT, { userId: userId })
+    BringDownClientAndShowError(UNEXPECTED_ERROR)
     throw e
   }
 

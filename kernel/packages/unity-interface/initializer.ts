@@ -10,7 +10,8 @@ import { loadUnity, UnityGame } from './loader'
 import { unityBuildConfigurations } from 'config'
 import { initializeUnityEditor } from './wsEditorAdapter'
 import future from 'fp-future'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithUnityPayload } from 'shared/loading/ReportFatalError'
+import { UNEXPECTED_ERROR } from 'shared/loading/types'
 
 declare const globalThis: StoreContainer & { Hls: any }
 // HLS is required to make video texture and streaming work in Unity
@@ -81,7 +82,9 @@ async function loadInjectedUnityDelegate(
       return true
     }
 
-    ReportFatalError(message as any)
+    const error = new Error(`${message} ... file: ${filename} - lineno: ${lineno}`)
+    ReportFatalErrorWithUnityPayload(error, ErrorContext.RENDERER_ERRORHANDLER)
+    BringDownClientAndShowError(UNEXPECTED_ERROR)
     return true
   }
 
