@@ -1,19 +1,9 @@
 import { Authenticator } from 'dcl-crypto'
 import { ExplorerIdentity } from 'shared/session/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
-import { ContentMapping } from '../../types'
-import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
+import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene, AssetId, Asset } from './types'
 import { getDefaultTLD } from 'config'
 import { defaultLogger } from '../../logger'
-
-export type AssetId = string
-
-export type Asset = {
-  id: AssetId
-  model: string
-  mappings: ContentMapping[]
-  baseUrl: string
-}
 
 const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
 const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'

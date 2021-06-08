@@ -6,9 +6,9 @@ import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
 import { defaultLogger } from '../../logger'
 import { DEBUG } from '../../../config'
-import { BuilderManifest, CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
+import { Asset, AssetId, BuilderManifest, CONTENT_PATH, DeploymentResult, SceneDeploymentSourceMetadata, SerializedSceneState } from './types'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { Asset, AssetId, BuilderServerAPIManager } from './BuilderServerAPIManager'
+import { BuilderServerAPIManager } from './BuilderServerAPIManager'
 import {
   fromBuildertoStateDefinitionFormat,
   fromSerializedStateToStorableFormat,
@@ -160,7 +160,14 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           type: EntityType.SCENE,
           pointers: parcels,
           files: entityFiles,
-          metadata: sceneJson
+          metadata: {
+            ...sceneJson,
+            source: {
+              origin: 'builder-in-world',
+              version: 1,
+              projectId: this.builderManifest.project.id
+            } as SceneDeploymentSourceMetadata
+          }
         })
 
         // Sign entity id
@@ -275,7 +282,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 setAPIName('SceneStateStorageController', SceneStateStorageController)
 
 const toBuffer = require('blob-to-buffer')
-function blobToBuffer(blob: Blob): Promise<Buffer> {
+export function blobToBuffer(blob: Blob): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     toBuffer(blob, (err: Error, buffer: Buffer) => {
       if (err) reject(err)

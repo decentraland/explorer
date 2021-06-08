@@ -433,6 +433,10 @@ export class UnityInterface {
     )
   }
 
+  public SendUnpublishSceneResult(result: DeploymentResult) {
+    this.SendMessageToUnity('Bridges', 'UnpublishSceneResult', JSON.stringify(result))
+  }
+
   // *********************************************************************************
   // ************** Quests messages **************
   // *********************************************************************************
