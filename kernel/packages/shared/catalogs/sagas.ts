@@ -32,7 +32,8 @@ import {
   WearablesRequestFilters,
   WearableV2,
   BodyShapeRepresentationV2,
-  PartialWearableV2
+  PartialWearableV2,
+  PreviewWearable
 } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
@@ -44,7 +45,9 @@ import { ensureRenderer } from 'shared/renderer/sagas'
 import { isFeatureEnabled } from 'shared/meta/selectors'
 import { FeatureFlags } from 'shared/meta/types'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
+import { fetchJson } from 'dcl-catalyst-commons'
 import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
+import { BASE_DOWNLOAD_URL } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
@@ -179,11 +182,28 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
     if (WITH_FIXED_COLLECTIONS) {
       // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
       // That's why we are also querying a prod catalyst for the given collections
-      const collectionIds = WITH_FIXED_COLLECTIONS.split(',')
-      const orgClient: CatalystClient = yield CatalystClient.connectedToCatalystIn('mainnet', 'EXPLORER')
-      const zoneWearables = yield client.fetchWearables({ collectionIds })
-      const orgWearables = yield orgClient.fetchWearables({ collectionIds })
-      result.push(...zoneWearables, ...orgWearables)
+      const collectionIds: string[] = WITH_FIXED_COLLECTIONS.split(',')
+
+      // Fetch published collections
+      const urnCollections = collectionIds.filter((collectionId) => collectionId.startsWith('urn'))
+      if (urnCollections.length > 0) {
+        const orgClient: CatalystClient = yield CatalystClient.connectedToCatalystIn('mainnet', 'EXPLORER')
+        const zoneWearables = yield client.fetchWearables({ collectionIds: urnCollections })
+        const orgWearables = yield orgClient.fetchWearables({ collectionIds: urnCollections })
+        result.push(...zoneWearables, ...orgWearables)
+      }
+
+      // Fetch uuid collections
+      const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
+      if (uuidCollections) {
+        for (const collectionUuid of uuidCollections) {
+          const collection: { data: PreviewWearable[] } = yield fetchJson(
+            `https://builder-api.decentraland.org/v1/collections/${collectionUuid}/items`
+          )
+          const v2Wearables = collection.data.map((wearable) => mapPreviewWearableIntoCatalystWearable(wearable))
+          result.push(...v2Wearables)
+        }
+      }
     } else {
       const ownedWearables: OwnedWearablesWithDefinition[] = yield call(
         fetchOwnedWearables,
@@ -212,6 +232,27 @@ function fetchOwnedWearables(ethAddress: string, client: CatalystClient) {
 
 async function fetchWearablesByFilters(filters: WearablesRequestFilters, client: CatalystClient) {
   return client.fetchWearables(filters)
+}
+
+function mapPreviewWearableIntoCatalystWearable(wearable: PreviewWearable): any {
+  const { id, rarity, name, thumbnail, description, data, contents: contentToHash } = wearable
+  return {
+    id,
+    rarity,
+    i18n: [{ code: 'en', text: name }],
+    thumbnail: `${BASE_DOWNLOAD_URL}/${contentToHash[thumbnail]}`,
+    description,
+    data: {
+      ...data,
+      representations: data.representations.map(({ contents, ...other }) => ({
+        ...other,
+        contents: contents.map((key) => ({
+          key,
+          url: `${BASE_DOWNLOAD_URL}/${contentToHash[key]}`
+        }))
+      }))
+    }
+  }
 }
 
 function mapV1WearableIntoV2(wearable: Wearable): PartialWearableV2 {

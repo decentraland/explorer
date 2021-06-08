@@ -5,7 +5,7 @@ import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene, AssetId, A
 import { getDefaultTLD } from 'config'
 import { defaultLogger } from '../../logger'
 
-const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
+export const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
 const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'
 const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
 

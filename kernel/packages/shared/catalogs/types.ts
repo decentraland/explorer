@@ -20,6 +20,30 @@ export type Wearable = {
   thumbnail: string
 }
 
+export type PreviewWearable = {
+  id: string // uuid
+  rarity: string
+  name: string
+  thumbnail: string
+  description: string
+  data: {
+    category: string
+    tags: string[]
+    hides?: string[]
+    replaces?: string[]
+    representations: PreviewBodyShapeRepresentation[]
+  }
+  contents: Record<string, string> // from file name to hash
+}
+
+export type PreviewBodyShapeRepresentation = {
+  bodyShapes: string[]
+  mainFile: string
+  overrideHides?: string[]
+  overrideReplaces?: string[]
+  contents: string[]
+}
+
 export type WearableV2 = {
   id: string
   rarity: string
