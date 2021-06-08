@@ -177,7 +177,7 @@ export class BuilderServerAPIManager {
     const queryParams = 'projects/' + projectId + '/media'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
-    const thumbnailData = new FormData();
+    const thumbnailData = new FormData()
     thumbnailData.append('thumbnail', thumbnailBlob)
     const headers = this.authorize(identity, 'post', '/' + queryParams)
 
