@@ -33,7 +33,7 @@ import {
   WearableV2,
   BodyShapeRepresentationV2,
   PartialWearableV2,
-  PreviewWearable
+  UnpublishedWearable
 } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
@@ -47,7 +47,12 @@ import { FeatureFlags } from 'shared/meta/types'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
 import { fetchJson } from 'dcl-catalyst-commons'
 import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
-import { BASE_DOWNLOAD_URL } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
+import {
+  BASE_BUILDER_SERVER_URL,
+  BASE_DOWNLOAD_URL,
+  BuilderServerAPIManager
+} from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
+import { getCurrentIdentity } from 'shared/session/selectors'
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
@@ -193,14 +198,17 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
         result.push(...zoneWearables, ...orgWearables)
       }
 
-      // Fetch uuid collections
+      // Fetch unpublished collections from builder server
       const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
       if (uuidCollections) {
+        const identity = yield select(getCurrentIdentity)
         for (const collectionUuid of uuidCollections) {
-          const collection: { data: PreviewWearable[] } = yield fetchJson(
-            `https://builder-api.decentraland.org/v1/collections/${collectionUuid}/items`
-          )
-          const v2Wearables = collection.data.map((wearable) => mapPreviewWearableIntoCatalystWearable(wearable))
+          const path = `collections/${collectionUuid}/items`
+          const headers = BuilderServerAPIManager.authorize(identity, 'get', `/${path}`)
+          const collection: { data: UnpublishedWearable[] } = yield fetchJson(`${BASE_BUILDER_SERVER_URL}${path}`, {
+            headers
+          })
+          const v2Wearables = collection.data.map((wearable) => mapUnpublishedWearableIntoCatalystWearable(wearable))
           result.push(...v2Wearables)
         }
       }
@@ -234,7 +242,10 @@ async function fetchWearablesByFilters(filters: WearablesRequestFilters, client:
   return client.fetchWearables(filters)
 }
 
-function mapPreviewWearableIntoCatalystWearable(wearable: PreviewWearable): any {
+/**
+ * We are now mapping wearables that were fetched from the builder server into the same format that is returned by the catalysts
+ */
+function mapUnpublishedWearableIntoCatalystWearable(wearable: UnpublishedWearable): any {
   const { id, rarity, name, thumbnail, description, data, contents: contentToHash } = wearable
   return {
     id,

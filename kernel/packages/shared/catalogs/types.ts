@@ -20,7 +20,7 @@ export type Wearable = {
   thumbnail: string
 }
 
-export type PreviewWearable = {
+export type UnpublishedWearable = {
   id: string // uuid
   rarity: string
   name: string
@@ -31,12 +31,12 @@ export type PreviewWearable = {
     tags: string[]
     hides?: string[]
     replaces?: string[]
-    representations: PreviewBodyShapeRepresentation[]
+    representations: UnpublishedBodyShapeRepresentation[]
   }
   contents: Record<string, string> // from file name to hash
 }
 
-export type PreviewBodyShapeRepresentation = {
+type UnpublishedBodyShapeRepresentation = {
   bodyShapes: string[]
   mainFile: string
   overrideHides?: string[]

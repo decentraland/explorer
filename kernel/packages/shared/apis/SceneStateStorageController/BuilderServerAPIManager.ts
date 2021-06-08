@@ -7,11 +7,24 @@ import { defaultLogger } from '../../logger'
 
 export const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
 const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'
-const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
+export const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
 
 export class BuilderServerAPIManager {
+  private static readonly AUTH_CHAIN_HEADER_PREFIX = 'x-identity-auth-chain-'
   private readonly assets: Map<AssetId, BuilderAsset> = new Map()
-  private readonly AUTH_CHAIN_HEADER_PREFIX = 'x-identity-auth-chain-'
+
+  static authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
+    const headers: Record<string, string> = {}
+
+    if (identity) {
+      const endpoint = (method + ':' + path).toLowerCase()
+      const authChain = Authenticator.signPayload(identity, endpoint)
+      for (let i = 0; i < authChain.length; i++) {
+        headers[this.AUTH_CHAIN_HEADER_PREFIX + i] = JSON.stringify(authChain[i])
+      }
+    }
+    return headers
+  }
 
   async getAssets(assetIds: AssetId[]): Promise<Record<string, BuilderAsset>> {
     const unknownAssets = assetIds.filter((assetId) => !this.assets.has(assetId))
@@ -51,7 +64,7 @@ export class BuilderServerAPIManager {
       const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
       let params: RequestInit = {
-        headers: this.authorize(identity, 'get', '/' + queryParams)
+        headers: BuilderServerAPIManager.authorize(identity, 'get', '/' + queryParams)
       }
 
       const response = await fetch(urlToFecth, params)
@@ -78,7 +91,7 @@ export class BuilderServerAPIManager {
       const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
       let params: RequestInit = {
-        headers: this.authorize(identity, 'get', '/' + queryParams)
+        headers: BuilderServerAPIManager.authorize(identity, 'get', '/' + queryParams)
       }
 
       const response = await fetch(urlToFecth, params)
@@ -144,7 +157,7 @@ export class BuilderServerAPIManager {
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
     const body = JSON.stringify({ manifest: builderManifest })
-    const headers = this.authorize(identity, 'put', '/' + queryParams)
+    const headers = BuilderServerAPIManager.authorize(identity, 'put', '/' + queryParams)
     headers['Content-Type'] = 'application/json'
 
     let params: RequestInit = {
@@ -169,7 +182,7 @@ export class BuilderServerAPIManager {
 
     const thumbnailData = new FormData()
     thumbnailData.append('thumbnail', thumbnailBlob)
-    const headers = this.authorize(identity, 'post', '/' + queryParams)
+    const headers = BuilderServerAPIManager.authorize(identity, 'post', '/' + queryParams)
 
     let params: RequestInit = {
       headers: headers,
@@ -281,18 +294,5 @@ export class BuilderServerAPIManager {
       scene: builderScene
     }
     return builderManifest
-  }
-
-  private authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
-    const headers: Record<string, string> = {}
-
-    if (identity) {
-      const endpoint = (method + ':' + path).toLowerCase()
-      const authChain = Authenticator.signPayload(identity, endpoint)
-      for (let i = 0; i < authChain.length; i++) {
-        headers[this.AUTH_CHAIN_HEADER_PREFIX + i] = JSON.stringify(authChain[i])
-      }
-    }
-    return headers
   }
 }
