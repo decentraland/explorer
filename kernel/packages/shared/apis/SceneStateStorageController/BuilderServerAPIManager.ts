@@ -117,6 +117,14 @@ export class BuilderServerAPIManager {
     }
   }
 
+  async updateProjectThumbnail(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
+    try {
+      await this.setThumbnailOnServer(projectId, thumbnailBlob, identity)
+    } catch (e) {
+      defaultLogger.error(e)
+    }
+  }
+
   async createProjectWithCoords(coordinates: string, identity: ExplorerIdentity): Promise<BuilderManifest> {
     const builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
     try {
@@ -153,6 +161,30 @@ export class BuilderServerAPIManager {
       headers: headers,
       method: 'PUT',
       body: body
+    }
+
+    const response = await fetch(urlToFecth, params)
+    const data = await response.json()
+    return data
+  }
+
+  private async setThumbnailOnServer(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
+    // TODO: We should delete this when we enter in production or we won't be able to set the project in production
+    if (getDefaultTLD() === 'org') {
+      defaultLogger.log('Project thumbnail saving is disable in org for the moment!')
+      return undefined
+    }
+    const queryParams = 'projects/' + projectId + '/media'
+    const urlToFecth = `${this.getBaseUrl()}${queryParams}`
+
+    const thumbnailData = new FormData()
+    thumbnailData.append('thumbnail', thumbnailBlob)
+    const headers = this.authorize(identity, 'post', '/' + queryParams)
+
+    let params: RequestInit = {
+      headers: headers,
+      method: 'POST',
+      body: thumbnailData
     }
 
     const response = await fetch(urlToFecth, params)

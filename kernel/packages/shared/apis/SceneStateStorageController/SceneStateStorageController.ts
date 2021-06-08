@@ -26,6 +26,7 @@ import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefi
 import { ExplorerIdentity } from 'shared/session/types'
 import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from './ISceneStateStorageController'
+import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 
 declare const globalThis: any
 
@@ -49,6 +50,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
     const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
     if (newProject) {
+      globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description)
       this.builderManifest = newProject
       const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
       return serializeSceneState(translatedManifest)
@@ -59,6 +61,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   @exposeMethod
   async createProjectWithCoords(coordinates: string): Promise<boolean> {
     const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
+    globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description)
     this.builderManifest = newProject
     return newProject ? true : false
   }
@@ -89,8 +92,29 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async publishSceneState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneScreenshot: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
     let result: DeploymentResult
+
+    // Deserialize the scene state
+    const deserializedSceneState: SceneStateDefinition = deserializeSceneState(sceneState)
+
+    // Convert the scene state to builder scheme format
+    let builderManifest = await toBuilderFromStateDefinitionFormat(
+      deserializedSceneState,
+      this.builderManifest,
+      this.builderApiManager
+    )
+
+    // Update the project info
+    builderManifest.project.title = sceneName
+    builderManifest.project.description = sceneDescription
+
+    // Update the manifest
+    await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+
+    // Update the thumbnail
+    const thumbnailBlob: Blob = base64ToBlob(sceneScreenshot, 'image/png')
+    await this.builderApiManager.updateProjectThumbnail(builderManifest.project.id, thumbnailBlob, this.getIdentity())
 
     // Convert to storable format
     const storableFormat = fromSerializedStateToStorableFormat(sceneState)
@@ -111,12 +135,18 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
         // Prepare scene.json
         const sceneJson = this.parcelIdentity.land.sceneJsonData
+        sceneJson.display = {
+          title: sceneName,
+          description: sceneDescription,
+          navmapThumbnail: CONTENT_PATH.SCENE_THUMBNAIL
+        }
 
         // Group all entity files
         const entityFiles: Map<string, Buffer> = new Map([
           [CONTENT_PATH.DEFINITION_FILE, Buffer.from(JSON.stringify(storableFormat))],
           [CONTENT_PATH.BUNDLED_GAME_FILE, Buffer.from(gameFile)],
           [CONTENT_PATH.SCENE_FILE, Buffer.from(JSON.stringify(sceneJson))],
+          [CONTENT_PATH.SCENE_THUMBNAIL, await blobToBuffer(thumbnailBlob)],
           ...models
         ])
 
