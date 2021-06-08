@@ -112,6 +112,10 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     // Update the manifest
     await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
 
+    // Update the thumbnail
+    const thumbnailBlob: Blob = base64ToBlob(sceneScreenshot, 'image/png')
+    await this.builderApiManager.updateProjectThumbnail(builderManifest.project.id, thumbnailBlob, this.getIdentity())
+
     // Convert to storable format
     const storableFormat = fromSerializedStateToStorableFormat(sceneState)
 
@@ -142,7 +146,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           [CONTENT_PATH.DEFINITION_FILE, Buffer.from(JSON.stringify(storableFormat))],
           [CONTENT_PATH.BUNDLED_GAME_FILE, Buffer.from(gameFile)],
           [CONTENT_PATH.SCENE_FILE, Buffer.from(JSON.stringify(sceneJson))],
-          [CONTENT_PATH.SCENE_THUMBNAIL, await blobToBuffer(base64ToBlob(sceneScreenshot))],
+          [CONTENT_PATH.SCENE_THUMBNAIL, await blobToBuffer(thumbnailBlob)],
           ...models
         ])
 
