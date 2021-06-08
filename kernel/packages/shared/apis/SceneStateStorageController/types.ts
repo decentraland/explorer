@@ -27,7 +27,8 @@ export enum CONTENT_PATH {
   DEFINITION_FILE = 'scene-state-definition.json',
   SCENE_FILE = 'scene.json',
   MODELS_FOLDER = 'models',
-  BUNDLED_GAME_FILE = 'bin/game.js'
+  BUNDLED_GAME_FILE = 'bin/game.js',
+  SCENE_THUMBNAIL = 'thumbnail.png'
 }
 
 export type DeploymentResult = { ok: true } | { ok: false; error: string }
