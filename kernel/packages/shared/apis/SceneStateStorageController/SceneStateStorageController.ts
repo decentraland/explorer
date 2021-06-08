@@ -41,6 +41,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
     if (!manifest) return undefined
 
+    globalThis.unityInterface.SendBuilderProjectInfo(manifest.project.title, manifest.project.description)
     this.builderManifest = manifest
     const definition = fromBuildertoStateDefinitionFormat(manifest.scene)
     return serializeSceneState(definition)
