@@ -55,25 +55,22 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
     }
     const authChain = Authenticator.signPayload(identity, entityId)
 
+    const sceneId = await fetchSceneIds([coordinates])
     await contentClient.deployEntity({ files, entityId, authChain })
 
-    // Invalidate previous scene and reload it if running
-    fetchSceneIds([coordinates])
-      .then(async (scenesId) => {
-        if (scenesId && scenesId[0]) {
-          const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
-          const sceneId = scenesId[0]
-
-          await invalidateScene(sceneId)
-
-          if (sceneWorkers.get(sceneId)) {
-            reloadScene(sceneId).catch((error) =>
-              defaultLogger.error(`Failed reloading scene for coordinates ${coordinates}`, error)
-            )
-          }
-        }
-      })
-      .catch((error) => defaultLogger.error(`Failed fetching sceneId for coordinates ${coordinates}`, error))
+    // Reload scene if running. Invalidate it if not
+    if (sceneId && sceneId[0]) {
+      const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
+      if (sceneWorkers.get(sceneId[0])) {
+        reloadScene(sceneId[0]).catch((error) =>
+          defaultLogger.error(`Failed reloading scene at coordinates ${coordinates}`, error)
+        )
+      } else {
+        invalidateScene(sceneId[0]).catch((error) =>
+          defaultLogger.error(`Failed invalidating scene at coordinates ${coordinates}`, error)
+        )
+      }
+    }
 
     result = { ok: true, error: '' }
   } catch (error) {
