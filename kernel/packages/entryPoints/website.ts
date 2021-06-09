@@ -140,6 +140,7 @@ namespace webApp {
 
         const configForRenderer = kernelConfigForRenderer()
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
+        configForRenderer.features.enableBuilderInWorld = builderInWorldEnabled
         i.SetKernelConfiguration(configForRenderer)
 
         configureTaskbarDependentHUD(i, voiceChatEnabled, builderInWorldEnabled)
