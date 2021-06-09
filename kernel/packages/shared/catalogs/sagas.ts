@@ -200,7 +200,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
 
       // Fetch unpublished collections from builder server
       const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
-      if (uuidCollections) {
+      if (uuidCollections.length > 0) {
         const identity = yield select(getCurrentIdentity)
         for (const collectionUuid of uuidCollections) {
           const path = `collections/${collectionUuid}/items`
