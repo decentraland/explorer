@@ -1,19 +1,9 @@
 import { Authenticator } from 'dcl-crypto'
 import { ExplorerIdentity } from 'shared/session/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
-import { ContentMapping } from '../../types'
-import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
+import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene, AssetId, Asset } from './types'
 import { getDefaultTLD } from 'config'
 import { defaultLogger } from '../../logger'
-
-export type AssetId = string
-
-export type Asset = {
-  id: AssetId
-  model: string
-  mappings: ContentMapping[]
-  baseUrl: string
-}
 
 const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
 const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'
@@ -117,6 +107,14 @@ export class BuilderServerAPIManager {
     }
   }
 
+  async updateProjectThumbnail(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
+    try {
+      await this.setThumbnailOnServer(projectId, thumbnailBlob, identity)
+    } catch (e) {
+      defaultLogger.error(e)
+    }
+  }
+
   async createProjectWithCoords(coordinates: string, identity: ExplorerIdentity): Promise<BuilderManifest> {
     const builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
     try {
@@ -153,6 +151,30 @@ export class BuilderServerAPIManager {
       headers: headers,
       method: 'PUT',
       body: body
+    }
+
+    const response = await fetch(urlToFecth, params)
+    const data = await response.json()
+    return data
+  }
+
+  private async setThumbnailOnServer(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
+    // TODO: We should delete this when we enter in production or we won't be able to set the project in production
+    if (getDefaultTLD() === 'org') {
+      defaultLogger.log('Project thumbnail saving is disable in org for the moment!')
+      return undefined
+    }
+    const queryParams = 'projects/' + projectId + '/media'
+    const urlToFecth = `${this.getBaseUrl()}${queryParams}`
+
+    const thumbnailData = new FormData()
+    thumbnailData.append('thumbnail', thumbnailBlob)
+    const headers = this.authorize(identity, 'post', '/' + queryParams)
+
+    let params: RequestInit = {
+      headers: headers,
+      method: 'POST',
+      body: thumbnailData
     }
 
     const response = await fetch(urlToFecth, params)

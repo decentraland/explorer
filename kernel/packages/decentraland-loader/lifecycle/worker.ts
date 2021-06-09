@@ -122,6 +122,10 @@ let downloadManager: SceneDataDownloadManager
         const parcels = parcelController.setLineOfSightRadius(data.distanceInParcels)
         positionController.updateSightedParcels(parcels)
       })
+
+      connector.on('Scene.Invalidate', (data: { sceneId: string }) => {
+        sceneController.invalidate(data.sceneId)
+      })
     }
   )
 }
