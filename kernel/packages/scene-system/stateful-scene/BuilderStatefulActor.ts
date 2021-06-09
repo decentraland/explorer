@@ -2,6 +2,7 @@
 import { ILand } from 'shared/types'
 import { deserializeSceneState } from './SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from 'shared/apis/SceneStateStorageController/ISceneStateStorageController'
+import { CONTENT_PATH } from 'shared/apis/SceneStateStorageController/types'
 
 export class BuilderStatefulActor {
   constructor(protected readonly land: ILand, private readonly sceneStorage: ISceneStateStorageController) {}
@@ -17,6 +18,14 @@ export class BuilderStatefulActor {
       const builderProject = await this.sceneStorage.getProjectManifest(this.land.sceneJsonData.source?.projectId)
       if (builderProject) {
         return deserializeSceneState(builderProject)
+      }
+    }
+
+    // Look for stateful definition
+    if (this.land.mappingsResponse.contents.find((pair) => pair.file === CONTENT_PATH.DEFINITION_FILE)) {
+      const definition = await this.sceneStorage.getStoredState(this.land.sceneId)
+      if (definition) {
+        return deserializeSceneState(definition)
       }
     }
 
