@@ -20,6 +20,30 @@ export type Wearable = {
   thumbnail: string
 }
 
+export type UnpublishedWearable = {
+  id: string // uuid
+  rarity: string
+  name: string
+  thumbnail: string
+  description: string
+  data: {
+    category: string
+    tags: string[]
+    hides?: string[]
+    replaces?: string[]
+    representations: UnpublishedBodyShapeRepresentation[]
+  }
+  contents: Record<string, string> // from file name to hash
+}
+
+type UnpublishedBodyShapeRepresentation = {
+  bodyShapes: string[]
+  mainFile: string
+  overrideHides?: string[]
+  overrideReplaces?: string[]
+  contents: string[]
+}
+
 export type WearableV2 = {
   id: string
   rarity: string
