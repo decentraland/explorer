@@ -4,10 +4,7 @@ import { deserializeSceneState } from './SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from 'shared/apis/SceneStateStorageController/ISceneStateStorageController'
 
 export class BuilderStatefulActor {
-  constructor(
-    protected readonly land: ILand,
-    private readonly sceneStorage: ISceneStateStorageController
-  ) {}
+  constructor(protected readonly land: ILand, private readonly sceneStorage: ISceneStateStorageController) {}
 
   async getInititalSceneState(): Promise<SceneStateDefinition> {
     const sceneState = await this.getContentLandDefinition()
@@ -15,16 +12,7 @@ export class BuilderStatefulActor {
   }
 
   private async getContentLandDefinition(): Promise<SceneStateDefinition | undefined> {
-
-    //First we search the definition in the builder server filtering by land coordinates
-    const builderProjectByCoordinates = await this.sceneStorage.getProjectManifestByCoordinates(
-      this.land.sceneJsonData.scene.base
-    )
-    if (builderProjectByCoordinates) {
-      return deserializeSceneState(builderProjectByCoordinates)
-    }
-
-    //if there is no project associated to the land, we search the last builder project deployed in the land
+    // Fetch project from builder api
     if (this.land.sceneJsonData.source?.projectId) {
       const builderProject = await this.sceneStorage.getProjectManifest(this.land.sceneJsonData.source?.projectId)
       if (builderProject) {
@@ -32,7 +20,15 @@ export class BuilderStatefulActor {
       }
     }
 
-    //If there is no builder project deployed in the land, we just create a new one
+    // Try with it coordinates if failed
+    const builderProjectByCoordinates = await this.sceneStorage.getProjectManifestByCoordinates(
+      this.land.sceneJsonData.scene.base
+    )
+    if (builderProjectByCoordinates) {
+      return deserializeSceneState(builderProjectByCoordinates)
+    }
+
+    // If there is no builder project deployed in the land, we just create a new one
     await this.sceneStorage.createProjectWithCoords(this.land.sceneJsonData.scene.base)
     return new SceneStateDefinition()
   }
