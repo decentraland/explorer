@@ -1,17 +1,16 @@
 import future from 'fp-future'
 import { parseUrn } from '@dcl/urn-resolver'
+import type * as _TheRenderer from '@dcl/unity-renderer/index'
 
 declare const globalThis: any
 
-export type DclRenderer = {}
+const rendererPackageJson = require('@dcl/unity-renderer/package.json')
+
+export type DclRenderer = typeof _TheRenderer
 
 export type LoadRendererResult = {
   DclRenderer: DclRenderer
-  createUnityInstance: (
-    canvas: HTMLCanvasElement,
-    config: any,
-    onProgress?: (progress: number) => void
-  ) => Promise<UnityGame>
+  createUnityInstance: (canvas: HTMLCanvasElement, onProgress?: (progress: number) => void) => Promise<UnityGame>
   baseUrl: string
 }
 
@@ -25,9 +24,10 @@ export type UnityGame = {
   Quit(): Promise<void>
 }
 
-// TODO: return type DclRenderer
-async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
-  const scriptUrl = new URL('index.js', baseUrl).toString()
+async function injectRenderer(baseUrl: string, version: string): Promise<LoadRendererResult> {
+  const scriptUrl = new URL('index.js?v=' + version, baseUrl).toString()
+  window['console'].log('Renderer: ' + scriptUrl)
+
   await injectScript(scriptUrl)
 
   if (typeof globalThis.createUnityInstance === 'undefined') {
@@ -38,9 +38,28 @@ async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
     throw new Error('Error while loading the renderer from ' + scriptUrl)
   }
 
+  const originalCreateUnityInstance: (
+    canvas: HTMLCanvasElement,
+    config: any,
+    onProgress?: (progress: number) => void
+  ) => Promise<UnityGame> = globalThis.createUnityInstance
+
   return {
     DclRenderer: globalThis.DclRenderer,
-    createUnityInstance: globalThis.createUnityInstance,
+    createUnityInstance: async (canvas, onProgress?) => {
+      const resolveWithBaseUrl = (file: string) => new URL(file + '?v=' + version, baseUrl).toString()
+      const config = {
+        dataUrl: resolveWithBaseUrl('unity.data.unityweb'),
+        frameworkUrl: resolveWithBaseUrl('unity.framework.js.unityweb'),
+        codeUrl: resolveWithBaseUrl('unity.wasm.unityweb'),
+        streamingAssetsUrl: 'StreamingAssets',
+        companyName: 'Decentraland',
+        productName: 'Decentraland World Client',
+        productVersion: '0.1'
+      }
+
+      return originalCreateUnityInstance(canvas, config, onProgress)
+    },
     baseUrl
   }
 }
@@ -63,12 +82,12 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   }
 
   // Load the embeded renderer from the artifacts root folder
-  return injectRenderer(getRendererArtifactsRoot())
+  return injectRenderer(getRendererArtifactsRoot(), rendererPackageJson.version)
 }
 
 async function loadRendererByBranch(branch: string): Promise<LoadRendererResult> {
   const baseUrl = `https://renderer-artifacts.decentraland.org/branch/${branch}/`
-  return injectRenderer(baseUrl)
+  return injectRenderer(baseUrl, performance.now().toString())
 }
 
 export async function loadUnity(urn?: string): Promise<LoadRendererResult> {

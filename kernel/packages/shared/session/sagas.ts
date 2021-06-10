@@ -28,7 +28,7 @@ import {
 } from 'shared/loading/types'
 import { identifyEmail, identifyUser, trackEvent } from 'shared/analytics'
 import { checkTldVsWeb3Network, getAppNetwork } from 'shared/web3'
-import { connection, ProviderType } from 'decentraland-connect'
+import { connection, Provider, ProviderType } from 'decentraland-connect'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
@@ -105,7 +105,7 @@ function* updateTermOfService(action: any) {
 
 function* scheduleAwaitingSignaturePrompt() {
   yield delay(10000)
-  const isStillWaiting = yield select((state) => !state.session?.initialized)
+  const isStillWaiting: boolean = yield select((state) => !state.session?.initialized)
 
   if (isStillWaiting) {
     yield put(toggleWalletPrompt(true))
@@ -150,7 +150,6 @@ function* checkPreviousSession() {
       yield put(signInSetCurrentProvider(identity.provider))
     }
   } else {
-
     try {
       yield call(() => connecetor.disconnect())
     } catch (e) {
@@ -163,7 +162,7 @@ function* checkPreviousSession() {
 
 function* previewAutoSignIn() {
   yield requestProvider(null)
-  const session = yield authorize()
+  const session: { userId: string; identity: ExplorerIdentity } = yield authorize()
   yield signIn(session.userId, session.identity)
 }
 
@@ -211,17 +210,18 @@ function* showAvatarEditor() {
   yield put(changeLoginStage(LoginStage.SIGN_UP))
   yield put(changeSignUpStage(SignUpStage.AVATAR))
 
-  const profile = yield select(getSignUpProfile)
+  const profile: Partial<Profile> = yield select(getSignUpProfile)
 
   yield ensureBaseCatalogs()
-  unityInterface.LoadProfile(profile)
+  // TODO: Fix as any
+  unityInterface.LoadProfile(profile as any)
   unityInterface.ShowAvatarEditorInSignIn()
   yield put(setLoadingScreen(false))
   Html.switchGameContainer(true)
 }
 
 function* requestProvider(providerType: ProviderType | null) {
-  const provider = yield requestEthProvider(providerType)
+  const provider: Provider | null = yield requestEthProvider(providerType)
   if (provider) {
     if (WORLD_EXPLORER && (yield checkTldVsWeb3Network())) {
       throw new Error('Network mismatch')
@@ -237,25 +237,27 @@ function* requestProvider(providerType: ProviderType | null) {
 function* authorize() {
   if (ENABLE_WEB3) {
     try {
-      let userData
+      let userData: StoredSession | null = null
 
       if (isGuest()) {
         userData = getLastSessionByProvider(null)
       } else {
-        const ethAddress = yield getUserEthAccountIfAvailable(true)
-        const address = ethAddress.toLocaleLowerCase()
+        const ethAddress: string | undefined = yield getUserEthAccountIfAvailable(true)
+        if (ethAddress) {
+          const address = ethAddress.toLocaleLowerCase()
 
-        userData = getStoredSession(address)
+          userData = getStoredSession(address)
 
-        if (userData) {
-          // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
-          userData.identity.rawAddress = ethAddress
+          if (userData) {
+            // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
+            userData.identity.rawAddress = ethAddress
+          }
         }
       }
 
       // check that user data is stored & key is not expired
       if (!userData || isSessionExpired(userData)) {
-        const identity = yield createAuthIdentity()
+        const identity: ExplorerIdentity = yield createAuthIdentity()
         return {
           userId: identity.address,
           identity
@@ -274,7 +276,7 @@ function* authorize() {
     }
   } else {
     logger.log(`Using test user.`)
-    const identity = yield createAuthIdentity()
+    const identity: ExplorerIdentity = yield createAuthIdentity()
     const session = { userId: identity.address, identity }
     saveSession(session.userId, session.identity)
     return session
