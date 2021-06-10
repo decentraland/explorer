@@ -27,7 +27,6 @@ import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
-import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
@@ -200,11 +199,10 @@ export class UnityInterface {
         resolve(payload)
       })
 
-      // We solve on timeout anyways to simplify usage.
       setTimeout(() => {
         this.crashPayloadResponseObservable.remove(crashListener)
-        resolve('Crash payload request failed')
-      }, 10000)
+        reject()
+      }, 2000)
 
       this.SendMessageToUnity('Main', 'CrashPayloadRequest')
     })
@@ -415,6 +413,10 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
   }
 
+  public SendBuilderProjectInfo(projectName: string, projectDescription: string) {
+    this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription }))
+  }
+
   public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
     if (!profiles) {
       this.SendMessageToUnity('Bridges', 'SetENSOwnerQueryResult', JSON.stringify({ searchInput, success: false }))
@@ -429,6 +431,10 @@ export class UnityInterface {
       'SetENSOwnerQueryResult',
       JSON.stringify({ searchInput, success: true, profiles: profilesForRenderer })
     )
+  }
+
+  public SendUnpublishSceneResult(result: DeploymentResult) {
+    this.SendMessageToUnity('Bridges', 'UnpublishSceneResult', JSON.stringify(result))
   }
 
   // *********************************************************************************
@@ -554,42 +560,8 @@ export class UnityInterface {
     if (isError) {
       const error = `Error while sending Message to Unity. Object: ${object}. Method: ${method}. Payload: ${payload}.`
       defaultLogger.error(error)
-      ReportRendererInterfaceError(error, error)
     }
   }
 }
 
-export class ClientDebug {
-  private unityInterface: UnityInterface
-
-  public constructor(unityInterface: UnityInterface) {
-    this.unityInterface = unityInterface
-  }
-
-  public DumpScenesLoadInfo() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpScenesLoadInfo')
-  }
-
-  public DumpRendererLockersInfo() {
-    this.unityInterface.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
-  }
-
-  public RunPerformanceMeterTool(durationInSeconds: number) {
-    this.unityInterface.SendMessageToUnity('Main', 'RunPerformanceMeterTool', durationInSeconds)
-  }
-
-  public DumpCrashPayload() {
-    this.unityInterface
-      .CrashPayloadRequest()
-      .then((payload: string) => {
-        defaultLogger.log(`DumpCrashPayload result:\n${payload}`)
-        defaultLogger.log(`DumpCrashPayload length:${payload.length}`)
-      })
-      .catch((x) => {
-        //
-      })
-  }
-}
-
 export let unityInterface: UnityInterface = new UnityInterface()
-export let clientDebug: ClientDebug = new ClientDebug(unityInterface)

@@ -80,13 +80,13 @@ import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithCommsPayload } from 'shared/loading/ReportFatalError'
 import {
   NEW_LOGIN,
-  UNEXPECTED_ERROR,
   commsEstablished,
   COMMS_COULD_NOT_BE_ESTABLISHED,
-  commsErrorRetrying
+  commsErrorRetrying,
+  ESTABLISHING_COMMS
 } from 'shared/loading/types'
 import { getIdentity, getStoredSession } from 'shared/session'
 import { createLogger } from '../logger'
@@ -1013,7 +1013,8 @@ export async function connect(userId: string) {
         } catch (e) {
           disconnect()
           defaultLogger.error(`error while trying to establish communications `, e)
-          ReportFatalError(UNEXPECTED_ERROR)
+          BringDownClientAndShowError(ESTABLISHING_COMMS)
+          ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
         }
       })
     }
@@ -1040,7 +1041,8 @@ export async function startCommunications(context: Context) {
           // max number of attemps reached => rethrow error
           logger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
           disconnect()
-          ReportFatalError(COMMS_COULD_NOT_BE_ESTABLISHED)
+          BringDownClientAndShowError(COMMS_COULD_NOT_BE_ESTABLISHED)
+          ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
           throw e
         } else {
           // max number of attempts not reached => continue with loop
@@ -1207,7 +1209,8 @@ function handleReconnectionError() {
 
 function handleIdTaken() {
   disconnect()
-  ReportFatalError(NEW_LOGIN)
+  BringDownClientAndShowError(NEW_LOGIN)
+  ReportFatalErrorWithCommsPayload(new Error(`Handle Id already taken`), `comms#init`)
 }
 
 function handleFullLayer() {

@@ -1,3 +1,14 @@
+import { ContentMapping } from '../../types'
+
+export type AssetId = string
+
+export type Asset = {
+  id: AssetId
+  model: string
+  mappings: ContentMapping[]
+  baseUrl: string
+}
+
 export type SerializedSceneState = {
   entities: SerializedEntity[]
 }
@@ -16,7 +27,8 @@ export enum CONTENT_PATH {
   DEFINITION_FILE = 'scene-state-definition.json',
   SCENE_FILE = 'scene.json',
   MODELS_FOLDER = 'models',
-  BUNDLED_GAME_FILE = 'bin/game.js'
+  BUNDLED_GAME_FILE = 'bin/game.js',
+  SCENE_THUMBNAIL = 'thumbnail.png'
 }
 
 export type DeploymentResult = { ok: true } | { ok: false; error: string }
@@ -93,8 +105,15 @@ export type BuilderGround = {
 }
 
 export type UnityColor = {
-  r: number,
-  g: number,
-  b: number,
+  r: number
+  g: number
+  b: number
   a: number
+}
+
+export type SceneDeploymentSourceMetadata = {
+  version: number
+  origin: string
+  projectId?: string
+  isEmpty?: boolean
 }
