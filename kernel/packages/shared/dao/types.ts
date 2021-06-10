@@ -54,6 +54,7 @@ export type DaoState = {
   resizeService: string
   hotScenesService: string
   exploreRealmsService: string
+  poiService: string
   realm: Realm | undefined
   candidates: Candidate[]
   contentWhitelist: Candidate[]
@@ -83,4 +84,10 @@ export type PingResult = {
   elapsed?: number
   status?: ServerConnectionStatus
   result?: CatalystLayers
+}
+
+export enum HealthStatus {
+  HEALTHY = 'Healthy',
+  UNHEALTHY = 'Unhealthy',
+  DOWN = 'Down'
 }

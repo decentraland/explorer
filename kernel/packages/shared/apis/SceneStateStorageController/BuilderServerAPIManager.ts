@@ -1,27 +1,30 @@
 import { Authenticator } from 'dcl-crypto'
 import { ExplorerIdentity } from 'shared/session/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
-import { ContentMapping } from '../../types'
-import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
+import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene, AssetId, Asset } from './types'
 import { getDefaultTLD } from 'config'
 import { defaultLogger } from '../../logger'
 
-export type AssetId = string
-
-export type Asset = {
-  id: AssetId
-  model: string
-  mappings: ContentMapping[]
-  baseUrl: string
-}
-
-const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
+export const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
 const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'
-const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
+export const BASE_BUILDER_SERVER_URL = 'https://builder-api.decentraland.org/v1/'
 
 export class BuilderServerAPIManager {
+  private static readonly AUTH_CHAIN_HEADER_PREFIX = 'x-identity-auth-chain-'
   private readonly assets: Map<AssetId, BuilderAsset> = new Map()
-  private readonly AUTH_CHAIN_HEADER_PREFIX = 'x-identity-auth-chain-'
+
+  static authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
+    const headers: Record<string, string> = {}
+
+    if (identity) {
+      const endpoint = (method + ':' + path).toLowerCase()
+      const authChain = Authenticator.signPayload(identity, endpoint)
+      for (let i = 0; i < authChain.length; i++) {
+        headers[this.AUTH_CHAIN_HEADER_PREFIX + i] = JSON.stringify(authChain[i])
+      }
+    }
+    return headers
+  }
 
   async getAssets(assetIds: AssetId[]): Promise<Record<string, BuilderAsset>> {
     const unknownAssets = assetIds.filter((assetId) => !this.assets.has(assetId))
@@ -61,7 +64,7 @@ export class BuilderServerAPIManager {
       const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
       let params: RequestInit = {
-        headers: this.authorize(identity, 'get', '/' + queryParams)
+        headers: BuilderServerAPIManager.authorize(identity, 'get', '/' + queryParams)
       }
 
       const response = await fetch(urlToFecth, params)
@@ -88,7 +91,7 @@ export class BuilderServerAPIManager {
       const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
       let params: RequestInit = {
-        headers: this.authorize(identity, 'get', '/' + queryParams)
+        headers: BuilderServerAPIManager.authorize(identity, 'get', '/' + queryParams)
       }
 
       const response = await fetch(urlToFecth, params)
@@ -111,7 +114,16 @@ export class BuilderServerAPIManager {
 
   async updateProjectManifest(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
     try {
+      builderManifest.project.updated_at = new Date().toISOString()
       await this.setManifestOnServer(builderManifest, identity)
+    } catch (e) {
+      defaultLogger.error(e)
+    }
+  }
+
+  async updateProjectThumbnail(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
+    try {
+      await this.setThumbnailOnServer(projectId, thumbnailBlob, identity)
     } catch (e) {
       defaultLogger.error(e)
     }
@@ -146,13 +158,37 @@ export class BuilderServerAPIManager {
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
     const body = JSON.stringify({ manifest: builderManifest })
-    const headers = this.authorize(identity, 'put', '/' + queryParams)
+    const headers = BuilderServerAPIManager.authorize(identity, 'put', '/' + queryParams)
     headers['Content-Type'] = 'application/json'
 
     let params: RequestInit = {
       headers: headers,
       method: 'PUT',
       body: body
+    }
+
+    const response = await fetch(urlToFecth, params)
+    const data = await response.json()
+    return data
+  }
+
+  private async setThumbnailOnServer(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
+    // TODO: We should delete this when we enter in production or we won't be able to set the project in production
+    if (getDefaultTLD() === 'org') {
+      defaultLogger.log('Project thumbnail saving is disable in org for the moment!')
+      return undefined
+    }
+    const queryParams = 'projects/' + projectId + '/media'
+    const urlToFecth = `${this.getBaseUrl()}${queryParams}`
+
+    const thumbnailData = new FormData()
+    thumbnailData.append('thumbnail', thumbnailBlob)
+    const headers = BuilderServerAPIManager.authorize(identity, 'post', '/' + queryParams)
+
+    let params: RequestInit = {
+      headers: headers,
+      method: 'POST',
+      body: thumbnailData
     }
 
     const response = await fetch(urlToFecth, params)
@@ -259,18 +295,5 @@ export class BuilderServerAPIManager {
       scene: builderScene
     }
     return builderManifest
-  }
-
-  private authorize(identity: ExplorerIdentity, method: string = 'get', path: string = '') {
-    const headers: Record<string, string> = {}
-
-    if (identity) {
-      const endpoint = (method + ':' + path).toLowerCase()
-      const authChain = Authenticator.signPayload(identity, endpoint)
-      for (let i = 0; i < authChain.length; i++) {
-        headers[this.AUTH_CHAIN_HEADER_PREFIX + i] = JSON.stringify(authChain[i])
-      }
-    }
-    return headers
   }
 }

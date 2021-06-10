@@ -92,6 +92,18 @@ export class LifecycleManager extends TransportBasedServer {
       this.notify('Scene.reload', { sceneId })
     }
   }
+
+  async invalidateScene(sceneId: string) {
+    const landFuture = this.sceneIdToRequest.get(sceneId)
+    if (landFuture) {
+      const land = await landFuture
+      const parcels = land.sceneJsonData.scene.parcels
+      for (let parcel of parcels) {
+        this.positionToRequest.delete(parcel)
+      }
+      this.notify('Scene.Invalidate', { sceneId })
+    }
+  }
 }
 
 let server: LifecycleManager

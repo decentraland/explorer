@@ -1,8 +1,7 @@
 import { LightweightWriter } from 'dcl-scene-writer'
 import * as ECS from 'decentraland-ecs'
 import { CLASS_ID } from 'decentraland-ecs/src'
-import { Asset, AssetId } from './BuilderServerAPIManager'
-import { SerializedSceneState, CONTENT_PATH } from './types'
+import { SerializedSceneState, CONTENT_PATH, Asset, AssetId } from './types'
 
 export function createGameFile(state: SerializedSceneState, assets: Map<AssetId, Asset>): string {
   const writer = new LightweightWriter(ECS)

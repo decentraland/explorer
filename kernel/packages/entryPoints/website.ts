@@ -7,7 +7,7 @@ global.enableWeb3 = true
 
 import { initShared } from 'shared'
 import { createLogger } from 'shared/logger'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
   experienceStarted,
@@ -86,11 +86,12 @@ namespace webApp {
     } catch (err) {
       document.body.classList.remove('dcl-loading')
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
-        ReportFatalError(NOT_INVITED)
+        BringDownClientAndShowError(NOT_INVITED)
       } else {
         console['error']('Error loading Unity', err)
-        ReportFatalError(FAILED_FETCHING_UNITY)
+        BringDownClientAndShowError(FAILED_FETCHING_UNITY)
       }
+      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       throw err
     }
   }
@@ -139,6 +140,7 @@ namespace webApp {
 
         const configForRenderer = kernelConfigForRenderer()
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
+        configForRenderer.features.enableBuilderInWorld = builderInWorldEnabled
         i.SetKernelConfiguration(configForRenderer)
 
         configureTaskbarDependentHUD(i, voiceChatEnabled, builderInWorldEnabled)
