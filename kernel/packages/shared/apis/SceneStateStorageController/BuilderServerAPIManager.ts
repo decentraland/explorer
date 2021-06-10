@@ -114,6 +114,7 @@ export class BuilderServerAPIManager {
 
   async updateProjectManifest(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
     try {
+      builderManifest.project.updated_at = new Date().toISOString()
       await this.setManifestOnServer(builderManifest, identity)
     } catch (e) {
       defaultLogger.error(e)
