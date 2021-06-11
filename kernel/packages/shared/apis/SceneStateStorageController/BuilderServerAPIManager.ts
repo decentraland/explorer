@@ -233,7 +233,8 @@ export class BuilderServerAPIManager {
         '29d657c1-95cf-4e17-b424-fe252d43ced5': {
           id: '29d657c1-95cf-4e17-b424-fe252d43ced5',
           components: ['14708436-ffd4-44d6-8a28-48d8fcb65917', '47924b6e-27ba-41a3-8bd9-c025cd092a48'],
-          disableGizmos: true
+          disableGizmos: true,
+          name: '29d657c1-95cf-4e17-b424-fe252d43ced5'
         }
       },
       components: {
