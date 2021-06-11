@@ -67,6 +67,7 @@ export type BuilderEntity = {
   id: string
   components: string[]
   disableGizmos: boolean
+  name: string
 }
 
 export type BuilderComponent = {
