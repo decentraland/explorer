@@ -152,7 +152,7 @@ export const contracts = {
     'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
     'Multisig': '0x0E659A116e161d8e502F9036bAbDA51334F2667E',
     'CollectionImplementation': '0x006080C6061C4aF79b39Da0842a3a22A7b3f185e',
-    'Rarities': '0xbdA0Cf0678E6873774b3536dB1bA1d25B09F60ab',
+    'Rarities': '0x17113b44fdd661A156cc01b5031E3aCF72c32EB3',
     'Committee': '0x71d9350Ef44E1e451F00e447C0DfF2d1FB75510a',
     'CollectionManager ': '0x9D32AaC179153A991e832550d9F96441Ea27763A',
     'Forwarder': '0xBF6755A83C0dCDBB2933A96EA778E00b717d7004',
