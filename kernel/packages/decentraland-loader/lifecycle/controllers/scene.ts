@@ -44,15 +44,10 @@ export class SceneLifeCycleController extends EventEmitter {
     const parcels = this.sceneStatus.get(sceneId)?.sceneDescription?.sceneJsonData?.scene?.parcels
     if (parcels) {
       // Invalidate parcel to scenes association
-      for (const parcel of parcels) {
-        this._positionToSceneId.delete(parcel)
-        this.futureOfPositionToSceneId.delete(parcel)
-      }
-      this.downloadManager.invalidateParcels(parcels)
+      this.invalidate(sceneId)
 
       // Unload and re-load scenes
       this.emit('Unload scene', sceneId)
-      this.sceneStatus.delete(sceneId)
       const newScenes = await this.fetchSceneIds(parcels)
       await this.startSceneLoading(newScenes)
     }
@@ -79,6 +74,18 @@ export class SceneLifeCycleController extends EventEmitter {
     lifeCycleStatus.status = status
 
     this.emit('Scene status', { sceneId, status })
+  }
+
+  invalidate(sceneId: string) {
+    const parcels = this.sceneStatus.get(sceneId)?.sceneDescription?.sceneJsonData?.scene?.parcels
+    if (parcels) {
+      for (const parcel of parcels) {
+        this._positionToSceneId.delete(parcel)
+        this.futureOfPositionToSceneId.delete(parcel)
+      }
+      this.downloadManager.invalidateParcels(parcels)
+    }
+    this.sceneStatus.delete(sceneId)
   }
 
   private distinct(value: any, index: number, self: Array<any>) {

@@ -413,6 +413,10 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
   }
 
+  public SendBuilderProjectInfo(projectName: string, projectDescription: string) {
+    this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription }))
+  }
+
   public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
     if (!profiles) {
       this.SendMessageToUnity('Bridges', 'SetENSOwnerQueryResult', JSON.stringify({ searchInput, success: false }))
@@ -427,6 +431,10 @@ export class UnityInterface {
       'SetENSOwnerQueryResult',
       JSON.stringify({ searchInput, success: true, profiles: profilesForRenderer })
     )
+  }
+
+  public SendUnpublishSceneResult(result: DeploymentResult) {
+    this.SendMessageToUnity('Bridges', 'UnpublishSceneResult', JSON.stringify(result))
   }
 
   // *********************************************************************************

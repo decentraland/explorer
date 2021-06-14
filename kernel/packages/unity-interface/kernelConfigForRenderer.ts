@@ -1,5 +1,5 @@
 import { KernelConfigForRenderer } from 'shared/types'
-import { commConfigurations, ENABLE_BUILDER_IN_WORLD, getDefaultTLD, WSS_ENABLED } from 'config'
+import { commConfigurations, getDefaultTLD, WSS_ENABLED } from 'config'
 import { nameValidCharacterRegex, nameValidRegex } from 'shared/profiles/utils/names'
 import { getWorld } from '@dcl/schemas'
 
@@ -14,7 +14,7 @@ export function kernelConfigForRenderer(): KernelConfigForRenderer {
       nameValidRegex: nameValidRegex.toString().replace(/[/]/g, '')
     },
     features: {
-      enableBuilderInWorld: ENABLE_BUILDER_IN_WORLD
+      enableBuilderInWorld: false
     },
     gifSupported:
       // tslint:disable-next-line

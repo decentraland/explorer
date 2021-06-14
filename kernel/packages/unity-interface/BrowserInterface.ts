@@ -67,6 +67,7 @@ import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
+import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -578,6 +579,10 @@ export class BrowserInterface {
     // TODO(Brian): Add more parameters?
     BringDownClientAndShowError(AVATAR_LOADING_ERROR)
     ReportFatalErrorWithUnityPayload(new Error(AVATAR_LOADING_ERROR), ErrorContext.RENDERER_AVATARS)
+  }
+
+  public UnpublishScene(data: { coordinates: string }) {
+    unpublishSceneByCoords(data.coordinates).catch((error) => defaultLogger.log(error))
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
