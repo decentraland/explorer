@@ -12,7 +12,8 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage
 } from 'atomicHelpers/localStorage'
-import { StoredSession } from './types'
+import { LoginStage, StoredSession } from './types'
+import { authenticate } from './actions'
 
 declare const globalThis: StoreContainer
 
@@ -116,6 +117,18 @@ export async function userAuthentified(): Promise<void> {
         return resolve()
       }
     })
+  })
+}
+
+export function authenticateWhenItsReady(providerType: ProviderType | null) {
+  const store: Store<RootState> = globalThis.globalStore
+
+  const unsubscribe = store.subscribe(() => {
+    const loginStage = store.getState().session.loginStage
+    if (loginStage === LoginStage.SIGN_IN) {
+      unsubscribe()
+      globalThis.globalStore.dispatch(authenticate(providerType))
+    }
   })
 }
 

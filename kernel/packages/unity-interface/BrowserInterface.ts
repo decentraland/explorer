@@ -16,7 +16,12 @@ import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../dec
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
-import { aborted, BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithUnityPayload } from 'shared/loading/ReportFatalError'
+import {
+  aborted,
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithUnityPayload
+} from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, ProfileType } from 'shared/profiles/types'
@@ -45,7 +50,7 @@ import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
 import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
-import { getIdentity, hasWallet } from 'shared/session'
+import { authenticateWhenItsReady, getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
@@ -68,6 +73,7 @@ import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
+import { ProviderType } from 'decentraland-connect'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -94,6 +100,11 @@ type SystemInfoPayload = {
   processorType: string
   processorCount: number
   systemMemorySize: number
+}
+
+enum RendererAuthenticationType {
+  GUEST = 0,
+  WALLET_CONNECT = 1
 }
 
 export class BrowserInterface {
@@ -280,6 +291,15 @@ export class BrowserInterface {
       Html.switchGameContainer(false)
       unityInterface.DeactivateRendering()
     }
+  }
+
+  public SendAuthentication(data: { rendererAuthenticationType: RendererAuthenticationType }) {
+    let providerType: ProviderType | null = null
+    if (data.rendererAuthenticationType === RendererAuthenticationType.WALLET_CONNECT) {
+      providerType = ProviderType.WALLET_CONNECT
+    }
+
+    authenticateWhenItsReady(providerType)
   }
 
   public RequestOwnProfileUpdate() {
