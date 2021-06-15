@@ -184,6 +184,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
 
   const result: any[] = []
   if (filters.ownedByUser) {
+    defaultLogger.info('ASKED FOR OWNED WEARABLES')
     if (WITH_FIXED_COLLECTIONS) {
       // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
       // That's why we are also querying a prod catalyst for the given collections
