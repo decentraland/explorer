@@ -36,6 +36,12 @@ export function getWalletName() {
   }
 }
 
+function getWalletProps() {
+  return Object.keys(ethereum || {})
+    .filter(prop => prop.startsWith('is') && typeof ethereum[prop] === 'boolean')
+    .join(',')
+}
+
 export type TrackEvents = {
   ['open_login_popup']: {},
   ['click_login_button']: {
@@ -46,6 +52,7 @@ export type TrackEvents = {
 export function track<E extends keyof TrackEvents>(event: E, properties?: TrackEvents[E]) {
   if (window.analytics) {
     const wallet = getWalletName()
-    window.analytics.track(event, { wallet, ...properties })
+    const walletProps = getWalletProps()
+    window.analytics.track(event, { wallet, walletProps, ...properties })
   }
 }
