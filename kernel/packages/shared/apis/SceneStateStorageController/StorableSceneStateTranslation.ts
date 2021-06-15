@@ -69,7 +69,8 @@ export async function toBuilderFromStateDefinitionFormat(
     let builderEntity: BuilderEntity = {
       id: entityId,
       components: builderComponentsIds,
-      disableGizmos: false
+      disableGizmos: false,
+      name: entityId
     }
     entities[builderEntity.id] = builderEntity
   }

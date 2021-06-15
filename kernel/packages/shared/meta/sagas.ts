@@ -108,7 +108,9 @@ function checkExplorerVersion(config: Partial<MetaConfiguration>) {
 async function fetchFeatureFlags(): Promise<Record<string, boolean> | undefined> {
   const featureFlagsEndpoint = getServerConfigurations().explorerFeatureFlags
   try {
-    const response = await fetch(featureFlagsEndpoint)
+    const response = await fetch(featureFlagsEndpoint, {
+      credentials: 'same-origin'
+    })
     if (response.ok) {
       const { flags } = await response.json()
       return flags

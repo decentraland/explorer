@@ -7,10 +7,13 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
 import { loadUnity, UnityGame } from './loader'
 
-import { unityBuildConfigurations } from 'config'
 import { initializeUnityEditor } from './wsEditorAdapter'
 import future from 'fp-future'
-import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithUnityPayload } from 'shared/loading/ReportFatalError'
+import {
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithUnityPayload
+} from 'shared/loading/ReportFatalError'
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 
 declare const globalThis: StoreContainer & { Hls: any }
@@ -46,19 +49,9 @@ async function loadInjectedUnityDelegate(
   }
 
   // inject unity loader
-  const { baseUrl, createUnityInstance } = await loadUnity(queryParams.get('renderer') || undefined)
+  const { createUnityInstance } = await loadUnity(queryParams.get('renderer') || undefined)
 
   preventUnityKeyboardLock()
-
-  const config = {
-    dataUrl: baseUrl + unityBuildConfigurations.UNITY_DATA_PATH,
-    frameworkUrl: baseUrl + unityBuildConfigurations.UNITY_FRAMEWORK_PATH,
-    codeUrl: baseUrl + unityBuildConfigurations.UNITY_CODE_PATH,
-    streamingAssetsUrl: unityBuildConfigurations.UNITY_STREAMING_ASSETS_URL,
-    companyName: unityBuildConfigurations.UNITY_ORGANIZATION_NAME,
-    productName: unityBuildConfigurations.UNITY_PRODUCT_NAME,
-    productVersion: unityBuildConfigurations.UNITY_PRODUCT_VERSION
-  }
 
   const canvas = document.createElement('canvas')
   canvas.addEventListener('contextmenu', function (e) {
@@ -67,11 +60,9 @@ async function loadInjectedUnityDelegate(
   canvas.id = '#canvas'
   container.appendChild(canvas)
 
-  const instanceFuture = createUnityInstance(canvas, config, function (_progress) {
+  const instance = await createUnityInstance(canvas, function (_progress) {
     // In the future we could report progress of the loading: console.log('progress', _progress)
   })
-
-  const instance = await instanceFuture
 
   instance.Module.errorHandler = (message: string, filename: string, lineno: number) => {
     console['error'](message, filename, lineno)
@@ -90,7 +81,7 @@ async function loadInjectedUnityDelegate(
 
   await engineStartedFuture
 
-  return instanceFuture
+  return instance
 }
 
 /** Initialize engine using WS transport (UnityEditor) */
