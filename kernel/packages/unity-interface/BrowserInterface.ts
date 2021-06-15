@@ -17,7 +17,12 @@ import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../dec
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
-import { aborted, BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithUnityPayload } from 'shared/loading/ReportFatalError'
+import {
+  aborted,
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithUnityPayload
+} from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, ProfileType } from 'shared/profiles/types'
@@ -556,18 +561,16 @@ export class BrowserInterface {
   }
 
   public RequestBIWCatalogHeader() {
- 
     const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
-      var emptyHeader: Record<string,string> = {}
+      var emptyHeader: Record<string, string> = {}
       unityInterface.SendBuilderCatalogHeaders(emptyHeader)
-    }
-    else{
-    const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
-    headers['Content-Type'] = 'application/json'
-    
-    unityInterface.SendBuilderCatalogHeaders(headers)
+    } else {
+      const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
+      headers['Content-Type'] = 'application/json'
+
+      unityInterface.SendBuilderCatalogHeaders(headers)
     }
   }
 
