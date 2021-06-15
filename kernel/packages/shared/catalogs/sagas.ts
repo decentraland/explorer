@@ -53,6 +53,7 @@ import {
   BuilderServerAPIManager
 } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { getCurrentIdentity } from 'shared/session/selectors'
+import { userAuthentified } from 'shared/session'
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
@@ -184,7 +185,6 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
 
   const result: any[] = []
   if (filters.ownedByUser) {
-    defaultLogger.info('ASKED FOR OWNED WEARABLES')
     if (WITH_FIXED_COLLECTIONS) {
       // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
       // That's why we are also querying a prod catalyst for the given collections
@@ -202,6 +202,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
       // Fetch unpublished collections from builder server
       const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
       if (uuidCollections.length > 0) {
+        yield userAuthentified()
         const identity = yield select(getCurrentIdentity)
         for (const collectionUuid of uuidCollections) {
           const path = `collections/${collectionUuid}/items`
