@@ -5,7 +5,7 @@ import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { getCurrentIdentity } from 'shared/session/selectors'
+import { getCurrentIdentity,getCurrentUserId } from 'shared/session/selectors'
 import {
   decentralandConfigurations,
   ethereumConfigurations,
@@ -61,7 +61,6 @@ import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
-import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
@@ -564,7 +563,7 @@ export class BrowserInterface {
     const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
-      var emptyHeader: Record<string, string> = {}
+      let emptyHeader: Record<string, string> = {}
       unityInterface.SendBuilderCatalogHeaders(emptyHeader)
     } else {
       const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
