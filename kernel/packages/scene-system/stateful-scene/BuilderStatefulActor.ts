@@ -23,15 +23,7 @@ export class BuilderStatefulActor {
 
     // Look for stateful definition
     if (this.land.mappingsResponse.contents.find((pair) => pair.file === CONTENT_PATH.DEFINITION_FILE)) {
-      const land = this.land
-      const definition = await this.sceneStorage.createProjectFromStateDefinition(
-        land.sceneId,
-        land.sceneJsonData.source?.projectId,
-        land.sceneJsonData.scene.base,
-        land.sceneJsonData.scene.parcels,
-        land.sceneJsonData.display?.title,
-        land.sceneJsonData.display?.description
-      )
+      const definition = await this.sceneStorage.createProjectFromStateDefinition()
       if (definition) {
         return deserializeSceneState(definition)
       }

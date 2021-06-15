@@ -240,14 +240,17 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async createProjectFromStateDefinition(
-    sceneId: string,
-    builderProjectId: string | undefined,
-    baseParcel: string,
-    parcels: string[],
-    title: string | undefined,
-    description: string | undefined
-  ): Promise<SerializedSceneState | undefined> {
+  async createProjectFromStateDefinition(): Promise<SerializedSceneState | undefined> {
+    const sceneJson = this.parcelIdentity.land.sceneJsonData
+    const sceneId: string = this.parcelIdentity.land.sceneId
+    const baseParcel: string = sceneJson.scene.base
+    const parcels: string[] = sceneJson.scene.parcels
+    const title: string | undefined = sceneJson.display?.title
+    const description: string | undefined = sceneJson.display?.description
+    const thumbnailHash: string | undefined = this.parcelIdentity.land.mappingsResponse.contents.find(
+      (pair) => pair.file === CONTENT_PATH.SCENE_THUMBNAIL
+    )?.hash
+
     try {
       const serializedScene = await this.getStoredState(sceneId)
       if (serializedScene) {
@@ -255,7 +258,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
         let builderManifest = await this.builderApiManager.createManifestFromSerializedState(
           uuid(),
-          builderProjectId ?? uuid(),
+          uuid(),
           baseParcel,
           parcels,
           title,
@@ -269,9 +272,23 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
             builderManifest.project.title,
             builderManifest.project.description
           )
-          this.builderApiManager
-            .updateProjectManifest(builderManifest, identity)
-            .catch((error) => defaultLogger.error(`Error updating project manifest ${error}`))
+
+          let thumbnail: string = ''
+
+          if (thumbnailHash) {
+            const contentClient = this.getContentClient()
+            const thumbnailBuffer = await contentClient.downloadContent(thumbnailHash, { attempts: 3 })
+            thumbnail = thumbnailBuffer.toString('base64')
+          }
+
+          this.publishSceneState(
+            sceneId,
+            builderManifest.project.title,
+            builderManifest.project.description,
+            thumbnail,
+            serializedScene
+          ).catch((error) => defaultLogger.error(`Error updating project manifest ${error}`))
+
           return serializedScene
         }
       }
