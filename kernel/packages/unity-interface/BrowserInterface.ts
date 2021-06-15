@@ -563,7 +563,7 @@ export class BrowserInterface {
       throw new Error('Identity not found when getting biw catalog headers')
     }
 
-    const headers = BuilderServerAPIManager.authorize(identity, 'put', '/')
+    const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
     headers['Content-Type'] = 'application/json'
     
     unityInterface.SendBuilderCatalogHeaders(headers)
