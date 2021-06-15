@@ -4,16 +4,6 @@ import { getWorld } from '@dcl/schemas'
 
 export const NETWORK_HZ = 10
 
-export namespace unityBuildConfigurations {
-  export const UNITY_DATA_PATH = 'unity.data.unityweb'
-  export const UNITY_FRAMEWORK_PATH = 'unity.framework.js.unityweb'
-  export const UNITY_CODE_PATH = 'unity.wasm.unityweb'
-  export const UNITY_STREAMING_ASSETS_URL = 'StreamingAssets'
-  export const UNITY_ORGANIZATION_NAME = 'Decentraland'
-  export const UNITY_PRODUCT_NAME = 'Decentraland World Client'
-  export const UNITY_PRODUCT_VERSION = '0.1'
-}
-
 export namespace interactionLimits {
   /**
    * click distance, this is the length of the ray/lens

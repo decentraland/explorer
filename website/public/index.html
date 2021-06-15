@@ -2,21 +2,10 @@
 <html lang="en">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,initial-scale=1,minimal-ui"
-    />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimal-ui" />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-    <link
-      rel="preload"
-      href="https://decentraland.org/images/background-secondary@blur.jpg"
-      as="image"
-    />
-    <link
-      rel="preload"
-      href="https://decentraland.org/images/background@blur.jpg"
-      as="image"
-    />
+    <link rel="preload" href="https://decentraland.org/images/background-secondary@blur.jpg" as="image" />
+    <link rel="preload" href="https://decentraland.org/images/background@blur.jpg" as="image" />
     <title>Decentraland</title>
     <style type="text/css">
       html,
@@ -48,25 +37,19 @@
 
       #gameContainer.loaded,
       body {
-        background: #090909
-          url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat
-          50% 5% !important;
+        background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
         background-size: 170px 32px !important;
       }
       @media screen and (min-height: 500px) {
         body {
-          background: #090909
-            url(images/decentraland-connect/DecentralandIsologotipo.png)
-            no-repeat 50% 5% !important;
+          background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
           background-size: 170px 32px !important;
         }
       }
       @media screen and (min-height: 800px) {
         #gameContainer.loaded,
         body {
-          background: #090909
-            url(images/decentraland-connect/DecentralandIsologotipo.png)
-            no-repeat 50% 25% !important;
+          background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 25% !important;
           background-size: 170px 32px !important;
         }
       }
@@ -137,8 +120,8 @@
       }
     </style>
     <script>
-      console.log("Explorer version: %REACT_APP_EXPLORER_VERSION%");
-      window.VERSION = "%REACT_APP_EXPLORER_VERSION%";
+      console.log("Explorer version: %REACT_APP_EXPLORER_VERSION%")
+      window.VERSION = "%REACT_APP_EXPLORER_VERSION%"
     </script>
   </head>
   <body class="dcl-loading">
@@ -153,12 +136,9 @@
         <div class="errormessage">
           <div class="errortext col">
             <div class="error">Error</div>
-            <div class="communicationslink">
-              Your browser or device is not supported
-            </div>
+            <div class="communicationslink">Your browser or device is not supported</div>
             <div class="givesomedetailof">
-              The Explorer only works on Chrome or Firefox for Windows, Linux
-              and macOS.
+              The Explorer only works on Chrome or Firefox for Windows, Linux and macOS.
             </div>
           </div>
           <div class="errorimage col">
@@ -169,18 +149,15 @@
       <link rel="stylesheet" href="css/errors.css" />
     </noscript>
     <!-- google -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=UA-63691338-5"
-    ></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-63691338-5"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+      window.dataLayer = window.dataLayer || []
 
       function gtag() {
-        dataLayer.push(arguments);
+        dataLayer.push(arguments)
       }
-      gtag("js", new Date());
-      gtag("config", "UA-63691338-5");
+      gtag("js", new Date())
+      gtag("config", "UA-63691338-5")
     </script>
     <script>
       // prettier-ignore
@@ -197,8 +174,11 @@
         captureUncaught: true,
         captureUnhandledRejections: true,
         payload: {
-          environment: document.domain.endsWith(".org") ? "production" : "development"
-        }
+          environment: document.domain.endsWith(".org") ? "production" : "development",
+          code_version: "%WEBSITE_COMMIT_HASH%"
+        },
+        code_version: "%WEBSITE_COMMIT_HASH%",
+        codeVersion: "%WEBSITE_COMMIT_HASH%",
       };
       // Rollbar Snippet
       // prettier-ignore
@@ -207,9 +187,9 @@
     </script>
 
     <script>
-      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity-renderer/";
+      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity-renderer/"
     </script>
 
-    <script src="%PUBLIC_URL%/website.js?%REACT_APP_WEBSITE_VERSION%"></script>
+    <script src="%PUBLIC_URL%/website.js?v=%REACT_APP_WEBSITE_VERSION%"></script>
   </body>
 </html>
