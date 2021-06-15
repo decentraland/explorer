@@ -417,6 +417,10 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription }))
   }
 
+  public SendBuilderCatalogHeaders(headers: Record<string,string>) {
+    this.SendMessageToUnity('Main', 'BuilderInWorldCatalogHeaders', JSON.stringify( headers ))
+  }
+
   public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
     if (!profiles) {
       this.SendMessageToUnity('Bridges', 'SetENSOwnerQueryResult', JSON.stringify({ searchInput, success: false }))

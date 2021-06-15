@@ -5,6 +5,7 @@ import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
+import { getCurrentIdentity } from 'shared/session/selectors'
 import {
   decentralandConfigurations,
   ethereumConfigurations,
@@ -46,7 +47,7 @@ import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared
 import { setAudioStream } from './audioStream'
 import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
@@ -68,6 +69,8 @@ import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
+import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
+import { Store } from 'redux'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -550,6 +553,20 @@ export class BrowserInterface {
 
   public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
     await killPortableExperienceScene(data.portableExperienceId)
+  }
+
+  public RequestBIWCatalogHeader() {
+ 
+    const store: Store<RootState> = globalThis['globalStore']
+    const identity = getCurrentIdentity(store.getState())
+    if (!identity) {
+      throw new Error('Identity not found when getting biw catalog headers')
+    }
+
+    const headers = BuilderServerAPIManager.authorize(identity, 'put', '/')
+    headers['Content-Type'] = 'application/json'
+    
+    unityInterface.SendBuilderCatalogHeaders(headers)
   }
 
   public RequestWearables(data: {
