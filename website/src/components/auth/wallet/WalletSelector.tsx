@@ -3,6 +3,7 @@ import { ProviderType } from "decentraland-connect";
 import { isCucumberProvider, isDapperProvider } from "decentraland-dapps/dist/lib/eth";
 import { Modal } from "../../common/Modal";
 import { WalletButton, WalletButtonLogo } from "./WalletButton";
+import { GuestButton } from "./GuestButton";
 import { Spinner } from "../../common/Spinner";
 import "./WalletSelector.css";
 
@@ -21,11 +22,12 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
   onLogin,
   onCancel,
 }) => {
-  const hasWallet = availableProviders.includes(ProviderType.INJECTED)
-  function handleLogin(provider: ProviderType) {
+  const hasWallet = (availableProviders || []).includes(ProviderType.INJECTED)
+  function handleLogin(provider: ProviderType | null) {
     if (provider === ProviderType.INJECTED && !hasWallet) {
       return;
     }
+
     if (onLogin) {
       onLogin(provider);
     }
@@ -45,11 +47,11 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
       result.push(WalletButtonLogo.METAMASK)
     }
 
-    if (availableProviders.includes(ProviderType.FORTMATIC)) {
+    if ((availableProviders || []).includes(ProviderType.FORTMATIC)) {
       result.push(WalletButtonLogo.FORTMATIC)
     }
 
-    if (availableProviders.includes(ProviderType.WALLET_CONNECT)) {
+    if ((availableProviders || []).includes(ProviderType.WALLET_CONNECT)) {
       result.push(WalletButtonLogo.WALLET_CONNECT)
     }
 
@@ -86,6 +88,9 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
               onClick={handleLogin}
             />
           ))}
+        </div>
+        <div>
+          <GuestButton onClick={handleLogin} />
         </div>
       </div>
     </Modal>
