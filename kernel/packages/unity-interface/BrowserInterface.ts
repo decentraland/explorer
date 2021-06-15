@@ -560,13 +560,15 @@ export class BrowserInterface {
     const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
-      throw new Error('Identity not found when getting biw catalog headers')
+      var emptyHeader: Record<string,string> = {}
+      unityInterface.SendBuilderCatalogHeaders(emptyHeader)
     }
-
+    else{
     const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
     headers['Content-Type'] = 'application/json'
     
     unityInterface.SendBuilderCatalogHeaders(headers)
+    }
   }
 
   public RequestWearables(data: {
