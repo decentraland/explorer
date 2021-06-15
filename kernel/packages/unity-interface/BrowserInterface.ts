@@ -567,8 +567,6 @@ export class BrowserInterface {
       unityInterface.SendBuilderCatalogHeaders(emptyHeader)
     } else {
       const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
-      headers['Content-Type'] = 'application/json'
-
       unityInterface.SendBuilderCatalogHeaders(headers)
     }
   }
