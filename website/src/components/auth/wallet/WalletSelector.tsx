@@ -78,9 +78,9 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
     >
       <div className="walletSelector">
         <h2 className="walletSelectorTitle">Sign In or Create an Account</h2>
-        <div className="walletButtonContainer">
-          {loading && <Spinner />}
-          {!loading && wallets.map(wallet => (
+        {loading && <div className="walletButtonContainer"><Spinner /></div>}
+        {!loading && <div className="walletButtonContainer">
+          {wallets.map(wallet => (
             <WalletButton
               key={wallet}
               type={wallet}
@@ -88,10 +88,10 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
               onClick={handleLogin}
             />
           ))}
-        </div>
-        <div>
-          <GuestButton onClick={handleLogin} />
-        </div>
+        </div>}
+        {!loading && <div>
+          <GuestButton active onClick={handleLogin} />
+        </div>}
       </div>
     </Modal>
   ) : null;

@@ -21,3 +21,7 @@
 .guestButton.active:hover {
   transform: translateY(-5px);
 }
+
+.walletButton.inactive {
+  filter: grayscale(1);
+}
