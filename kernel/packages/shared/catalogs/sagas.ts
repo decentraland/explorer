@@ -53,6 +53,7 @@ import {
   BuilderServerAPIManager
 } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { getCurrentIdentity } from 'shared/session/selectors'
+import { userAuthentified } from 'shared/session'
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
@@ -201,6 +202,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
       // Fetch unpublished collections from builder server
       const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
       if (uuidCollections.length > 0) {
+        yield userAuthentified()
         const identity = yield select(getCurrentIdentity)
         for (const collectionUuid of uuidCollections) {
           const path = `collections/${collectionUuid}/items`
