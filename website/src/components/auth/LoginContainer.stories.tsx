@@ -47,20 +47,6 @@ const Template: Story<LoginContainerProps & { state: any }> = ({
 //   stage: LoginStage.SIGN_IN,
 // };
 
-export const passport = Template.bind({});
-passport.args = {
-  ...Template.args,
-  stage: LoginStage.SIGN_UP,
-  state: { session: { signup: { stage: "passport" } } },
-};
-
-export const terms = Template.bind({});
-terms.args = {
-  ...Template.args,
-  stage: LoginStage.SIGN_UP,
-  state: { session: { signup: { stage: "terms" } } },
-};
-
 export const ConnectAdvice = Template.bind({});
 ConnectAdvice.args = {
   ...Template.args,

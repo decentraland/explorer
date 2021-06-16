@@ -6,7 +6,6 @@ import { Navbar } from "../common/Navbar"
 import { EthLogin } from "./EthLogin"
 import { EthConnectAdvice } from "./EthConnectAdvice"
 import { EthSignAdvice } from "./EthSignAdvice"
-import SignUpContainer from "./SignUpContainer"
 import { Container } from "../common/Container"
 import { BeginnersGuide } from "./BeginnersGuide"
 import { BigFooter } from "../common/BigFooter"
@@ -56,8 +55,7 @@ export interface LoginContainerProps {
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const loading = props.stage === LoginStage.LOADING || !props.engineReady
   const full = loading || props.stage === LoginStage.SIGN_IN
-  const shouldShow = LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar"
-
+  const shouldShow = LoginStage.COMPLETED !== props.stage && LoginStage.SIGN_UP !== props.stage
   return (
     <React.Fragment>
       {shouldShow && (
@@ -77,7 +75,6 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && <EthConnectAdvice onLogin={props.onLogin} />}
               {props.stage === LoginStage.SIGN_ADVICE && <EthSignAdvice />}
-              {props.stage === LoginStage.SIGN_UP && <SignUpContainer />}
             </Container>
           </main>
 

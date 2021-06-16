@@ -40,10 +40,6 @@ export const SIGNUP_FORM = '[SIGNUP_FORM]'
 export const signupForm = (name: string, email: string) => action(SIGNUP_FORM, { name, email })
 export type SignUpFormAction = ReturnType<typeof signupForm>
 
-export const SIGNUP_STAGE = '[SIGNUP_STAGE]'
-export const changeSignUpStage = (stage: string) => action(SIGNUP_STAGE, { stage })
-export type ChangeSignUpStageAction = ReturnType<typeof changeSignUpStage>
-
 export const CHANGE_LOGIN_STAGE = '[LOGIN_STAGE] change login stage'
 export const changeLoginStage = (stage: string) => action(CHANGE_LOGIN_STAGE, { stage })
 
