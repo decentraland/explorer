@@ -3,7 +3,6 @@ import { AnyAction } from 'redux'
 import { LoginStage, SessionState } from './types'
 import {
   CHANGE_LOGIN_STAGE,
-  ChangeSignUpStageAction,
   SIGNIN_CURRENT_PROVIDER,
   SIGNIN_SET_SIGNING,
   SIGNUP_CLEAR_DATA,
@@ -11,7 +10,6 @@ import {
   SIGNUP_SET_IDENTITY,
   SIGNUP_SET_IS_SIGNUP,
   SIGNUP_SET_PROFILE,
-  SIGNUP_STAGE,
   SignUpFormAction,
   SignUpSetIdentityAction,
   SignUpSetProfileAction,
@@ -61,14 +59,6 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
     }
     case TOGGLE_WALLET_PROMPT:
       return { ...state, showWalletPrompt: action.payload.show }
-    case SIGNUP_STAGE:
-      return {
-        ...state,
-        signup: {
-          ...state.signup,
-          ...(action as ChangeSignUpStageAction).payload
-        }
-      }
     case SIGNUP_FORM:
       const { name, email } = (action as SignUpFormAction).payload
       return {
