@@ -122,14 +122,18 @@ export async function userAuthentified(): Promise<void> {
 
 export function authenticateWhenItsReady(providerType: ProviderType | null) {
   const store: Store<RootState> = globalThis.globalStore
-
-  const unsubscribe = store.subscribe(() => {
-    const loginStage = store.getState().session.loginStage
-    if (loginStage === LoginStage.SIGN_IN) {
-      unsubscribe()
-      globalThis.globalStore.dispatch(authenticate(providerType))
-    }
-  })
+  const loginStage = store.getState().session.loginStage
+  if (loginStage === LoginStage.SIGN_IN) {
+    globalThis.globalStore.dispatch(authenticate(providerType))
+  } else if (loginStage === LoginStage.LOADING || loginStage === undefined) {
+    const unsubscribe = store.subscribe(() => {
+      const loginStage = store.getState().session.loginStage
+      if (loginStage === LoginStage.SIGN_IN) {
+        unsubscribe()
+        globalThis.globalStore.dispatch(authenticate(providerType))
+      }
+    })
+  }
 }
 
 function removeUrlParam(paramToRemove: string) {
