@@ -45,7 +45,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
               Play
             </button>
             <button className="eth-login-guest-button" onClick={handlePlayAsGuest}>
-              Enter as Guest
+              Play as Guest
             </button>
           </React.Fragment>
         )}

@@ -27,6 +27,6 @@ export const GuestButton: React.FC<WalletButtonProps> = ({
       rel="noopener noreferrer"
       className={`guestButton ${active ? 'active' : 'inactive'}`}
       onClick={handleClick}
-    >Enter as Guest</a>
+    >Play as Guest</a>
   );
 };
