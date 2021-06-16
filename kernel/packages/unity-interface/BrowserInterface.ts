@@ -49,7 +49,7 @@ import { fetchENSOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
+import { changeSignUpStage, logout, redirectToSignUp, signUp, signUpCancel, signupForm, signUpSetProfile } from 'shared/session/actions'
 import { authenticateWhenItsReady, getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -62,7 +62,6 @@ import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
-import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
 import { killPortableExperienceScene } from './portableExperiencesUtils'
@@ -287,9 +286,6 @@ export class BrowserInterface {
       globalThis.globalStore.dispatch(saveProfileRequest(update))
     } else {
       globalThis.globalStore.dispatch(signUpSetProfile(update))
-      globalThis.globalStore.dispatch(changeSignUpStage('passport'))
-      Html.switchGameContainer(false)
-      unityInterface.DeactivateRendering()
     }
   }
 
@@ -300,6 +296,12 @@ export class BrowserInterface {
     }
 
     authenticateWhenItsReady(providerType)
+  }
+
+  public SendPassport(passport: {name: string, email: string}) {
+    globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
+    globalThis.globalStore.dispatch(signUp())
+
   }
 
   public RequestOwnProfileUpdate() {

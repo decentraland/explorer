@@ -6,7 +6,15 @@ import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
 import { defaultLogger } from '../../logger'
 import { DEBUG } from '../../../config'
-import { Asset, AssetId, BuilderManifest, CONTENT_PATH, DeploymentResult, SceneDeploymentSourceMetadata, SerializedSceneState } from './types'
+import {
+  Asset,
+  AssetId,
+  BuilderManifest,
+  CONTENT_PATH,
+  DeploymentResult,
+  SceneDeploymentSourceMetadata,
+  SerializedSceneState
+} from './types'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { BuilderServerAPIManager } from './BuilderServerAPIManager'
 import {
@@ -16,7 +24,7 @@ import {
   StorableSceneState,
   toBuilderFromStateDefinitionFormat
 } from './StorableSceneStateTranslation'
-import { CLASS_ID } from 'decentraland-ecs/src'
+import { CLASS_ID, uuid } from 'decentraland-ecs/src'
 import { ParcelIdentity } from '../ParcelIdentity'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
@@ -93,7 +101,13 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneScreenshot: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async publishSceneState(
+    sceneId: string,
+    sceneName: string,
+    sceneDescription: string,
+    sceneScreenshot: string,
+    sceneState: SerializedSceneState
+  ): Promise<DeploymentResult> {
     let result: DeploymentResult
 
     // Deserialize the scene state
@@ -222,6 +236,64 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       }
     } catch (e) {
       defaultLogger.error(`Failed to fetch the current scene (${this.parcelIdentity.cid}) from the content server`, e)
+    }
+  }
+
+  @exposeMethod
+  async createProjectFromStateDefinition(): Promise<SerializedSceneState | undefined> {
+    const sceneJson = this.parcelIdentity.land.sceneJsonData
+    const sceneId: string = this.parcelIdentity.land.sceneId
+    const baseParcel: string = sceneJson.scene.base
+    const parcels: string[] = sceneJson.scene.parcels
+    const title: string | undefined = sceneJson.display?.title
+    const description: string | undefined = sceneJson.display?.description
+    const thumbnailHash: string | undefined = this.parcelIdentity.land.mappingsResponse.contents.find(
+      (pair) => pair.file === CONTENT_PATH.SCENE_THUMBNAIL
+    )?.hash
+
+    try {
+      const serializedScene = await this.getStoredState(sceneId)
+      if (serializedScene) {
+        const identity = this.getIdentity()
+
+        let builderManifest = await this.builderApiManager.createManifestFromSerializedState(
+          uuid(),
+          uuid(),
+          baseParcel,
+          parcels,
+          title,
+          description,
+          serializedScene,
+          identity
+        )
+        if (builderManifest) {
+          this.builderManifest = builderManifest
+          globalThis.unityInterface.SendBuilderProjectInfo(
+            builderManifest.project.title,
+            builderManifest.project.description
+          )
+
+          let thumbnail: string = ''
+
+          if (thumbnailHash) {
+            const contentClient = this.getContentClient()
+            const thumbnailBuffer = await contentClient.downloadContent(thumbnailHash, { attempts: 3 })
+            thumbnail = thumbnailBuffer.toString('base64')
+          }
+
+          this.publishSceneState(
+            sceneId,
+            builderManifest.project.title,
+            builderManifest.project.description,
+            thumbnail,
+            serializedScene
+          ).catch((error) => defaultLogger.error(`Error updating project manifest ${error}`))
+
+          return serializedScene
+        }
+      }
+    } catch (error) {
+      defaultLogger.error(`Failed creating project from state definition at coords ${baseParcel}`)
     }
   }
 

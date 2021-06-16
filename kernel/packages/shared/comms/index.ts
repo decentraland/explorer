@@ -10,7 +10,7 @@ import {
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType, SceneFeatureToggles } from 'shared/types'
-import { positionObservable, PositionReport, lastPlayerPosition } from 'shared/world/positionThings'
+import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import { lastPlayerScene } from 'shared/world/sceneState'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
@@ -53,7 +53,7 @@ import {
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
@@ -127,12 +127,6 @@ export const MORDOR_POSITION: Position = [
 
 type CommsContainer = {
   printCommsInformation: () => void
-  bots: {
-    create: () => string
-    list: () => string[]
-    remove: (id: string) => boolean
-    reposition: (id: string) => void
-  }
 }
 
 declare const globalThis: CommsContainer
@@ -1275,62 +1269,6 @@ globalThis.printCommsInformation = function () {
     defaultLogger.log('Communication topics: ' + previousTopics)
     context.stats.printDebugInformation()
   }
-}
-
-type Bot = { id: string; handle: any }
-const bots: Bot[] = []
-
-globalThis.bots = {
-  create: () => {
-    const id = uuid()
-    processProfileMessage(context!, id, id, {
-      type: 'profile',
-      time: Date.now(),
-      data: {
-        version: '1',
-        user: id,
-        type: ProfileType.DEPLOYED
-      }
-    })
-    const position = { ...lastPlayerPosition }
-    const handle = setInterval(() => {
-      processPositionMessage(context!, id, {
-        type: 'position',
-        time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
-      })
-    }, 1000)
-    bots.push({ id, handle })
-    return id
-  },
-  remove: (id: string | undefined) => {
-    let bot
-    if (id) {
-      bot = bots.find((bot) => bot.id === id)
-    } else {
-      bot = bots.length > 0 ? bots[0] : undefined
-    }
-    if (bot) {
-      clearInterval(bot.handle)
-      bots.splice(bots.indexOf(bot), 1)
-      return true
-    }
-    return false
-  },
-  reposition: (id: string) => {
-    // to test immediate repositioning
-    let bot = bots.find((bot) => bot.id === id)
-    if (bot) {
-      const position = { ...lastPlayerPosition }
-
-      bot.handle = processPositionMessage(context!, id, {
-        type: 'position',
-        time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0, true]
-      })
-    }
-  },
-  list: () => bots.map((bot) => bot.id)
 }
 
 function stripSnapshots(profile: Profile): Profile {
