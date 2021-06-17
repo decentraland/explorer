@@ -148,6 +148,7 @@ export const contracts = {
     'RootChainProxy': '0x2890ba17efe978480615e330ecb65333b880928e'
   },
   'matic': {
+    'MetaTxForwarder': '0x0baBda04f62C549A09EF3313Fe187f29c099FF3C',
     'MANAToken': '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4',
     'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
     'Multisig': '0x0E659A116e161d8e502F9036bAbDA51334F2667E',
