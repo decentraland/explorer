@@ -80,6 +80,16 @@ class StatefulWebWorkerScene extends Script {
           .catch((error) => this.error(`Failed to save the scene's manifest`, error))
       }
     })
+
+    // Listen to save scene info requests
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
+      if (type === 'SaveSceneInfo') {
+        this.sceneStateStorage
+          .saveSceneInfo(serializeSceneState(this.sceneDefinition), payload.title, payload.description, payload.screenshot)
+          .catch((error) => this.error(`Failed to save the scene's info`, error))
+      }
+    })
   }
 
   private error(context: string, error: Error) {
