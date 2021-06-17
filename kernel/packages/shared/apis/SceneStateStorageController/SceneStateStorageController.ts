@@ -116,30 +116,8 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       defaultLogger.error('Project details updating failed', error)
       result = false
     }
-    
-    return result
-  }
 
-  private async updateProjectDetails(sceneState: SerializedSceneState, sceneName: string, sceneDescription: string, thumbnailBlob: Blob) {
-    // Deserialize the scene state
-    const deserializedSceneState: SceneStateDefinition = deserializeSceneState(sceneState)
-    
-    // Convert the scene state to builder scheme format
-    let builderManifest = await toBuilderFromStateDefinitionFormat(
-      deserializedSceneState,
-      this.builderManifest,
-      this.builderApiManager
-    )
-    
-    // Update the project info
-    builderManifest.project.title = sceneName
-    builderManifest.project.description = sceneDescription
-    
-    // Update the manifest
-    await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
-    
-    // Update the thumbnail
-    await this.builderApiManager.updateProjectThumbnail(builderManifest.project.id, thumbnailBlob, this.getIdentity())
+    return result
   }
 
   @exposeMethod
@@ -374,6 +352,28 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
     const result = await Promise.all(promises)
     return new Map(result)
+  }
+
+  private async updateProjectDetails(sceneState: SerializedSceneState, sceneName: string, sceneDescription: string, thumbnailBlob: Blob) {
+    // Deserialize the scene state
+    const deserializedSceneState: SceneStateDefinition = deserializeSceneState(sceneState)
+
+    // Convert the scene state to builder scheme format
+    let builderManifest = await toBuilderFromStateDefinitionFormat(
+      deserializedSceneState,
+      this.builderManifest,
+      this.builderApiManager
+    )
+
+    // Update the project info
+    builderManifest.project.title = sceneName
+    builderManifest.project.description = sceneDescription
+
+    // Update the manifest
+    await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+
+    // Update the thumbnail
+    await this.builderApiManager.updateProjectThumbnail(builderManifest.project.id, thumbnailBlob, this.getIdentity())
   }
 }
 setAPIName('SceneStateStorageController', SceneStateStorageController)
