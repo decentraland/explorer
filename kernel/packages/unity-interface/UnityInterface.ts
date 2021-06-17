@@ -214,6 +214,18 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'ActivateRendering')
   }
 
+  public SetLoadingScreen(data: {
+    isVisible: Boolean,
+    message: string,
+    showWalletPrompt: boolean,
+    showTips: boolean
+  }) {
+    if(this.gameInstance === undefined)
+      return;
+
+      this.SendMessageToUnity('Bridges', "SetLoadingScreen", JSON.stringify(data) );
+  }
+
   public DeactivateRendering() {
     renderStateObservable.notifyObservers(false)
     this.SendMessageToUnity('Main', 'DeactivateRendering')

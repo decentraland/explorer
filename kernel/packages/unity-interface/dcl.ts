@@ -8,7 +8,7 @@ import {
   SHOW_FPS_COUNTER
 } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
+import {loadingScenes, setLoadingScreen, teleportTriggered} from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
@@ -35,6 +35,7 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { TeleportController } from 'shared/world/TeleportController'
+import {toggleWalletPrompt} from "../shared/session/actions";
 
 declare const globalThis: RendererInterfaces &
   StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
@@ -63,6 +64,21 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
   }
+
+  globalThis.globalStore.dispatch(toggleWalletPrompt(true))
+  refreshLoadingScreen()
+}
+
+export function refreshLoadingScreen() {
+  let state = globalThis.globalStore.getState();
+  let loading = state?.loading;
+  let session = state?.session;
+  unityInterface.SetLoadingScreen({
+    isVisible: loading?.showLoadingScreen || loading?.waitingTutorial || false,
+    message: loading?.message || "",
+    showWalletPrompt: session?.showWalletPrompt || false,
+    showTips: loading?.initialLoad || false
+  })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
