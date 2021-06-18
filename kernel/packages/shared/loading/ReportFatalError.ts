@@ -110,7 +110,7 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
-  const eventData = {
+  const rollbarEventData = {
     // attach every field from the payload to the event
     ...(payload || {}),
     // set the context property
@@ -121,8 +121,14 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
     stack: getStack(error).slice(0, 10000)
   }
 
-  trackEvent('error_fatal', eventData)
-  ReportRollbarError(error, eventData)
+  // segment requires less information than rollbar
+  trackEvent('error_fatal', {
+    context: rollbarEventData.context,
+    message: rollbarEventData.message,
+    stack: rollbarEventData.stack,
+    saga_stack: payload['sagaStack']
+  })
+  ReportRollbarError(error, rollbarEventData)
 }
 
 function getStack(error?: any) {
