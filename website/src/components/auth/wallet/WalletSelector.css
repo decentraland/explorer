@@ -1,5 +1,6 @@
-.popup-container .popup.walletSelectorPopup {
+.popup-container.with-flat-background .popup.walletSelectorPopup {
   padding: 0;
+  background: #F7F7F7;
 }
 
 .walletSelector {
@@ -33,7 +34,6 @@ a.guestSelector {
   margin-top: 62px;
   background-color: rgba(236, 236, 236, 1);
   color: black;
-  text-transform: uppercase;
   text-decoration: underline;
   font-size: 16px;
   line-height: 19px;

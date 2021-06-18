@@ -95,7 +95,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
         </div>}
       </div>
       {!loading && <a className="guestSelector" href="#guest" onClick={handleGuestLogin}>
-        Play as guest
+        Play as Guest
       </a>}
     </Modal>
   ) : null;
