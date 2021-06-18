@@ -413,12 +413,8 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
   }
 
-  public SendBuilderProjectInfo(projectName: string, projectDescription: string) {
-    this.SendMessageToUnity(
-      'Main',
-      'BuilderProjectInfo',
-      JSON.stringify({ title: projectName, description: projectDescription })
-    )
+  public SendBuilderProjectInfo(projectName: string, projectDescription: string, isNewEmptyProject: boolean) {
+    this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription, isNewEmptyProject: isNewEmptyProject }))
   }
 
   public SendBuilderCatalogHeaders(headers: Record<string, string>) {
