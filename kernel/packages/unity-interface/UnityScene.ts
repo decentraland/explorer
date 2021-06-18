@@ -9,6 +9,7 @@ import { SceneWorker } from 'shared/world/SceneWorker'
 import { unityInterface } from './UnityInterface'
 import { protobufMsgBridge } from './protobufMessagesBridge'
 import { nativeMsgBridge } from './nativeMessagesBridge'
+import { trackEvent } from 'shared/analytics'
 
 let sendBatchTime: Array<number> = []
 let sendBatchMsgs: Array<number> = []
@@ -24,6 +25,15 @@ export class UnityScene<T> implements ParcelSceneAPI {
 
   constructor(public data: EnvironmentData<T>) {
     this.logger = DEBUG_SCENE_LOG === true ? createLogger(getParcelSceneID(this) + ': ') : createDummyLogger()
+
+    const startLoadingTime = performance.now()
+
+    this.eventDispatcher.once('sceneStart', () => {
+      trackEvent('scene_start_event', {
+        sceneId: getParcelSceneID(this),
+        time_since_creation: performance.now() - startLoadingTime
+      })
+    })
   }
 
   sendBatch(actions: EntityAction[]): void {

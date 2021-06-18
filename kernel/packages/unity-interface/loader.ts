@@ -1,6 +1,7 @@
 import future from 'fp-future'
 import { parseUrn } from '@dcl/urn-resolver'
 import type * as _TheRenderer from '@dcl/unity-renderer/index'
+import { trackEvent } from 'shared/analytics'
 
 declare const globalThis: any
 
@@ -38,6 +39,8 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
     throw new Error('Error while loading the renderer from ' + scriptUrl)
   }
 
+  const startLoadingTime = performance.now()
+
   const originalCreateUnityInstance: (
     canvas: HTMLCanvasElement,
     config: any,
@@ -58,7 +61,12 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
         productVersion: '0.1'
       }
 
-      return originalCreateUnityInstance(canvas, config, onProgress)
+      return originalCreateUnityInstance(canvas, config, function (...args) {
+        if (args[0] == 1.0) {
+          trackEvent('unity_started', { version, loading_time: performance.now() - startLoadingTime })
+        }
+        if (onProgress) return onProgress.apply(null, args)
+      })
     },
     baseUrl
   }

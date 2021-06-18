@@ -109,27 +109,34 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
   }
 }
 
-export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
+export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
   const finalPayload = GetErrorPayload(context, payload)
-  trackEvent('error_fatal', {
-    context: context,
-    message: error.message,
-    stack: error.stack?.slice(0, 10000)
-  })
+  const eventData = {
+    // attach every field from the payload to the event
+    ...(finalPayload || {}),
+    // this is on purpose, if error is not an actual Error, it has no message, so we use the ''+error to call a
+    // toString, we do that because it may be also null. and (null).toString() is invalid, but ''+null works perfectly
+    message: error.message || '' + error,
+    stack: getStack(error).slice(0, 10000)
+  }
 
+  trackEvent('error_fatal', eventData)
   ReportRollbarError(error, finalPayload)
 }
 
-export function ReportSceneError(message: string, payload: any) {
-  const finalPayload = GetErrorPayload(ErrorContext.KERNEL_SCENE, payload)
-  trackEvent('error_scene', {
-    message: message,
-    payload: finalPayload
-  })
-  ReportRollbarError(new Error(message), finalPayload)
+function getStack(error?: any) {
+  if (error && error.stack) {
+    return error.stack
+  } else {
+    try {
+      throw new Error((error && error.message) || error || '<nullish error>')
+    } catch (e) {
+      return e.stack || '' + error
+    }
+  }
 }
 
-function GetErrorPayload(context: ErrorContextTypes, additionalPayload: any) {
+function GetErrorPayload(context: ErrorContextTypes, additionalPayload: Record<string, any>) {
   const result = {
     context: context,
     ...additionalPayload
