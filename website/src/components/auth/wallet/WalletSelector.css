@@ -1,5 +1,5 @@
 .popup-container .popup.walletSelectorPopup {
-  padding: 64px 45px;
+  padding: 0;
 }
 
 .walletSelector {
@@ -7,6 +7,7 @@
   flex-flow: column wrap;
   align-items: center;
   color: #333;
+  padding: 64px 45px 0 45px;
 }
 
 h2.walletSelectorTitle {
@@ -25,4 +26,19 @@ h2.walletSelectorTitle {
   align-items: stretch;
   min-width: 400px;
   min-height: 170px;
+}
+
+a.guestSelector {
+  cursor: pointer;
+  margin-top: 62px;
+  background-color: rgba(236, 236, 236, 1);
+  color: black;
+  text-transform: uppercase;
+  text-decoration: underline;
+  font-size: 16px;
+  line-height: 19px;
+  text-align: center;
+  border-radius: 0 0 20px 20px;
+  font-weight: 600;
+  display: block;
 }

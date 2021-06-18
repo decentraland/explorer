@@ -89,10 +89,16 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
             />
           ))}
         </div>}
-        {!loading && <div>
-          <GuestButton active onClick={handleLogin} />
-        </div>}
       </div>
+      {!loading && <a
+        className="guestSelector"
+        href="#guest"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => handleLogin(null)}
+      >
+        Play as guest
+      </a>}
     </Modal>
   ) : null;
 };
