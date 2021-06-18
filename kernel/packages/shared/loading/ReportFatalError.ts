@@ -121,12 +121,21 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
     stack: getStack(error).slice(0, 10000)
   }
 
+  let sagaStack: string | undefined = payload['sagaStack']
+
+  if (sagaStack) {
+    // first stringify
+    sagaStack = '' + sagaStack
+    // then crop
+    sagaStack = sagaStack.slice(0, 10000)
+  }
+
   // segment requires less information than rollbar
   trackEvent('error_fatal', {
     context: rollbarEventData.context,
     message: rollbarEventData.message,
     stack: rollbarEventData.stack,
-    saga_stack: payload['sagaStack']
+    saga_stack: sagaStack
   })
   ReportRollbarError(error, rollbarEventData)
 }
