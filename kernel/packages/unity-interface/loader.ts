@@ -29,11 +29,11 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
   const scriptUrl = new URL('index.js?v=' + version, baseUrl).toString()
   window['console'].log('Renderer: ' + scriptUrl)
 
-  const startLoadingTime = performance.now()
+  let startTime = performance.now()
 
-  trackEvent('unity_loader_downloading_start', { version, loading_time: performance.now() - startLoadingTime })
+  trackEvent('unity_loader_downloading_start', { version })
   await injectScript(scriptUrl)
-  trackEvent('unity_loader_downloading_end', { version, loading_time: performance.now() - startLoadingTime })
+  trackEvent('unity_loader_downloading_end', { version, loading_time: performance.now() - startTime })
 
   if (typeof globalThis.createUnityInstance === 'undefined') {
     throw new Error('Error while loading createUnityInstance from ' + scriptUrl)
@@ -65,19 +65,22 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
 
       let didLoadUnity = false
 
-      trackEvent('unity_downloading_start', { version, loading_time: performance.now() - startLoadingTime })
+      startTime = performance.now()
+      trackEvent('unity_downloading_start', { version })
 
       return originalCreateUnityInstance(canvas, config, function (...args) {
         // 0.9 is harcoded in unityLoader, it marks the download-complete event
 
         if (0.9 == args[0] && !didLoadUnity) {
-          trackEvent('unity_downloading_end', { version, loading_time: performance.now() - startLoadingTime })
-          trackEvent('unity_initializing_start', { version, loading_time: performance.now() - startLoadingTime })
+          trackEvent('unity_downloading_end', { version, loading_time: performance.now() - startTime })
+
+          startTime = performance.now()
+          trackEvent('unity_initializing_start', { version })
           didLoadUnity = true
         }
         // 1.0 marks the engine-initialized event
         if (1.0 == args[0]) {
-          trackEvent('unity_initializing_end', { version, loading_time: performance.now() - startLoadingTime })
+          trackEvent('unity_initializing_end', { version, loading_time: performance.now() - startTime })
         }
         if (onProgress) return onProgress.apply(null, args)
       })
