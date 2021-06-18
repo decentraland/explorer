@@ -71,7 +71,7 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
       return originalCreateUnityInstance(canvas, config, function (...args) {
         // 0.9 is harcoded in unityLoader, it marks the download-complete event
 
-        if (0.9 == args[0] && !didLoadUnity) {
+        if (0.9 === args[0] && !didLoadUnity) {
           trackEvent('unity_downloading_end', { version, loading_time: performance.now() - startTime })
 
           startTime = performance.now()
@@ -79,7 +79,7 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
           didLoadUnity = true
         }
         // 1.0 marks the engine-initialized event
-        if (1.0 == args[0]) {
+        if (1.0 === args[0]) {
           trackEvent('unity_initializing_end', { version, loading_time: performance.now() - startTime })
         }
         if (onProgress) return onProgress.apply(null, args)

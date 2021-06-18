@@ -137,14 +137,6 @@ function getStack(error?: any) {
   }
 }
 
-function GetErrorPayload(context: ErrorContextTypes, additionalPayload: Record<string, any>) {
-  const result = {
-    context: context,
-    ...additionalPayload
-  }
-  return result
-}
-
 function ReportRollbarError(error: Error, payload: any) {
   if (window.Rollbar) {
     window.Rollbar.critical(error, payload)
