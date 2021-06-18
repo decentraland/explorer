@@ -101,16 +101,16 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async saveSceneInfo(
+  async saveProjectInfo(
     sceneState: SerializedSceneState,
-    sceneName: string,
-    sceneDescription: string,
-    sceneScreenshot: string
+    projectName: string,
+    projectDescription: string,
+    projectScreenshot: string
   ): Promise<boolean> {
     let result: boolean
     try {
-      const thumbnailBlob: Blob = base64ToBlob(sceneScreenshot, 'image/png')
-      await this.updateProjectDetails(sceneState, sceneName, sceneDescription, thumbnailBlob)
+      const thumbnailBlob: Blob = base64ToBlob(projectScreenshot, 'image/png')
+      await this.updateProjectDetails(sceneState, projectName, projectDescription, thumbnailBlob)
       result = true
     } catch (error) {
       defaultLogger.error('Project details updating failed', error)

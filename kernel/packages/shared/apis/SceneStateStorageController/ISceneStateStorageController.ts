@@ -8,5 +8,5 @@ export interface ISceneStateStorageController {
   getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined>
   createProjectWithCoords(coordinates: string): Promise<boolean>
   createProjectFromStateDefinition(): Promise<SerializedSceneState | undefined>
-  saveSceneInfo(sceneState: SerializedSceneState, sceneName: string, sceneDescription: string, sceneScreenshot: string): Promise<boolean>
+  saveProjectInfo(sceneState: SerializedSceneState, projectName: string, projectDescription: string, projectScreenshot: string): Promise<boolean>
 }

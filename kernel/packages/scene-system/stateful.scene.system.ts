@@ -81,12 +81,12 @@ class StatefulWebWorkerScene extends Script {
       }
     })
 
-    // Listen to save scene info requests
+    // Listen to save project info requests
     this.eventSubscriber.on('stateEvent', ({ data }) => {
       const { type, payload } = data
-      if (type === 'SaveSceneInfo') {
+      if (type === 'SaveProjectInfo') {
         this.sceneStateStorage
-          .saveSceneInfo(serializeSceneState(this.sceneDefinition), payload.title, payload.description, payload.screenshot)
+          .saveProjectInfo(serializeSceneState(this.sceneDefinition), payload.title, payload.description, payload.screenshot)
           .catch((error) => this.error(`Failed to save the scene's info`, error))
       }
     })
