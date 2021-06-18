@@ -40,5 +40,6 @@ a.guestSelector {
   text-align: center;
   border-radius: 0 0 20px 20px;
   font-weight: 600;
+  padding: 17px;
   display: block;
 }

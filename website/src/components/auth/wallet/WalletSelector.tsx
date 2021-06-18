@@ -32,6 +32,11 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
     }
   }
 
+  function handleGuestLogin(e: React.MouseEvent<any>) {
+    e.preventDefault()
+    handleLogin(null)
+  }
+
   const wallets = useMemo(() => {
     const result: WalletButtonLogo[] = []
     if (hasWallet) {
@@ -89,13 +94,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
           ))}
         </div>}
       </div>
-      {!loading && <a
-        className="guestSelector"
-        href="#guest"
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => handleLogin(null)}
-      >
+      {!loading && <a className="guestSelector" href="#guest" onClick={handleGuestLogin}>
         Play as guest
       </a>}
     </Modal>
