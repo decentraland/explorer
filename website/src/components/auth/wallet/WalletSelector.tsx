@@ -3,7 +3,6 @@ import { ProviderType } from "decentraland-connect";
 import { isCucumberProvider, isDapperProvider } from "decentraland-dapps/dist/lib/eth";
 import { Modal } from "../../common/Modal";
 import { WalletButton, WalletButtonLogo } from "./WalletButton";
-import { GuestButton } from "./GuestButton";
 import { Spinner } from "../../common/Spinner";
 import "./WalletSelector.css";
 
