@@ -110,17 +110,6 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
-  const rollbarEventData = {
-    // attach every field from the payload to the event
-    ...(payload || {}),
-    // set the context property
-    context,
-    // this is on purpose, if error is not an actual Error, it has no message, so we use the ''+error to call a
-    // toString, we do that because it may be also null. and (null).toString() is invalid, but ''+null works perfectly
-    message: error.message || '' + error,
-    stack: getStack(error).slice(0, 10000)
-  }
-
   let sagaStack: string | undefined = payload['sagaStack']
 
   if (sagaStack) {
@@ -132,12 +121,16 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
 
   // segment requires less information than rollbar
   trackEvent('error_fatal', {
-    context: rollbarEventData.context,
-    message: rollbarEventData.message,
-    stack: rollbarEventData.stack,
+    context,
+    // this is on purpose, if error is not an actual Error, it has no message, so we use the ''+error to call a
+    // toString, we do that because it may be also null. and (null).toString() is invalid, but ''+null works perfectly
+    message: error.message || '' + error,
+    stack: getStack(error).slice(0, 10000),
     saga_stack: sagaStack
   })
-  ReportRollbarError(error, rollbarEventData)
+
+  // we only add the context to rollbar event
+  ReportRollbarError(error, { context, ...payload })
 }
 
 function getStack(error?: any) {
