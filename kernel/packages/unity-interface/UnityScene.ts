@@ -30,7 +30,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
 
     this.eventDispatcher.once('sceneStart', () => {
       trackEvent('scene_start_event', {
-        sceneId: getParcelSceneID(this),
+        scene_id: getParcelSceneID(this),
         time_since_creation: performance.now() - startLoadingTime
       })
     })
