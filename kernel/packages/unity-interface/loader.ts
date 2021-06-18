@@ -61,8 +61,16 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
         productVersion: '0.1'
       }
 
+      let didLoadUnity = false
+
       return originalCreateUnityInstance(canvas, config, function (...args) {
-        if (args[0] == 1.0) {
+        // 0.9 is harcoded in unityLoader, it marks the download-complete event
+        if (0.9 == args[0] && !didLoadUnity) {
+          trackEvent('unity_loaded', { version, loading_time: performance.now() - startLoadingTime })
+          didLoadUnity = true
+        }
+        // 1.0 marks the engine-initialized event
+        if (1.0 == args[0]) {
           trackEvent('unity_started', { version, loading_time: performance.now() - startLoadingTime })
         }
         if (onProgress) return onProgress.apply(null, args)

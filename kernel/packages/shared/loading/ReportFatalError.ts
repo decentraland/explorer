@@ -110,10 +110,11 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
-  const finalPayload = GetErrorPayload(context, payload)
   const eventData = {
     // attach every field from the payload to the event
-    ...(finalPayload || {}),
+    ...(payload || {}),
+    // set the context property
+    context,
     // this is on purpose, if error is not an actual Error, it has no message, so we use the ''+error to call a
     // toString, we do that because it may be also null. and (null).toString() is invalid, but ''+null works perfectly
     message: error.message || '' + error,
@@ -121,7 +122,7 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
   }
 
   trackEvent('error_fatal', eventData)
-  ReportRollbarError(error, finalPayload)
+  ReportRollbarError(error, eventData)
 }
 
 function getStack(error?: any) {
