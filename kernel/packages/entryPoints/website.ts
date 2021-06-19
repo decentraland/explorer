@@ -1,6 +1,6 @@
 declare const globalThis: { UnityLoader: any } & StoreContainer
 declare const global: any
-;(window as any).reactVersion = true
+  ; (window as any).reactVersion = true
 
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
@@ -21,6 +21,7 @@ import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
+import { trackEvent } from 'shared/analytics'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
@@ -234,7 +235,8 @@ namespace webApp {
   // In the future, we should probably replace this with a library
   export const utils = {
     isBadWord,
-    filterInvalidNameCharacters
+    filterInvalidNameCharacters,
+    trackEvent
   }
 
   function setUserPositionAfterTutorial() {
