@@ -9,7 +9,6 @@ import { DEBUG } from '../../../config'
 import {
   Asset,
   AssetId,
-  BuilderComponent,
   BuilderManifest,
   CONTENT_PATH,
   DeploymentResult,
@@ -288,13 +287,10 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           // Transform manifest components
           this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
 
-          const transformedComponents: Record<string, BuilderComponent> = {}
-          for (let key of Object.keys(builderManifest.scene.components)) {
-            transformedComponents[key] = this.transformTranslator.transformBuilderComponent(
-              builderManifest.scene.components[key]
-            )
-          }
-          builderManifest.scene.components = transformedComponents
+          builderManifest.scene.components = Object.entries(builderManifest.scene.components).reduce(
+            (acc, [k, v]) => ({ ...acc, [k]: this.transformTranslator.transformBuilderComponent(v) }),
+            {}
+          )
 
           // Notify renderer about the project information
           globalThis.unityInterface.SendBuilderProjectInfo(
