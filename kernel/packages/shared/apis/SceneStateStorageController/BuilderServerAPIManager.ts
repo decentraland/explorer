@@ -18,7 +18,8 @@ import { getDefaultTLD } from 'config'
 import { defaultLogger } from '../../logger'
 import { getParcelSceneLimits } from 'atomicHelpers/landHelpers'
 import { CLASS_ID } from 'decentraland-ecs/src'
-import { toHumanReadableType, fromHumanReadableType } from './utils'
+import { toHumanReadableType, fromHumanReadableType, getLayoutFromParcels } from './utils'
+import { SceneSourcePlacement } from 'shared/types'
 
 export const BASE_DOWNLOAD_URL = 'https://builder-api.decentraland.org/v1/storage/contents'
 const BASE_BUILDER_SERVER_URL_ROPSTEN = 'https://builder-api.decentraland.io/v1/'
@@ -155,55 +156,92 @@ export class BuilderServerAPIManager {
     return builderManifest
   }
 
-  async createManifestFromSerializedState(
+  async builderManifestFromSerializedState(
     builderSceneId: string,
     builderProjectId: string,
     baseParcel: string,
     parcels: string[],
     title: string | undefined,
     description: string | undefined,
+    ethAddress: string,
     scene: SerializedSceneState,
-    identity: ExplorerIdentity
-  ): Promise<BuilderManifest | undefined> {
-    try {
-      const builderManifest = await this.builderManifesFromSerializedState(
-        builderSceneId,
-        builderProjectId,
-        baseParcel,
-        parcels,
-        title,
-        description,
-        identity.rawAddress,
-        scene
-      )
-      await this.setManifestOnServer(builderManifest, identity)
-      return builderManifest
-    } catch (e) {
-      defaultLogger.error(e)
+    sceneLayout: SceneSourcePlacement['layout'] | undefined
+  ): Promise<BuilderManifest> {
+    const builderProject: BuilderProject = this.createBuilderProject(
+      builderSceneId,
+      builderProjectId,
+      baseParcel,
+      parcels,
+      ethAddress,
+      title,
+      description,
+      sceneLayout?.cols,
+      sceneLayout?.rows
+    )
+
+    const { entities, components } = getBuilderEntitiesAndComponentsFromSerializedState(scene)
+    const assetsId: string[] = Object.values(components)
+      .filter((component) => fromHumanReadableType(component.type) === CLASS_ID.GLTF_SHAPE)
+      .map((component) => component.data.assetId)
+
+    const assets = await this.getAssets(assetsId)
+
+    const ground: BuilderGround = Object.values(assets)
+      .filter((asset) => asset.category === 'ground')
+      ?.map((groundAsset) => {
+        return {
+          assetId: groundAsset.id,
+          componentId: Object.values(components).filter((component) => component.data.assetId === groundAsset.id)[0]?.id
+        }
+      })[0]
+
+    const groundEntity = Object.values(entities).filter((entity) =>
+      entity.components.find((componentId) => componentId === ground.componentId)
+    )[0]
+
+    if (groundEntity) {
+      groundEntity.disableGizmos = true
     }
-    return undefined
+
+    // NOTE: scene metrics are calculated again in builder dapp, so for now we only fill entities count
+    let builderScene: BuilderScene = {
+      id: builderSceneId,
+      entities,
+      components,
+      assets,
+      ground,
+      limits: getSceneLimits(parcels.length),
+      metrics: {
+        textures: 0,
+        triangles: 0,
+        materials: 0,
+        meshes: 0,
+        bodies: 0,
+        entities: Object.keys(entities).length
+      }
+    }
+
+    return {
+      version: BUILDER_MANIFEST_VERSION,
+      project: builderProject,
+      scene: builderScene
+    }
   }
 
-  createBuilderProject(
+  private createBuilderProject(
     builderSceneId: string,
     builderProjectId: string,
     baseParcel: string,
     parcels: string[],
     ethAddress: string,
-    title: string | undefined = undefined,
-    description: string | undefined = undefined
+    title?: string,
+    description?: string,
+    cols?: number,
+    rows?: number
   ): BuilderProject {
     const today = new Date().toISOString()
-    let rows = 1
-    let cols = 1
 
-    if (parcels.length > 1) {
-      const rowsAll: number[] = parcels.map((parcel) => parseInt(parcel.split(',')[1], 10))
-      const colsAll: number[] = parcels.map((parcel) => parseInt(parcel.split(',')[0], 10))
-
-      rows = Math.max(...rowsAll) - Math.min(...rowsAll)
-      cols = Math.max(...colsAll) - Math.min(...colsAll)
-    }
+    const layout = getLayoutFromParcels(parcels)
 
     return {
       id: builderProjectId,
@@ -212,8 +250,8 @@ export class BuilderServerAPIManager {
       is_public: false,
       scene_id: builderSceneId,
       eth_address: ethAddress,
-      rows: rows,
-      cols: cols,
+      rows: rows ?? layout.rows,
+      cols: cols ?? layout.cols,
       created_at: today,
       updated_at: today,
       creation_coords: baseParcel
@@ -364,76 +402,6 @@ export class BuilderServerAPIManager {
       scene: builderScene
     }
     return builderManifest
-  }
-
-  private async builderManifesFromSerializedState(
-    builderSceneId: string,
-    builderProjectId: string,
-    baseParcel: string,
-    parcels: string[],
-    title: string | undefined,
-    description: string | undefined,
-    ethAddress: string,
-    scene: SerializedSceneState
-  ): Promise<BuilderManifest> {
-    const builderProject: BuilderProject = this.createBuilderProject(
-      builderSceneId,
-      builderProjectId,
-      baseParcel,
-      parcels,
-      ethAddress,
-      title,
-      description
-    )
-
-    const { entities, components } = getBuilderEntitiesAndComponentsFromSerializedState(scene)
-
-    const assetsId = Object.values(components)
-      .filter((component) => fromHumanReadableType(component.type) === CLASS_ID.GLTF_SHAPE)
-      .map((component) => component.data.assetId)
-
-    const assets = await this.getAssets(assetsId)
-
-    const ground: BuilderGround = Object.values(assets)
-      .filter((asset) => asset.category === 'ground')
-      ?.map((groundAsset) => {
-        return {
-          assetId: groundAsset.id,
-          componentId: Object.values(components).filter((component) => component.data.assetId === groundAsset.id)[0]?.id
-        }
-      })[0]
-
-    const groundEntity = Object.values(entities).filter((entity) =>
-      entity.components.find((componentId) => componentId === ground.componentId)
-    )[0]
-
-    if (groundEntity) {
-      groundEntity.disableGizmos = true
-    }
-
-    // NOTE: scene metrics are calculated again in builder dapp, so for now we only fill entities count
-    let builderScene: BuilderScene = {
-      id: builderSceneId,
-      entities,
-      components,
-      assets,
-      ground,
-      limits: getSceneLimits(parcels.length),
-      metrics: {
-        textures: 0,
-        triangles: 0,
-        materials: 0,
-        meshes: 0,
-        bodies: 0,
-        entities: Object.keys(entities).length
-      }
-    }
-
-    return {
-      version: BUILDER_MANIFEST_VERSION,
-      project: builderProject,
-      scene: builderScene
-    }
   }
 }
 
