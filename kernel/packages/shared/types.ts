@@ -440,6 +440,12 @@ export enum HUDElementID {
   CONTROLS_HUD = 18,
   EXPLORE_HUD = 19,
   HELP_AND_SUPPORT_HUD = 20,
+
+  /**
+   * @deprecated
+   */
+  EMAIL_PROMPT = 21,
+
   USERS_AROUND_LIST_HUD = 21,
   GRAPHIC_CARD_WARNING = 22,
   BUILD_MODE = 23,
