@@ -271,7 +271,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         const identity = this.getIdentity()
 
         // Create builder manifest from serialized scene
-        let builderManifest = await this.builderApiManager.builderManifesFromSerializedState(
+        let builderManifest = await this.builderApiManager.builderManifestFromSerializedState(
           uuid(),
           uuid(),
           baseParcel,

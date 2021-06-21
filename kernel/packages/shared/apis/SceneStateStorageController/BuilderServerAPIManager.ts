@@ -156,7 +156,7 @@ export class BuilderServerAPIManager {
     return builderManifest
   }
 
-  async builderManifesFromSerializedState(
+  async builderManifestFromSerializedState(
     builderSceneId: string,
     builderProjectId: string,
     baseParcel: string,
