@@ -355,14 +355,6 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'FailGIFFetch', id)
   }
 
-  public ConfigureEmailPrompt(tutorialStep: number) {
-    const emailCompletedFlag = 128
-    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
-      active: (tutorialStep & emailCompletedFlag) === 0,
-      visible: false
-    })
-  }
-
   public ConfigureTutorial(tutorialStep: number, tutorialConfig: TutorialInitializationMessage) {
     const tutorialCompletedFlag = 256
 
