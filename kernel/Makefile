@@ -132,6 +132,7 @@ build-release: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(DIST_PACKAGE_JSON) ## 
 	@node ./scripts/prepareDist.js
 
 publish: | build-release ## Release a new version, using the `scripts/npmPublish` script
+	@cd $(PWD)/../website; cp $(PWD)/../website/static/package.json $(PWD)/../website/build; node $(PWD)/scripts/npmPublish.js
 	@cd $(PWD)/packages/decentraland-ecs; node $(PWD)/scripts/npmPublish.js
 	@cd $(PWD)/packages/build-ecs; node $(PWD)/scripts/npmPublish.js
 	@cd $(PWD)/static; node $(PWD)/scripts/npmPublish.js
