@@ -236,7 +236,7 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "package-lock.json" }}
       - run:
-          name: Publish a new version of decentraland-ecs and decentraland-website
+          name: Publish a new version of decentraland-ecs
           command: make publish
           when: on_success
 
