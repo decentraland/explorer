@@ -2,4 +2,4 @@
 
 cp static/package.json build/
 cd build
-node ../kernel/scripts/npmPublish.js
+node ../../kernel/scripts/npmPublish.js
