@@ -5,7 +5,7 @@ import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { getCurrentIdentity,getCurrentUserId } from 'shared/session/selectors'
+import { getCurrentIdentity, getCurrentUserId } from 'shared/session/selectors'
 import {
   decentralandConfigurations,
   ethereumConfigurations,
@@ -75,6 +75,7 @@ import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/
 import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
+import { areCandidatesFetched } from 'shared/dao/selectors'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -300,7 +301,7 @@ export class BrowserInterface {
     authenticateWhenItsReady(providerType)
   }
 
-  public SendPassport(passport: {name: string, email: string}) {
+  public SendPassport(passport: { name: string; email: string }) {
     globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
     globalThis.globalStore.dispatch(signUp())
   }
@@ -493,7 +494,9 @@ export class BrowserInterface {
     notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
 
     const future = candidatesFetched()
-    if (future.isPending) {
+
+    const store: Store<RootState> = (window as any)['globalStore']
+    if (!areCandidatesFetched(store.getState())) {
       notifyStatusThroughChat(`Waiting while realms are initialized, this may take a while...`)
     }
 

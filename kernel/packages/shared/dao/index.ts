@@ -1,5 +1,5 @@
 import defaultLogger from '../logger'
-import future, { IFuture } from 'fp-future'
+import future from 'fp-future'
 import { Layer, Realm, Candidate, RootDaoState, ServerConnectionStatus, PingResult, HealthStatus } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
@@ -219,18 +219,14 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
   return candidateToRealm(sorted[0])
 }
 
-export function candidatesFetched(): IFuture<void> {
-  const result: IFuture<void> = future()
-
+export async function candidatesFetched(): Promise<void> {
   const store: Store<RootState> = (window as any)['globalStore']
 
-  const fetched = areCandidatesFetched(store.getState())
-  if (fetched) {
-    result.resolve()
-    return result
+  if (areCandidatesFetched(store.getState())) {
+    return
   }
 
-  new Promise((resolve) => {
+  return new Promise((resolve) => {
     const unsubscribe = store.subscribe(() => {
       const fetched = areCandidatesFetched(store.getState())
       if (fetched) {
@@ -239,24 +235,18 @@ export function candidatesFetched(): IFuture<void> {
       }
     })
   })
-    .then(() => result.resolve())
-    .catch((e) => result.reject(e))
-
-  return result
 }
 
 export async function realmInitialized(): Promise<void> {
   const store: Store<RootState> = (window as any)['globalStore']
 
-  const initialized = isRealmInitialized(store.getState())
-  if (initialized) {
-    return Promise.resolve()
+  if (isRealmInitialized(store.getState())) {
+    return
   }
 
   return new Promise((resolve) => {
     const unsubscribe = store.subscribe(() => {
-      const initialized = isRealmInitialized(store.getState())
-      if (initialized) {
+      if (isRealmInitialized(store.getState())) {
         unsubscribe()
         return resolve()
       }
