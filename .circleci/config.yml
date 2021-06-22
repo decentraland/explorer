@@ -240,6 +240,23 @@ jobs:
           command: make publish
           when: on_success
 
+  publish-website:
+    <<: *base_website_env
+    steps:
+      - <<: *attach_root
+      - run:
+          name: Set up NPM access tokens
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          when: on_success
+      - restore_cache:
+          name: Restoring node_modules
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+      - run:
+          name: Publish a new version of decentraland-website
+          command: sh scripts/publish.sh
+          when: on_success
+
   deploy-on-pr:
     <<: *base_kernel_env
     steps:
@@ -359,7 +376,13 @@ workflows:
               only: master # next
             tags:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
-
+      - publish-website:
+          requires:
+            - "build-website"
+          # TODO!: remove filter before merge
+          # filters:
+          #   branches:
+          #     only: master
       # deployments
       - deploy-dev:
           requires:
