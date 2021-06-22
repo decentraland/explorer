@@ -209,6 +209,17 @@ export type ScenePolicy = {
 export type SceneSource = {
   origin?: string
   projectId?: string
+  version?: number
+  rotation?: SceneSourcePlacement['rotation']
+  point?: SceneSourcePlacement['point']
+  layout?: SceneSourcePlacement['layout']
+  isEmpty?: boolean
+}
+
+export type SceneSourcePlacement = {
+  rotation: 'north' | 'east' | 'south' | 'west'
+  point: { x: number; y: number }
+  layout: { cols: number; rows: number }
 }
 
 /// https://github.com/decentraland/proposals/blob/master/dsp/0020.mediawiki

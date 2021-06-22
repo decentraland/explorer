@@ -1,4 +1,5 @@
 import { CLASS_ID } from 'decentraland-ecs/src'
+import { SceneSourcePlacement } from 'shared/types'
 
 /**
  * We are converting from numeric ids to a more human readable format. It might make sense to change this in the future,
@@ -30,4 +31,15 @@ export function fromHumanReadableType(humanReadableType: string): number {
     throw new Error(`Unknown human readable type ${humanReadableType}`)
   }
   return type
+}
+
+export function getLayoutFromParcels(parcels: string[]): SceneSourcePlacement['layout'] {
+  let rows = 1
+  let cols = 1
+
+  if (parcels.length > 1) {
+    rows = [...new Set(parcels.map((parcel) => parcel.split(',')[1]))].length
+    cols = [...new Set(parcels.map((parcel) => parcel.split(',')[0]))].length
+  }
+  return { cols, rows }
 }
