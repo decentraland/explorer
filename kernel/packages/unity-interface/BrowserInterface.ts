@@ -5,6 +5,7 @@ import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
+import { getCurrentIdentity,getCurrentUserId } from 'shared/session/selectors'
 import {
   decentralandConfigurations,
   ethereumConfigurations,
@@ -51,7 +52,7 @@ import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared
 import { setAudioStream } from './audioStream'
 import { logout, redirectToSignUp, signUp, signUpCancel, signupForm, signUpSetProfile } from 'shared/session/actions'
 import { authenticateWhenItsReady, getIdentity, hasWallet } from 'shared/session'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
@@ -60,7 +61,6 @@ import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
-import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
@@ -73,6 +73,8 @@ import { profileToRendererFormat } from 'shared/profiles/transformations/profile
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
 import { ProviderType } from 'decentraland-connect'
+import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
+import { Store } from 'redux'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -571,6 +573,18 @@ export class BrowserInterface {
 
   public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
     await killPortableExperienceScene(data.portableExperienceId)
+  }
+
+  public RequestBIWCatalogHeader() {
+    const store: Store<RootState> = globalThis['globalStore']
+    const identity = getCurrentIdentity(store.getState())
+    if (!identity) {
+      let emptyHeader: Record<string, string> = {}
+      unityInterface.SendBuilderCatalogHeaders(emptyHeader)
+    } else {
+      const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
+      unityInterface.SendBuilderCatalogHeaders(headers)
+    }
   }
 
   public RequestWearables(data: {

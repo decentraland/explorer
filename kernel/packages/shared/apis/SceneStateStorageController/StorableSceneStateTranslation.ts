@@ -12,6 +12,7 @@ import {
 } from './types'
 import { BuilderServerAPIManager } from './BuilderServerAPIManager'
 import { toHumanReadableType, fromHumanReadableType } from './utils'
+import { SceneTransformTranslator } from './SceneTransformTranslator'
 
 const CURRENT_SCHEMA_VERSION = 1
 
@@ -33,7 +34,8 @@ type StorableComponent = {
 export async function toBuilderFromStateDefinitionFormat(
   scene: SceneStateDefinition,
   builderManifest: BuilderManifest,
-  builderApiManager: BuilderServerAPIManager
+  builderApiManager: BuilderServerAPIManager,
+  transfromTranslator: SceneTransformTranslator
 ): Promise<BuilderManifest> {
   let entities: Record<string, BuilderEntity> = {}
   let builderComponents: Record<string, BuilderComponent> = {}
@@ -57,11 +59,11 @@ export async function toBuilderFromStateDefinitionFormat(
       }
 
       // we add the component to the builder format
-      let builderComponent: BuilderComponent = {
+      let builderComponent: BuilderComponent = transfromTranslator.transformBuilderComponent({
         id: newId,
         type: componentType,
         data: component.data
-      }
+      })
       builderComponents[builderComponent.id] = builderComponent
     }
 
@@ -154,7 +156,10 @@ export async function toBuilderFromStateDefinitionFormat(
   return builderManifest
 }
 
-export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneStateDefinition {
+export function fromBuildertoStateDefinitionFormat(
+  scene: BuilderScene,
+  transfromTranslator: SceneTransformTranslator
+): SceneStateDefinition {
   const sceneState = new SceneStateDefinition()
 
   const componentMap = new Map(Object.entries(scene.components))
@@ -184,10 +189,11 @@ export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneSt
           componentData.color = color
           componentData.style = 0
         }
-        let component: Component = {
+
+        let component: Component = transfromTranslator.transformStateDefinitionComponent({
           componentId: fromHumanReadableType(componentMap.get(componentId)!.type),
           data: componentData
-        }
+        })
         components.push(component)
       }
     }

@@ -12,6 +12,11 @@
   text-align: center;
   text-decoration: none;
   box-sizing: content-box;
+  transition: transform 0.3s ease;
+}
+
+.walletButton.active:hover {
+  transform: translateY(-5px);
 }
 
 .walletButton.inactive {

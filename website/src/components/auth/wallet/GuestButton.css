@@ -1,0 +1,27 @@
+.guestButton {
+  margin: 15px 0 0;
+  color: #222222;
+  text-shadow: 0 0 black;
+  width: 330px;
+  padding: 12px;
+  font-size: 15px;
+  line-height: 18px;
+  font-weight: 600;
+  display: flex;
+  flex-flow: column wrap;
+  background: #fff;
+  box-shadow: 0 5px 0 #cacfe2;
+  border-radius: 15px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.guestButton.active:hover {
+  transform: translateY(-5px);
+}
+
+.walletButton.inactive {
+  filter: grayscale(1);
+}
