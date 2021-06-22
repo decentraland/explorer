@@ -223,7 +223,7 @@ jobs:
           paths:
             - website/build
 
-  publish-ecs-and-website:
+  publish-ecs:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
