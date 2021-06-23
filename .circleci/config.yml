@@ -379,6 +379,7 @@ workflows:
       - publish-website:
           requires:
             - "build-website"
+            - "publish-ecs"
           # TODO!: remove filter before merge
           # filters:
           #   branches:
