@@ -2,5 +2,5 @@
 
 cp static/package.json build/
 cd build
-echo $(ls ../scripts)
+echo $(ls ../../kernel/scripts)
 node ../../kernel/scripts/npmPublish.js
