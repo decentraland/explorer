@@ -253,8 +253,7 @@ export class BuilderServerAPIManager {
       rows: rows ?? layout.rows,
       cols: cols ?? layout.cols,
       created_at: today,
-      updated_at: today,
-      creation_coords: baseParcel
+      updated_at: today
     }
   }
 
@@ -332,6 +331,7 @@ export class BuilderServerAPIManager {
     let builderSceneId = uuid()
     let builderProjectId = uuid()
     let builderProject = this.createBuilderProject(builderSceneId, builderProjectId, land, [land], ethAddress)
+    builderProject.creation_coords = land
 
     let builderScene: BuilderScene = {
       id: builderSceneId,
