@@ -127,9 +127,11 @@ export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
 export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.includes('SHOW_FPS_COUNTER') || DEBUG
 export const HAS_INITIAL_POSITION_MARK = location.search.includes('position')
-export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.includes('FORCE_SEND_MESSAGE')
+
+export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
+export const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN
 
 export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
 
@@ -268,11 +270,6 @@ export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | nu
 export function getDefaultAssetBundlesBaseUrl(): string {
   const TLDDefault = getDefaultTLD()
   return `https://content-assets-as-bundle.decentraland.${TLDDefault}`
-}
-
-export function getAssetBundlesBaseUrl(): string {
-  const TLDDefault = getDefaultTLD()
-  return qs.ASSET_BUNDLES_DOMAIN || `https://content-assets-as-bundle.decentraland.${TLDDefault}`
 }
 
 export function getServerConfigurations() {

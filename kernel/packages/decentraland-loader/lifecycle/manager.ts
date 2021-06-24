@@ -15,7 +15,8 @@ import {
   parcelLimits,
   ENABLE_EMPTY_SCENES,
   LOS,
-  getDefaultAssetBundlesBaseUrl
+  getDefaultAssetBundlesBaseUrl,
+  ASSET_BUNDLES_DOMAIN
 } from 'config'
 
 import { ILand } from 'shared/types'
@@ -128,7 +129,8 @@ export async function initParcelSceneWorker() {
 
   const state = globalThis.globalStore.getState()
   const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
-  const assetBundlesServer = state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
+  const assetBundlesServer =
+    ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
 
   // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
   //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.
