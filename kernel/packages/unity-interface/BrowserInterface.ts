@@ -104,11 +104,6 @@ type SystemInfoPayload = {
   systemMemorySize: number
 }
 
-enum RendererAuthenticationType {
-  GUEST = 0,
-  WALLET_CONNECT = 1
-}
-
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
@@ -292,9 +287,10 @@ export class BrowserInterface {
     }
   }
 
-  public SendAuthentication(data: { rendererAuthenticationType: RendererAuthenticationType }) {
+  public SendAuthentication(data: { rendererAuthenticationType: string }) {
     let providerType: ProviderType | null = null
-    if (data.rendererAuthenticationType === RendererAuthenticationType.WALLET_CONNECT) {
+
+    if (data.rendererAuthenticationType === 'wallet_connect') {
       providerType = ProviderType.WALLET_CONNECT
     }
 
