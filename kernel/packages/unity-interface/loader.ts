@@ -1,6 +1,7 @@
 import future from 'fp-future'
 import { parseUrn } from '@dcl/urn-resolver'
 import type * as _TheRenderer from '@dcl/unity-renderer/index'
+import { trackEvent } from 'shared/analytics'
 
 declare const globalThis: any
 
@@ -24,11 +25,18 @@ export type UnityGame = {
   Quit(): Promise<void>
 }
 
-async function injectRenderer(baseUrl: string, version: string): Promise<LoadRendererResult> {
-  const scriptUrl = new URL('index.js?v=' + version, baseUrl).toString()
+async function injectRenderer(baseUrl: string, rendererVersion: string): Promise<LoadRendererResult> {
+  const scriptUrl = new URL('index.js?v=' + rendererVersion, baseUrl).toString()
   window['console'].log('Renderer: ' + scriptUrl)
 
+  let startTime = performance.now()
+
+  trackEvent('unity_loader_downloading_start', { renderer_version: rendererVersion })
   await injectScript(scriptUrl)
+  trackEvent('unity_loader_downloading_end', {
+    renderer_version: rendererVersion,
+    loading_time: performance.now() - startTime
+  })
 
   if (typeof globalThis.createUnityInstance === 'undefined') {
     throw new Error('Error while loading createUnityInstance from ' + scriptUrl)
@@ -47,7 +55,7 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
   return {
     DclRenderer: globalThis.DclRenderer,
     createUnityInstance: async (canvas, onProgress?) => {
-      const resolveWithBaseUrl = (file: string) => new URL(file + '?v=' + version, baseUrl).toString()
+      const resolveWithBaseUrl = (file: string) => new URL(file + '?v=' + rendererVersion, baseUrl).toString()
       const config = {
         dataUrl: resolveWithBaseUrl('unity.data.unityweb'),
         frameworkUrl: resolveWithBaseUrl('unity.framework.js.unityweb'),
@@ -58,7 +66,32 @@ async function injectRenderer(baseUrl: string, version: string): Promise<LoadRen
         productVersion: '0.1'
       }
 
-      return originalCreateUnityInstance(canvas, config, onProgress)
+      let didLoadUnity = false
+
+      startTime = performance.now()
+      trackEvent('unity_downloading_start', { renderer_version: rendererVersion })
+
+      return originalCreateUnityInstance(canvas, config, function (...args) {
+        // 0.9 is harcoded in unityLoader, it marks the download-complete event
+        if (0.9 === args[0] && !didLoadUnity) {
+          trackEvent('unity_downloading_end', {
+            renderer_version: rendererVersion,
+            loading_time: performance.now() - startTime
+          })
+
+          startTime = performance.now()
+          trackEvent('unity_initializing_start', { renderer_version: rendererVersion })
+          didLoadUnity = true
+        }
+        // 1.0 marks the engine-initialized event
+        if (1.0 === args[0]) {
+          trackEvent('unity_initializing_end', {
+            renderer_version: rendererVersion,
+            loading_time: performance.now() - startTime
+          })
+        }
+        if (onProgress) return onProgress.apply(null, args)
+      })
     },
     baseUrl
   }

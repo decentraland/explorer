@@ -6,7 +6,15 @@ import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
 import { defaultLogger } from '../../logger'
 import { DEBUG } from '../../../config'
-import { Asset, AssetId, BuilderManifest, CONTENT_PATH, DeploymentResult, SceneDeploymentSourceMetadata, SerializedSceneState } from './types'
+import {
+  Asset,
+  AssetId,
+  BuilderManifest,
+  CONTENT_PATH,
+  DeploymentResult,
+  SceneDeploymentSourceMetadata,
+  SerializedSceneState
+} from './types'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { BuilderServerAPIManager } from './BuilderServerAPIManager'
 import {
@@ -16,7 +24,7 @@ import {
   StorableSceneState,
   toBuilderFromStateDefinitionFormat
 } from './StorableSceneStateTranslation'
-import { CLASS_ID } from 'decentraland-ecs/src'
+import { CLASS_ID, uuid } from 'decentraland-ecs/src'
 import { ParcelIdentity } from '../ParcelIdentity'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
@@ -27,6 +35,8 @@ import { ExplorerIdentity } from 'shared/session/types'
 import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from './ISceneStateStorageController'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
+import { getLayoutFromParcels } from './utils'
+import { SceneTransformTranslator } from './SceneTransformTranslator'
 
 declare const globalThis: any
 
@@ -34,6 +44,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest
+  private transformTranslator!: SceneTransformTranslator
 
   @exposeMethod
   async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
@@ -41,9 +52,10 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
     if (!manifest) return undefined
 
-    globalThis.unityInterface.SendBuilderProjectInfo(manifest.project.title, manifest.project.description)
+    globalThis.unityInterface.SendBuilderProjectInfo(manifest.project.title, manifest.project.description, false)
     this.builderManifest = manifest
-    const definition = fromBuildertoStateDefinitionFormat(manifest.scene)
+    this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
+    const definition = fromBuildertoStateDefinitionFormat(manifest.scene, this.transformTranslator)
     return serializeSceneState(definition)
   }
 
@@ -51,9 +63,13 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
     const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
     if (newProject) {
-      globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description)
+      globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description, false)
       this.builderManifest = newProject
-      const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
+      this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
+      const translatedManifest = fromBuildertoStateDefinitionFormat(
+        this.builderManifest.scene,
+        this.transformTranslator
+      )
       return serializeSceneState(translatedManifest)
     }
     return undefined
@@ -62,8 +78,9 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   @exposeMethod
   async createProjectWithCoords(coordinates: string): Promise<boolean> {
     const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
-    globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description)
+    globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description, true)
     this.builderManifest = newProject
+    this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
     return newProject ? true : false
   }
 
@@ -79,7 +96,8 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       let builderManifest = await toBuilderFromStateDefinitionFormat(
         sceneState,
         this.builderManifest,
-        this.builderApiManager
+        this.builderApiManager,
+        this.transformTranslator
       )
 
       // Update the manifest
@@ -93,29 +111,37 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async publishSceneState(sceneId: string, sceneName: string, sceneDescription: string, sceneScreenshot: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async saveProjectInfo(
+    sceneState: SerializedSceneState,
+    projectName: string,
+    projectDescription: string,
+    projectScreenshot: string
+  ): Promise<boolean> {
+    let result: boolean
+    try {
+      const thumbnailBlob: Blob = base64ToBlob(projectScreenshot, 'image/png')
+      await this.updateProjectDetails(sceneState, projectName, projectDescription, thumbnailBlob)
+      result = true
+    } catch (error) {
+      defaultLogger.error('Project details updating failed', error)
+      result = false
+    }
+
+    return result
+  }
+
+  @exposeMethod
+  async publishSceneState(
+    sceneId: string,
+    sceneName: string,
+    sceneDescription: string,
+    sceneScreenshot: string,
+    sceneState: SerializedSceneState
+  ): Promise<DeploymentResult> {
     let result: DeploymentResult
-
-    // Deserialize the scene state
-    const deserializedSceneState: SceneStateDefinition = deserializeSceneState(sceneState)
-
-    // Convert the scene state to builder scheme format
-    let builderManifest = await toBuilderFromStateDefinitionFormat(
-      deserializedSceneState,
-      this.builderManifest,
-      this.builderApiManager
-    )
-
-    // Update the project info
-    builderManifest.project.title = sceneName
-    builderManifest.project.description = sceneDescription
-
-    // Update the manifest
-    await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
-
-    // Update the thumbnail
+    // Update the project name, desc and thumbnail
     const thumbnailBlob: Blob = base64ToBlob(sceneScreenshot, 'image/png')
-    await this.builderApiManager.updateProjectThumbnail(builderManifest.project.id, thumbnailBlob, this.getIdentity())
+    await this.updateProjectDetails(sceneState, sceneName, sceneDescription, thumbnailBlob)
 
     // Convert to storable format
     const storableFormat = fromSerializedStateToStorableFormat(sceneState)
@@ -165,7 +191,12 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
             source: {
               origin: 'builder-in-world',
               version: 1,
-              projectId: this.builderManifest.project.id
+              projectId: this.builderManifest.project.id,
+              rotation: this.parcelIdentity.land.sceneJsonData.source?.rotation ?? 'east',
+              layout: this.parcelIdentity.land.sceneJsonData.source?.layout ?? getLayoutFromParcels(parcels),
+              point:
+                this.parcelIdentity.land.sceneJsonData.source?.point ??
+                this.parcelIdentity.land.sceneJsonData.scene.base
             } as SceneDeploymentSourceMetadata
           }
         })
@@ -225,6 +256,83 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     }
   }
 
+  @exposeMethod
+  async createProjectFromStateDefinition(): Promise<SerializedSceneState | undefined> {
+    const sceneJson = this.parcelIdentity.land.sceneJsonData
+    const sceneId: string = this.parcelIdentity.land.sceneId
+    const baseParcel: string = sceneJson.scene.base
+    const parcels: string[] = sceneJson.scene.parcels
+    const title: string | undefined = sceneJson.display?.title
+    const description: string | undefined = sceneJson.display?.description
+
+    try {
+      const serializedScene = await this.getStoredState(sceneId)
+      if (serializedScene) {
+        const identity = this.getIdentity()
+
+        // Create builder manifest from serialized scene
+        let builderManifest = await this.builderApiManager.builderManifestFromSerializedState(
+          uuid(),
+          uuid(),
+          baseParcel,
+          parcels,
+          title,
+          description,
+          identity.rawAddress,
+          serializedScene,
+          this.parcelIdentity.land.sceneJsonData.source?.layout
+        )
+
+        if (builderManifest) {
+          // Transform manifest components
+          this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
+
+          builderManifest.scene.components = Object.entries(builderManifest.scene.components).reduce(
+            (acc, [k, v]) => ({ ...acc, [k]: this.transformTranslator.transformBuilderComponent(v) }),
+            {}
+          )
+
+          // Notify renderer about the project information
+          globalThis.unityInterface.SendBuilderProjectInfo(
+            builderManifest.project.title,
+            builderManifest.project.description,
+            false
+          )
+
+          // Update/Create manifest in builder-server
+          this.builderManifest = builderManifest
+          this.builderApiManager
+            .updateProjectManifest(builderManifest, identity)
+            .catch((error) => defaultLogger.error(`Error updating project manifest ${error}`))
+
+          // Retrieve deployed thumbnail
+          const thumbnailHash: string | undefined = this.parcelIdentity.land.mappingsResponse.contents.find(
+            (pair) => pair.file === CONTENT_PATH.SCENE_THUMBNAIL
+          )?.hash
+          let thumbnail: string = ''
+          if (thumbnailHash) {
+            const contentClient = this.getContentClient()
+            const thumbnailBuffer = await contentClient.downloadContent(thumbnailHash, { attempts: 3 })
+            thumbnail = thumbnailBuffer.toString('base64')
+          }
+
+          // Publish scene
+          this.publishSceneState(
+            sceneId,
+            builderManifest.project.title,
+            builderManifest.project.description,
+            thumbnail,
+            serializedScene
+          ).catch((error) => defaultLogger.error(`Error publishing scene ${error}`))
+
+          return serializedScene
+        }
+      }
+    } catch (error) {
+      defaultLogger.error(`Failed creating project from state definition at coords ${baseParcel}`, error)
+    }
+  }
+
   private getIdentity(): ExplorerIdentity {
     const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
@@ -277,6 +385,34 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
     const result = await Promise.all(promises)
     return new Map(result)
+  }
+
+  private async updateProjectDetails(
+    sceneState: SerializedSceneState,
+    sceneName: string,
+    sceneDescription: string,
+    thumbnailBlob: Blob
+  ) {
+    // Deserialize the scene state
+    const deserializedSceneState: SceneStateDefinition = deserializeSceneState(sceneState)
+
+    // Convert the scene state to builder scheme format
+    let builderManifest = await toBuilderFromStateDefinitionFormat(
+      deserializedSceneState,
+      this.builderManifest,
+      this.builderApiManager,
+      this.transformTranslator
+    )
+
+    // Update the project info
+    builderManifest.project.title = sceneName
+    builderManifest.project.description = sceneDescription
+
+    // Update the manifest
+    await this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+
+    // Update the thumbnail
+    await this.builderApiManager.updateProjectThumbnail(builderManifest.project.id, thumbnailBlob, this.getIdentity())
   }
 }
 setAPIName('SceneStateStorageController', SceneStateStorageController)

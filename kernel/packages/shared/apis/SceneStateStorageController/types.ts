@@ -1,4 +1,4 @@
-import { ContentMapping } from '../../types'
+import { ContentMapping, SceneSource } from 'shared/types'
 
 export type AssetId = string
 
@@ -112,9 +112,4 @@ export type UnityColor = {
   a: number
 }
 
-export type SceneDeploymentSourceMetadata = {
-  version: number
-  origin: string
-  projectId?: string
-  isEmpty?: boolean
-}
+export type SceneDeploymentSourceMetadata = SceneSource

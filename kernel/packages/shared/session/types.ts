@@ -31,12 +31,6 @@ export enum LoginStage {
   COMPLETED = 'completed'
 }
 
-export enum SignUpStage {
-  AVATAR = 'avatar',
-  PASSPORT = 'passport',
-  TERMS = 'terms'
-}
-
 export type SessionState = {
   initialized: boolean
   userId: string | undefined

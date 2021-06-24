@@ -221,7 +221,8 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
         }
       }
     } catch (error) {
-      defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
+      // we throw here because it seems this is an unrecoverable error
+      throw new Error(`Error requesting profile for ${userId}: ${error}`)
     }
 
     if (currentId === userId) {
@@ -505,10 +506,17 @@ async function deploy(
   // Build the client
   const catalyst = new ContentClient(url, 'explorer-kernel-profile')
 
+  const entityWithoutNewFilesPayload = {
+    type: EntityType.PROFILE,
+    pointers: [identity.address],
+    hashesByKey: contentHashes,
+    metadata
+  }
+
   // Build entity and group all files
   const preparationData = await (contentFiles.size
     ? catalyst.buildEntity({ type: EntityType.PROFILE, pointers: [identity.address], files: contentFiles, metadata })
-    : catalyst.buildEntityWithoutNewFiles({ type: EntityType.PROFILE, pointers: [identity.address], hashesByKey: contentHashes, metadata }))
+    : catalyst.buildEntityWithoutNewFiles(entityWithoutNewFilesPayload))
   // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the deploy data

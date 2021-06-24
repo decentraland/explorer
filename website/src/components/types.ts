@@ -10,6 +10,7 @@ type KernelWebApp = {
   utils: {
     isBadWord: (word: string) => boolean
     filterInvalidNameCharacters: (name: string) => string
+    trackEvent: (eventName: string, eventData: any) => void
   }
 }
 
