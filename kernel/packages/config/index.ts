@@ -265,6 +265,16 @@ export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | nu
   return null
 }
 
+export function getDefaultAssetBundlesBaseUrl(): string {
+  const TLDDefault = getDefaultTLD()
+  return `https://content-assets-as-bundle.decentraland.${TLDDefault}`
+}
+
+export function getAssetBundlesBaseUrl(): string {
+  const TLDDefault = getDefaultTLD()
+  return qs.ASSET_BUNDLES_DOMAIN || `https://content-assets-as-bundle.decentraland.${TLDDefault}`
+}
+
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   const notToday = TLDDefault === 'today' ? 'org' : TLDDefault
@@ -273,13 +283,11 @@ export function getServerConfigurations() {
 
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
   const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
-  const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
 
   const QUESTS_SERVER_URL =
     qs.QUESTS_SERVER_URL ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
-    contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,

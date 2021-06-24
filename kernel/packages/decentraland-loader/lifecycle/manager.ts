@@ -8,7 +8,15 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 
-import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS, PIN_CATALYST } from 'config'
+import { ensureMetaConfigurationInitialized } from 'shared/meta'
+
+import {
+  DEBUG,
+  parcelLimits,
+  ENABLE_EMPTY_SCENES,
+  LOS,
+  getDefaultAssetBundlesBaseUrl
+} from 'config'
 
 import { ILand } from 'shared/types'
 import { getFetchContentServer, getCatalystServer, getFetchMetaContentService } from 'shared/dao/selectors'
@@ -110,6 +118,8 @@ let server: LifecycleManager
 export const getServer = () => server
 
 export async function initParcelSceneWorker() {
+  await ensureMetaConfigurationInitialized()
+
   server = new LifecycleManager(WebWorkerTransport(worker))
 
   globalThis.workerManager = server
@@ -118,6 +128,7 @@ export async function initParcelSceneWorker() {
 
   const state = globalThis.globalStore.getState()
   const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
+  const assetBundlesServer = state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
 
   // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
   //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.
@@ -128,11 +139,11 @@ export async function initParcelSceneWorker() {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
     catalystServer: DEBUG ? localServer : getCatalystServer(state),
     metaContentService: DEBUG ? localServer : getFetchMetaContentService(state),
-    contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
+    contentServerBundles: assetBundlesServer + '/',
     rootUrl: fullRootUrl,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
-    worldConfig: globalThis.globalStore.getState().meta.config.world
+    worldConfig: state.meta.config.world
   })
 
   return server
