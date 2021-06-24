@@ -167,7 +167,6 @@ namespace webApp {
 
         EnsureProfile(identity.address)
           .then((profile) => {
-            i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 

@@ -76,6 +76,7 @@ import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
+import Html from 'shared/Html'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -298,6 +299,8 @@ export class BrowserInterface {
   }
 
   public SendPassport(passport: { name: string; email: string }) {
+    Html.switchGameContainer(false)
+    unityInterface.DeactivateRendering()
     globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
     globalThis.globalStore.dispatch(signUp())
   }
