@@ -28,19 +28,6 @@ describe('Wearables Saga', () => {
       .run()
   })
 
-  it('When all owned wearables are requested, then they are returned successfully', () => {
-    const wearables = [wearable1]
-    return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: userId }, context))
-      .put(wearablesSuccess(wearables, context))
-      .provide([
-        [select(getFetchContentServer), serverUrl],
-        [select(baseCatalogsLoaded), true],
-        [select(getPlatformCatalog), {}],
-        [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
-      ])
-      .run()
-  })
-
   it('When base avatars are requested, then they are returned successfully', () => {
     const baseWearables = [wearable1]
     return expectSaga(handleWearablesRequest, wearablesRequest({ collectionIds: [BASE_AVATARS_COLLECTION_ID] }, context))
