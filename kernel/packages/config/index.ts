@@ -242,7 +242,6 @@ export function getExclusiveServer() {
   return 'https://wearable-api.decentraland.org/v2/collections'
 }
 
-export const ALL_WEARABLES = location.search.includes('ALL_WEARABLES') && getDefaultTLD() !== 'org'
 export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? qs.WITH_COLLECTIONS : undefined
 export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
 export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'

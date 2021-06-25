@@ -53,12 +53,7 @@ import { RootState } from 'shared/store/rootTypes'
 import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import {
-  ensureBaseCatalogs,
-  fetchInventoryItemsByAddress,
-  mapLegacyIdToUrn,
-  mapLegacyIdsToUrn
-} from 'shared/catalogs/sagas'
+import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
 import { getProfileType } from './getProfileType'
@@ -66,9 +61,6 @@ import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'sha
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
-import { WearableId } from 'shared/types'
-import { isFeatureEnabled } from 'shared/meta/selectors'
-import { FeatureFlags } from 'shared/meta/types'
 
 const toBuffer = require('blob-to-buffer')
 
@@ -257,19 +249,6 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   const passport: Profile = yield call(processServerProfile, userId, profile)
 
-  const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
-
-  if (!ALL_WEARABLES && WORLD_EXPLORER && !shouldUseV2) {
-    try {
-      const inventory: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
-      passport.avatar.wearables = passport.avatar.wearables.filter(
-        (wearableId) => wearableId.includes('base-avatars') || inventory.includes(wearableId)
-      )
-    } catch (e) {
-      defaultLogger.error(`Failed to fetch inventory to filter owned wearables`)
-    }
-  }
-
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
 }
 
@@ -317,24 +296,8 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
 export async function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
-  const shouldUseV2: boolean = WORLD_EXPLORER && isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
-  let profile: any
-  if (shouldUseV2) {
-    const client = new CatalystClient(catalystUrl, 'EXPLORER')
-    profile = await client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
-  } else {
-    const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
-    profile = await response.json()
-    const avatar = profile?.avatars[0]?.avatar
-    if (avatar?.bodyShape) {
-      avatar.bodyShape = mapLegacyIdToUrn(avatar.bodyShape)
-    }
-
-    if (avatar?.wearables) {
-      avatar.wearables = mapLegacyIdsToUrn(avatar.wearables)
-    }
-  }
-  return profile
+  const client = new CatalystClient(catalystUrl, 'EXPLORER')
+  return await client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {

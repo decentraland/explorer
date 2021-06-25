@@ -1,10 +1,9 @@
 import { expectSaga } from 'redux-saga-test-plan'
 import { call, select } from 'redux-saga/effects'
-import { BASE_AVATARS_COLLECTION_ID, fetchInventoryItemsByAddress, handleWearablesFailure, handleWearablesRequest, handleWearablesSuccess, informRequestFailure, sendWearablesCatalog, WRONG_FILTERS_ERROR } from 'shared/catalogs/sagas'
+import { BASE_AVATARS_COLLECTION_ID, handleWearablesFailure, handleWearablesRequest, handleWearablesSuccess, informRequestFailure, sendWearablesCatalog, WRONG_FILTERS_ERROR } from 'shared/catalogs/sagas'
 import { wearablesFailure, wearablesRequest, wearablesSuccess } from 'shared/catalogs/actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from 'shared/catalogs/selectors'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import { throwError } from 'redux-saga-test-plan/providers'
 import { getFetchContentServer } from 'shared/dao/selectors'
 
 const serverUrl = 'https://server.com'
@@ -38,7 +37,6 @@ describe('Wearables Saga', () => {
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
-        [call(fetchInventoryItemsByAddress, userId), Promise.resolve([wearableId1])],
       ])
       .run()
   })
@@ -64,21 +62,6 @@ describe('Wearables Saga', () => {
       .provide([
         [call(ensureRenderer), true],
         [call(sendWearablesCatalog, wearables, context), null],
-      ])
-      .run()
-  })
-
-  it('When wearables fetch fails to load, then the request fails', () => {
-    const errorMessage = 'Something failed'
-    const error = new Error(errorMessage)
-    return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: userId }, context))
-      .put(wearablesFailure(context, errorMessage))
-      .provide([
-        [select(getFetchContentServer), serverUrl],
-        [select(baseCatalogsLoaded), true],
-        [select(getPlatformCatalog), {}],
-        [select(getExclusiveCatalog), {}],
-        [call(fetchInventoryItemsByAddress, userId), throwError(error)],
       ])
       .run()
   })

@@ -465,7 +465,7 @@ export function* ensureBaseCatalogs() {
   }
 }
 
-export async function fetchInventoryItemsByAddress(address: string): Promise<WearableId[]> {
+async function fetchInventoryItemsByAddress(address: string): Promise<WearableId[]> {
   if (!WORLD_EXPLORER) {
     return []
   }
