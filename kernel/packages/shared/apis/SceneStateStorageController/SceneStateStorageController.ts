@@ -139,9 +139,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     sceneState: SerializedSceneState
   ): Promise<DeploymentResult> {
     let result: DeploymentResult
-    // Update the project name, desc and thumbnail
-    const thumbnailBlob: Blob = base64ToBlob(sceneScreenshot, 'image/png')
-    await this.updateProjectDetails(sceneState, sceneName, sceneDescription, thumbnailBlob)
 
     // Convert to storable format
     const storableFormat = fromSerializedStateToStorableFormat(sceneState)
@@ -151,6 +148,8 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       result = { ok: true }
     } else {
       try {
+        const thumbnailBlob: Blob = base64ToBlob(sceneScreenshot, 'image/png')
+
         // Fetch all asset metadata
         const assets = await this.getAllAssets(sceneState)
 
@@ -210,6 +209,10 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         const authChain = Authenticator.signPayload(identity, entityId)
 
         await contentClient.deployEntity({ files, entityId, authChain })
+
+        // Update the project name, desc and thumbnail. unlink coordinates from builder project
+        this.builderManifest.project.creation_coords = undefined
+        await this.updateProjectDetails(sceneState, sceneName, sceneDescription, thumbnailBlob)
 
         result = { ok: true }
       } catch (error) {
