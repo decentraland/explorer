@@ -51,7 +51,7 @@ import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
 import { logout, redirectToSignUp, signUp, signUpCancel, signupForm, signUpSetProfile } from 'shared/session/actions'
-import { getIdentity, hasWallet } from 'shared/session'
+import { authenticateWhenItsReady, getIdentity, hasWallet } from 'shared/session'
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
@@ -72,6 +72,7 @@ import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
+import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
@@ -285,6 +286,12 @@ export class BrowserInterface {
     } else {
       globalThis.globalStore.dispatch(signUpSetProfile(update))
     }
+  }
+
+  public SendAuthentication(data: { rendererAuthenticationType: string }) {
+    const providerType: ProviderType | null = Object.values(ProviderType).includes(data.rendererAuthenticationType as ProviderType) ? data.rendererAuthenticationType as ProviderType : null
+
+    authenticateWhenItsReady(providerType)
   }
 
   public SendPassport(passport: { name: string; email: string }) {
