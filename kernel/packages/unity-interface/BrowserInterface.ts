@@ -289,11 +289,7 @@ export class BrowserInterface {
   }
 
   public SendAuthentication(data: { rendererAuthenticationType: string }) {
-    let providerType: ProviderType | null = null
-
-    if (data.rendererAuthenticationType === 'wallet_connect') {
-      providerType = ProviderType.WALLET_CONNECT
-    }
+    const providerType: ProviderType | null = Object.values(ProviderType).includes(data.rendererAuthenticationType as ProviderType) ? data.rendererAuthenticationType as ProviderType : null
 
     authenticateWhenItsReady(providerType)
   }
