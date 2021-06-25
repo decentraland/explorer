@@ -50,7 +50,7 @@ export type BuilderProject = {
   cols: number
   created_at: string
   updated_at: string
-  creation_coords: string
+  creation_coords?: string
 }
 
 export type BuilderScene = {
