@@ -6,7 +6,6 @@ import {
   PIN_CATALYST,
   WSS_ENABLED,
   TEST_WEARABLES_OVERRIDE,
-  ALL_WEARABLES,
   WITH_FIXED_COLLECTIONS
 } from 'config'
 
@@ -379,12 +378,8 @@ function* fetchWearablesV1(filters: WearablesRequestFilters) {
       .filter((wearable) => !!wearable)
   } else if (filters.ownedByUser) {
     // Only owned wearables
-    if (ALL_WEARABLES) {
-      response = Object.values(exclusiveCatalog)
-    } else {
-      const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
-      response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
-    }
+    const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
+    response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
   } else if (filters.collectionIds) {
     // We assume that the only collection id used is base-avatars
     response = Object.values(platformCatalog)

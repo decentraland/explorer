@@ -293,7 +293,7 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
   }
 }
 
-async function profileServerRequest(userId: string) {
+export async function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
