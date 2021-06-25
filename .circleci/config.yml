@@ -190,6 +190,12 @@ jobs:
     steps:
       - <<: *attach_root
       - run:
+          name: "ssh known hosts"
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            ssh-keyscan -p 443 github.com >> ~/.ssh/known_hosts
+      - run:
           name: "installing"
           command: npm ci
       - run:
