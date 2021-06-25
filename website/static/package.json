@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "typescript": "^4.3.4",
+    "ts-node": "^10.0.0",
     "node-fetch": "^2.6.1",
     "child_process": "^1.0.2",
     "semver": "^7.3.5",
