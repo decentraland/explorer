@@ -62,7 +62,6 @@ export type CommsConfig = {
 }
 
 export enum FeatureFlags {
-  WEARABLES_V2 = 'wearables_v2',
   QUESTS = 'quests',
   BUILDER_IN_WORLD = 'builder_in_world'
 }
