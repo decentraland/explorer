@@ -7,14 +7,8 @@ declare const globalThis: any
 
 const rendererPackageJson = require('@dcl/unity-renderer/package.json')
 
-export type DclRenderer = typeof _TheRenderer
-
-export type LoadRendererResult = {
-  DclRenderer: DclRenderer
-  createUnityInstance: (canvas: HTMLCanvasElement, onProgress?: (progress: number) => void) => Promise<UnityGame>
-  baseUrl: string
-}
-
+// TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
+//       https://github.com/decentraland/unity-renderer/pull/689
 export type UnityGame = {
   Module: {
     /** this handler can be overwritten, return true to stop error propagation */
@@ -24,8 +18,54 @@ export type UnityGame = {
   SetFullscreen(): void
   Quit(): Promise<void>
 }
+// TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
+//       https://github.com/decentraland/unity-renderer/pull/689
+export type RendererOptions = {
+  canvas: HTMLCanvasElement
 
-async function injectRenderer(baseUrl: string, rendererVersion: string): Promise<LoadRendererResult> {
+  onProgress?: (progress: number) => void
+  onSuccess?: (unityInstance: any) => void
+  onError?: (error: any) => void
+  /** Legacy messaging system */
+  onMessageLegacy: (type: string, payload: string) => void
+  /** used to append a ?v={} to the URL. Useful to debug cache issues */
+  versionQueryParam?: string
+  /** baseUrl where all the assets are deployed */
+  baseUrl: string
+}
+
+// TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
+//       https://github.com/decentraland/unity-renderer/pull/689
+export type DecentralandRendererInstance = {
+  engineStartedFuture: Promise<{}>
+  originalUnity: UnityGame
+}
+
+export type DclRenderer = typeof _TheRenderer & {
+  // TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
+  //       https://github.com/decentraland/unity-renderer/pull/689
+  initializeWebRenderer(options: RendererOptions): Promise<DecentralandRendererInstance>
+}
+
+declare var DclRenderer: DclRenderer
+
+export type LoadRendererResult = {
+  DclRenderer: DclRenderer
+  createWebRenderer(canvas: HTMLCanvasElement): Promise<DecentralandRendererInstance>
+  baseUrl: string
+}
+
+/** The following options are common to all kinds of renderers, it abstracts
+ * what we need to implement in our end to support a renderer. WIP */
+export type CommonRendererOptions = {
+  onMessage: (type: string, payload: string) => void
+}
+
+async function injectRenderer(
+  baseUrl: string,
+  rendererVersion: string,
+  options: CommonRendererOptions
+): Promise<LoadRendererResult> {
   const scriptUrl = new URL('index.js?v=' + rendererVersion, baseUrl).toString()
   window['console'].log('Renderer: ' + scriptUrl)
 
@@ -38,42 +78,27 @@ async function injectRenderer(baseUrl: string, rendererVersion: string): Promise
     loading_time: performance.now() - startTime
   })
 
-  if (typeof globalThis.createUnityInstance === 'undefined') {
-    throw new Error('Error while loading createUnityInstance from ' + scriptUrl)
-  }
-
   if (typeof globalThis.DclRenderer === 'undefined') {
     throw new Error('Error while loading the renderer from ' + scriptUrl)
   }
 
-  const originalCreateUnityInstance: (
-    canvas: HTMLCanvasElement,
-    config: any,
-    onProgress?: (progress: number) => void
-  ) => Promise<UnityGame> = globalThis.createUnityInstance
+  if (typeof DclRenderer.initializeWebRenderer === 'undefined') {
+    throw new Error(
+      'This version of explorer is only compatible with renderers newer than https://github.com/decentraland/unity-renderer/pull/689'
+    )
+  }
 
   return {
     DclRenderer: globalThis.DclRenderer,
-    createUnityInstance: async (canvas, onProgress?) => {
-      const resolveWithBaseUrl = (file: string) => new URL(file + '?v=' + rendererVersion, baseUrl).toString()
-      const config = {
-        dataUrl: resolveWithBaseUrl('unity.data.unityweb'),
-        frameworkUrl: resolveWithBaseUrl('unity.framework.js.unityweb'),
-        codeUrl: resolveWithBaseUrl('unity.wasm.unityweb'),
-        streamingAssetsUrl: 'StreamingAssets',
-        companyName: 'Decentraland',
-        productName: 'Decentraland World Client',
-        productVersion: '0.1'
-      }
-
+    createWebRenderer: async (canvas) => {
       let didLoadUnity = false
 
       startTime = performance.now()
       trackEvent('unity_downloading_start', { renderer_version: rendererVersion })
 
-      return originalCreateUnityInstance(canvas, config, function (...args) {
+      function onProgress(progress: number) {
         // 0.9 is harcoded in unityLoader, it marks the download-complete event
-        if (0.9 === args[0] && !didLoadUnity) {
+        if (0.9 === progress && !didLoadUnity) {
           trackEvent('unity_downloading_end', {
             renderer_version: rendererVersion,
             loading_time: performance.now() - startTime
@@ -84,20 +109,27 @@ async function injectRenderer(baseUrl: string, rendererVersion: string): Promise
           didLoadUnity = true
         }
         // 1.0 marks the engine-initialized event
-        if (1.0 === args[0]) {
+        if (1.0 === progress) {
           trackEvent('unity_initializing_end', {
             renderer_version: rendererVersion,
             loading_time: performance.now() - startTime
           })
         }
-        if (onProgress) return onProgress.apply(null, args)
+      }
+
+      return DclRenderer.initializeWebRenderer({
+        baseUrl,
+        canvas,
+        versionQueryParam: rendererVersion,
+        onProgress,
+        onMessageLegacy: options.onMessage
       })
     },
     baseUrl
   }
 }
 
-async function loadDefaultRenderer(): Promise<LoadRendererResult> {
+async function loadDefaultRenderer(options: CommonRendererOptions): Promise<LoadRendererResult> {
   // PAY ATTENTION:
   //  Whenever we decide to not bundle the renderer anymore and have independant
   //  release cycles for the explorer, replace this whole function by the following commented line
@@ -115,17 +147,17 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   }
 
   // Load the embeded renderer from the artifacts root folder
-  return injectRenderer(getRendererArtifactsRoot(), rendererPackageJson.version)
+  return injectRenderer(getRendererArtifactsRoot(), rendererPackageJson.version, options)
 }
 
-async function loadRendererByBranch(branch: string): Promise<LoadRendererResult> {
+async function loadRendererByBranch(branch: string, options: CommonRendererOptions): Promise<LoadRendererResult> {
   const baseUrl = `https://renderer-artifacts.decentraland.org/branch/${branch}/`
-  return injectRenderer(baseUrl, performance.now().toString())
+  return injectRenderer(baseUrl, performance.now().toString(), options)
 }
 
-export async function loadUnity(urn?: string): Promise<LoadRendererResult> {
-  if (!urn) {
-    return loadDefaultRenderer()
+export async function loadUnity(urn: string | null, options: CommonRendererOptions): Promise<LoadRendererResult> {
+  if (urn === null) {
+    return loadDefaultRenderer(options)
   } else {
     const parsedUrn = await parseUrn(urn)
 
@@ -135,7 +167,7 @@ export async function loadUnity(urn?: string): Promise<LoadRendererResult> {
 
     // urn:decentraland:off-chain:renderer-artifacts:${branch}
     if (parsedUrn.type === 'off-chain' && parsedUrn.registry === 'renderer-artifacts') {
-      return loadRendererByBranch(parsedUrn.id)
+      return loadRendererByBranch(parsedUrn.id, options)
     }
 
     throw new Error('It was impossible to resolve a renderer for the URN "' + urn + '"')

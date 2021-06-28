@@ -31,7 +31,9 @@ function* initializeRenderer(action: InitializeRenderer) {
   yield put(waitingForRenderer())
 
   // start loading the renderer
-  const renderer: UnityGame = yield delegate(container, handleMessageFromEngine)
+  const renderer: UnityGame = yield delegate(container, {
+    onMessage: handleMessageFromEngine
+  })
 
   // wire the kernel to the renderer
   yield initializeEngine(renderer)
