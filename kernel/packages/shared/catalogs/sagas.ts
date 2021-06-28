@@ -164,7 +164,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
         ? yield call(fetchWearablesV2, filters)
         : yield call(fetchWearablesV1, filters)
 
-      const assetBundlesBaseUrl:string = getAssetBundlesBaseUrl() + '/'
+      const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl() + '/'
 
       const v2Wearables: WearableV2[] = response.map((wearable) => ({
         ...wearable,

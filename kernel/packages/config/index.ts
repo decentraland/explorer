@@ -4,10 +4,9 @@ import { getWorld } from '@dcl/schemas'
 import defaultLogger from 'shared/logger'
 import { StoreContainer } from 'shared/store/rootTypes'
 
-declare const globalThis:StoreContainer
+declare const globalThis: StoreContainer
 
 export const NETWORK_HZ = 10
-
 
 export namespace interactionLimits {
   /**
