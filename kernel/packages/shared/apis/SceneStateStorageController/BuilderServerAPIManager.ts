@@ -267,11 +267,7 @@ export class BuilderServerAPIManager {
   }
 
   private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
-    // TODO: We should delete this when we enter in production or we won't be able to set the project in production
-    if (getDefaultTLD() === 'org') {
-      defaultLogger.log('Project saving is disable in org for the moment!')
-      return undefined
-    }
+
     const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
