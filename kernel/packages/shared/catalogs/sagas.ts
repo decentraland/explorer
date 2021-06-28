@@ -3,11 +3,11 @@ import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 import {
   getServerConfigurations,
   getWearablesSafeURL,
-  PIN_CATALYST,
   WSS_ENABLED,
   TEST_WEARABLES_OVERRIDE,
   ALL_WEARABLES,
-  WITH_FIXED_COLLECTIONS
+  WITH_FIXED_COLLECTIONS,
+  getAssetBundlesBaseUrl
 } from 'config'
 
 import defaultLogger from 'shared/logger'
@@ -164,10 +164,12 @@ export function* handleWearablesRequest(action: WearablesRequest) {
         ? yield call(fetchWearablesV2, filters)
         : yield call(fetchWearablesV1, filters)
 
+      const assetBundlesBaseUrl:string = getAssetBundlesBaseUrl() + '/'
+
       const v2Wearables: WearableV2[] = response.map((wearable) => ({
         ...wearable,
         baseUrl: wearable.baseUrl ?? downloadUrl + '/contents/',
-        baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
+        baseUrlBundles: assetBundlesBaseUrl
       }))
 
       yield put(wearablesSuccess(v2Wearables, context))

@@ -10,14 +10,7 @@ import { resolveUrl } from 'atomicHelpers/parseUrl'
 
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
 
-import {
-  DEBUG,
-  parcelLimits,
-  ENABLE_EMPTY_SCENES,
-  LOS,
-  getDefaultAssetBundlesBaseUrl,
-  ASSET_BUNDLES_DOMAIN
-} from 'config'
+import { DEBUG, parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
 
 import { ILand } from 'shared/types'
 import { getFetchContentServer, getCatalystServer, getFetchMetaContentService } from 'shared/dao/selectors'
@@ -129,8 +122,6 @@ export async function initParcelSceneWorker() {
 
   const state = globalThis.globalStore.getState()
   const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
-  const assetBundlesServer =
-    ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
 
   // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
   //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.
@@ -141,7 +132,7 @@ export async function initParcelSceneWorker() {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
     catalystServer: DEBUG ? localServer : getCatalystServer(state),
     metaContentService: DEBUG ? localServer : getFetchMetaContentService(state),
-    contentServerBundles: assetBundlesServer + '/',
+    contentServerBundles: getAssetBundlesBaseUrl() + '/',
     rootUrl: fullRootUrl,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
