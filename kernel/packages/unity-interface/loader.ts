@@ -3,7 +3,7 @@ import { parseUrn } from '@dcl/urn-resolver'
 import type * as _TheRenderer from '@dcl/unity-renderer/index'
 import { trackEvent } from 'shared/analytics'
 
-declare const globalThis: any
+declare const globalThis: { DclRenderer?: DclRenderer; RENDERER_ARTIFACTS_ROOT?: string }
 
 const rendererPackageJson = require('@dcl/unity-renderer/package.json')
 
@@ -47,16 +47,16 @@ export type DclRenderer = typeof _TheRenderer & {
   initializeWebRenderer(options: RendererOptions): Promise<DecentralandRendererInstance>
 }
 
-declare var DclRenderer: DclRenderer
-
 export type LoadRendererResult = {
   DclRenderer: DclRenderer
-  createWebRenderer(canvas: HTMLCanvasElement): Promise<DecentralandRendererInstance>
   baseUrl: string
+  createWebRenderer(canvas: HTMLCanvasElement): Promise<DecentralandRendererInstance>
 }
 
-/** The following options are common to all kinds of renderers, it abstracts
- * what we need to implement in our end to support a renderer. WIP */
+/**
+ * The following options are common to all kinds of renderers, it abstracts
+ * what we need to implement in our end to support a renderer. WIP
+ */
 export type CommonRendererOptions = {
   onMessage: (type: string, payload: string) => void
 }
@@ -82,7 +82,7 @@ async function injectRenderer(
     throw new Error('Error while loading the renderer from ' + scriptUrl)
   }
 
-  if (typeof DclRenderer.initializeWebRenderer === 'undefined') {
+  if (typeof (globalThis.DclRenderer.initializeWebRenderer as any) === 'undefined') {
     throw new Error(
       'This version of explorer is only compatible with renderers newer than https://github.com/decentraland/unity-renderer/pull/689'
     )
@@ -117,7 +117,7 @@ async function injectRenderer(
         }
       }
 
-      return DclRenderer.initializeWebRenderer({
+      return globalThis.DclRenderer!.initializeWebRenderer({
         baseUrl,
         canvas,
         versionQueryParam: rendererVersion,
