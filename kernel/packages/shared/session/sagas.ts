@@ -72,7 +72,7 @@ import { ensureRealmInitialized } from '../dao/sagas'
 import { ensureBaseCatalogs } from '../catalogs/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
-import {ensureUnityInterface} from "../renderer";
+import { ensureUnityInterface } from "../renderer"
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
