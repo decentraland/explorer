@@ -1,14 +1,6 @@
 import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 
-import {
-  getServerConfigurations,
-  getWearablesSafeURL,
-  PIN_CATALYST,
-  WSS_ENABLED,
-  TEST_WEARABLES_OVERRIDE,
-  ALL_WEARABLES,
-  WITH_FIXED_COLLECTIONS
-} from 'config'
+import { getServerConfigurations, PIN_CATALYST, WSS_ENABLED, WITH_FIXED_COLLECTIONS } from 'config'
 
 import defaultLogger from 'shared/logger'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
@@ -24,11 +16,8 @@ import {
   WEARABLES_REQUEST,
   WEARABLES_SUCCESS
 } from './actions'
-import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
+import { baseCatalogsLoaded, getPlatformCatalog } from './selectors'
 import {
-  Wearable,
-  Collection,
-  WearableId,
   WearablesRequestFilters,
   WearableV2,
   BodyShapeRepresentationV2,
@@ -39,11 +28,8 @@ import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
 import { RendererInterfaces } from 'unity-interface/dcl'
 import { StoreContainer } from '../store/rootTypes'
-import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import { isFeatureEnabled } from 'shared/meta/selectors'
-import { FeatureFlags } from 'shared/meta/types'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
 import { fetchJson } from 'dcl-catalyst-commons'
 import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
@@ -75,68 +61,15 @@ export function* catalogsSaga(): any {
   yield takeEvery(WEARABLES_FAILURE, handleWearablesFailure)
 }
 
-function overrideBaseUrl(wearable: PartialWearableV2): PartialWearableV2 {
-  if (!TEST_WEARABLES_OVERRIDE) {
-    return {
-      ...wearable,
-      baseUrl: getWearablesSafeURL() + '/contents/'
-    }
-  } else {
-    return wearable
-  }
-}
-
 function* initialLoad() {
   yield call(ensureRealmInitialized)
 
-  const shouldUseV2 = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
-
-  if (WORLD_EXPLORER && !shouldUseV2) {
-    try {
-      const catalogUrl = getServerConfigurations().avatar.catalog
-
-      let collections: Collection[] | undefined
-      if (globalThis.location.search.match(/TEST_WEARABLES/)) {
-        collections = [{ id: 'all', wearables: (yield call(fetchCatalog, catalogUrl))[0] }]
-      } else {
-        const cached = yield retrieve('catalog')
-
-        if (cached) {
-          const version = yield headCatalog(catalogUrl)
-          if (cached.version === version) {
-            collections = cached.data
-          }
-        }
-
-        if (!collections) {
-          const response = yield call(fetchCatalog, catalogUrl)
-          collections = response[0]
-
-          const version = response[1]
-          if (version) {
-            yield store('catalog', { version, data: response[0] })
-          }
-        }
-      }
-      const catalog: PartialWearableV2[] = collections!
-        .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
-        .filter((wearable) => !!wearable)
-        .map(mapV1WearableIntoV2)
-        .map(overrideBaseUrl)
-      const baseAvatars = catalog.filter((_: PartialWearableV2) => _.data.tags && !_.data.tags.includes('exclusive'))
-      const baseExclusive = catalog.filter((_: PartialWearableV2) => _.data.tags && _.data.tags.includes('exclusive'))
-      yield put(catalogLoaded('base-avatars', baseAvatars))
-      yield put(catalogLoaded('base-exclusive', baseExclusive))
-    } catch (error) {
-      defaultLogger.error('[FATAL]: Could not load catalog!', error)
-    }
-  } else if (!WORLD_EXPLORER) {
+  if (!WORLD_EXPLORER) {
     let baseCatalog = []
     try {
       const catalogPath = '/default-profile/basecatalog.json'
       const response = yield fetch(getResourcesURL() + catalogPath)
       baseCatalog = yield response.json()
-      baseCatalog = baseCatalog.map(mapV1WearableIntoV2)
 
       if (WSS_ENABLED) {
         for (let item of baseCatalog) {
@@ -157,12 +90,12 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   const valid = areFiltersValid(filters)
   if (valid) {
     try {
-      const shouldUseV2 = WORLD_EXPLORER && (yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false))
+      const shouldUseLocalCatalog = WORLD_EXPLORER
       const downloadUrl = yield select(getFetchContentServer)
 
-      const response: PartialWearableV2[] = shouldUseV2
-        ? yield call(fetchWearablesV2, filters)
-        : yield call(fetchWearablesV1, filters)
+      const response: PartialWearableV2[] = shouldUseLocalCatalog
+        ? yield call(fetchWearablesFromCatalyst, filters)
+        : yield call(fetchWearablesFromLocalCatalog, filters)
 
       const v2Wearables: WearableV2[] = response.map((wearable) => ({
         ...wearable,
@@ -179,7 +112,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   }
 }
 
-function* fetchWearablesV2(filters: WearablesRequestFilters) {
+function* fetchWearablesFromCatalyst(filters: WearablesRequestFilters) {
   const catalystUrl = yield select(getCatalystServer)
   const client: CatalystClient = new CatalystClient(catalystUrl, 'EXPLORER')
 
@@ -268,41 +201,6 @@ function mapUnpublishedWearableIntoCatalystWearable(wearable: UnpublishedWearabl
   }
 }
 
-function mapV1WearableIntoV2(wearable: Wearable): PartialWearableV2 {
-  const {
-    category,
-    tags,
-    hides,
-    replaces,
-    representations,
-    id,
-    rarity,
-    i18n,
-    thumbnail,
-    baseUrl,
-    description
-  } = wearable
-  return {
-    id: mapLegacyIdToUrn(id),
-    rarity,
-    i18n,
-    thumbnail,
-    description,
-    data: {
-      category,
-      tags,
-      hides,
-      replaces,
-      representations: representations.map(({ bodyShapes, contents, ...other }) => ({
-        ...other,
-        bodyShapes: mapLegacyIdsToUrn(bodyShapes),
-        contents: contents.map(({ file, hash }) => ({ key: file, hash }))
-      }))
-    },
-    baseUrl
-  }
-}
-
 function mapCatalystRepresentationIntoV2(representation: any): BodyShapeRepresentationV2 {
   const { contents, ...other } = representation
 
@@ -341,50 +239,15 @@ function mapCatalystWearableIntoV2(v2Wearable: any): PartialWearableV2 {
   }
 }
 
-export function mapLegacyIdsToUrn(wearableIds: WearableId[]): WearableId[] {
-  return wearableIds.map(mapLegacyIdToUrn)
-}
-
-export function mapLegacyIdToUrn(wearableId: WearableId): WearableId {
-  if (!wearableId.startsWith('dcl://')) {
-    return wearableId
-  }
-  if (wearableId.startsWith('dcl://base-avatars')) {
-    const name = wearableId.substring(wearableId.lastIndexOf('/') + 1)
-    return `urn:decentraland:off-chain:base-avatars:${name}`
-  } else {
-    const [collectionName, wearableName] = wearableId.replace('dcl://', '').split('/')
-    return `urn:decentraland:ethereum:collections-v1:${collectionName}:${wearableName}`
-  }
-}
-
-function* fetchWearablesV1(filters: WearablesRequestFilters) {
+function* fetchWearablesFromLocalCatalog(filters: WearablesRequestFilters) {
   yield call(ensureBaseCatalogs)
 
   const platformCatalog = yield select(getPlatformCatalog)
-  const exclusiveCatalog = yield select(getExclusiveCatalog)
 
   let response: PartialWearableV2[]
   if (filters.wearableIds) {
     // Filtering by ids
-    response = filters.wearableIds
-      .map((wearableId) =>
-        wearableId === 'urn:decentraland:off-chain:base-avatars:SchoolShoes'
-          ? 'urn:decentraland:off-chain:base-avatars:Moccasin'
-          : wearableId
-      )
-      .map((wearableId) =>
-        wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
-      )
-      .filter((wearable) => !!wearable)
-  } else if (filters.ownedByUser) {
-    // Only owned wearables
-    if (ALL_WEARABLES) {
-      response = Object.values(exclusiveCatalog)
-    } else {
-      const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
-      response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
-    }
+    response = filters.wearableIds.map((wearableId) => platformCatalog[wearableId]).filter((wearable) => !!wearable)
   } else if (filters.collectionIds) {
     // We assume that the only collection id used is base-avatars
     response = Object.values(platformCatalog)
@@ -431,23 +294,6 @@ function areFiltersValid(filters: WearablesRequestFilters) {
   return filtersSet === 1 && ok
 }
 
-async function headCatalog(url: string) {
-  const request = await fetch(url, { method: 'HEAD' })
-  if (!request.ok) {
-    throw new Error('Catalog not found')
-  }
-  return request.headers.get('etag')
-}
-
-async function fetchCatalog(url: string) {
-  const request = await fetch(url)
-  if (!request.ok) {
-    throw new Error('Catalog not found')
-  }
-  const etag = request.headers.get('etag')
-  return [await request.json(), etag]
-}
-
 export function informRequestFailure(error: string, context: string | undefined) {
   globalThis.unityInterface.WearablesRequestFailed(error, context)
 }
@@ -457,23 +303,7 @@ export function sendWearablesCatalog(wearables: WearableV2[], context: string | 
 }
 
 export function* ensureBaseCatalogs() {
-  const shouldUseV2: boolean =
-    WORLD_EXPLORER && isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.WEARABLES_V2, false)
-
-  while (!shouldUseV2 && !(yield select(baseCatalogsLoaded))) {
+  while (!WORLD_EXPLORER && !(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
-}
-
-export async function fetchInventoryItemsByAddress(address: string): Promise<WearableId[]> {
-  if (!WORLD_EXPLORER) {
-    return []
-  }
-  const result = await fetch(`${getServerConfigurations().wearablesApi}/addresses/${address}/wearables?fields=id`)
-  if (!result.ok) {
-    throw new Error('Unable to fetch inventory for address ' + address)
-  }
-  const inventory: { id: string }[] = await result.json()
-
-  return mapLegacyIdsToUrn(inventory.map((wearable) => wearable.id))
 }

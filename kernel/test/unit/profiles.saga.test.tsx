@@ -12,7 +12,6 @@ import { PROFILE_SUCCESS } from '../../packages/shared/profiles/actions'
 import { isRealmInitialized, getResizeService } from '../../packages/shared/dao/selectors'
 import { getServerConfigurations } from 'config'
 import { sleep } from 'atomicHelpers/sleep'
-import { fetchInventoryItemsByAddress } from 'shared/catalogs/sagas'
 
 const profile = { data: 'profile' }
 
@@ -35,7 +34,6 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(isRealmInitialized), true],
         [call(profileServerRequest, 'user|1'), delayedProfile],
-        [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [select(getCurrentUserId), 'myid'],
         [call(processServerProfile, 'user|1', profile), 'passport']
       ])
@@ -58,9 +56,7 @@ describe('fetchProfile behavior', () => {
         [select(getCurrentUserId), 'myid'],
         [call(processServerProfile, 'user|1', profile), 'passport1'],
         [call(profileServerRequest, 'user|2'), delayedProfile],
-        [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [call(processServerProfile, 'user|2', profile), 'passport2'],
-        [call(fetchInventoryItemsByAddress, 'user|2'), []],
       ])
       .run()
   })
@@ -72,7 +68,6 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(getCurrentUserId), 'myid'],
         [select(getResizeService), 'http://fake/resizeurl'],
-        [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [matchers.call.fn(fetch), dynamic(() => ({ ok: true }))],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
         [call(processServerProfile, 'user|1', profile1), dynamic((effect) => effect.args[1])]
@@ -99,7 +94,6 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(getCurrentUserId), 'myid'],
         [select(getResizeService), 'http://fake/resizeurl'],
-        [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [matchers.call.fn(fetch), dynamic(() => ({ ok: true }))],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
         [call(processServerProfile, 'user|1', profile1), dynamic((effect) => effect.args[1])]
@@ -126,7 +120,6 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(getCurrentUserId), 'myid'],
         [select(getResizeService), 'http://fake/resizeurl'],
-        [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [matchers.call.fn(fetch), dynamic((call) => ({ ok: !call.args[0].startsWith('http://fake/resizeurl') }))],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
         [call(processServerProfile, 'user|1', profile1), dynamic((effect) => effect.args[1])]

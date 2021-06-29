@@ -3,7 +3,7 @@ import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, select, takeEvery } from 'redux-saga/effects'
 
-import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL, ALL_WEARABLES } from 'config'
+import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
 
 import defaultLogger from 'shared/logger'
 import {
@@ -53,12 +53,6 @@ import { RootState } from 'shared/store/rootTypes'
 import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import {
-  ensureBaseCatalogs,
-  fetchInventoryItemsByAddress,
-  mapLegacyIdToUrn,
-  mapLegacyIdsToUrn
-} from 'shared/catalogs/sagas'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
 import { getProfileType } from './getProfileType'
@@ -66,9 +60,6 @@ import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'sha
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
-import { WearableId } from 'shared/types'
-import { isFeatureEnabled } from 'shared/meta/selectors'
-import { FeatureFlags } from 'shared/meta/types'
 
 const toBuffer = require('blob-to-buffer')
 
@@ -257,19 +248,6 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   const passport: Profile = yield call(processServerProfile, userId, profile)
 
-  const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
-
-  if (!ALL_WEARABLES && WORLD_EXPLORER && !shouldUseV2) {
-    try {
-      const inventory: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
-      passport.avatar.wearables = passport.avatar.wearables.filter(
-        (wearableId) => wearableId.includes('base-avatars') || inventory.includes(wearableId)
-      )
-    } catch (e) {
-      defaultLogger.error(`Failed to fetch inventory to filter owned wearables`)
-    }
-  }
-
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
 }
 
@@ -314,27 +292,11 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
   }
 }
 
-export async function profileServerRequest(userId: string) {
+export function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
-  const shouldUseV2: boolean = WORLD_EXPLORER && isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
-  let profile: any
-  if (shouldUseV2) {
-    const client = new CatalystClient(catalystUrl, 'EXPLORER')
-    profile = await client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
-  } else {
-    const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
-    profile = await response.json()
-    const avatar = profile?.avatars[0]?.avatar
-    if (avatar?.bodyShape) {
-      avatar.bodyShape = mapLegacyIdToUrn(avatar.bodyShape)
-    }
-
-    if (avatar?.wearables) {
-      avatar.wearables = mapLegacyIdsToUrn(avatar.wearables)
-    }
-  }
-  return profile
+  const client = new CatalystClient(catalystUrl, 'EXPLORER')
+  return client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {
@@ -366,7 +328,6 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   }
 
   yield call(ensureRenderer)
-  yield call(ensureBaseCatalogs)
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(sendLoadProfile, profile)
   } else {
@@ -380,8 +341,6 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
 }
 
 function* sendLoadProfile(profile: Profile) {
-  yield call(ensureBaseCatalogs)
-
   const identity = yield select(getCurrentIdentity)
   const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
