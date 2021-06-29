@@ -13,7 +13,7 @@ import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { DEBUG, parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
 
 import { ILand } from 'shared/types'
-import { getFetchContentServer, getCatalystServer, getFetchMetaContentService } from 'shared/dao/selectors'
+import { getFetchContentServer, getCatalystServer } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
 import { StoreContainer } from 'shared/store/rootTypes'
 
@@ -131,7 +131,6 @@ export async function initParcelSceneWorker() {
   server.notify('Lifecycle.initialize', {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
     catalystServer: DEBUG ? localServer : getCatalystServer(state),
-    metaContentService: DEBUG ? localServer : getFetchMetaContentService(state),
     contentServerBundles: getAssetBundlesBaseUrl() + '/',
     rootUrl: fullRootUrl,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,

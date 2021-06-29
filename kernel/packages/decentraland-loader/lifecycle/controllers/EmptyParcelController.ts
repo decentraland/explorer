@@ -12,7 +12,6 @@ export class EmptyParcelController {
     public options: {
       contentServer: string
       catalystServer: string
-      metaContentService: string
       contentServerBundles: string
       worldConfig: WorldConfig
       rootUrl: string
