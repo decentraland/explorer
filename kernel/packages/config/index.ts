@@ -1,7 +1,6 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
 import { getWorld } from '@dcl/schemas'
-import defaultLogger from 'shared/logger'
 import { StoreContainer } from 'shared/store/rootTypes'
 
 declare const globalThis: StoreContainer
@@ -272,8 +271,6 @@ export function getAssetBundlesBaseUrl(): string {
   const state = globalThis.globalStore.getState()
   const result =
     ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
-
-  defaultLogger.log(`getAssetBundlesBaseUrl = ${result}`)
   return result
 }
 
