@@ -7,7 +7,6 @@ import "./WalletSelector.css";
 
 export interface WalletSelectorProps {
   open: boolean;
-  loading: boolean;
   availableProviders: ProviderType[];
   onLogin: (provider: ProviderType | null) => void;
   onCancel: () => void;
@@ -91,7 +90,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
           ))}
         </div>}
       </div>
-      {!loading && <a className="guestSelector" href="#guest" onClick={handleGuestLogin}>
+      {<a className="guestSelector" href="#guest" onClick={handleGuestLogin}>
         Play as Guest
       </a>}
     </Modal>
