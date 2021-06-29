@@ -2,7 +2,6 @@ import { analizeColorPart, stripAlpha } from './analizeColorPart'
 import { isValidBodyShape } from './isValidBodyShape'
 import { Profile, Snapshots } from '../types'
 import { WearableId } from 'decentraland-ecs/src'
-import { mapLegacyIdsToUrn, mapLegacyIdToUrn } from 'shared/catalogs/sagas'
 
 export function ensureServerFormat(profile: Profile): ServerFormatProfile {
   const { avatar } = profile
@@ -26,13 +25,26 @@ export function ensureServerFormat(profile: Profile): ServerFormatProfile {
   return {
     ...profile,
     avatar: {
-      bodyShape: mapLegacyIdToUrn(avatar.bodyShape),
+      bodyShape: mapLegacyIdToUrn(avatar.bodyShape), // These mappings from legacy id are here just in case they still have the legacy id in local storage
       snapshots: avatar.snapshots,
       eyes: { color: eyes },
       hair: { color: hair },
       skin: { color: skin },
-      wearables: mapLegacyIdsToUrn(avatar.wearables)
+      wearables: avatar.wearables.map(mapLegacyIdToUrn)
     }
+  }
+}
+
+function mapLegacyIdToUrn(wearableId: WearableId): WearableId {
+  if (!wearableId.startsWith('dcl://')) {
+    return wearableId
+  }
+  if (wearableId.startsWith('dcl://base-avatars')) {
+    const name = wearableId.substring(wearableId.lastIndexOf('/') + 1)
+    return `urn:decentraland:off-chain:base-avatars:${name}`
+  } else {
+    const [collectionName, wearableName] = wearableId.replace('dcl://', '').split('/')
+    return `urn:decentraland:ethereum:collections-v1:${collectionName}:${wearableName}`
   }
 }
 

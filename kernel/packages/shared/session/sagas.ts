@@ -69,7 +69,6 @@ import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile
 import { unityInterface } from '../../unity-interface/UnityInterface'
 import { getSignUpIdentity, getSignUpProfile } from './selectors'
 import { ensureRealmInitialized } from '../dao/sagas'
-import { ensureBaseCatalogs } from '../catalogs/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
 
@@ -208,7 +207,6 @@ function* showAvatarEditor() {
 
   const profile: Partial<Profile> = yield select(getSignUpProfile)
 
-  yield ensureBaseCatalogs()
   // TODO: Fix as any
   unityInterface.LoadProfile(profile as any)
   unityInterface.ShowAvatarEditorInSignIn()

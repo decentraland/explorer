@@ -5,7 +5,6 @@ export const getUpdateProfileServer = (store: RootDaoState) => store.dao.updateC
 
 export const getFetchContentServer = (store: RootDaoState) => store.dao.fetchContentServer
 export const getCatalystServer = (store: RootDaoState) => store.dao.catalystServer
-export const getFetchMetaContentService = (store: RootDaoState) => store.dao.catalystServer + '/lambdas/contentv2'
 export const getResizeService = (store: RootDaoState) => store.dao.resizeService
 
 export const getCommsServer = (store: RootDaoState) => store.dao.commsServer
