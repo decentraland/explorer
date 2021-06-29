@@ -16,7 +16,6 @@ export interface WalletSelectorProps {
 
 export const WalletSelector: React.FC<WalletSelectorProps> = ({
   open,
-  loading,
   availableProviders,
   onLogin,
   onCancel,
@@ -82,8 +81,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
     >
       <div className="walletSelector">
         <h2 className="walletSelectorTitle">Sign In or Create an Account</h2>
-        {loading && <div className="walletButtonContainer"><Spinner /></div>}
-        {!loading && <div className="walletButtonContainer">
+        {<div className="walletButtonContainer">
           {wallets.map(wallet => (
             <WalletButton
               key={wallet}

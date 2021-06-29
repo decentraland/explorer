@@ -72,6 +72,7 @@ import { ensureRealmInitialized } from '../dao/sagas'
 import { ensureBaseCatalogs } from '../catalogs/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
+import {ensureUnityInterface} from "../renderer";
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -208,6 +209,7 @@ function* showAvatarEditor() {
 
   const profile: Partial<Profile> = yield select(getSignUpProfile)
 
+  yield ensureUnityInterface()
   yield ensureBaseCatalogs()
   // TODO: Fix as any
   unityInterface.LoadProfile(profile as any)

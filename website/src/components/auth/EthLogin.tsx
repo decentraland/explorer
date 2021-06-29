@@ -11,6 +11,7 @@ export interface EthLoginProps {
   loading: boolean
   availableProviders: ProviderType[]
   onLogin: (provider: ProviderType | null) => void
+  signing: boolean
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
@@ -38,8 +39,8 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
       <LoginHeader />
       <Avatars />
       <div id="eth-login-confirmation-wrapper">
-        {isLoading && <Spinner />}
-        {!isLoading && (
+        {isLoading && props.signing && <Spinner />}
+        {!props.signing && (
           <React.Fragment>
             <button className="eth-login-confirm-button" onClick={handlePlay}>
               Play
@@ -52,7 +53,6 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
       </div>
       <WalletSelector
         open={showWalletSelector}
-        loading={props.loading}
         onLogin={handleLogin}
         availableProviders={props.availableProviders}
         onCancel={() => setShowWalletSelector(false)}
