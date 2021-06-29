@@ -3,10 +3,12 @@ import { ProviderType } from "decentraland-connect";
 import { isCucumberProvider, isDapperProvider } from "decentraland-dapps/dist/lib/eth";
 import { Modal } from "../../common/Modal";
 import { WalletButton, WalletButtonLogo } from "./WalletButton";
+import { Spinner } from "../../common/Spinner";
 import "./WalletSelector.css";
 
 export interface WalletSelectorProps {
   open: boolean;
+  loading: boolean;
   availableProviders: ProviderType[];
   onLogin: (provider: ProviderType | null) => void;
   onCancel: () => void;
@@ -14,6 +16,7 @@ export interface WalletSelectorProps {
 
 export const WalletSelector: React.FC<WalletSelectorProps> = ({
   open,
+  loading,
   availableProviders,
   onLogin,
   onCancel,
@@ -79,7 +82,8 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
     >
       <div className="walletSelector">
         <h2 className="walletSelectorTitle">Sign In or Create an Account</h2>
-        {<div className="walletButtonContainer">
+        {loading && <div className="walletButtonContainer"><Spinner /></div>}
+        {!loading && <div className="walletButtonContainer">
           {wallets.map(wallet => (
             <WalletButton
               key={wallet}
@@ -90,7 +94,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
           ))}
         </div>}
       </div>
-      {<a className="guestSelector" href="#guest" onClick={handleGuestLogin}>
+      {!loading && <a className="guestSelector" href="#guest" onClick={handleGuestLogin}>
         Play as Guest
       </a>}
     </Modal>

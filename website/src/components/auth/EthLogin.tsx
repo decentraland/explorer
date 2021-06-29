@@ -53,6 +53,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
       </div>
       <WalletSelector
         open={showWalletSelector}
+        loading={props.signing}
         onLogin={handleLogin}
         availableProviders={props.availableProviders}
         onCancel={() => setShowWalletSelector(false)}
