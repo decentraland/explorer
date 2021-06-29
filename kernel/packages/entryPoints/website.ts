@@ -190,8 +190,6 @@ namespace webApp {
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
 
-    await ensureMetaConfigurationInitialized()
-
     i.SetRenderProfile(renderProfile)
 
     if (isForeground()) {

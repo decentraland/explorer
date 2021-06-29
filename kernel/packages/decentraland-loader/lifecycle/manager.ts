@@ -8,7 +8,9 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 
-import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS, PIN_CATALYST } from 'config'
+import { ensureMetaConfigurationInitialized } from 'shared/meta'
+
+import { DEBUG, parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
 
 import { ILand } from 'shared/types'
 import { getFetchContentServer, getCatalystServer } from 'shared/dao/selectors'
@@ -110,6 +112,8 @@ let server: LifecycleManager
 export const getServer = () => server
 
 export async function initParcelSceneWorker() {
+  await ensureMetaConfigurationInitialized()
+
   server = new LifecycleManager(WebWorkerTransport(worker))
 
   globalThis.workerManager = server
@@ -127,11 +131,11 @@ export async function initParcelSceneWorker() {
   server.notify('Lifecycle.initialize', {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
     catalystServer: DEBUG ? localServer : getCatalystServer(state),
-    contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
+    contentServerBundles: getAssetBundlesBaseUrl() + '/',
     rootUrl: fullRootUrl,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
-    worldConfig: globalThis.globalStore.getState().meta.config.world
+    worldConfig: state.meta.config.world
   })
 
   return server

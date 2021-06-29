@@ -1,6 +1,6 @@
 import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 
-import { getServerConfigurations, PIN_CATALYST, WSS_ENABLED, WITH_FIXED_COLLECTIONS } from 'config'
+import { WSS_ENABLED, WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl } from 'config'
 
 import defaultLogger from 'shared/logger'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
@@ -97,10 +97,12 @@ export function* handleWearablesRequest(action: WearablesRequest) {
         ? yield call(fetchWearablesFromCatalyst, filters)
         : yield call(fetchWearablesFromLocalCatalog, filters)
 
+      const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl() + '/'
+
       const v2Wearables: WearableV2[] = response.map((wearable) => ({
         ...wearable,
         baseUrl: wearable.baseUrl ?? downloadUrl + '/contents/',
-        baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
+        baseUrlBundles: assetBundlesBaseUrl
       }))
 
       yield put(wearablesSuccess(v2Wearables, context))

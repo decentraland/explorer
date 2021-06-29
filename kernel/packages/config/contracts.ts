@@ -77,6 +77,7 @@ export const contracts = {
     'ClaimWearableForFree': '0x8dd61d1a67bce13a87e20a76c6f164c388a726d6',
     'Moonshot2020Collection': '0x6a99abebb48819d2abe92c5e4dc4f48dc09a3ee8',
     'DAOAgent': '0x9A6ebE7E2a7722F8200d0ffB63a1F6406A0d7dce',
+    'DAOEstateForwarder': '0x34ed9e73930290cec0cfe601809255ec1313ea18',
     'LANDMiniMeToken': '0x20dfe381ca71ade2582094cf569a8cb020af5ab1',
     'EstateMiniMeToken': '0x8568f23f343694650370fe5e254b55bfb704a6c7',
     'BuyAdapter': '0xf4fbd84193f9aaf9779dedbb415a806933eb1c95',
