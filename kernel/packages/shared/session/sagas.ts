@@ -184,6 +184,7 @@ function isGuestWithProfile(session: StoredSession) {
 }
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
+  yield ensureUnityInterface()
   yield put(signUpSetIsSignUp(true))
   let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
@@ -208,7 +209,6 @@ function* showAvatarEditor() {
 
   const profile: Partial<Profile> = yield select(getSignUpProfile)
 
-  yield ensureUnityInterface()
   // TODO: Fix as any
   unityInterface.LoadProfile(profile as any)
   unityInterface.ShowAvatarEditorInSignIn()
