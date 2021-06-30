@@ -1,7 +1,7 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
 import { SortedLimitedQueue } from 'atomicHelpers/SortedLimitedQueue'
 import defaultLogger from 'shared/logger'
-import { VOICE_CHAT_SAMPLE_RATE, OPUS_FRAME_SIZE_MS } from './constants'
+import { VOICE_CHAT_SAMPLE_RATE, OPUS_FRAME_SIZE_MS, getVoiceChatCDNRootUrl } from './constants'
 import { parse, write } from 'sdp-transform'
 import { EncodedFrame, InputWorkletRequestTopic, OutputWorkletRequestTopic } from './types'
 
@@ -53,7 +53,7 @@ export type VoiceSpatialParams = {
   orientation: [number, number, number]
 }
 
-const worlketModulesUrl = 'voice-chat-codec/audioWorkletProcessors.js'
+const worlketModulesUrl = getVoiceChatCDNRootUrl() + '/audioWorkletProcessors.js'
 
 type AudioContextWithInitPromise = [AudioContext, Promise<any>]
 

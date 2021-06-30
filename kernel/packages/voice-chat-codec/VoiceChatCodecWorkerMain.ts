@@ -1,7 +1,8 @@
 import { ResponseTopic, RequestTopic, VoiceChatWorkerRequest } from './types'
 import defaultLogger from 'shared/logger'
+import { getVoiceChatCDNRootUrl } from './constants'
 
-const workerUrl = 'voice-chat-codec/worker.js'
+const workerUrl = getVoiceChatCDNRootUrl() + '/worker.js'
 
 type EncodeListener = (encoded: Uint8Array) => any
 type DecodeListener = (samples: Float32Array) => any
