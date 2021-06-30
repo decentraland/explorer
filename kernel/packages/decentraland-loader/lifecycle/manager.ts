@@ -136,8 +136,6 @@ export async function initParcelSceneWorker() {
 
   const fullRootUrl = getCDNRootUrl()
 
-  console.log(fullRootUrl)
-
   server.notify('Lifecycle.initialize', {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
     catalystServer: DEBUG ? localServer : getCatalystServer(state),
