@@ -71,6 +71,7 @@ import { getSignUpIdentity, getSignUpProfile } from './selectors'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
+import { ensureUnityInterface } from "../renderer"
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -183,6 +184,7 @@ function isGuestWithProfile(session: StoredSession) {
 }
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
+  yield ensureUnityInterface()
   yield put(signUpSetIsSignUp(true))
   let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)

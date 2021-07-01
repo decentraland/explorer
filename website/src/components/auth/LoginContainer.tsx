@@ -68,9 +68,9 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
             <Container className="eth-login-popup">
               {full && (
                 <EthLogin
-                  loading={loading || props.signing}
                   availableProviders={props.availableProviders}
                   onLogin={props.onLogin}
+                  signing={props.signing}
                 />
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && <EthConnectAdvice onLogin={props.onLogin} />}
