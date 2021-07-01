@@ -8,14 +8,13 @@ import { track } from "../../utils"
 import "./EthLogin.css"
 
 export interface EthLoginProps {
-  loading: boolean
   availableProviders: ProviderType[]
   onLogin: (provider: ProviderType | null) => void
+  signing: boolean
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
-  const [showWalletSelector, setShowWalletSelector] = useState(false)
-  const isLoading = props.loading || showWalletSelector
+  const [showWalletSelector, setShowWalletSelector] = useState(false)  
 
   function handlePlay() {
     track('open_login_popup')
@@ -38,8 +37,8 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
       <LoginHeader />
       <Avatars />
       <div id="eth-login-confirmation-wrapper">
-        {isLoading && <Spinner />}
-        {!isLoading && (
+        {props.signing && <Spinner />}
+        {!props.signing && (
           <React.Fragment>
             <button className="eth-login-confirm-button" onClick={handlePlay}>
               Play
@@ -52,7 +51,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
       </div>
       <WalletSelector
         open={showWalletSelector}
-        loading={props.loading}
+        loading={props.signing}
         onLogin={handleLogin}
         availableProviders={props.availableProviders}
         onCancel={() => setShowWalletSelector(false)}
