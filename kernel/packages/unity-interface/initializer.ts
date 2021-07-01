@@ -35,10 +35,6 @@ async function loadInjectedUnityDelegate(container: HTMLElement, options: Common
   preventUnityKeyboardLock()
 
   const canvas = document.createElement('canvas')
-  // THIS IS COMMENTED BECAUSE Unity2020 already does this for us
-  // 1 canvas.addEventListener('contextmenu', function (e) {
-  // 1   e.preventDefault()
-  // 1 })
   canvas.id = '#canvas'
   container.appendChild(canvas)
 
