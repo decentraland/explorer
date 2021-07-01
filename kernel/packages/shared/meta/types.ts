@@ -9,6 +9,7 @@ export type MetaConfiguration = {
   explorer: {
     minBuildNumber: number
     useUnityIndexedDbCache: boolean
+    assetBundlesFetchUrl: string
   }
   servers: {
     added: string[]
