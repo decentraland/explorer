@@ -7,50 +7,12 @@ declare const globalThis: { DclRenderer?: DclRenderer; RENDERER_ARTIFACTS_ROOT?:
 
 const rendererPackageJson = require('@dcl/unity-renderer/package.json')
 
-// TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
-//       https://github.com/decentraland/unity-renderer/pull/689
-export type UnityGame = {
-  Module: {
-    /** this handler can be overwritten, return true to stop error propagation */
-    errorHandler?: (message: string, filename: string, lineno: number) => boolean
-  }
-  SendMessage(object: string, method: string, args: number | string): void
-  SetFullscreen(): void
-  Quit(): Promise<void>
-}
-// TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
-//       https://github.com/decentraland/unity-renderer/pull/689
-export type RendererOptions = {
-  canvas: HTMLCanvasElement
-
-  onProgress?: (progress: number) => void
-  onSuccess?: (unityInstance: any) => void
-  onError?: (error: any) => void
-  /** Legacy messaging system */
-  onMessageLegacy: (type: string, payload: string) => void
-  /** used to append a ?v={} to the URL. Useful to debug cache issues */
-  versionQueryParam?: string
-  /** baseUrl where all the assets are deployed */
-  baseUrl: string
-}
-
-// TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
-//       https://github.com/decentraland/unity-renderer/pull/689
-export type DecentralandRendererInstance = {
-  engineStartedFuture: Promise<{}>
-  originalUnity: UnityGame
-}
-
-export type DclRenderer = typeof _TheRenderer & {
-  // TODO: remove this after PR is merged and the UnityGame type migrates to @dcl/unity-renderer
-  //       https://github.com/decentraland/unity-renderer/pull/689
-  initializeWebRenderer(options: RendererOptions): Promise<DecentralandRendererInstance>
-}
+export type DclRenderer = typeof _TheRenderer
 
 export type LoadRendererResult = {
   DclRenderer: DclRenderer
   baseUrl: string
-  createWebRenderer(canvas: HTMLCanvasElement): Promise<DecentralandRendererInstance>
+  createWebRenderer(canvas: HTMLCanvasElement): Promise<_TheRenderer.DecentralandRendererInstance>
 }
 
 /**
