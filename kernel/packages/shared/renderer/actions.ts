@@ -1,6 +1,7 @@
 import { action } from 'typesafe-actions'
 
-import type { CommonRendererOptions, UnityGame } from 'unity-interface/loader'
+import type { CommonRendererOptions } from 'unity-interface/loader'
+import type { UnityGame } from '@dcl/unity-renderer/index'
 
 import { RENDERER_INITIALIZED, PARCEL_LOADING_STARTED, ENGINE_STARTED } from './types'
 

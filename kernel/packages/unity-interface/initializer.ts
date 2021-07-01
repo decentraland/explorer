@@ -5,7 +5,8 @@ import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
 import { initializeRenderer } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
-import { CommonRendererOptions, loadUnity, UnityGame } from './loader'
+import { CommonRendererOptions, loadUnity } from './loader'
+import type { UnityGame } from '@dcl/unity-renderer/index'
 
 import { initializeUnityEditor } from './wsEditorAdapter'
 import {
