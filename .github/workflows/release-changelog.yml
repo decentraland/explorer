@@ -1,0 +1,44 @@
+name: Release Changelog Notification
+
+on:
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - 'release-*'
+      - 'release'
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Get changelog
+        id: get-comment-body
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          content="$(./.github/scripts/dump-changelog.sh)"
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo ::set-output name=changelog::${content}
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Changelog
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            # Changelog
+
+            ${{ steps.get-comment-body.outputs.changelog }}
+          edit-mode: replace
