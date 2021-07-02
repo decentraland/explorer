@@ -2,10 +2,10 @@ name: Release Changelog Notification
 
 on:
   pull_request:
-    types: [ opened, synchronize ]
+    types: [opened, synchronize]
     branches:
-      - 'release-*'
-      - 'release'
+      - "release-*"
+      - "release"
 
 jobs:
   comment:
