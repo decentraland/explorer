@@ -13,6 +13,7 @@ import {
   experienceStarted,
   FAILED_FETCHING_UNITY,
   NOT_INVITED,
+  NO_WEBGL_COULD_BE_CREATED,
   setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
@@ -45,6 +46,7 @@ import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/na
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 import { isWaitingTutorial } from 'shared/loading/selectors'
 import { ensureUnityInterface } from 'shared/renderer'
+import { isCompatibleBrowser } from 'shared/comms/browser';
 
 const logger = createLogger('website.ts: ')
 
@@ -72,6 +74,11 @@ namespace webApp {
   }
 
   export async function initWeb(container: HTMLElement) {
+    if (!isCompatibleBrowser()) {
+      BringDownClientAndShowError(NO_WEBGL_COULD_BE_CREATED)
+      throw new Error('Browser not compatible!')
+    }
+
     if (!container) throw new Error('cannot find element #gameContainer')
     const start = Date.now()
     const observer = renderStateObservable.add((isRunning) => {
