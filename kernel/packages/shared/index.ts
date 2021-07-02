@@ -21,8 +21,6 @@ export function initShared() {
   const { store, startSagas } = buildStore()
   globalThis.globalStore = store
 
-  startSagas()
-
   if (isMobile()) {
     BringDownClientAndShowError(MOBILE_NOT_SUPPORTED)
     return
@@ -30,6 +28,8 @@ export function initShared() {
     BringDownClientAndShowError(NO_WEBGL_COULD_BE_CREATED)
     return
   }
+
+  startSagas()
 
   store.dispatch(notStarted())
   store.dispatch(loadingStarted())
