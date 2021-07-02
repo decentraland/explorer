@@ -76,7 +76,7 @@ namespace webApp {
   export async function initWeb(container: HTMLElement) {
     if (!isCompatibleBrowser()) {
       BringDownClientAndShowError(NO_WEBGL_COULD_BE_CREATED)
-      throw new Error('Browser not compatible!')
+      throw new Error('Browser not supported!')
     }
 
     if (!container) throw new Error('cannot find element #gameContainer')
