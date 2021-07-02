@@ -1,3 +1,4 @@
+import { isMobile } from './comms/mobile'
 import { isCompatibleBrowser } from './comms/browser'
 
 import './apis/index'
@@ -5,7 +6,7 @@ import './events'
 
 import { initializeUrlRealmObserver } from './dao'
 import { BringDownClientAndShowError } from './loading/ReportFatalError'
-import { loadingStarted, notStarted, NO_WEBGL_COULD_BE_CREATED } from './loading/types'
+import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED, NO_WEBGL_COULD_BE_CREATED } from './loading/types'
 import { buildStore } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { StoreContainer } from './store/rootTypes'
@@ -22,7 +23,10 @@ export function initShared() {
 
   startSagas()
 
-  if (!isCompatibleBrowser()) {
+  if (isMobile()) {
+    BringDownClientAndShowError(MOBILE_NOT_SUPPORTED)
+    return
+  } else if (!isCompatibleBrowser()) {
     BringDownClientAndShowError(NO_WEBGL_COULD_BE_CREATED)
     return
   }
