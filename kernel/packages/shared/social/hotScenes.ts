@@ -1,5 +1,5 @@
 import { refreshCandidatesStatuses } from 'shared/dao'
-import { Candidate } from 'shared/dao/types'
+import { LayerBasedCandidate } from 'shared/dao/types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
@@ -90,9 +90,14 @@ async function fetchHotScenesNoLambdaFallback(): Promise<HotSceneInfo[]> {
 
   let crowdedScenes: Record<string, HotSceneInfo> = {}
 
+  //TODO: Add support for island based candidates
   const filteredCandidates = candidates.filter(
-    (candidate) => candidate.layer && candidate.layer.usersCount > 0 && candidate.layer.usersParcels
-  )
+    (candidate) =>
+      candidate.type === 'layer-based' &&
+      candidate.layer &&
+      candidate.layer.usersCount > 0 &&
+      candidate.layer.usersParcels
+  ) as LayerBasedCandidate[]
 
   for (const candidate of filteredCandidates) {
     await fillHotScenesRecord(candidate, crowdedScenes)
@@ -112,7 +117,7 @@ async function fetchHotScenesNoLambdaFallback(): Promise<HotSceneInfo[]> {
     .sort((a, b) => (a.usersTotalCount > b.usersTotalCount ? -1 : 1))
 }
 
-async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<string, HotSceneInfo>) {
+async function fillHotScenesRecord(candidate: LayerBasedCandidate, crowdedScenes: Record<string, HotSceneInfo>) {
   const tiles =
     candidate.layer.usersParcels
       // tslint:disable:strict-type-predicates
@@ -143,16 +148,12 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
     }
 
     hotScene.usersTotalCount++
-    realm.usersCount ++
+    realm.usersCount++
     realm.userParcels.push(TileStringToVector2(tiles[i]))
   }
 }
 
-function createHotSceneInfo(
-  baseCoord: string,
-  id: string,
-  land: ILand | undefined
-): HotSceneInfo {
+function createHotSceneInfo(baseCoord: string, id: string, land: ILand | undefined): HotSceneInfo {
   const sceneJsonData: SceneJsonData | undefined = land?.sceneJsonData
   return {
     id: id,
@@ -168,16 +169,16 @@ function createHotSceneInfo(
     baseCoords: TileStringToVector2(baseCoord),
     parcels: sceneJsonData
       ? sceneJsonData.scene.parcels.map((parcel) => {
-        const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-        return { x: coord[0], y: coord[1] }
-      })
+          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+          return { x: coord[0], y: coord[1] }
+        })
       : [],
     realms: [],
     usersTotalCount: 0
   }
 }
 
-function createRealmInfo(candidate: Candidate): RealmInfo {
+function createRealmInfo(candidate: LayerBasedCandidate): RealmInfo {
   return {
     serverName: candidate.catalystName,
     layer: candidate.layer.name,
@@ -213,9 +214,9 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
       baseCoords: TileStringToVector2(land.sceneJsonData.scene.base),
       parcels: land.sceneJsonData
         ? land.sceneJsonData.scene.parcels.map((parcel) => {
-          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-          return { x: coord[0], y: coord[1] }
-        })
+            const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+            return { x: coord[0], y: coord[1] }
+          })
         : [],
       realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0, userParcels: [] }],
       usersTotalCount: 0
