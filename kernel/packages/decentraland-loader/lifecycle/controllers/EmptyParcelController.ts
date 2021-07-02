@@ -19,11 +19,11 @@ export class EmptyParcelController {
   ) {
     /* tslint:disable */
     if (options.worldConfig.renderProfile == RenderProfile.HALLOWEEN) {
-      this.baseUrl = `${options.rootUrl}loader/empty-scenes-halloween/`
+      this.baseUrl = `${options.rootUrl}loader/latest/empty-scenes-halloween/`
     } else if (options.worldConfig.renderProfile == RenderProfile.XMAS) {
-      this.baseUrl = `${options.rootUrl}loader/empty-scenes-xmas/`
+      this.baseUrl = `${options.rootUrl}loader/latest/empty-scenes-xmas/`
     } else {
-      this.baseUrl = `${options.rootUrl}loader/empty-scenes/`
+      this.baseUrl = `${options.rootUrl}loader/latest/empty-scenes/`
     }
     /* tslint:enable */
   }
