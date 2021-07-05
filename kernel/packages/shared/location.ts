@@ -5,8 +5,6 @@ const base =
     ? new URL(globalThis.KERNEL_ROOT, document.location.toString()).toString()
     : new URL('.', document.location.toString()).toString()
 
-console.log('> Kernel base: ' + base)
-
 export function getResourcesURL(path: string) {
   return new URL(path, base).toString()
 }
