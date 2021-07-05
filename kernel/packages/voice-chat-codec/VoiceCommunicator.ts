@@ -5,6 +5,9 @@ import { VOICE_CHAT_SAMPLE_RATE, OPUS_FRAME_SIZE_MS } from './constants'
 import { parse, write } from 'sdp-transform'
 import { EncodedFrame, InputWorkletRequestTopic, OutputWorkletRequestTopic } from './types'
 
+const workletWorkerRaw = require('raw-loader!../../static/voice-chat-codec/audioWorkletProcessors.js')
+const workletWorkerUrl = URL.createObjectURL(new Blob([workletWorkerRaw], { type: 'application/javascript' }))
+
 export type AudioCommunicatorChannel = {
   send(data: EncodedFrame): any
 }
@@ -52,8 +55,6 @@ export type VoiceSpatialParams = {
   position: [number, number, number]
   orientation: [number, number, number]
 }
-
-const worlketModulesUrl = 'voice-chat-codec/audioWorkletProcessors.js'
 
 type AudioContextWithInitPromise = [AudioContext, Promise<any>]
 
@@ -486,7 +487,7 @@ export class VoiceCommunicator {
   private createContext(contextOptions?: AudioContextOptions): AudioContextWithInitPromise {
     const aContext = new AudioContext(contextOptions)
     const workletInitializedPromise = aContext.audioWorklet
-      .addModule(worlketModulesUrl)
+      .addModule(workletWorkerUrl)
       .catch((e) => defaultLogger.error('Error loading worklet modules: ', e))
     return [aContext, workletInitializedPromise]
   }
