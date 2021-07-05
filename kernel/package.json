@@ -57,7 +57,7 @@
     "@types/node": "^10.17.0",
     "@types/node-fetch": "^2.1.4",
     "@types/sdp-transform": "^2.4.4",
-    "@types/segment-analytics": "0.0.32",
+    "@types/segment-analytics": "0.0.33",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^5.0.1",
     "@types/sinon-chai": "^3.2.2",
