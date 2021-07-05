@@ -1,5 +1,3 @@
-declare const globalThis: { VOICE_CODEC_ROOT?: string }
-
 export const OPUS_BITS_PER_SECOND = 24000
 export const OPUS_FRAME_SIZE_MS = 40
 
@@ -11,14 +9,3 @@ export const OUTPUT_NODE_BUFFER_SIZE = 2048
 export const OUTPUT_NODE_BUFFER_DURATION = (OUTPUT_NODE_BUFFER_SIZE * 1000) / VOICE_CHAT_SAMPLE_RATE
 
 export const INPUT_NODE_BUFFER_SIZE = 2048
-
-export const getVoiceChatCDNRootUrl = (): string => {
-  if (typeof globalThis.VOICE_CODEC_ROOT === 'undefined') {
-    // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
-    //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.
-    //              This is used for empty parcels and should be used for fetching any other local resource.
-    return `voice-chat-codec`
-  } else {
-    return new URL(globalThis.VOICE_CODEC_ROOT + '/latest', document.location.toString()).toString()
-  }
-}

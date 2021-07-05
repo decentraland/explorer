@@ -16,6 +16,7 @@ import { ContentMapping, SceneJsonData } from '../../types'
 import { jsonFetch } from '../../../atomicHelpers/jsonFetch'
 import { blobToBuffer } from './SceneStateStorageController'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { getResourcesURL } from 'shared/location'
 
 declare const globalThis: any
 
@@ -84,7 +85,7 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
 }
 
 async function getEmptySceneFiles(coordinates: string): Promise<SceneDeployment> {
-  const fullRootUrl = new URL('loader/latest/empty-scenes/', location.toString()).toString()
+  const fullRootUrl = getResourcesURL('loader/empty-scenes/')
 
   const scenes = await jsonFetch(fullRootUrl + 'mappings.json')
   const scenesContents: ContentMapping[][] = Object.values(scenes)

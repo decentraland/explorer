@@ -6,7 +6,7 @@ import { parse, write } from 'sdp-transform'
 import { EncodedFrame, InputWorkletRequestTopic, OutputWorkletRequestTopic } from './types'
 
 const workletWorkerRaw = require('raw-loader!../../static/voice-chat-codec/audioWorkletProcessors.js')
-const workletWorkerUrl = URL.createObjectURL(new Blob([workletWorkerRaw]))
+const workletWorkerUrl = URL.createObjectURL(new Blob([workletWorkerRaw], { type: 'application/javascript' }))
 
 export type AudioCommunicatorChannel = {
   send(data: EncodedFrame): any

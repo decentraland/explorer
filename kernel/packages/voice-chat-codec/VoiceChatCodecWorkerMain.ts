@@ -1,11 +1,8 @@
 import { ResponseTopic, RequestTopic, VoiceChatWorkerRequest } from './types'
 import defaultLogger from 'shared/logger'
 
-/*
- * The worker is set up on the first require of this file
- */
 const audioWorkerRaw = require('raw-loader!../../static/voice-chat-codec/worker.js')
-const audioWorkerUrl = URL.createObjectURL(new Blob([audioWorkerRaw]))
+const audioWorkerUrl = URL.createObjectURL(new Blob([audioWorkerRaw], { type: 'application/javascript' }))
 
 type EncodeListener = (encoded: Uint8Array) => any
 type DecodeListener = (samples: Float32Array) => any
