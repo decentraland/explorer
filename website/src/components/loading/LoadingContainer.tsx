@@ -103,7 +103,7 @@ export const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
     state.waitingTutorial;
   return (
     <React.Fragment>
-      {show && (
+      {false && (
         <LoadingMessage
           image={withImages ? tip.image : undefined}
           message={withImages ? tip.text : undefined}
