@@ -224,7 +224,7 @@ export class UnityInterface {
       return
     }
 
-    this.SendMessageToUnity('Bridges', "SetLoadingScreen", JSON.stringify(data) );
+    this.SendMessageToUnity('Bridges', "SetLoadingScreen", JSON.stringify(data))
   }
 
   public DeactivateRendering() {
