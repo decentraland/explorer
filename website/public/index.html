@@ -2,10 +2,21 @@
 <html lang="en">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimal-ui" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,minimal-ui"
+    />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="preload" href="https://decentraland.org/images/background-secondary@blur.jpg" as="image" />
-    <link rel="preload" href="https://decentraland.org/images/background@blur.jpg" as="image" />
+    <link
+      rel="preload"
+      href="https://decentraland.org/images/background-secondary@blur.jpg"
+      as="image"
+    />
+    <link
+      rel="preload"
+      href="https://decentraland.org/images/background@blur.jpg"
+      as="image"
+    />
     <title>Decentraland</title>
     <style type="text/css">
       html,
@@ -37,19 +48,25 @@
 
       #gameContainer.loaded,
       body {
-        background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
+        background: #090909
+          url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat
+          50% 5% !important;
         background-size: 170px 32px !important;
       }
       @media screen and (min-height: 500px) {
         body {
-          background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
+          background: #090909
+            url(images/decentraland-connect/DecentralandIsologotipo.png)
+            no-repeat 50% 5% !important;
           background-size: 170px 32px !important;
         }
       }
       @media screen and (min-height: 800px) {
         #gameContainer.loaded,
         body {
-          background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 25% !important;
+          background: #090909
+            url(images/decentraland-connect/DecentralandIsologotipo.png)
+            no-repeat 50% 25% !important;
           background-size: 170px 32px !important;
         }
       }
@@ -120,8 +137,8 @@
       }
     </style>
     <script>
-      console.log("Explorer version: %REACT_APP_EXPLORER_VERSION%")
-      window.VERSION = "%REACT_APP_EXPLORER_VERSION%"
+      console.log("Explorer version: %REACT_APP_EXPLORER_VERSION%");
+      window.VERSION = "%REACT_APP_EXPLORER_VERSION%";
     </script>
   </head>
   <body class="dcl-loading">
@@ -136,9 +153,12 @@
         <div class="errormessage">
           <div class="errortext col">
             <div class="error">Error</div>
-            <div class="communicationslink">Your browser or device is not supported</div>
+            <div class="communicationslink">
+              Your browser or device is not supported
+            </div>
             <div class="givesomedetailof">
-              The Explorer only works on Chrome or Firefox for Windows, Linux and macOS.
+              The Explorer only works on Chrome or Firefox for Windows, Linux
+              and macOS.
             </div>
           </div>
           <div class="errorimage col">
@@ -148,20 +168,9 @@
       </div>
       <link rel="stylesheet" href="css/errors.css" />
     </noscript>
-    <!-- google -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-63691338-5"></script>
-    <script>
-      window.dataLayer = window.dataLayer || []
-
-      function gtag() {
-        dataLayer.push(arguments)
-      }
-      gtag("js", new Date())
-      gtag("config", "UA-63691338-5")
-    </script>
     <script>
       // prettier-ignore
-      !function () { var analytics = window.analytics = window.analytics || []; if (!analytics.initialize) if (analytics.invoked) window.console && console.error && console.error("Segment snippet included twice."); else { analytics.invoked = !0; analytics.methods = ["trackSubmit", "trackClick", "trackLink", "trackForm", "pageview", "identify", "reset", "group", "track", "ready", "alias", "debug", "page", "once", "off", "on"]; analytics.factory = function (t) { return function () { var e = Array.prototype.slice.call(arguments); e.unshift(t); analytics.push(e); return analytics } }; for (var t = 0; t < analytics.methods.length; t++) { var e = analytics.methods[t]; analytics[e] = analytics.factory(e) } analytics.load = function (t, e) { var n = document.createElement("script"); n.type = "text/javascript"; n.async = !0; n.src = "https://segment.decentraland.org/v1/" + t + "/segment.min.js"; var a = document.getElementsByTagName("script")[0]; a.parentNode.insertBefore(n, a); analytics._loadOptions = e }; analytics.SNIPPET_VERSION = "4.1.0"; } }();
+      !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.13.2";}}();
     </script>
     <script>
       // prettier-ignore
@@ -187,7 +196,7 @@
     </script>
 
     <script>
-      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity-renderer/"
+      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity-renderer/";
     </script>
 
     <script src="%PUBLIC_URL%/website.js?v=%REACT_APP_WEBSITE_VERSION%"></script>
