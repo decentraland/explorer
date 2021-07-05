@@ -1,6 +1,7 @@
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
 import { Component } from 'scene-system/stateful-scene/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
+import { CLASS_ID } from 'decentraland-ecs/src'
 import {
   BuilderAsset,
   BuilderComponent,
@@ -67,12 +68,21 @@ export async function toBuilderFromStateDefinitionFormat(
       builderComponents[builderComponent.id] = builderComponent
     }
 
+    let entityname = entityId
+
+    //We iterate over the name of the entities to asign it in a builder format
+    for (let component of Object.values(builderComponents)) {
+      if (component.type === 'Name') {
+        entityname = component.data.builderValue
+      }
+    }
+
     // we add the entity to builder format
     let builderEntity: BuilderEntity = {
       id: entityId,
       components: builderComponentsIds,
       disableGizmos: false,
-      name: entityId
+      name: entityname
     }
     entities[builderEntity.id] = builderEntity
   }
@@ -198,9 +208,35 @@ export function fromBuildertoStateDefinitionFormat(
       }
     }
 
+    //We see if the builder already asigned a name to the entity, if it has a name, we create the equivalent part in biw. We do this so we can mantain the smart-item references
+    if (entity.name !== undefined) {
+      let componentFound = false
+
+      for (let component of components) {
+        if (component.componentId == CLASS_ID.NAME) {
+          componentFound = true
+          components.push(GetNameComponent(component.data.value, entity.name, transfromTranslator))
+          break
+        }
+      }
+      if (!componentFound) components.push(GetNameComponent(entity.name, entity.name, transfromTranslator))
+    }
+
     sceneState.addEntity(entity.id, components)
   }
   return sceneState
+}
+
+function GetNameComponent(name: string, builderName: string, transfromTranslator: SceneTransformTranslator): Component {
+  let nameComponentData = {
+    value: name,
+    builderValue: builderName
+  }
+  let nameComponent: Component = transfromTranslator.transformStateDefinitionComponent({
+    componentId: CLASS_ID.NAME,
+    data: nameComponentData
+  })
+  return nameComponent
 }
 
 export function fromSerializedStateToStorableFormat(state: SerializedSceneState): StorableSceneState {

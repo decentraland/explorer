@@ -193,6 +193,8 @@ export class RendererStatefulActor extends StatefulActor implements StateContain
         return { name: 'lockedOnEdit', disposability: ComponentDisposability.DISPOSABLE }
       case CLASS_ID.VISIBLE_ON_EDIT:
         return { name: 'visibleOnEdit', disposability: ComponentDisposability.DISPOSABLE }
+      case CLASS_ID.SMART_ITEM:
+        return { name: 'script', disposability: ComponentDisposability.NON_DISPOSABLE }
     }
     throw new Error('Component not implemented yet')
   }
