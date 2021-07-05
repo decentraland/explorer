@@ -220,8 +220,10 @@ export class UnityInterface {
     showWalletPrompt: boolean,
     showTips: boolean
   }) {
-    if(this.gameInstance === undefined)
-      return;
+    if (this.gameInstance === undefined)
+    {
+      return
+    }
 
       this.SendMessageToUnity('Bridges', "SetLoadingScreen", JSON.stringify(data) );
   }
