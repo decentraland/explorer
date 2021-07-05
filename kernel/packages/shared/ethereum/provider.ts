@@ -40,7 +40,7 @@ export function getEthConnector(): EthereumConnector {
 
 export async function requestProvider(type: ProviderType | null) {
   try {
-    const { provider } = await ethConnector.connect(type)
+    const { provider } = await getEthConnector().connect(type)
     requestManager.setProvider(provider)
     providerFuture.resolve({
       successful: !isGuest(),
@@ -56,7 +56,7 @@ export async function requestProvider(type: ProviderType | null) {
 }
 
 export function isGuest(): boolean {
-  return ethConnector.isGuest()
+  return getEthConnector().isGuest()
 }
 
 export function getProviderType() {

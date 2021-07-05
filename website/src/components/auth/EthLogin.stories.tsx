@@ -5,7 +5,6 @@ import { EthLogin, EthLoginProps } from "./EthLogin";
 export default {
   title: "Explorer/auth/EthLogin",
   args: {
-    loading: false,
     provider: null,
     hasMetamask: true,
   },
@@ -28,12 +27,10 @@ LoginHome.args = {
 
 export const LoginSigning = Template.bind({});
 LoginSigning.args = {
-  ...Template.args,
-  loading: true,
+  ...Template.args
 };
 
 export const LoginPreviousSession = Template.bind({});
 LoginPreviousSession.args = {
-  ...Template.args,
-  loading: false,
+  ...Template.args
 };
