@@ -1,10 +1,10 @@
-export function getResourcesURL() {
-  let pathName = location.pathname.split('/')
-  if (pathName[pathName.length - 1].includes('.')) {
-    pathName.pop()
-  }
+declare const globalThis: { KERNEL_ROOT?: string }
 
-  const basePath = origin + pathName.join('/')
-  if (basePath.endsWith('/')) return basePath.slice(0, -1)
-  return basePath
+const base =
+  typeof globalThis.KERNEL_ROOT !== 'undefined'
+    ? new URL(globalThis.KERNEL_ROOT, document.location.toString()).toString()
+    : new URL('.', document.location.toString()).toString()
+
+export function getResourcesURL(path: string) {
+  return new URL(path, base).toString()
 }
