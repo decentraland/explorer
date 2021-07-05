@@ -215,11 +215,11 @@ export function fromBuildertoStateDefinitionFormat(
       for (let component of components) {
         if (component.componentId == CLASS_ID.NAME) {
           componentFound = true
-          components.push(GetNameComponent(component.data.value, entity.name, transfromTranslator))
+          components.push(CreateStatelessNameComponent(component.data.value, entity.name, transfromTranslator))
           break
         }
       }
-      if (!componentFound) components.push(GetNameComponent(entity.name, entity.name, transfromTranslator))
+      if (!componentFound) components.push(CreateStatelessNameComponent(entity.name, entity.name, transfromTranslator))
     }
 
     sceneState.addEntity(entity.id, components)
@@ -227,7 +227,7 @@ export function fromBuildertoStateDefinitionFormat(
   return sceneState
 }
 
-function GetNameComponent(name: string, builderName: string, transfromTranslator: SceneTransformTranslator): Component {
+function CreateStatelessNameComponent(name: string, builderName: string, transfromTranslator: SceneTransformTranslator): Component {
   let nameComponentData = {
     value: name,
     builderValue: builderName
