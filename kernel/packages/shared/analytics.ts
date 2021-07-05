@@ -53,12 +53,10 @@ export async function initialize(segmentKey: string): Promise<void> {
 
   if (window.analytics.load) {
     // loading client for the first time
-    // Need to cast to any because the interface lacks _write_key which is required by the latest segment.js version
-    ;(window.analytics as any)._write_key = segmentKey
     window.analytics.load(segmentKey)
     window.analytics.page()
     window.analytics.ready(() => {
-      window.analytics.timeout(10000)
+      window.analytics.timeout(1000)
     })
   }
 }
