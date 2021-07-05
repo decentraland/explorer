@@ -70,7 +70,7 @@ export async function toBuilderFromStateDefinitionFormat(
 
     let entityname = entityId
 
-    //We iterate over the name of the entities to asign it in a builder format
+    // We iterate over the name of the entities to asign it in a builder format
     for (let component of Object.values(builderComponents)) {
       if (component.type === 'Name') {
         entityname = component.data.builderValue
@@ -208,19 +208,18 @@ export function fromBuildertoStateDefinitionFormat(
       }
     }
 
-    //We see if the builder already asigned a name to the entity, if it has a name, we create the equivalent part in biw. We do this so we can mantain the smart-item references
-    if (entity.name !== undefined) {
-      let componentFound = false
+    // We need to mantain the builder name of the entity, so we create the equivalent part in biw. We do this so we can mantain the smart-item references
+    let componentFound = false
 
-      for (let component of components) {
-        if (component.componentId === CLASS_ID.NAME) {
-          componentFound = true
-          components.push(CreateStatelessNameComponent(component.data.value, entity.name, transfromTranslator))
-          break
-        }
+    for (let component of components) {
+      if (component.componentId === CLASS_ID.NAME) {
+        componentFound = true
+        component.data.values = component.data.value
+        component.data.builderValue = entity.name
+        break
       }
-      if (!componentFound) components.push(CreateStatelessNameComponent(entity.name, entity.name, transfromTranslator))
     }
+    if (!componentFound) components.push(CreateStatelessNameComponent(entity.name, entity.name, transfromTranslator))
 
     sceneState.addEntity(entity.id, components)
   }
