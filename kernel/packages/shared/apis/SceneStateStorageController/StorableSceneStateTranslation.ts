@@ -213,7 +213,7 @@ export function fromBuildertoStateDefinitionFormat(
       let componentFound = false
 
       for (let component of components) {
-        if (component.componentId == CLASS_ID.NAME) {
+        if (component.componentId === CLASS_ID.NAME) {
           componentFound = true
           components.push(CreateStatelessNameComponent(component.data.value, entity.name, transfromTranslator))
           break
@@ -227,7 +227,11 @@ export function fromBuildertoStateDefinitionFormat(
   return sceneState
 }
 
-function CreateStatelessNameComponent(name: string, builderName: string, transfromTranslator: SceneTransformTranslator): Component {
+function CreateStatelessNameComponent(
+  name: string,
+  builderName: string,
+  transfromTranslator: SceneTransformTranslator
+): Component {
   let nameComponentData = {
     value: name,
     builderValue: builderName

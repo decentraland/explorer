@@ -13,7 +13,7 @@ const HUMAN_READABLE_TO_ID: Map<string, number> = new Map([
   ['Name', CLASS_ID.NAME],
   ['LockedOnEdit', CLASS_ID.LOCKED_ON_EDIT],
   ['VisibleOnEdit', CLASS_ID.VISIBLE_ON_EDIT],
-  ['Script', CLASS_ID.SMART_ITEM] 
+  ['Script', CLASS_ID.SMART_ITEM]
 ])
 
 export function toHumanReadableType(type: number): string {
