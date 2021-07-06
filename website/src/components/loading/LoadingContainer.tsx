@@ -111,7 +111,7 @@ export const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
           showWalletPrompt={showWalletPrompt}
         />
       )}
-      {false && <ProgressBar percentage={percentage} />}
+      {show && false && <ProgressBar percentage={percentage} />}
     </React.Fragment>
   );
 };
