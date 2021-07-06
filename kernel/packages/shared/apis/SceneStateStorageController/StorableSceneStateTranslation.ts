@@ -68,12 +68,12 @@ export async function toBuilderFromStateDefinitionFormat(
       builderComponents[builderComponent.id] = builderComponent
     }
 
-    let entityname = entityId
+    let entityName = entityId
 
     // We iterate over the name of the entities to asign it in a builder format
     for (let component of Object.values(builderComponents)) {
       if (component.type === 'Name') {
-        entityname = component.data.builderValue
+        entityName = component.data.builderValue
       }
     }
 
@@ -82,7 +82,7 @@ export async function toBuilderFromStateDefinitionFormat(
       id: entityId,
       components: builderComponentsIds,
       disableGizmos: false,
-      name: entityname
+      name: entityName
     }
     entities[builderEntity.id] = builderEntity
   }
