@@ -22,6 +22,7 @@ declare const globalThis: StoreContainer
 
 export let aborted = false
 
+// once this function is called, no more errors will be tracked neither reported to rollbar
 export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   if (aborted) {
     return
@@ -43,22 +44,26 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
     event === COMMS_COULD_NOT_BE_ESTABLISHED
       ? 'comms'
       : event === NOT_INVITED
-      ? 'notinvited'
-      : event === NO_WEBGL_COULD_BE_CREATED
-      ? 'notsupported'
-      : event === MOBILE_NOT_SUPPORTED
-      ? 'nomobile'
-      : event === NEW_LOGIN
-      ? 'newlogin'
-      : event === NETWORK_MISMATCH
-      ? 'networkmismatch'
-      : event === AVATAR_LOADING_ERROR
-      ? 'avatarerror'
-      : 'fatal'
+        ? 'notinvited'
+        : event === NO_WEBGL_COULD_BE_CREATED
+          ? 'notsupported'
+          : event === MOBILE_NOT_SUPPORTED
+            ? 'nomobile'
+            : event === NEW_LOGIN
+              ? 'newlogin'
+              : event === NETWORK_MISMATCH
+                ? 'networkmismatch'
+                : event === AVATAR_LOADING_ERROR
+                  ? 'avatarerror'
+                  : 'fatal'
 
   globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
   Html.showErrorModal(targetError)
   aborted = true
+
+  if (window.Rollbar) {
+    window.Rollbar.configure({ enabled: false });
+  }
 }
 
 export namespace ErrorContext {
@@ -110,6 +115,10 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
+  if (aborted) {
+    return
+  }
+
   let sagaStack: string | undefined = payload['sagaStack']
 
   if (sagaStack) {
