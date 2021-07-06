@@ -153,6 +153,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   analyticsData() {
     return {
       // This should work for any of both peer library types
+      // tslint:disable-next-line
       stats: buildCatalystPeerStatsData(this.peer as any)
     }
   }
@@ -239,7 +240,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     const currentRooms = [...this.peer.currentRooms]
 
     function isSameRoom(roomId: string, roomIdOrObject: string | Room) {
-      roomIdOrObject === roomId || (typeof roomIdOrObject !== 'string' && roomIdOrObject.id === roomId)
+      return roomIdOrObject === roomId || (typeof roomIdOrObject !== 'string' && roomIdOrObject.id === roomId)
     }
 
     const joining = this.rooms.map((room) => {

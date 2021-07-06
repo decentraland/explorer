@@ -90,7 +90,7 @@ async function fetchHotScenesNoLambdaFallback(): Promise<HotSceneInfo[]> {
 
   let crowdedScenes: Record<string, HotSceneInfo> = {}
 
-  //TODO: Add support for island based candidates
+  // TODO: Add support for island based candidates
   const filteredCandidates = candidates.filter(
     (candidate) =>
       candidate.type === 'layer-based' &&
@@ -169,9 +169,9 @@ function createHotSceneInfo(baseCoord: string, id: string, land: ILand | undefin
     baseCoords: TileStringToVector2(baseCoord),
     parcels: sceneJsonData
       ? sceneJsonData.scene.parcels.map((parcel) => {
-          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-          return { x: coord[0], y: coord[1] }
-        })
+        const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+        return { x: coord[0], y: coord[1] }
+      })
       : [],
     realms: [],
     usersTotalCount: 0
@@ -214,9 +214,9 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
       baseCoords: TileStringToVector2(land.sceneJsonData.scene.base),
       parcels: land.sceneJsonData
         ? land.sceneJsonData.scene.parcels.map((parcel) => {
-            const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-            return { x: coord[0], y: coord[1] }
-          })
+          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+          return { x: coord[0], y: coord[1] }
+        })
         : [],
       realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0, userParcels: [] }],
       usersTotalCount: 0
