@@ -15,7 +15,7 @@ import { Position, positionHash } from '../interface/utils'
 import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
 import { Peer as LayerBasedPeerType } from 'decentraland-katalyst-peer'
-import { Peer as IslandBasedPeerType } from '@dcl/catalyst-peer'
+import { Peer as IslandBasedPeer, buildCatalystPeerStatsData } from '@dcl/catalyst-peer'
 import { PacketCallback, PeerConfig, Room } from 'decentraland-katalyst-peer/src/types'
 import {
   ChatData,
@@ -30,18 +30,14 @@ import {
 import { Realm, CommsStatus } from 'shared/dao/types'
 import { compareVersions } from 'atomicHelpers/semverCompare'
 
-import * as Long from 'long'
 import { getProfileType } from 'shared/profiles/getProfileType'
 import { Profile } from 'shared/types'
 import { ProfileType } from 'shared/profiles/types'
 import { EncodedFrame } from 'voice-chat-codec/types'
-declare const window: any
-window.Long = Long
 
-type PeerType = LayerBasedPeerType | IslandBasedPeerType
+type PeerType = LayerBasedPeerType | IslandBasedPeer
 
-const { LayerBasedPeer } = require('decentraland-katalyst-peer')
-const { IslandBasedPeer, buildCatalystPeerStatsData } = require('@dcl/catalyst-peer')
+const { Peer: LayerBasedPeer } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
@@ -327,7 +323,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
           break
         case CommsMessage.DataCase.POSITION_DATA:
           const positionMessage = mapToPositionMessage(commsMessage.getPositionData()!)
-          this.peer.setPeerPosition(sender, positionMessage.slice(0, 3))
+          this.peer.setPeerPosition(sender, positionMessage.slice(0, 3) as [number, number, number])
           this.positionHandler(sender, createPackage(commsMessage, 'position', positionMessage))
           break
         case CommsMessage.DataCase.SCENE_DATA:

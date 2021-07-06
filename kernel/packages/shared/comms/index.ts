@@ -5,7 +5,8 @@ import {
   COMMS,
   AUTO_CHANGE_REALM,
   genericAvatarSnapshots,
-  COMMS_PROFILE_TIMEOUT
+  COMMS_PROFILE_TIMEOUT,
+  COMMS_SERVICE
 } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
@@ -148,10 +149,10 @@ export class PeerTrackingInfo {
     version: number | null
     status: 'ok' | 'loading' | 'error'
   } = {
-    promise: Promise.resolve(),
-    version: null,
-    status: 'loading'
-  }
+      promise: Promise.resolve(),
+      version: null,
+      status: 'loading'
+    }
 
   profileType?: ProfileType
 
@@ -523,28 +524,28 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (context.sendingProfileResponse) return
 
   context.sendingProfileResponse = true
-  ;(async () => {
-    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+    ; (async () => {
+      const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
-    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
-    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
-      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
-    }
+      // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+      if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+        await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+      }
 
-    const profile = await ProfileAsPromise(
-      myAddress,
-      message.data.version ? parseInt(message.data.version, 10) : undefined,
-      getProfileType(myIdentity)
-    )
+      const profile = await ProfileAsPromise(
+        myAddress,
+        message.data.version ? parseInt(message.data.version, 10) : undefined,
+        getProfileType(myIdentity)
+      )
 
-    if (context.currentPosition) {
-      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
-    }
+      if (context.currentPosition) {
+        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+      }
 
-    context.lastProfileResponseTime = Date.now()
-  })()
-    .finally(() => (context.sendingProfileResponse = false))
-    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+      context.lastProfileResponseTime = Date.now()
+    })()
+      .finally(() => (context.sendingProfileResponse = false))
+      .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
@@ -921,8 +922,14 @@ export async function connect(userId: string) {
       case 'v2': {
         await ensureMetaConfigurationInitialized()
         const lighthouseUrl = getCommsServer(store.getState())
-        const realm = getRealm(store.getState())
+        let realm = getRealm(store.getState())
         const commsConfig = getCommsConfig(store.getState())
+
+        if (COMMS_SERVICE) {
+          // For now, we assume that if we provided a hardcoded url for comms it will be island based
+          realm = { ...realm!, lighthouseVersion: '1.0.0' }
+          delete realm.layer
+        }
 
         const peerConfig: any = {
           connectionConfig: {
@@ -1174,7 +1181,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
-      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
+        ; (globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     throw new ConnectionEstablishmentError(e.message)
