@@ -62,7 +62,7 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   aborted = true
 
   if (window.Rollbar) {
-    window.Rollbar.configure({ enabled: false });
+    window.Rollbar.configure({ enabled: false })
   }
 }
 
