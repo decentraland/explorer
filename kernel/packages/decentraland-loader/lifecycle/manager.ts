@@ -9,6 +9,7 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
+import { getResourcesURL } from 'shared/location'
 
 import { DEBUG, parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
 
@@ -123,10 +124,7 @@ export async function initParcelSceneWorker() {
   const state = globalThis.globalStore.getState()
   const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
 
-  // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
-  //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.
-  //              This is used for empty parcels and should be used for fetching any other local resource.
-  const fullRootUrl = `${location.protocol}//${location.host}${location.pathname}`.replace('index.html', '')
+  const fullRootUrl = getResourcesURL('.')
 
   server.notify('Lifecycle.initialize', {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),

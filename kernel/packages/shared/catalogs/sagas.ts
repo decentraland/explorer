@@ -68,7 +68,7 @@ function* initialLoad() {
     let baseCatalog = []
     try {
       const catalogPath = '/default-profile/basecatalog.json'
-      const response = yield fetch(getResourcesURL() + catalogPath)
+      const response = yield fetch(getResourcesURL(catalogPath))
       baseCatalog = yield response.json()
 
       if (WSS_ENABLED) {
