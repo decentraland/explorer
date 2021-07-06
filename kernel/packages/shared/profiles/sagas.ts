@@ -235,8 +235,8 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
       profile = yield call(generateRandomUserProfile, userId)
     }
   } else {
-    const baseUrl = yield call(getResourcesURL)
-    profile = yield call(backupProfile, baseUrl + '/default-profile/snapshots', userId)
+    const snapshotUrl = getResourcesURL('default-profile/snapshots')
+    profile = yield call(backupProfile, snapshotUrl, userId)
   }
 
   if (currentId === userId) {
