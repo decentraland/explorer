@@ -148,10 +148,10 @@ export class PeerTrackingInfo {
     version: number | null
     status: 'ok' | 'loading' | 'error'
   } = {
-      promise: Promise.resolve(),
-      version: null,
-      status: 'loading'
-    }
+    promise: Promise.resolve(),
+    version: null,
+    status: 'loading'
+  }
 
   profileType?: ProfileType
 
