@@ -13,7 +13,7 @@ import {
   Realm as SocialRealm
 } from 'dcl-social-client'
 
-import { DEBUG_PM, INIT_PRE_LOAD, getServerConfigurations, WORLD_EXPLORER } from 'config'
+import { DEBUG_PM, INIT_PRE_LOAD, WORLD_EXPLORER } from 'config'
 
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
@@ -54,6 +54,7 @@ import { ensureRendererEnabled } from 'shared/world/worldState'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { ensureFriendProfile } from './ensureFriendProfile'
+import { getSynapseUrl } from 'shared/meta/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -90,7 +91,7 @@ function* initializeSaga() {
 
     const identity = yield select(getCurrentIdentity)
     try {
-      const { synapseUrl } = getServerConfigurations()
+      const synapseUrl = yield select(getSynapseUrl)
       yield call(initializePrivateMessaging, synapseUrl, identity)
     } catch (e) {
       logger.error(`error initializing private messaging`, e)

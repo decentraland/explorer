@@ -40,7 +40,6 @@ let downloadManager: SceneDataDownloadManager
     (options: {
       contentServer: string
       catalystServer: string
-      metaContentService: string
       contentServerBundles: string
       rootUrl: string
       lineOfSightRadius: number
@@ -50,7 +49,6 @@ let downloadManager: SceneDataDownloadManager
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
         catalystServer: options.catalystServer,
-        metaContentService: options.metaContentService,
         contentServerBundles: options.contentServerBundles,
         worldConfig: options.worldConfig,
         rootUrl: options.rootUrl

@@ -9,6 +9,7 @@ export type MetaConfiguration = {
   explorer: {
     minBuildNumber: number
     useUnityIndexedDbCache: boolean
+    assetBundlesFetchUrl: string
   }
   servers: {
     added: string[]
@@ -16,6 +17,7 @@ export type MetaConfiguration = {
     contentWhitelist: string[]
     catalystsNodesEndpoint?: string
   }
+  synapseUrl: string
   world: WorldConfig
   comms: CommsConfig
   minCatalystVersion?: string
@@ -62,7 +64,7 @@ export type CommsConfig = {
 }
 
 export enum FeatureFlags {
-  WEARABLES_V2 = 'wearables_v2',
   QUESTS = 'quests',
-  BUILDER_IN_WORLD = 'builder_in_world'
+  BUILDER_IN_WORLD = 'builder_in_world',
+  AVATAR_LODS = 'avatar_lods'
 }

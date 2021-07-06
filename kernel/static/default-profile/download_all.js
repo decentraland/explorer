@@ -30,7 +30,7 @@ try {
 const hashes = catalog.reduce(
   (hashes, wearable) =>
     hashes.concat(
-      wearable.representations.reduce(
+      wearable.data.representations.reduce(
         (hashes, representation) =>
           hashes.concat(representation.contents.reduce((hashes, content) => hashes.concat([content.hash]), [])),
         []

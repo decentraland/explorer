@@ -56,7 +56,7 @@ export async function initialize(segmentKey: string): Promise<void> {
     window.analytics.load(segmentKey)
     window.analytics.page()
     window.analytics.ready(() => {
-      window.analytics.timeout(10000)
+      window.analytics.timeout(1000)
     })
   }
 }
@@ -82,7 +82,7 @@ export function identifyEmail(email: string, userId?: string) {
 }
 
 export function trackEvent(eventName: string, eventData: Record<string, any>) {
-  const data = { ...eventData, time: new Date().toISOString(), sessionId, version: (window as any)['VERSION'] }
+  const data = { ...eventData, sessionId, version: (window as any)['VERSION'] }
 
   if (DEBUG_ANALYTICS) {
     defaultLogger.info(`Tracking event "${eventName}": `, data)

@@ -124,7 +124,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
 function realmProperties(realm: Realm, configOverride: boolean = true): Partial<DaoState> {
   const domain = realm.domain
   return {
-    fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2',
+    fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/content',
     catalystServer: domain,
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
@@ -155,7 +155,7 @@ function ensureContentWhitelist(state: Partial<DaoState>, contentWhitelist: Cand
   const { domain } = contentWhitelist[0]
   return {
     ...state,
-    fetchContentServer: FETCH_CONTENT_SERVICE ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2'
+    fetchContentServer: FETCH_CONTENT_SERVICE ? FETCH_CONTENT_SERVICE : domain + '/content'
   }
 }
 
