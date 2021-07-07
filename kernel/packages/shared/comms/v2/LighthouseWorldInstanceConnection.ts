@@ -15,8 +15,8 @@ import { Position, positionHash } from '../interface/utils'
 import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
 import { Peer as LayerBasedPeerType } from 'decentraland-katalyst-peer'
-import { Peer as IslandBasedPeer, buildCatalystPeerStatsData } from '@dcl/catalyst-peer'
-import { PacketCallback, PeerConfig, Room } from 'decentraland-katalyst-peer/src/types'
+import { Peer as IslandBasedPeer, buildCatalystPeerStatsData, PeerConfig, PacketCallback } from '@dcl/catalyst-peer'
+import { Room } from 'decentraland-katalyst-peer/src/types'
 import {
   ChatData,
   CommsMessage,
@@ -104,7 +104,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     private peerId: string,
     private realm: Realm,
     private lighthouseUrl: string,
-    private peerConfig: PeerConfig,
+    private peerConfig: PeerConfig & { onIslandChange: (island: string | undefined) => any },
     private statusHandler: (status: CommsStatus) => void
   ) {
     // This assignment is to "definetly initialize" peer
@@ -136,6 +136,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
     this.realm = realm
     this.lighthouseUrl = url
+    this.peerConfig.onIslandChange(undefined)
 
     this.initializePeer()
     await this.connectPeer()
@@ -152,7 +153,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   analyticsData() {
     return {
-      // This should work for any of both peer library types
+      // This should work for any of both peer library types. Once we stop using both, we can remove the type cast
       // tslint:disable-next-line
       stats: buildCatalystPeerStatsData(this.peer as any)
     }

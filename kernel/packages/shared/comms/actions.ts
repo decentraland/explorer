@@ -38,3 +38,7 @@ export type SetVoiceMute = ReturnType<typeof setVoiceMute>
 export const SET_VOICE_POLICY = 'Set Voice Policy'
 export const setVoicePolicy = (voicePolicy: VoicePolicy) => action(SET_VOICE_POLICY, { voicePolicy })
 export type SetVoicePolicy = ReturnType<typeof setVoicePolicy>
+
+export const SET_COMMS_ISLAND = 'Set Comms Island'
+export const setCommsIsland = (island: string | undefined) => action(SET_COMMS_ISLAND, { island })
+export type SetCommsIsland = ReturnType<typeof setCommsIsland>

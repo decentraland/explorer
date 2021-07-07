@@ -92,8 +92,8 @@ import {
 import { getIdentity, getStoredSession } from 'shared/session'
 import { createLogger } from '../logger'
 import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
-import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
-import { getVoicePolicy, isVoiceChatRecording } from './selectors'
+import { setCommsIsland, voicePlayingUpdate, voiceRecordingUpdate } from './actions'
+import { getCommsIsland, getVoicePolicy, isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
 import future, { IFuture } from 'fp-future'
 import { getProfileType } from 'shared/profiles/getProfileType'
@@ -101,11 +101,12 @@ import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { isURL } from 'atomicHelpers/isURL'
-import { VoicePolicy } from './types'
+import { RootCommsState, VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
 import { EncodedFrame } from 'voice-chat-codec/types'
 import Html from 'shared/Html'
 import { isFeatureToggleEnabled } from 'shared/selectors'
+import * as qs from "query-string"
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -149,10 +150,10 @@ export class PeerTrackingInfo {
     version: number | null
     status: 'ok' | 'loading' | 'error'
   } = {
-    promise: Promise.resolve(),
-    version: null,
-    status: 'loading'
-  }
+      promise: Promise.resolve(),
+      version: null,
+      status: 'loading'
+    }
 
   profileType?: ProfileType
 
@@ -956,6 +957,9 @@ export async function connect(userId: string) {
             maxConnectionDistance: 4,
             nearbyPeersDistance: 5,
             disconnectDistance: 5
+          },
+          onIslandChange: (island: string | undefined) => {
+            store.dispatch(setCommsIsland(island))
           }
         }
 
@@ -1140,7 +1144,7 @@ async function doStartCommunications(context: Context) {
         obj.immediate
       ] as Position
 
-      if (context && isRendererEnabled) {
+      if (context && isRendererEnabled()) {
         onPositionUpdate(context, p)
       }
     })
@@ -1293,4 +1297,33 @@ function stripSnapshots(profile: Profile): Profile {
     ...profile,
     avatar: { ...profile.avatar, snapshots: newSnapshots as Snapshots }
   }
+}
+
+function observeIslandChange(
+  store: Store<RootCommsState>,
+  onIslandChange: (previousIsland: string | undefined, currentIsland: string | undefined) => any) {
+
+  let currentIsland = getCommsIsland(store.getState())
+
+  store.subscribe(() => {
+    const previousIsland = currentIsland
+    currentIsland = getCommsIsland(store.getState())
+    if (currentIsland !== previousIsland) {
+      onIslandChange(previousIsland, currentIsland)
+    }
+  })
+}
+
+export function initializeUrlIslandObserver() {
+  observeIslandChange(store, (_previousIsland, currentIsland) => {
+    const q = qs.parse(location.search)
+
+    if (currentIsland) {
+      q.island = currentIsland
+    } else {
+      delete q.island
+    }
+
+    history.replaceState({ island: currentIsland }, '', `?${qs.stringify(q)}`)
+  })
 }

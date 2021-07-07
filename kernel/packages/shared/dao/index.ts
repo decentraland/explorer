@@ -30,7 +30,7 @@ import { CatalystNode } from '../types'
 import { zip } from './utils/zip'
 import { realmToString } from './utils/realmToString'
 import { PIN_CATALYST } from 'config'
-const qs: any = require('query-string')
+import * as qs from 'query-string'
 
 const DEFAULT_TIMEOUT = 5000
 
@@ -259,10 +259,10 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
       return Math.abs(elapsedDiff) > 1500
         ? elapsedDiff // If the latency difference is greater than 1500, we consider that as the main factor
         : scoreDiff !== 0
-        ? scoreDiff // If there's score difference, we consider that
-        : usersDiff !== 0
-        ? usersDiff // If the score is the same (as when they are empty)
-        : elapsedDiff // If the candidates have the same score by users, we consider the latency again
+          ? scoreDiff // If there's score difference, we consider that
+          : usersDiff !== 0
+            ? usersDiff // If the score is the same (as when they are empty)
+            : elapsedDiff // If the candidates have the same score by users, we consider the latency again
     })
 
   if (sorted.length === 0 && candidates.length > 0) {

@@ -1,5 +1,5 @@
 import { contracts as contractInfo } from './contracts'
-const queryString = require('query-string')
+import * as queryString from 'query-string'
 import { getWorld } from '@dcl/schemas'
 import { StoreContainer } from 'shared/store/rootTypes'
 
@@ -91,24 +91,29 @@ export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
 
 const qs = queryString.parse(location.search)
 
+function ensureSingleString(value: string | string[] | null): string | null {
+  if (!value || typeof value === 'string') return value
+  return value[0]
+}
+
 // Comms
 export const USE_LOCAL_COMMS = location.search.includes('LOCAL_COMMS') || PREVIEW
-export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
+export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? ensureSingleString(qs.COMMS)! : 'v2-p2p' // by default
 export const COMMS_PROFILE_TIMEOUT = 10000
 
-export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
-export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
-export const COMMS_SERVICE = qs.COMMS_SERVICE
-export const RESIZE_SERVICE = qs.RESIZE_SERVICE
-export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
-export const POI_SERVICE = qs.POI_SERVICE
-export const REALM = qs.realm
+export const UPDATE_CONTENT_SERVICE = ensureSingleString(qs.UPDATE_CONTENT_SERVICE)
+export const FETCH_CONTENT_SERVICE = ensureSingleString(qs.FETCH_CONTENT_SERVICE)
+export const COMMS_SERVICE = ensureSingleString(qs.COMMS_SERVICE)
+export const RESIZE_SERVICE = ensureSingleString(qs.RESIZE_SERVICE)
+export const HOTSCENES_SERVICE = ensureSingleString(qs.HOTSCENES_SERVICE)
+export const POI_SERVICE = ensureSingleString(qs.POI_SERVICE)
+export const REALM = ensureSingleString(qs.realm)
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
 
 export const AUTO_CHANGE_REALM = location.search.includes('AUTO_CHANGE_REALM')
 
-export const LOS = qs.LOS
+export const LOS = ensureSingleString(qs.LOS)
 
 export const DEBUG = location.search.includes('DEBUG_MODE') || !!(global as any).mocha || PREVIEW || EDITOR
 export const DEBUG_ANALYTICS = location.search.includes('DEBUG_ANALYTICS')
@@ -130,17 +135,17 @@ export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
 export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.includes('SHOW_FPS_COUNTER') || DEBUG
 export const HAS_INITIAL_POSITION_MARK = location.search.includes('position')
-export const WSS_ENABLED = qs.ws !== undefined
+export const WSS_ENABLED = !!ensureSingleString(qs.ws)
 export const FORCE_SEND_MESSAGE = location.search.includes('FORCE_SEND_MESSAGE')
 
 export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
-export const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN
+export const ASSET_BUNDLES_DOMAIN = ensureSingleString(qs.ASSET_BUNDLES_DOMAIN)
 
-export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
+export const PIN_CATALYST = typeof qs.CATALYST === 'string' ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
 
-export const FORCE_RENDERING_STYLE = qs.FORCE_RENDERING_STYLE
+export const FORCE_RENDERING_STYLE = ensureSingleString(qs.FORCE_RENDERING_STYLE) as any
 
-const META_CONFIG_URL = qs.META_CONFIG_URL
+const META_CONFIG_URL = ensureSingleString(qs.META_CONFIG_URL)
 
 export namespace commConfigurations {
   export const debug = true
@@ -150,9 +155,9 @@ export namespace commConfigurations {
 
   export const peerTtlMs = 60000
 
-  export const maxVisiblePeers = qs.MAX_VISIBLE_PEERS ? parseInt(qs.MAX_VISIBLE_PEERS, 10) : 25
+  export const maxVisiblePeers = typeof qs.MAX_VISIBLE_PEERS === 'string' ? parseInt(qs.MAX_VISIBLE_PEERS, 10) : 25
 
-  export const autoChangeRealmInterval = qs.AUTO_CHANGE_INTERVAL ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
+  export const autoChangeRealmInterval = typeof qs.AUTO_CHANGE_INTERVAL === 'string' ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
   export const iceServers = [
     {
@@ -245,9 +250,9 @@ export function getExclusiveServer() {
   return 'https://wearable-api.decentraland.org/v2/collections'
 }
 
-export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? qs.WITH_COLLECTIONS : undefined
-export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
-export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'
+export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? ensureSingleString(qs.WITH_COLLECTIONS)! : undefined
+export const WEARABLE_API_DOMAIN = ensureSingleString(qs.WEARABLE_API_DOMAIN) || 'wearable-api.decentraland.org'
+export const WEARABLE_API_PATH_PREFIX = ensureSingleString(qs.WEARABLE_API_PATH_PREFIX) || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
 export function getWearablesSafeURL() {
@@ -287,7 +292,7 @@ export function getServerConfigurations() {
   const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
 
   const QUESTS_SERVER_URL =
-    qs.QUESTS_SERVER_URL ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
+    ensureSingleString(qs.QUESTS_SERVER_URL) ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,

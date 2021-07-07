@@ -3,7 +3,7 @@ import { AnyAction } from 'redux'
 import { COMMS_ESTABLISHED } from 'shared/loading/types'
 
 import { CommsState, VoicePolicy } from './types'
-import { SET_VOICE_CHAT_RECORDING, SET_VOICE_POLICY, TOGGLE_VOICE_CHAT_RECORDING } from './actions'
+import { SET_COMMS_ISLAND, SET_VOICE_CHAT_RECORDING, SET_VOICE_POLICY, TOGGLE_VOICE_CHAT_RECORDING } from './actions'
 
 const INITIAL_COMMS = {
   initialized: false,
@@ -27,6 +27,8 @@ export function commsReducer(state?: CommsState, action?: AnyAction): CommsState
       return { ...state, voiceChatRecording: !state.voiceChatRecording }
     case SET_VOICE_POLICY:
       return { ...state, voicePolicy: action.payload.voicePolicy }
+    case SET_COMMS_ISLAND:
+      return { ...state, island: action.payload.island }
     default:
       return state
   }
