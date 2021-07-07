@@ -135,6 +135,11 @@ declare const globalThis: CommsContainer
 
 const logger = createLogger('comms: ')
 
+type ProfilePromiseState = {
+  promise: Promise<ProfileForRenderer | void>
+  version: number | null
+  status: 'ok' | 'loading' | 'error'
+}
 export class PeerTrackingInfo {
   public position: Position | null = null
   public identity: string | null = null
@@ -145,15 +150,11 @@ export class PeerTrackingInfo {
   public receivedPublicChatMessages = new Set<string>()
   public talking = false
 
-  profilePromise: {
-    promise: Promise<ProfileForRenderer | void>
-    version: number | null
-    status: 'ok' | 'loading' | 'error'
-  } = {
-      promise: Promise.resolve(),
-      version: null,
-      status: 'loading'
-    }
+  profilePromise: ProfilePromiseState = {
+    promise: Promise.resolve(),
+    version: null,
+    status: 'loading'
+  }
 
   profileType?: ProfileType
 
