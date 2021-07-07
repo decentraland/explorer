@@ -54,6 +54,9 @@ export const isFeatureEnabled = (store: RootMetaState, featureName: FeatureFlags
   }
 }
 
+export const getSynapseUrl = (store: RootMetaState): string =>
+  store.meta.config.synapseUrl ?? 'https://chat.decentraland.zone'
+
 /** Convert camel case to upper snake case */
 function toUrlFlag(key: string) {
   const result = key.replace(/([A-Z])/g, ' $1')
