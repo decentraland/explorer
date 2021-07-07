@@ -92,7 +92,8 @@ export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
 const qs = queryString.parse(location.search)
 
 function ensureSingleString(value: string | string[] | null): string | null {
-  if (!value || typeof value === 'string') return value
+  if (!value) return null
+  if (typeof value === 'string') return value
   return value[0]
 }
 
