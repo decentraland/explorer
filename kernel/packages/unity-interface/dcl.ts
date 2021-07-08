@@ -35,7 +35,6 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { TeleportController } from 'shared/world/TeleportController'
-import { toggleWalletPrompt } from "../shared/session/actions"
 
 declare const globalThis: RendererInterfaces &
   StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
@@ -65,7 +64,6 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
     TeleportController.stopTeleportAnimation()
   }
 
-  globalThis.globalStore.dispatch(toggleWalletPrompt(true))
   refreshLoadingScreen()
 }
 

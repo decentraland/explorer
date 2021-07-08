@@ -72,6 +72,7 @@ import { ensureRealmInitialized } from '../dao/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
 import { ensureUnityInterface } from "../renderer"
+import {refreshLoadingScreen} from "../../unity-interface/dcl";
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -106,6 +107,7 @@ function* scheduleAwaitingSignaturePrompt() {
 
   if (isStillWaiting) {
     yield put(toggleWalletPrompt(true))
+    refreshLoadingScreen()
     Html.showAwaitingSignaturePrompt(true)
   }
 }
