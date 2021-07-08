@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import ErrorContainer from "./errors/ErrorContainer";
+import LoginContainer from "./auth/LoginContainer";
 import { Audio } from "./common/Audio";
 import WarningContainer from "./warning/WarningContainer";
 import "./App.css";
