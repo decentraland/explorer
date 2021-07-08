@@ -1019,8 +1019,8 @@ export async function connect(userId: string) {
         } catch (e) {
           disconnect()
           defaultLogger.error(`error while trying to establish communications `, e)
-          BringDownClientAndShowError(ESTABLISHING_COMMS)
           ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
+          BringDownClientAndShowError(ESTABLISHING_COMMS)
         }
       })
     }
@@ -1047,8 +1047,8 @@ export async function startCommunications(context: Context) {
           // max number of attemps reached => rethrow error
           logger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
           disconnect()
-          BringDownClientAndShowError(COMMS_COULD_NOT_BE_ESTABLISHED)
           ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
+          BringDownClientAndShowError(COMMS_COULD_NOT_BE_ESTABLISHED)
           throw e
         } else {
           // max number of attempts not reached => continue with loop
@@ -1215,8 +1215,8 @@ function handleReconnectionError() {
 
 function handleIdTaken() {
   disconnect()
+  ReportFatalErrorWithCommsPayload(new Error(`Handle Id already taken`), ErrorContext.COMMS_INIT)
   BringDownClientAndShowError(NEW_LOGIN)
-  ReportFatalErrorWithCommsPayload(new Error(`Handle Id already taken`), `comms#init`)
 }
 
 function handleFullLayer() {
