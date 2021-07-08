@@ -2,6 +2,10 @@
 
 This is the [decentraland explorer](https://play.decentraland.org) official repository.
 
+This repository covers mainly the Kernel component of the explorer product. 
+
+Kernel component responsibility includes running the SDK scenes, handling back-end business logic and more. This said, you can clone this repo and run the browser version of Explorer. If you want to contribute to our renderer, please check out the unity-renderer repo: https://github.com/decentraland/unity-renderer/pulls. Unity-renderer repo outputs a npm package that's used on this one for publishing the Explorer.
+
 ## Before you start
 
 1. [Contribution Guidelines](.github/CONTRIBUTING.md)
@@ -9,56 +13,6 @@ This is the [decentraland explorer](https://play.decentraland.org) official repo
 3. [Code Review Standards](docs/code-review-standards.md)
 
 # Running the Explorer
-
-## Main Dependencies
-
-This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ .
-So, before anything make sure you have it installed by typing:
-
-    git lfs install
-    git lfs pull
-
----
-
-## Debug using Unity only
-
-### Why you should care
-
-Take this path if you intend to contribute on features without the need of modifying Kernel.
-This is the recommended path for artists.
-
-### Steps
-
-1. Download and install Unity 2019.4.19f1
-2. Open the scene named `InitialScene`
-3. Within the scene, select the `WSSController` GameObject.
-4. On `WSSController` inspector, make sure that `Base url mode` is set to `Custom`
-   and `Base url custom` is set to `https://play.decentraland.zone/?`
-5. Run the Initial Scene in the Unity editor
-6. A browser tab with `explorer` should open automatically and steal your focus, don't close it!. Login with your wallet, go back to Unity and explorer should start running on the `Game View`.
-7. As you can see, `WSSController` has other special options like the starting position, etc. You are welcome to use them as you see fit, but you'll have to close the tab and restart the scene for them to make effect.
-
-### Troubleshooting
-
-#### Missing git lfs extension
-
-If while trying to compile the Unity project you get an error regarding some libraries that can not be added (for instance Newtonsoft
-Json.NET or Google Protobuf), please execute the following command in the root folder:
-
-    git lfs install
-    git lfs pull
-
-Then, on the Unity editor, click on `Assets > Reimport All`
-
----
-
-## Debug using Kernel only
-
-### Why you should care
-
-Kernel mostly takes care of scene code execution and sandboxing, communication with catalysts, external services, comms, etc. If you want to delve into any of this, you may want to follow these steps and don't bother with the Unity installation.
-
-### Steps
 
 Make sure you have the following dependencies:
 
@@ -86,8 +40,6 @@ By now, you can run and watch a server with the kernel build by typing:
     make watch
 
 The make process will take a while. When its finished, you can start debugging the browser's explorer by going to http://localhost:3000/
-
-Note that the Unity version used by this approach will be the latest version deployed to `master` branch. If you need a local Unity build, check out the [advanced debugging scenarios](#advanced-debugging-scenarios).
 
 ### Update local renderer build version
 
@@ -122,31 +74,6 @@ When any commit is pushed to a branch on the server, a build is generated and de
 If the CI succeeds, you can browse to the generated link and test your changes. Bear in mind that any push will kick the CI, and there's no need to create a pull request.
 
 ---
-
-<a name="advanced-debugging-scenarios"></a>
-
-# Advanced debugging scenarios
-
-## Debug with Unity Editor + local Kernel
-
-### Why you should care
-
-You may want to use this approach for any features that need both Kernel and Unity modifications, and you need to watch Unity code changes fast without the need of injecting a wasm targeted build in the browser.
-
-When the steps are followed, you will be able to test your changes with just pressing the "Play" button within Unity. This will open a tab running the local Kernel build and Unity will connect to it using websocket.
-
-This is the most useful debugging scenario for advanced feature implementation.
-
-### Steps
-
-- Make sure you have the proper Unity version up and running
-- Make sure you are running kernel through `make watch` command.
-- Back in unity editor, open the `WSSController` component inspector of `InitialScene`
-- Make sure that is setup correctly
-
-## Debug with browsers + local Unity build
-
-See https://github.com/decentraland/unity-renderer/ for instructions regarding Unity testing.
 
 ## Technical how-to guides and explainers
 
