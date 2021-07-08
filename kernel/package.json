@@ -123,6 +123,7 @@
     "long": "^4.0.0",
     "multihashes": "^0.4.14",
     "multihashing-async": "^0.8.0",
+    "mz-observable": "^1.0.1",
     "oimo": "^1.0.9",
     "redux": "^4.0.4",
     "redux-saga": "^1.0.5",

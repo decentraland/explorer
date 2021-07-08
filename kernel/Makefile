@@ -122,7 +122,7 @@ static/dist/%.js: build-essentials packages/entryPoints/%.ts
 
 # Release
 
-DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/website.js
+DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/kernel.js
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
@@ -228,19 +228,19 @@ watch-builder: build-essentials static/dist/editor.js ## Watch the files require
 
 watch-cli: build-essentials ## Watch the files required for building the CLI
 	@node_modules/.bin/concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,preview,website,server" \
+		-n "ecs,scene-system,internal-scenes,loader,preview,kernel,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/entryPoints/preview.json --watch" \
-			"$(COMPILER) targets/entryPoints/website.json --watch" \
+			"$(COMPILER) targets/entryPoints/kernel.json --watch" \
 			"node ./scripts/runTestServer.js --keep-open"
 
 # Aesthetics
 
 lint: ## Validate correct formatting and circular dependencies
-	@node_modules/.bin/madge packages/entryPoints/website.ts --circular --warning
+	@node_modules/.bin/madge packages/entryPoints/kernel.ts --circular --warning
 	@node_modules/.bin/madge packages --orphans --extensions ts --exclude '.+\.d.ts|.+/dist\/.+'
 	@node_modules/.bin/tslint --project tsconfig.json
 
@@ -250,17 +250,17 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 
 # Development
 
-watch: $(SOME_MAPPINGS) build-essentials static/dist/website.js ## Watch the files required for hacking the explorer
+watch: $(SOME_MAPPINGS) build-essentials static/dist/kernel.js ## Watch the files required for hacking the explorer
 	cd ../website && npm run start &
 	cd $(PWD);
 	@NODE_ENV=development npx concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,website,test,simulator,server" \
+		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,kernel,test,simulator,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/scenes/basic-scenes.json --watch" \
-			"$(COMPILER) targets/entryPoints/website.json --watch" \
+			"$(COMPILER) targets/entryPoints/kernel.json --watch" \
 			"$(COMPILER) targets/test.json --watch" \
 			"node ./scripts/runPathSimulator.js" \
 			"node ./scripts/runTestServer.js --keep-open"

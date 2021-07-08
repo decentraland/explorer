@@ -14,15 +14,15 @@ export interface EthLoginProps {
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
-  const [showWalletSelector, setShowWalletSelector] = useState(false)  
+  const [showWalletSelector, setShowWalletSelector] = useState(false)
 
   function handlePlay() {
-    track('open_login_popup')
+    track("open_login_popup")
     setShowWalletSelector(true)
   }
 
   function handleLogin(provider: ProviderType | null) {
-    track('click_login_button', { provider_type: provider || 'guest' })
+    track("click_login_button", { provider_type: provider || "guest" })
     if (props.onLogin) {
       props.onLogin(provider)
     }

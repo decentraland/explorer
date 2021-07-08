@@ -13,31 +13,17 @@ import {
   ExecutionLifecycleEventsList
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
-import Html from '../Html'
 import { trackEvent } from '../analytics'
 import { action } from 'typesafe-actions'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { errorObservable } from '../observables'
 
 declare const globalThis: StoreContainer
 
-export let aborted = false
-
 export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
-  if (aborted) {
-    return
-  }
-
   if (ExecutionLifecycleEventsList.includes(event)) {
     globalThis.globalStore.dispatch(action(event))
   }
-
-  const body = document.body
-  const container = document.getElementById('gameContainer')
-  container!.setAttribute('style', 'display: none !important')
-
-  Html.hideProgressBar()
-
-  body.setAttribute('style', 'background-image: none !important;')
 
   const targetError =
     event === COMMS_COULD_NOT_BE_ESTABLISHED
@@ -57,8 +43,12 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       : 'fatal'
 
   globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
-  Html.showErrorModal(targetError)
-  aborted = true
+
+  errorObservable.notifyObservers({
+    error: new Error(event),
+    code: targetError,
+    level: 'fatal'
+  })
 }
 
 export namespace ErrorContext {
@@ -129,8 +119,11 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
     saga_stack: sagaStack
   })
 
-  // we only add the context to rollbar event
-  ReportRollbarError(error, { context, ...payload })
+  errorObservable.notifyObservers({
+    error,
+    level: 'fatal',
+    extra: { context, ...payload }
+  })
 }
 
 function getStack(error?: any) {
@@ -142,11 +135,5 @@ function getStack(error?: any) {
     } catch (e) {
       return e.stack || '' + error
     }
-  }
-}
-
-function ReportRollbarError(error: Error, payload: any) {
-  if (window.Rollbar) {
-    window.Rollbar.critical(error, payload)
   }
 }

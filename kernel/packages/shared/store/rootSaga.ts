@@ -9,7 +9,6 @@ import { daoSaga } from '../dao/sagas'
 import { metaSaga } from '../meta/sagas'
 import { chatSaga } from '../chat/sagas'
 import { sessionSaga } from '../session/sagas'
-import { analyticsSaga } from '../analytics/sagas'
 import { friendsSaga } from '../friends/sagas'
 import { commsSaga } from '../comms/sagas'
 import { socialSaga } from '../social/sagas'
@@ -19,7 +18,6 @@ import { questsSaga } from 'shared/quests/sagas'
 export function createRootSaga() {
   return function* rootSaga() {
     yield fork(metaSaga)
-    yield fork(analyticsSaga)
     yield fork(friendsSaga)
     yield fork(sessionSaga)
     yield fork(commsSaga)

@@ -1,7 +1,7 @@
-import React from "react";
+import React from "react"
 
-import "./errors.css";
-import errorImage from "../../images/errors/error-robotmobile.png";
+import "./errors.css"
+import errorImage from "../../images/errors/error-robotmobile.png"
 
 export const ErrorNoMobile: React.FC = () => (
   <div id="error-nomobile" className="hidden-error">
@@ -24,15 +24,13 @@ export const ErrorNoMobile: React.FC = () => (
           margin: "auto",
         }}
       >
-        <div className="theclientisonlya">
-          The client is only available on desktop right now.
-        </div>
+        <div className="theclientisonlya">The client is only available on desktop right now.</div>
         <img alt="" className="robotmobilebrowsererror" src={errorImage} />
         <div className="cta">
           <div
             className="signup"
             onClick={() => {
-              window.location.href = "https://decentraland.org";
+              window.location.href = "https://decentraland.org"
             }}
           >
             Learn more about decentraland
@@ -41,4 +39,4 @@ export const ErrorNoMobile: React.FC = () => (
       </div>
     </div>
   </div>
-);
+)

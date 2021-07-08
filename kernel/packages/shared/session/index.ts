@@ -12,8 +12,10 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage
 } from 'atomicHelpers/localStorage'
-import { LoginStage, StoredSession } from './types'
+import { StoredSession } from './types'
 import { authenticate } from './actions'
+import { IEthereumProvider, LoginStage } from '../../../../anti-corruption-layer/kernel-types'
+import { login } from 'shared/ethereum/provider'
 
 declare const globalThis: StoreContainer
 
@@ -120,19 +122,21 @@ export async function userAuthentified(): Promise<void> {
   })
 }
 
-export function authenticateWhenItsReady(providerType: ProviderType | null) {
+export function authenticateWhenItsReady(provider: IEthereumProvider, isGuest: boolean) {
+  login(provider, isGuest)
+
   const store: Store<RootState> = globalThis.globalStore
   const loginStage = store.getState().session.loginStage
-  if (loginStage === LoginStage.SIGN_IN) {
-    globalThis.globalStore.dispatch(authenticate(providerType))
-  } else if (loginStage === LoginStage.LOADING || loginStage === undefined) {
+  if (loginStage === LoginStage.LOADING || loginStage === undefined) {
     const unsubscribe = store.subscribe(() => {
       const loginStage = store.getState().session.loginStage
       if (loginStage === LoginStage.SIGN_IN) {
         unsubscribe()
-        globalThis.globalStore.dispatch(authenticate(providerType))
+        globalThis.globalStore.dispatch(authenticate())
       }
     })
+  } else {
+    globalThis.globalStore.dispatch(authenticate())
   }
 }
 

@@ -6,14 +6,10 @@
 # These owners will be the default owners for everything in the repo. (disabled)
 #*                  @decentraland/world-team
 
-# Specific subteams
-
-# Unity Team (disabled)
-#unity-client/**/*                            @decentraland/unity-team 
-
 # ECS and SDK packages
 kernel/packages/build-ecs/**/*               @decentraland/kernel-team
 kernel/packages/decentraland-amd/**/*        @decentraland/kernel-team
 kernel/packages/decentraland-ecs/**/*        @decentraland/kernel-team
 kernel/packages/decentraland-ecs/**/*        menduz
 kernel/packages/scene-system/**/*            menduz
+anti-corruption-layer/kernel-types.ts        @decentraland/protocol-guardians

@@ -10,6 +10,7 @@ import { Container } from "../common/Container"
 import { BeginnersGuide } from "./BeginnersGuide"
 import { BigFooter } from "../common/BigFooter"
 import "./LoginContainer.css"
+import { StoreType } from "../../state/redux"
 
 export enum LoginStage {
   LOADING = "loading",
@@ -20,7 +21,7 @@ export enum LoginStage {
   COMPLETED = "completed",
 }
 
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: StoreType): LoginContainerProps => {
   // test all connectors
   const enableProviders = new Set([
     ProviderType.INJECTED, // Ready
@@ -29,12 +30,10 @@ const mapStateToProps = (state: any) => {
   ])
   const availableProviders = connection.getAvailableProviders().filter((provider) => enableProviders.has(provider))
   return {
-    stage: state.session.loginStage,
-    signing: state.session.signing,
-    subStage: state.session.signup.stage,
-    provider: state.session.currentProvider,
+    stage: state.session.kernelState?.loginStatus,
+    signing: state.session.kernelState?.signing || false,
     availableProviders,
-    engineReady: state.renderer.initialized && state.renderer.engineStarted,
+    engineReady: state.kernel.ready,
   }
 }
 
@@ -43,16 +42,17 @@ const mapDispatchToProps = (dispatch: any) => ({
 })
 
 export interface LoginContainerProps {
-  stage: LoginStage
+  stage?: LoginStage
   signing: boolean
-  subStage: string
-  provider?: string | null
   availableProviders: ProviderType[]
-  onLogin: (provider: ProviderType | null) => void
   engineReady: boolean
 }
 
-export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
+export interface LoginContainerDispathc {
+  onLogin: (provider: ProviderType | null) => void
+}
+
+export const LoginContainer: React.FC<LoginContainerProps & LoginContainerDispathc> = (props) => {
   const loading = props.stage === LoginStage.LOADING || !props.engineReady
   const full = loading || props.stage === LoginStage.SIGN_IN
   const shouldShow = LoginStage.COMPLETED !== props.stage && LoginStage.SIGN_UP !== props.stage
@@ -60,10 +60,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
     <React.Fragment>
       {shouldShow && (
         <div className={"LoginContainer" + (full ? " FullPage" : "")}>
-          {/* Nabvar */}
           <Navbar full={full} />
-
-          {/* Main */}
           <main>
             <Container className="eth-login-popup">
               {full && (
@@ -77,11 +74,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
               {props.stage === LoginStage.SIGN_ADVICE && <EthSignAdvice />}
             </Container>
           </main>
-
-          {/* Beginner Guide */}
           {full && <BeginnersGuide />}
-
-          {/* Footer */}
           {full && <BigFooter />}
         </div>
       )}

@@ -1,7 +1,7 @@
-import React from "react";
+import React from "react"
 
-import "./errors.css";
-import errorImage from "../../images/errors/error-robotmobile.png";
+import "./errors.css"
+import errorImage from "../../images/errors/error-robotmobile.png"
 
 export const ErrorAvatarLoading: React.FC = () => (
   <div id="error-avatarerror" className="error-container">
@@ -14,9 +14,7 @@ export const ErrorAvatarLoading: React.FC = () => (
         </div>
         <div className="givesomedetailof">
           Please try again later, and if the problem persists you can contact us through the Discord channel or at{" "}
-          <a href="mailto:hello@decentraland.org">
-            hello@decentraland.org
-          </a>
+          <a href="mailto:hello@decentraland.org">hello@decentraland.org</a>
         </div>
       </div>
       <div className="errorimage col">
@@ -24,4 +22,4 @@ export const ErrorAvatarLoading: React.FC = () => (
       </div>
     </div>
   </div>
-);
+)

@@ -1,4 +1,5 @@
-import { LoginStage, RootSessionState } from './types'
+import { LoginStage } from '../../../../anti-corruption-layer/kernel-types'
+import { RootSessionState } from './types'
 
 // TODO use userId
 export const getUserId = (state: RootSessionState) => state.session.userId

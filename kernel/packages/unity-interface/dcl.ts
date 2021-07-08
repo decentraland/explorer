@@ -7,7 +7,6 @@ import {
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER
 } from 'config'
-import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
@@ -175,10 +174,8 @@ export async function startUnitySceneWorkers() {
       })
     },
     onPositionSettled: (spawnPoint) => {
-      if (!aborted) {
-        unityInterface.Teleport(spawnPoint)
-        unityInterface.ActivateRendering()
-      }
+      unityInterface.Teleport(spawnPoint)
+      unityInterface.ActivateRendering()
     },
     onPositionUnsettled: () => {
       unityInterface.DeactivateRendering()

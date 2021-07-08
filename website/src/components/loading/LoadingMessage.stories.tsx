@@ -1,6 +1,6 @@
-import React from "react";
-import { Meta, Story } from "@storybook/react";
-import { LoadingMessage, LoadingMessageProps } from "./LoadingMessage";
+import React from "react"
+import { Meta, Story } from "@storybook/react"
+import { LoadingMessage, LoadingMessageProps } from "./LoadingMessage"
 
 export default {
   title: "Explorer/loading/LoadingMessage",
@@ -11,8 +11,6 @@ export default {
     showWalletPrompt: false,
   },
   component: LoadingMessage,
-} as Meta;
+} as Meta
 
-export const Template: Story<LoadingMessageProps> = (args) => (
-  <LoadingMessage {...args} />
-);
+export const Template: Story<LoadingMessageProps> = (args) => <LoadingMessage {...args} />

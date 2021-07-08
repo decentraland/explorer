@@ -1,19 +1,20 @@
-import React from "react";
-import { connect } from "react-redux";
-import "./Overlay.css";
+import React from "react"
+import { connect } from "react-redux"
+import { StoreType } from "../../state/redux"
+import "./Overlay.css"
 
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: StoreType) => {
   return {
-    show: (!state.loading.error && state.loading.showLoadingScreen) || false,
-  };
-};
+    show: false, // (!state.loading.error && state.loading.showLoadingScreen) ||
+  }
+}
 
 export interface OverlayProps {
-  show: boolean;
+  show: boolean
 }
 
 export const Overlay: React.FC<OverlayProps> = (props) => (
   <React.Fragment>{props.show && <div id="overlay" />}</React.Fragment>
-);
+)
 
-export default connect(mapStateToProps)(Overlay);
+export default connect(mapStateToProps)(Overlay)

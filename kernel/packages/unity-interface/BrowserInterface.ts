@@ -16,9 +16,8 @@ import {
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { identifyEmail, trackEvent } from 'shared/analytics'
+import { trackEvent } from 'shared/analytics'
 import {
-  aborted,
   BringDownClientAndShowError,
   ErrorContext,
   ReportFatalErrorWithUnityPayload
@@ -76,7 +75,7 @@ import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
-import Html from 'shared/Html'
+import { signUpObservable } from 'shared/observables'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -289,13 +288,16 @@ export class BrowserInterface {
   }
 
   public SendAuthentication(data: { rendererAuthenticationType: string }) {
-    const providerType: ProviderType | null = Object.values(ProviderType).includes(data.rendererAuthenticationType as ProviderType) ? data.rendererAuthenticationType as ProviderType : null
+    const providerType: ProviderType | null = Object.values(ProviderType).includes(
+      data.rendererAuthenticationType as ProviderType
+    )
+      ? (data.rendererAuthenticationType as ProviderType)
+      : null
 
-    authenticateWhenItsReady(providerType)
+    authenticateWhenItsReady(providerType, false)
   }
 
   public SendPassport(passport: { name: string; email: string }) {
-    Html.switchGameContainer(false)
     unityInterface.DeactivateRendering()
     globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
     globalThis.globalStore.dispatch(signUp())
@@ -303,9 +305,13 @@ export class BrowserInterface {
 
   public RequestOwnProfileUpdate() {
     const userId = getCurrentUserId(globalThis.globalStore.getState())
-    if (!isGuest() && userId) {
-      globalThis.globalStore.dispatch(profileRequest(userId))
-    }
+    isGuest()
+      .then((isGuest) => {
+        if (!isGuest && userId) {
+          globalThis.globalStore.dispatch(profileRequest(userId))
+        }
+      })
+      .catch(defaultLogger.error)
   }
 
   public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
@@ -332,9 +338,7 @@ export class BrowserInterface {
         break
       }
       case 'ActivateRenderingACK': {
-        if (!aborted) {
-          renderStateObservable.notifyObservers(true)
-        }
+        renderStateObservable.notifyObservers(true)
         break
       }
       case 'StartStatefulMode': {
@@ -402,10 +406,7 @@ export class BrowserInterface {
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
-    const userId = getCurrentUserId(globalThis.globalStore.getState())
-    if (userId) {
-      identifyEmail(data.userEmail, hasWallet() ? userId : undefined)
-    }
+    signUpObservable.notifyObservers({ email: data.userEmail })
   }
 
   public RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {

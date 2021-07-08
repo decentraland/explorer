@@ -1,73 +1,34 @@
+import { ETHEREUM_NETWORK, PREVIEW, WORLD_EXPLORER } from 'config'
 import { RequestManager } from 'eth-connect'
 import { future } from 'fp-future'
-import { defaultLogger } from 'shared/logger'
-import { Account } from 'web3x/account'
-import { Eth } from 'web3x/eth'
-import { ProviderType } from 'decentraland-connect'
-import { EthereumConnector } from './EthereumConnector'
-import { LegacyProviderAdapter } from 'web3x/providers'
-import { EDITOR } from 'config'
+import Html from 'shared/Html'
+import { checkTldVsWeb3Network, getAppNetwork } from 'shared/web3'
+import { IEthereumProvider } from '../../../../anti-corruption-layer/kernel-types'
 
-let ethConnector: EthereumConnector
-export const providerFuture = future()
 export const requestManager = new RequestManager((window as any).ethereum ?? null)
 
-export const loginCompleted = future<void>()
-  ; (window as any).loginCompleted = loginCompleted
+export type LoginCompletedResult = { provider: IEthereumProvider; isGuest: boolean }
+export const loginCompleted = future<LoginCompletedResult>()
 
-export function createEth(provider: any = null) {
-  return ethConnector.createEth(provider)
+export function login(provider: IEthereumProvider, isGuest: boolean) {
+  if (!loginCompleted.isPending) throw new Error('Double login is not enabled')
+  loginCompleted.resolve({ provider, isGuest })
 }
 
-// This function creates a Web3x eth object without the need of having initiated sign in / sign up. Used when requesting the catalysts
-export function createEthWhenNotConnectedToWeb3(): Eth {
-  const ethereum = (window as any).ethereum
-  if (ethereum) {
-    // If we have a web3 enabled browser, we can use that
-    return new Eth(new LegacyProviderAdapter((window as any).ethereum))
-  } else {
-    // If not, we use infura
-    return new Eth(EthereumConnector.createWeb3xWebsocketProvider())
+loginCompleted.then(async ({ provider }) => {
+  requestManager.setProvider(provider)
+
+  if (WORLD_EXPLORER && (await checkTldVsWeb3Network())) {
+    throw new Error('Network mismatch')
   }
-}
 
-export function getEthConnector(): EthereumConnector {
-  if (!ethConnector) {
-    ethConnector = new EthereumConnector()
+  if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (await getAppNetwork())) {
+    Html.showNetworkWarning()
   }
-  return ethConnector
-}
+})
 
-export async function requestProvider(type: ProviderType | null) {
-  try {
-    const { provider } = await getEthConnector().connect(type)
-    requestManager.setProvider(provider)
-    providerFuture.resolve({
-      successful: !isGuest(),
-      provider: provider,
-      localIdentity: isGuest() ? Account.create() : undefined
-    })
-    return provider
-  } catch (e) {
-    defaultLogger.log('Could not get a wallet connection', e)
-    requestManager.setProvider(null)
-  }
-  return null
-}
-
-export function isGuest(): boolean {
-  return getEthConnector().isGuest()
-}
-
-export function getProviderType() {
-  return ethConnector.getType()
-}
-
-export async function awaitApproval(): Promise<void> {
-  if (EDITOR) {
-    await requestProvider(null)
-  }
-  return providerFuture
+export async function isGuest(): Promise<boolean> {
+  return (await loginCompleted).isGuest
 }
 
 export function isSessionExpired(userData: any) {
@@ -76,24 +37,14 @@ export function isSessionExpired(userData: any) {
 
 export async function getUserAccount(returnChecksum: boolean = false): Promise<string | undefined> {
   try {
-    const eth = createEth()
-
-    if (!eth) return undefined
-
-    const accounts = await eth.getAccounts()
+    const accounts = await requestManager.eth_accounts()
 
     if (!accounts || accounts.length === 0) {
       return undefined
     }
 
-    return returnChecksum ? accounts[0].toJSON() : accounts[0].toJSON().toLowerCase()
+    return returnChecksum ? accounts[0] : accounts[0].toLowerCase()
   } catch (error) {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
-  }
-}
-
-export async function getUserEthAccountIfAvailable(returnChecksum: boolean = false): Promise<string | undefined> {
-  if (!isGuest()) {
-    return getUserAccount(returnChecksum)
   }
 }

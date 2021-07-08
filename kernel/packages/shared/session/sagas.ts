@@ -1,6 +1,5 @@
 import { call, delay, put, select, takeEvery, takeLatest } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
-import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
@@ -9,14 +8,11 @@ import { ENABLE_WEB3, ETHEREUM_NETWORK, PREVIEW, setNetwork, WORLD_EXPLORER } fr
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
 import {
-  createEth,
-  getEthConnector,
-  getProviderType,
-  getUserEthAccountIfAvailable,
   isGuest,
   isSessionExpired,
   loginCompleted,
-  requestProvider as requestEthProvider
+  LoginCompletedResult,
+  requestManager
 } from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
@@ -26,31 +22,21 @@ import {
   setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
-import { identifyEmail, identifyUser, trackEvent } from 'shared/analytics'
-import { checkTldVsWeb3Network, getAppNetwork } from 'shared/web3'
-import { connection, Provider, ProviderType } from 'decentraland-connect'
+import { trackEvent } from 'shared/analytics'
+import { getAppNetwork } from 'shared/web3'
+import { connection } from 'decentraland-connect'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
-import {
-  getLastSessionByProvider,
-  getLastSessionWithoutWallet,
-  getStoredSession,
-  removeStoredSession,
-  Session,
-  setStoredSession
-} from './index'
-import { ExplorerIdentity, LoginStage, StoredSession } from './types'
+import { getLastSessionByProvider, getStoredSession, Session, setStoredSession } from './index'
+import { ExplorerIdentity, StoredSession } from './types'
 import {
   AUTHENTICATE,
-  AuthenticateAction,
   changeLoginStage,
   INIT_SESSION,
   loginCompleted as loginCompletedAction,
   LOGOUT,
   REDIRECT_TO_SIGN_UP,
-  signInSetCurrentProvider,
-  signInSigning,
   SIGNUP,
   SIGNUP_CANCEL,
   signUpClearData,
@@ -60,8 +46,7 @@ import {
   toggleWalletPrompt,
   UPDATE_TOS,
   updateTOS,
-  userAuthentified,
-  authenticate as authenticateAction
+  userAuthentified
 } from './actions'
 import Html from '../Html'
 import { fetchProfileLocally, doesProfileExist } from '../profiles/sagas'
@@ -71,7 +56,8 @@ import { getSignUpIdentity, getSignUpProfile } from './selectors'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
-import { ensureUnityInterface } from "../renderer"
+import { ensureUnityInterface } from '../renderer'
+import { LoginStage } from '../../../../anti-corruption-layer/kernel-types'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -93,7 +79,6 @@ export function* sessionSaga(): any {
 function* initialize() {
   const tosAgreed: boolean = !!getFromLocalStorage(TOS_KEY)
   yield put(updateTOS(tosAgreed))
-  Html.initializeTos(tosAgreed)
 }
 
 function* updateTermOfService(action: any) {
@@ -112,75 +97,27 @@ function* scheduleAwaitingSignaturePrompt() {
 
 function* initSession() {
   yield ensureRealmInitialized()
-  yield checkConnector()
-  if (ENABLE_WEB3) {
-    yield checkPreviousSession()
-    Html.showEthLogin()
-  } else {
-    yield previewAutoSignIn()
-  }
+
+  // TODO: Move this to website
 
   yield put(changeLoginStage(LoginStage.SIGN_IN))
 
-  if (ENABLE_WEB3) {
-    const connecetor = getEthConnector()
-    if (connecetor.isConnected()) {
-      yield put(authenticateAction(connecetor.getType()))
-      return
-    }
-  }
-
-  Html.bindLoginEvent()
+  // TODO: if isConnected, connect
 }
 
-function* checkConnector() {
-  const connecetor = getEthConnector()
-  yield call(() => connecetor.restoreConnection())
-}
-
-function* checkPreviousSession() {
-  const connecetor = getEthConnector()
-  const session = getLastSessionWithoutWallet()
-  if (!isSessionExpired(session) && session) {
-    const identity = session.identity
-    if (identity && identity.provider) {
-      yield put(signInSetCurrentProvider(identity.provider))
-    }
-  } else {
-    try {
-      yield call(() => connecetor.disconnect())
-    } catch (e) {
-      logger.error(e)
-    }
-
-    removeStoredSession(session?.userId)
-  }
-}
-
-function* previewAutoSignIn() {
-  yield requestProvider(null)
-  const session: { userId: string; identity: ExplorerIdentity } = yield authorize()
-  yield signIn(session.userId, session.identity)
-}
-
-function* authenticate(action: AuthenticateAction) {
-  yield put(signInSigning(true))
-  const provider = yield requestProvider(action.payload.provider)
-  if (!provider) {
-    yield put(signInSigning(false))
-    return
-  }
+function* authenticate() {
   const session = yield authorize()
   let profileExists = yield doesProfileExist(session.userId)
-  if (profileExists || isGuestWithProfile(session) || PREVIEW) {
+  const isGuestWithProfileLocal: boolean = yield call(isGuestWithProfile, session)
+  if (profileExists || isGuestWithProfileLocal || PREVIEW) {
     return yield signIn(session.userId, session.identity)
   }
   return yield startSignUp(session.userId, session.identity)
 }
 
-function isGuestWithProfile(session: StoredSession) {
+async function isGuestWithProfile(session: StoredSession): Promise<boolean> {
   const profile = fetchProfileLocally(session.userId)
-  return isGuest() && profile
+  return (await isGuest()) && !!profile
 }
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
@@ -213,21 +150,6 @@ function* showAvatarEditor() {
   unityInterface.LoadProfile(profile as any)
   unityInterface.ShowAvatarEditorInSignIn()
   yield put(setLoadingScreen(false))
-  Html.switchGameContainer(true)
-}
-
-function* requestProvider(providerType: ProviderType | null) {
-  const provider: Provider | null = yield requestEthProvider(providerType)
-  if (provider) {
-    if (WORLD_EXPLORER && (yield checkTldVsWeb3Network())) {
-      throw new Error('Network mismatch')
-    }
-
-    if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getAppNetwork())) {
-      Html.showNetworkWarning()
-    }
-  }
-  return provider
 }
 
 function* authorize() {
@@ -235,18 +157,20 @@ function* authorize() {
     try {
       let userData: StoredSession | null = null
 
-      if (isGuest()) {
+      const { isGuest }: LoginCompletedResult = yield loginCompleted
+
+      if (isGuest) {
         userData = getLastSessionByProvider(null)
       } else {
-        const ethAddress: string | undefined = yield getUserEthAccountIfAvailable(true)
-        if (ethAddress) {
-          const address = ethAddress.toLocaleLowerCase()
+        const accounts: string[] = yield requestManager.eth_accounts()
+        if (accounts && accounts.length) {
+          const address = accounts[0].toLocaleLowerCase()
 
           userData = getStoredSession(address)
 
           if (userData) {
             // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
-            userData.identity.rawAddress = ethAddress
+            userData.identity.rawAddress = address
           }
         }
       }
@@ -285,14 +209,11 @@ function* signIn(userId: string, identity: ExplorerIdentity) {
 
   saveSession(userId, identity)
   if (identity.hasConnectedWeb3) {
-    identifyUser(userId)
     referUser(identity)
   }
 
-  yield put(signInSigning(false))
   yield setUserAuthentified(userId, identity)
 
-  loginCompleted.resolve()
   yield put(loginCompletedAction())
 }
 
@@ -322,7 +243,6 @@ function* signUp() {
   profile.version = 0
   profile.hasClaimedName = false
   if (profile.email) {
-    identifyEmail(profile.email, isGuest() ? undefined : profile.userId)
     profile.tutorialStep |= 128 // We use binary 256 for tutorial and 128 for email promp
   }
   delete profile.email // We don't deploy the email because it is public
@@ -335,7 +255,6 @@ function* signUp() {
 
 function* cancelSignUp() {
   yield put(signUpClearData())
-  yield put(signInSigning(false))
   yield put(signUpSetIsSignUp(false))
   yield put(changeLoginStage(LoginStage.SIGN_IN))
 }
@@ -357,22 +276,19 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
 
   let ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
 
-  let address
-  let signer
-  let provider: ProviderType | null
+  let address: string
+  let signer: (message: string) => Promise<any>
   let hasConnectedWeb3 = false
 
-  if (ENABLE_WEB3 && !isGuest()) {
-    const eth = createEth()!
-    const account = (await eth.getAccounts())[0]
+  if (ENABLE_WEB3 && !(await isGuest())) {
+    const account = (await requestManager.eth_accounts())[0]
 
-    address = account.toJSON()
-    provider = getProviderType()
+    address = account
     signer = async (message: string) => {
       let result
       while (!result) {
         try {
-          result = await new Personal(eth.provider).sign(message, account, '')
+          result = await requestManager.personal_sign(message, account, '')
         } catch (e) {
           if (e.message && e.message.includes('User denied message signature')) {
             put(changeLoginStage(LoginStage.SIGN_ADVICE))
@@ -388,7 +304,6 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
   } else {
     const account: Account = Account.create()
 
-    provider = null
     address = account.address.toJSON()
     signer = async (message: string) => account.sign(message).signature
 

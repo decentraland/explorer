@@ -1,12 +1,8 @@
 import { loadingTips } from './loading/types'
 import { future, IFuture } from 'fp-future'
-import { ProviderType } from 'decentraland-connect'
-import { authenticate, updateTOS } from './session/actions'
-import { StoreContainer } from './store/rootTypes'
 import { LoadingState } from './loading/reducer'
 import { ENABLE_WEB3, PREVIEW } from '../config'
 
-declare const globalThis: StoreContainer
 const isReact = !!(window as any).reactVersion
 const loadingImagesCache: Record<string, IFuture<string>> = {}
 
@@ -103,51 +99,6 @@ export default class Html {
     }
   }
 
-  static initializeTos(checked: boolean) {
-    if (isReact) return
-    const agreeCheck = document.getElementById('agree-check') as HTMLInputElement | undefined
-    if (agreeCheck) {
-      agreeCheck.checked = checked
-      // @ts-ignore
-      agreeCheck.onchange && agreeCheck.onchange()
-
-      const originalOnChange = agreeCheck.onchange
-      agreeCheck.onchange = (e) => {
-        globalThis.globalStore && globalThis.globalStore.dispatch(updateTOS(agreeCheck.checked))
-        // @ts-ignore
-        originalOnChange && originalOnChange(e)
-      }
-    }
-    Html.enableLogin()
-  }
-
-  static enableLogin() {
-    if (isReact) return
-    const wrapper = document.getElementById('eth-login-confirmation-wrapper')
-    const spinner = document.getElementById('eth-login-confirmation-spinner')
-    if (wrapper && spinner) {
-      spinner.style.cssText = 'display: none;'
-      wrapper.style.cssText = 'display: flex;'
-    }
-  }
-
-  static bindLoginEvent() {
-    if (isReact) return
-    const button = document.getElementById('eth-login-confirm-button')!
-    button.addEventListener('click', () => {
-      if (globalThis.globalStore) {
-        globalThis.globalStore.dispatch(authenticate(window.ethereum ? ProviderType.INJECTED : null))
-      }
-    })
-  }
-
-  static updateTLDInfo(tld: string, web3Net: string, tldNet: string) {
-    if (isReact) return
-    document.getElementById('tld')!.textContent = tld
-    document.getElementById('web3Net')!.textContent = web3Net
-    document.getElementById('web3NetGoal')!.textContent = tldNet
-  }
-
   static showAwaitingSignaturePrompt(show: boolean) {
     if (isReact) return
     showElementById('check-wallet-prompt', show)
@@ -185,10 +136,6 @@ export default class Html {
 
   static loopbackAudioElement() {
     return document.getElementById('voice-chat-audio') as HTMLAudioElement | undefined
-  }
-
-  static switchGameContainer(shouldShow: boolean) {
-    showElementById('gameContainer', shouldShow, true)
   }
 
   static showTeleportAnimation() {

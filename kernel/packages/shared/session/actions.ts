@@ -1,5 +1,4 @@
 import { action } from 'typesafe-actions'
-import { ProviderType } from 'decentraland-connect'
 
 import { ETHEREUM_NETWORK } from 'config'
 
@@ -11,7 +10,7 @@ export const initSession = () => action(INIT_SESSION)
 export type InitSession = ReturnType<typeof initSession>
 
 export const AUTHENTICATE = '[Authenticate]'
-export const authenticate = (provider: ProviderType | null) => action(AUTHENTICATE, { provider })
+export const authenticate = () => action(AUTHENTICATE)
 export type AuthenticateAction = ReturnType<typeof authenticate>
 
 export const SIGNUP = '[SIGNUP]'
@@ -61,14 +60,8 @@ export const signUpCancel = () => action(SIGNUP_CANCEL)
 export const SIGNUP_CLEAR_DATA = '[SIGN-UP] clear data'
 export const signUpClearData = () => action(SIGNUP_CLEAR_DATA)
 
-export const SIGNIN_CURRENT_PROVIDER = '[SIGN-IN] set initial wallet'
-export const signInSetCurrentProvider = (provider: string) => action(SIGNIN_CURRENT_PROVIDER, { provider })
-
 export const SIGNUP_COME_BACK_TO_AVATAR_EDITOR = '[SIGNUP_COME_BACK_TO_AVATAR_EDITOR]'
 export const signUpComeBackToAvatarEditor = () => action(SIGNUP_COME_BACK_TO_AVATAR_EDITOR)
-
-export const SIGNIN_SET_SIGNING = '[SIGN-IN] start authentication'
-export const signInSigning = (signing: boolean) => action(SIGNIN_SET_SIGNING, { signing })
 
 export const SIGNUP_SET_IS_SIGNUP = '[SIGN-UP] mark session as new user'
 export const signUpSetIsSignUp = (isSignUp: boolean) => action(SIGNUP_SET_IS_SIGNUP, { isSignUp })

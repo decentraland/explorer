@@ -1,6 +1,6 @@
-import React from "react";
-import "./errors.css";
-import errorImage from "../../images/errors/error-robotdead.png";
+import React from "react"
+import "./errors.css"
+import errorImage from "../../images/errors/error-robotdead.png"
 
 export const ErrorComms: React.FC = () => (
   <div id="error-comms" className="error-container">
@@ -14,13 +14,11 @@ export const ErrorComms: React.FC = () => (
           established with other peers
         </div>
         <div className="givesomedetailof">
-          This might be because you are behind a restrictive network firewall,
-          or a temporary problem with our coordinator server. <br />
+          This might be because you are behind a restrictive network firewall, or a temporary problem with our
+          coordinator server. <br />
           <br />
           Please try again later, or reach out to us at{" "}
-          <a href="mailto:hello@decentraland.org">
-            hello@decentraland.org
-          </a>
+          <a href="mailto:hello@decentraland.org">hello@decentraland.org</a>
           .<br />
           <br />
           Thank you for helping us improve!
@@ -29,7 +27,7 @@ export const ErrorComms: React.FC = () => (
           <button
             className="retry"
             onClick={() => {
-              window.location.reload();
+              window.location.reload()
             }}
           >
             Try again
@@ -43,4 +41,4 @@ export const ErrorComms: React.FC = () => (
       </div>
     </div>
   </div>
-);
+)

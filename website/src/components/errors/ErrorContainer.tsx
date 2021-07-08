@@ -1,54 +1,42 @@
-import React from "react";
-import { connect } from "react-redux";
-import { ErrorComms } from "./ErrorComms";
-import { ErrorFatal } from "./ErrorFatal";
-import { ErrorNoMobile } from "./ErrorNoMobile";
-import { ErrorNewLogin } from "./ErrorNewLogin";
-import { ErrorNetworkMismatch } from "./ErrorNetworkMismatch";
-import { ErrorNotInvited } from "./ErrorNotInvited";
-import { ErrorNotSupported } from "./ErrorNotSupported";
+import React from "react"
+import { connect } from "react-redux"
+import { ErrorComms } from "./ErrorComms"
+import { ErrorFatal } from "./ErrorFatal"
+import { ErrorNoMobile } from "./ErrorNoMobile"
+import { ErrorNewLogin } from "./ErrorNewLogin"
+import { ErrorNetworkMismatch } from "./ErrorNetworkMismatch"
+import { ErrorNotInvited } from "./ErrorNotInvited"
+import { ErrorNotSupported } from "./ErrorNotSupported"
 import { ErrorAvatarLoading } from "./ErrorAvatarLoading"
 
-import "./errors.css";
+import "./errors.css"
+import { ErrorType, StoreType } from "../../state/redux"
 
-export enum Error {
-  FATAL = "fatal",
-  COMMS = "comms",
-  NEW_LOGIN = "newlogin",
-  NOT_MOBILE = "nomobile",
-  NOT_INVITED = "notinvited",
-  NOT_SUPPORTED = "notsupported",
-  NET_MISMATCH = "networkmismatch",
-  AVATAR_ERROR = "avatarerror"
+const mapStateToProps = (state: StoreType): ErrorContainerProps => {
+  return {
+    error: state.error?.type || null,
+    details: state.error?.details || null,
+  }
 }
 
-const mapStateToProps = (state: any) => {
-  return {
-    error: state.loading.error || null,
-    details: state.loading.tldError || null,
-  };
-};
-
 export interface ErrorContainerProps {
-  error: string | null;
-  details: { tld: string; web3Net: string; tldNet: string } | null;
+  error: string | null
+  details: string | null
 }
 
 export const ErrorContainer: React.FC<ErrorContainerProps> = (props) => {
   return (
     <React.Fragment>
-      {props.error === Error.FATAL && <ErrorFatal />}
-      {props.error === Error.COMMS && <ErrorComms />}
-      {props.error === Error.NEW_LOGIN && <ErrorNewLogin />}
-      {props.error === Error.NOT_MOBILE && <ErrorNoMobile />}
-      {props.error === Error.NOT_INVITED && <ErrorNotInvited />}
-      {props.error === Error.NOT_SUPPORTED && <ErrorNotSupported />}
-      {props.error === Error.NET_MISMATCH && (
-        <ErrorNetworkMismatch details={props.details} />
-      )}
-      {props.error === Error.AVATAR_ERROR && <ErrorAvatarLoading />}
+      {props.error === ErrorType.FATAL && <ErrorFatal />}
+      {props.error === ErrorType.COMMS && <ErrorComms />}
+      {props.error === ErrorType.NEW_LOGIN && <ErrorNewLogin />}
+      {props.error === ErrorType.NOT_MOBILE && <ErrorNoMobile />}
+      {props.error === ErrorType.NOT_INVITED && <ErrorNotInvited />}
+      {props.error === ErrorType.NOT_SUPPORTED && <ErrorNotSupported />}
+      {props.error === ErrorType.NET_MISMATCH && <ErrorNetworkMismatch details={props.details} />}
+      {props.error === ErrorType.AVATAR_ERROR && <ErrorAvatarLoading />}
     </React.Fragment>
-  );
-};
+  )
+}
 
-export default connect(mapStateToProps)(ErrorContainer);
+export default connect(mapStateToProps)(ErrorContainer)
