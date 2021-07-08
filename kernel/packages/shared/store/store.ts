@@ -13,8 +13,8 @@ export const buildStore = () => {
   const sagaMiddleware = createSagaMiddleware({
     onError: (error: Error, { sagaStack }: { sagaStack: string }) => {
       defaultLogger.log('SAGA-ERROR: ', error)
-      BringDownClientAndShowError(error.message as any)
       ReportFatalError(error, ErrorContext.KERNEL_SAGA, { sagaStack })
+      BringDownClientAndShowError(error.message as any)
     }
   })
   const composeEnhancers = (DEBUG_REDUX && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
