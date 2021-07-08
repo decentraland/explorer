@@ -92,7 +92,7 @@ export function trackEvent(eventName: string, eventData: Record<string, any>) {
     return
   }
 
-  window.analytics.track(eventName, data, { integrations: { Klaviyo: false } })
+  window.analytics.track(eventName, data)
 }
 
 const TRACEABLE_AVATAR_EVENTS = [
