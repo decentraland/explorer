@@ -55,7 +55,7 @@ export interface LoginContainerProps {
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const loading = props.stage === LoginStage.LOADING || !props.engineReady
   const full = loading || props.stage === LoginStage.SIGN_IN
-  const shouldShow = LoginStage.COMPLETED !== props.stage && LoginStage.SIGN_UP !== props.stage
+  const shouldShow = (LoginStage.COMPLETED !== props.stage && LoginStage.SIGN_UP !== props.stage) || !props.engineReady
   return (
     <React.Fragment>
       {shouldShow && (
