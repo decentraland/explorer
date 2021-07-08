@@ -1,7 +1,8 @@
 import { ResponseTopic, RequestTopic, VoiceChatWorkerRequest } from './types'
 import defaultLogger from 'shared/logger'
 
-const workerUrl = 'voice-chat-codec/worker.js'
+const audioWorkerRaw = require('raw-loader!../../static/voice-chat-codec/worker.js')
+const audioWorkerUrl = URL.createObjectURL(new Blob([audioWorkerRaw], { type: 'application/javascript' }))
 
 type EncodeListener = (encoded: Uint8Array) => any
 type DecodeListener = (samples: Float32Array) => any
@@ -27,7 +28,7 @@ export class VoiceChatCodecWorkerMain {
   private decodeListeners: Record<string, DecodeListener[]> = {}
 
   constructor() {
-    this.worker = new Worker(workerUrl, { name: 'VoiceChatCodecWorker' })
+    this.worker = new Worker(audioWorkerUrl, { name: 'VoiceChatCodecWorker' })
     this.worker.onerror = (e) => {
       // Errors on voice worker should not be considered fatal for now
       e.preventDefault()

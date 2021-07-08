@@ -63,7 +63,7 @@ Kernel mostly takes care of scene code execution and sandboxing, communication w
 Make sure you have the following dependencies:
 
 - Latest version of GNU make, install it using `brew install make`
-- If you are using Windows 10, you must enable the Linux subsystem and install a Linux distro from Windows Store like Ubuntu. Then install all tools and dependecies like nodejs, npm, typescript, make, et cetera.
+- If you are using Windows 10, you must enable the Linux subsystem and install a Linux distro from Windows Store like Ubuntu. Then install all tools and dependecies like nodejs, npm, typescript, make, etcetera.
 - Node v10 or compatible installed via `sudo apt install nodejs` or [nvm](https://github.com/nvm-sh/nvm)
 
 ---
