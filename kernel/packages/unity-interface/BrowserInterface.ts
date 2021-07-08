@@ -30,7 +30,7 @@ import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
   FriendshipAction,
-  WorldPosition,
+  JumpInPayload,
   LoadableParcelScene
 } from 'shared/types'
 import {
@@ -75,7 +75,7 @@ import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/
 import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
-import { areCandidatesFetched } from 'shared/dao/selectors'
+import { areCandidatesFetched, getRealm } from 'shared/dao/selectors'
 import Html from 'shared/Html'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
@@ -478,7 +478,7 @@ export class BrowserInterface {
       })
   }
 
-  public async JumpIn(data: WorldPosition) {
+  public async JumpIn(data: JumpInPayload, nextRealmIndexToTry: number = 0) {
     const {
       gridPosition: { x, y },
       realm: { serverName, layer }
@@ -502,7 +502,9 @@ export class BrowserInterface {
     if (realm) {
       catalystRealmConnected().then(
         () => {
-          TeleportController.goTo(x, y, `Jumped to ${x},${y} in realm ${realmString}!`)
+          const successMessage = `Jumped to ${x},${y} in realm ${realmString}!`
+          notifyStatusThroughChat(successMessage)
+          TeleportController.goTo(x, y, successMessage)
         },
         (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
@@ -512,7 +514,17 @@ export class BrowserInterface {
         }
       )
     } else {
-      notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
+      if (data.candidateRealms.length > 0) {
+        if (nextRealmIndexToTry < data.candidateRealms.length) {
+          notifyStatusThroughChat(`Couldn't find realm ${realmString}. Trying to connect to the next more populated one...`)
+          this.TryToJumpToTheNextMostPopulatedRealm(nextRealmIndexToTry, data)
+        } else {
+          notifyStatusThroughChat(`Couldn't find realm ${realmString}. You'll stay in your current realm.`)
+          this.JumpToTheCurrentRealm(store, data)
+        }
+      } else {
+        notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
+      }
     }
   }
 
@@ -620,6 +632,39 @@ export class BrowserInterface {
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
     return !array || array.length === 0 ? undefined : array
+  }
+
+  private TryToJumpToTheNextMostPopulatedRealm(realmCandidateIndex: number, jumpInData: JumpInPayload) {
+    let realmIndexToJump = realmCandidateIndex
+    let newJumpInData = jumpInData
+
+    for (let i = realmCandidateIndex; i < jumpInData.candidateRealms.length; i++) {
+      const realm = jumpInData.candidateRealms[i]
+      if (realm.usersCount < realm.usersMax) {
+        newJumpInData.realm.serverName = realm.serverName
+        newJumpInData.realm.layer = realm.layer
+        realmIndexToJump = i
+        break
+      }
+    }
+
+    this.JumpIn(newJumpInData, realmIndexToJump + 1)
+  }
+
+  private JumpToTheCurrentRealm(store: Store<RootState>, jumpInData: JumpInPayload) {
+    const currentRealm = getRealm(store.getState())
+    if (currentRealm) {
+      const newData: JumpInPayload = {
+        gridPosition: jumpInData.gridPosition,
+        realm: {
+          serverName: currentRealm?.catalystName,
+          layer: currentRealm?.layer
+        },
+        candidateRealms: jumpInData.candidateRealms
+      }
+
+      this.JumpIn(newData)
+    }
   }
 }
 
