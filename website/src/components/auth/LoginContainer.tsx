@@ -70,7 +70,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
                 <EthLogin
                   availableProviders={props.availableProviders}
                   onLogin={props.onLogin}
-                  signing={props.signing}
+                  signing={props.signing || LoginStage.COMPLETED === props.stage}
                 />
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && <EthConnectAdvice onLogin={props.onLogin} />}
