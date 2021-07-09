@@ -21,7 +21,7 @@ import { TeleportController } from 'shared/world/TeleportController'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
-import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
+import { isValidExpression, validExpressions } from 'shared/apis/expressionExplainer'
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
@@ -37,7 +37,7 @@ declare const globalThis: RendererInterfaces & StoreContainer
 interface IChatCommand {
   name: string
   description: string
-  run: (message: string) => ChatMessage
+  run: (message: string) => ChatMessage | undefined
 }
 
 const chatCommands: { [key: string]: IChatCommand } = {}
@@ -105,11 +105,15 @@ function* handleReceivedMessage(action: MessageReceived) {
 function* handleSendMessage(action: SendMessage) {
   const { body: message } = action.payload
 
-  let entry: ChatMessage | null = null
+  let entry: ChatMessage | null | undefined = null
 
   // Check if message is a command
   if (message[0] === '/') {
     entry = handleChatCommand(message)
+
+    if (entry === undefined) { // Command is found but has no feedback message
+      return
+    }
 
     // If no such command was found, provide some feedback
     if (!entry) {
@@ -158,7 +162,7 @@ function handleChatCommand(message: string) {
   return null
 }
 
-function addChatCommand(name: string, description: string, fn: (message: string) => ChatMessage): void {
+function addChatCommand(name: string, description: string, fn: (message: string) => ChatMessage | undefined): void {
   if (chatCommands[name]) {
     // Chat command already registered
     return
@@ -334,13 +338,7 @@ function initChatCommands() {
 
       globalThis.unityInterface.TriggerSelfUserExpression(expression)
 
-      return {
-        messageId: uuid(),
-        messageType: ChatMessageType.SYSTEM,
-        sender: 'Decentraland',
-        timestamp: Date.now(),
-        body: expressionExplainer[expression]
-      }
+      return undefined // We dont want to send any feedback message
     }
   )
 
