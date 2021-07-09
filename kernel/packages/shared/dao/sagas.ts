@@ -103,8 +103,8 @@ function* loadCatalystRealms() {
       try {
         yield call(initializeCatalystCandidates)
       } catch (e) {
-        BringDownClientAndShowError(CATALYST_COULD_NOT_LOAD)
         ReportFatalErrorWithCatalystPayload(e, ErrorContext.KERNEL_INIT)
+        BringDownClientAndShowError(CATALYST_COULD_NOT_LOAD)
         throw e
       }
 

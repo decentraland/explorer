@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export function Reddit(props: React.SVGAttributes<SVGElement>) {
   return (
@@ -9,5 +9,5 @@ export function Reddit(props: React.SVGAttributes<SVGElement>) {
         transform="translate(4 4)"
       />
     </svg>
-  );
+  )
 }

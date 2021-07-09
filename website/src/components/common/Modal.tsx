@@ -1,13 +1,13 @@
-import React from "react";
-import { Avatars } from "./Avatars";
-import "./Modal.css";
+import React from 'react'
+import { Avatars } from './Avatars'
+import './Modal.css'
 
 export interface ModalProps {
-  withAvatars?: boolean;
-  withOverlay?: boolean;
-  withFlatBackground?: boolean;
-  className?: string;
-  onClose?: () => void;
+  withAvatars?: boolean
+  withOverlay?: boolean
+  withFlatBackground?: boolean
+  className?: string
+  onClose?: () => void
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -16,26 +16,26 @@ export const Modal: React.FC<ModalProps> = ({
   withFlatBackground,
   withOverlay,
   className,
-  children,
+  children
 }) => {
-  let containerClassName = 'popup-container';
+  let containerClassName = 'popup-container'
 
   if (withAvatars) {
-    containerClassName += ' with-avatars';
+    containerClassName += ' with-avatars'
   }
 
   if (withOverlay) {
-    containerClassName += ' with-overlay';
+    containerClassName += ' with-overlay'
   }
 
   if (withFlatBackground) {
-    containerClassName += ' with-flat-background';
+    containerClassName += ' with-flat-background'
   }
 
   let popupClassName = 'popup'
 
   if (className) {
-    popupClassName += ' ' + className;
+    popupClassName += ' ' + className
   }
 
   function handleClose() {
@@ -52,5 +52,5 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
       {withAvatars && <Avatars />}
     </div>
-  );
-};
+  )
+}

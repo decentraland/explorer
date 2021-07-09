@@ -1,8 +1,8 @@
-import React from "react";
-import "./Footer.css";
-import avatars1x from "../../images/login/avatars.png";
-import avatars2x from "../../images/login/avatars@2x.png";
-import avatars3x from "../../images/login/avatars@3x.png";
+import React from 'react'
+import './Footer.css'
+import avatars1x from '../../images/login/avatars.png'
+import avatars2x from '../../images/login/avatars@2x.png'
+import avatars3x from '../../images/login/avatars@3x.png'
 
 export const Avatars: React.FC = () => (
   <div className="eth-avatars">
@@ -14,4 +14,4 @@ export const Avatars: React.FC = () => (
       height="600"
     />
   </div>
-);
+)

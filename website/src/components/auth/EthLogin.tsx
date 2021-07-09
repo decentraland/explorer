@@ -1,11 +1,11 @@
-import React, { useState } from "react"
-import { ProviderType } from "decentraland-connect/dist/types"
-import { WalletSelector } from "./wallet/WalletSelector"
-import { LoginHeader } from "./LoginHeader"
-import { Spinner } from "../common/Spinner"
-import { Avatars } from "../common/Avatars"
-import { track } from "../../utils"
-import "./EthLogin.css"
+import React, { useState } from 'react'
+import { ProviderType } from 'decentraland-connect/dist/types'
+import { WalletSelector } from './wallet/WalletSelector'
+import { LoginHeader } from './LoginHeader'
+import { Spinner } from '../common/Spinner'
+import { Avatars } from '../common/Avatars'
+import { track } from '../../utils'
+import './EthLogin.css'
 
 export interface EthLoginProps {
   availableProviders: ProviderType[]
@@ -14,7 +14,7 @@ export interface EthLoginProps {
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
-  const [showWalletSelector, setShowWalletSelector] = useState(false)  
+  const [showWalletSelector, setShowWalletSelector] = useState(false)
 
   function handlePlay() {
     track('open_login_popup')

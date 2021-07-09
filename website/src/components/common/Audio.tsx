@@ -1,28 +1,26 @@
-import React from "react";
+import React from 'react'
 
 export interface AudioProps {
-  play: boolean;
-  track: string;
+  play: boolean
+  track: string
 }
 
 export class Audio extends React.Component<AudioProps> {
-  private player: HTMLAudioElement | null = null;
+  private player: HTMLAudioElement | null = null
 
   componentDidMount() {
-    this.updatePlayer();
+    this.updatePlayer()
   }
 
   componentDidUpdate() {
-    this.updatePlayer();
+    this.updatePlayer()
   }
 
   updatePlayer() {
     if (!this.player) {
-      return;
+      return
     }
-    !this.props.play
-      ? this.player.pause()
-      : this.player.play().catch((e) => {});
+    !this.props.play ? this.player.pause() : this.player.play().catch((e) => {})
   }
 
   render() {
@@ -30,6 +28,6 @@ export class Audio extends React.Component<AudioProps> {
       <audio ref={(audio) => (this.player = audio)} autoPlay loop>
         <source src={this.props.track} type="audio/mpeg" />
       </audio>
-    );
+    )
   }
 }

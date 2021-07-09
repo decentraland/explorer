@@ -19,6 +19,7 @@ const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
     denied: [],
     contentWhitelist: []
   },
+  synapseUrl: 'https://chat.decentraland.zone',
   world: {
     pois: []
   },
