@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export function Discord(props: React.SVGAttributes<SVGElement>) {
   return (
@@ -9,5 +9,5 @@ export function Discord(props: React.SVGAttributes<SVGElement>) {
         transform="translate(4 6)"
       />
     </svg>
-  );
+  )
 }

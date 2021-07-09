@@ -1,15 +1,15 @@
-import { ProviderType } from "decentraland-connect/dist/types"
-import { Kernel } from "../components/types";
+import { ProviderType } from 'decentraland-connect/dist/types'
+import { Kernel } from '../components/types'
 
-const kernel = (window as Kernel).webApp;
-const ethereum = window.ethereum as any;
+const kernel = (window as Kernel).webApp
+const ethereum = window.ethereum as any
 
 export function filterInvalidNameCharacters(name: string) {
-  return kernel.utils.filterInvalidNameCharacters(name);
+  return kernel.utils.filterInvalidNameCharacters(name)
 }
 
 export function isBadWord(name: string) {
-  return kernel.utils.isBadWord(name);
+  return kernel.utils.isBadWord(name)
 }
 
 export function callOnce<T>(fun: () => T): () => T {
@@ -49,12 +49,12 @@ export const getWalletName = callOnce(() => {
 
 export const getWalletProps = callOnce(() => {
   return Object.keys(ethereum || {})
-    .filter(prop => prop.startsWith('is') && typeof ethereum[prop] === 'boolean')
+    .filter((prop) => prop.startsWith('is') && typeof ethereum[prop] === 'boolean')
     .join(',')
 })
 
 export type TrackEvents = {
-  ['open_login_popup']: {},
+  ['open_login_popup']: {}
   ['click_login_button']: {
     provider_type: ProviderType | 'guest'
   }
