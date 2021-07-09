@@ -4,7 +4,7 @@ import './Overlay.css'
 
 const mapStateToProps = (state: any) => {
   return {
-    show: false,
+    show: (!state.loading.error && state.loading.showLoadingScreen) || false
   }
 }
 
