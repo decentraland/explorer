@@ -56,7 +56,7 @@ export async function initialize(segmentKey: string): Promise<void> {
     window.analytics.load(segmentKey)
     window.analytics.page()
     window.analytics.ready(() => {
-      window.analytics.timeout(10000)
+      window.analytics.timeout(1000)
     })
   }
 }
@@ -81,8 +81,8 @@ export function identifyEmail(email: string, userId?: string) {
   }
 }
 
-export function trackEvent(eventName: string, eventData: any) {
-  const data = { ...eventData, time: new Date().toISOString(), sessionId, version: (window as any)['VERSION'] }
+export function trackEvent(eventName: string, eventData: Record<string, any>) {
+  const data = { ...eventData, sessionId, version: (window as any)['VERSION'] }
 
   if (DEBUG_ANALYTICS) {
     defaultLogger.info(`Tracking event "${eventName}": `, data)
@@ -91,7 +91,8 @@ export function trackEvent(eventName: string, eventData: any) {
   if (!window.analytics) {
     return
   }
-  window.analytics.track(eventName, data, { integrations: { Klaviyo: false } })
+
+  window.analytics.track(eventName, data)
 }
 
 const TRACEABLE_AVATAR_EVENTS = [
@@ -118,13 +119,16 @@ function hookObservables() {
   const gridPosition = Vector2.Zero()
 
   positionObservable.add(({ position }) => {
-
     // Update seconds variable and check if new parcel
     if (performance.now() - lastTime > 1000) {
       worldToGrid(position, gridPosition)
       const currentPosition = `${gridPosition.x | 0},${gridPosition.y | 0}`
       if (previousPosition !== currentPosition) {
-        trackEvent('Move to Parcel', { newParcel: currentPosition, oldParcel: previousPosition, exactPosition: { x: position.x, y: position.y, z: position.z } })
+        trackEvent('Move to Parcel', {
+          newParcel: currentPosition,
+          oldParcel: previousPosition,
+          exactPosition: { x: position.x, y: position.y, z: position.z }
+        })
         previousPosition = currentPosition
       }
       lastTime = performance.now()

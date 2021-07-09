@@ -1,5 +1,5 @@
 import { call, put, select, take, takeLatest } from 'redux-saga/effects'
-import { FORCE_RENDERING_STYLE, getServerConfigurations, WORLD_EXPLORER } from 'config'
+import { FORCE_RENDERING_STYLE, getDefaultAssetBundlesBaseUrl, getServerConfigurations, WORLD_EXPLORER } from 'config'
 import { META_CONFIGURATION_INITIALIZED, metaConfigurationInitialized, metaUpdateMessageOfTheDay } from './actions'
 import defaultLogger from '../logger'
 import { buildNumber } from './env'
@@ -11,13 +11,15 @@ import { getUserId } from '../session/selectors'
 const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
   explorer: {
     minBuildNumber: 0,
-    useUnityIndexedDbCache: false
+    useUnityIndexedDbCache: false,
+    assetBundlesFetchUrl: getDefaultAssetBundlesBaseUrl()
   },
   servers: {
     added: [],
     denied: [],
     contentWhitelist: []
   },
+  synapseUrl: 'https://chat.decentraland.zone',
   world: {
     pois: []
   },
@@ -108,7 +110,9 @@ function checkExplorerVersion(config: Partial<MetaConfiguration>) {
 async function fetchFeatureFlags(): Promise<Record<string, boolean> | undefined> {
   const featureFlagsEndpoint = getServerConfigurations().explorerFeatureFlags
   try {
-    const response = await fetch(featureFlagsEndpoint)
+    const response = await fetch(featureFlagsEndpoint, {
+      credentials: 'same-origin'
+    })
     if (response.ok) {
       const { flags } = await response.json()
       return flags

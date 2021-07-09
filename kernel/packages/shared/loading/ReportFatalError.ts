@@ -22,6 +22,7 @@ declare const globalThis: StoreContainer
 
 export let aborted = false
 
+// once this function is called, no more errors will be tracked neither reported to rollbar
 export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   if (aborted) {
     return
@@ -43,22 +44,26 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
     event === COMMS_COULD_NOT_BE_ESTABLISHED
       ? 'comms'
       : event === NOT_INVITED
-      ? 'notinvited'
-      : event === NO_WEBGL_COULD_BE_CREATED
-      ? 'notsupported'
-      : event === MOBILE_NOT_SUPPORTED
-      ? 'nomobile'
-      : event === NEW_LOGIN
-      ? 'newlogin'
-      : event === NETWORK_MISMATCH
-      ? 'networkmismatch'
-      : event === AVATAR_LOADING_ERROR
-      ? 'avatarerror'
-      : 'fatal'
+        ? 'notinvited'
+        : event === NO_WEBGL_COULD_BE_CREATED
+          ? 'notsupported'
+          : event === MOBILE_NOT_SUPPORTED
+            ? 'nomobile'
+            : event === NEW_LOGIN
+              ? 'newlogin'
+              : event === NETWORK_MISMATCH
+                ? 'networkmismatch'
+                : event === AVATAR_LOADING_ERROR
+                  ? 'avatarerror'
+                  : 'fatal'
 
   globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
   Html.showErrorModal(targetError)
   aborted = true
+
+  if (window.Rollbar) {
+    window.Rollbar.configure({ enabled: false })
+  }
 }
 
 export namespace ErrorContext {
@@ -109,32 +114,44 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
   }
 }
 
-export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: any = null) {
-  const finalPayload = GetErrorPayload(context, payload)
-  trackEvent('error_fatal', {
-    context: context,
-    message: error.message,
-    stack: error.stack?.slice(0, 10000)
-  })
-
-  ReportRollbarError(error, finalPayload)
-}
-
-export function ReportSceneError(message: string, payload: any) {
-  const finalPayload = GetErrorPayload(ErrorContext.KERNEL_SCENE, payload)
-  trackEvent('error_scene', {
-    message: message,
-    payload: finalPayload
-  })
-  ReportRollbarError(new Error(message), finalPayload)
-}
-
-function GetErrorPayload(context: ErrorContextTypes, additionalPayload: any) {
-  const result = {
-    context: context,
-    ...additionalPayload
+export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
+  if (aborted) {
+    return
   }
-  return result
+
+  let sagaStack: string | undefined = payload['sagaStack']
+
+  if (sagaStack) {
+    // first stringify
+    sagaStack = '' + sagaStack
+    // then crop
+    sagaStack = sagaStack.slice(0, 10000)
+  }
+
+  // segment requires less information than rollbar
+  trackEvent('error_fatal', {
+    context,
+    // this is on purpose, if error is not an actual Error, it has no message, so we use the ''+error to call a
+    // toString, we do that because it may be also null. and (null).toString() is invalid, but ''+null works perfectly
+    message: error.message || '' + error,
+    stack: getStack(error).slice(0, 10000),
+    saga_stack: sagaStack
+  })
+
+  // we only add the context to rollbar event
+  ReportRollbarError(error, { context, ...payload })
+}
+
+function getStack(error?: any) {
+  if (error && error.stack) {
+    return error.stack
+  } else {
+    try {
+      throw new Error((error && error.message) || error || '<nullish error>')
+    } catch (e) {
+      return e.stack || '' + error
+    }
+  }
 }
 
 function ReportRollbarError(error: Error, payload: any) {

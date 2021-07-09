@@ -1,18 +1,11 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
 import { getWorld } from '@dcl/schemas'
+import { StoreContainer } from 'shared/store/rootTypes'
+
+declare const globalThis: StoreContainer
 
 export const NETWORK_HZ = 10
-
-export namespace unityBuildConfigurations {
-  export const UNITY_DATA_PATH = 'unity.data.unityweb'
-  export const UNITY_FRAMEWORK_PATH = 'unity.framework.js.unityweb'
-  export const UNITY_CODE_PATH = 'unity.wasm.unityweb'
-  export const UNITY_STREAMING_ASSETS_URL = 'StreamingAssets'
-  export const UNITY_ORGANIZATION_NAME = 'Decentraland'
-  export const UNITY_PRODUCT_NAME = 'Decentraland World Client'
-  export const UNITY_PRODUCT_VERSION = '0.1'
-}
 
 export namespace interactionLimits {
   /**
@@ -137,15 +130,15 @@ export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
 export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.includes('SHOW_FPS_COUNTER') || DEBUG
 export const HAS_INITIAL_POSITION_MARK = location.search.includes('position')
-export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.includes('FORCE_SEND_MESSAGE')
+
+export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
+export const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN
 
 export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
 
 export const FORCE_RENDERING_STYLE = qs.FORCE_RENDERING_STYLE
-
-export const TEST_WEARABLES_OVERRIDE = location.search.includes('TEST_WEARABLES')
 
 const META_CONFIG_URL = qs.META_CONFIG_URL
 
@@ -252,7 +245,6 @@ export function getExclusiveServer() {
   return 'https://wearable-api.decentraland.org/v2/collections'
 }
 
-export const ALL_WEARABLES = location.search.includes('ALL_WEARABLES') && getDefaultTLD() !== 'org'
 export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? qs.WITH_COLLECTIONS : undefined
 export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
 export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'
@@ -275,25 +267,32 @@ export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | nu
   return null
 }
 
+export function getAssetBundlesBaseUrl(): string {
+  const state = globalThis.globalStore.getState()
+  const result =
+    ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
+  return result
+}
+
+export function getDefaultAssetBundlesBaseUrl(): string {
+  const TLDDefault = getDefaultTLD()
+  return `https://content-assets-as-bundle.decentraland.${TLDDefault}`
+}
+
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   const notToday = TLDDefault === 'today' ? 'org' : TLDDefault
 
-  const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
-
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
   const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
-  const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
 
   const QUESTS_SERVER_URL =
     qs.QUESTS_SERVER_URL ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
-    contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
-    synapseUrl,
     questsUrl: QUESTS_SERVER_URL,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {

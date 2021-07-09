@@ -1,4 +1,4 @@
-import { ContentMapping } from '../../types'
+import { ContentMapping, SceneSource } from 'shared/types'
 
 export type AssetId = string
 
@@ -50,7 +50,7 @@ export type BuilderProject = {
   cols: number
   created_at: string
   updated_at: string
-  creation_coords: string
+  creation_coords?: string
 }
 
 export type BuilderScene = {
@@ -67,6 +67,7 @@ export type BuilderEntity = {
   id: string
   components: string[]
   disableGizmos: boolean
+  name: string
 }
 
 export type BuilderComponent = {
@@ -111,9 +112,4 @@ export type UnityColor = {
   a: number
 }
 
-export type SceneDeploymentSourceMetadata = {
-  version: number
-  origin: string
-  projectId?: string
-  isEmpty?: boolean
-}
+export type SceneDeploymentSourceMetadata = SceneSource

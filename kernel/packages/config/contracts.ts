@@ -77,6 +77,7 @@ export const contracts = {
     'ClaimWearableForFree': '0x8dd61d1a67bce13a87e20a76c6f164c388a726d6',
     'Moonshot2020Collection': '0x6a99abebb48819d2abe92c5e4dc4f48dc09a3ee8',
     'DAOAgent': '0x9A6ebE7E2a7722F8200d0ffB63a1F6406A0d7dce',
+    'DAOEstateForwarder': '0x34ed9e73930290cec0cfe601809255ec1313ea18',
     'LANDMiniMeToken': '0x20dfe381ca71ade2582094cf569a8cb020af5ab1',
     'EstateMiniMeToken': '0x8568f23f343694650370fe5e254b55bfb704a6c7',
     'BuyAdapter': '0xf4fbd84193f9aaf9779dedbb415a806933eb1c95',
@@ -148,11 +149,12 @@ export const contracts = {
     'RootChainProxy': '0x2890ba17efe978480615e330ecb65333b880928e'
   },
   'matic': {
+    'MetaTxForwarder': '0x0baBda04f62C549A09EF3313Fe187f29c099FF3C',
     'MANAToken': '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4',
     'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
     'Multisig': '0x0E659A116e161d8e502F9036bAbDA51334F2667E',
     'CollectionImplementation': '0x006080C6061C4aF79b39Da0842a3a22A7b3f185e',
-    'Rarities': '0xbdA0Cf0678E6873774b3536dB1bA1d25B09F60ab',
+    'Rarities': '0x17113b44fdd661A156cc01b5031E3aCF72c32EB3',
     'Committee': '0x71d9350Ef44E1e451F00e447C0DfF2d1FB75510a',
     'CollectionManager ': '0x9D32AaC179153A991e832550d9F96441Ea27763A',
     'Forwarder': '0xBF6755A83C0dCDBB2933A96EA778E00b717d7004',

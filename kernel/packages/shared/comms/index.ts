@@ -10,7 +10,7 @@ import {
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType, SceneFeatureToggles } from 'shared/types'
-import { positionObservable, PositionReport, lastPlayerPosition } from 'shared/world/positionThings'
+import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import { lastPlayerScene } from 'shared/world/sceneState'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
@@ -53,7 +53,7 @@ import {
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
@@ -127,12 +127,6 @@ export const MORDOR_POSITION: Position = [
 
 type CommsContainer = {
   printCommsInformation: () => void
-  bots: {
-    create: () => string
-    list: () => string[]
-    remove: (id: string) => boolean
-    reposition: (id: string) => void
-  }
 }
 
 declare const globalThis: CommsContainer
@@ -529,28 +523,28 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (context.sendingProfileResponse) return
 
   context.sendingProfileResponse = true
-  ;(async () => {
-    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+    ; (async () => {
+      const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
-    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
-    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
-      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
-    }
+      // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+      if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+        await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+      }
 
-    const profile = await ProfileAsPromise(
-      myAddress,
-      message.data.version ? parseInt(message.data.version, 10) : undefined,
-      getProfileType(myIdentity)
-    )
+      const profile = await ProfileAsPromise(
+        myAddress,
+        message.data.version ? parseInt(message.data.version, 10) : undefined,
+        getProfileType(myIdentity)
+      )
 
-    if (context.currentPosition) {
-      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
-    }
+      if (context.currentPosition) {
+        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+      }
 
-    context.lastProfileResponseTime = Date.now()
-  })()
-    .finally(() => (context.sendingProfileResponse = false))
-    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+      context.lastProfileResponseTime = Date.now()
+    })()
+      .finally(() => (context.sendingProfileResponse = false))
+      .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
@@ -1013,8 +1007,8 @@ export async function connect(userId: string) {
         } catch (e) {
           disconnect()
           defaultLogger.error(`error while trying to establish communications `, e)
-          BringDownClientAndShowError(ESTABLISHING_COMMS)
           ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
+          BringDownClientAndShowError(ESTABLISHING_COMMS)
         }
       })
     }
@@ -1041,8 +1035,8 @@ export async function startCommunications(context: Context) {
           // max number of attemps reached => rethrow error
           logger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
           disconnect()
-          BringDownClientAndShowError(COMMS_COULD_NOT_BE_ESTABLISHED)
           ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
+          BringDownClientAndShowError(COMMS_COULD_NOT_BE_ESTABLISHED)
           throw e
         } else {
           // max number of attempts not reached => continue with loop
@@ -1180,7 +1174,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
-      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
+        ; (globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     throw new ConnectionEstablishmentError(e.message)
@@ -1209,8 +1203,8 @@ function handleReconnectionError() {
 
 function handleIdTaken() {
   disconnect()
+  ReportFatalErrorWithCommsPayload(new Error(`Handle Id already taken`), ErrorContext.COMMS_INIT)
   BringDownClientAndShowError(NEW_LOGIN)
-  ReportFatalErrorWithCommsPayload(new Error(`Handle Id already taken`), `comms#init`)
 }
 
 function handleFullLayer() {
@@ -1275,62 +1269,6 @@ globalThis.printCommsInformation = function () {
     defaultLogger.log('Communication topics: ' + previousTopics)
     context.stats.printDebugInformation()
   }
-}
-
-type Bot = { id: string; handle: any }
-const bots: Bot[] = []
-
-globalThis.bots = {
-  create: () => {
-    const id = uuid()
-    processProfileMessage(context!, id, id, {
-      type: 'profile',
-      time: Date.now(),
-      data: {
-        version: '1',
-        user: id,
-        type: ProfileType.DEPLOYED
-      }
-    })
-    const position = { ...lastPlayerPosition }
-    const handle = setInterval(() => {
-      processPositionMessage(context!, id, {
-        type: 'position',
-        time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
-      })
-    }, 1000)
-    bots.push({ id, handle })
-    return id
-  },
-  remove: (id: string | undefined) => {
-    let bot
-    if (id) {
-      bot = bots.find((bot) => bot.id === id)
-    } else {
-      bot = bots.length > 0 ? bots[0] : undefined
-    }
-    if (bot) {
-      clearInterval(bot.handle)
-      bots.splice(bots.indexOf(bot), 1)
-      return true
-    }
-    return false
-  },
-  reposition: (id: string) => {
-    // to test immediate repositioning
-    let bot = bots.find((bot) => bot.id === id)
-    if (bot) {
-      const position = { ...lastPlayerPosition }
-
-      bot.handle = processPositionMessage(context!, id, {
-        type: 'position',
-        time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0, true]
-      })
-    }
-  },
-  list: () => bots.map((bot) => bot.id)
 }
 
 function stripSnapshots(profile: Profile): Profile {

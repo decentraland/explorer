@@ -1,7 +1,7 @@
-import { CLASS_ID } from 'decentraland-ecs/src'
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
 import { Component } from 'scene-system/stateful-scene/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
+import { CLASS_ID } from 'decentraland-ecs/src'
 import {
   BuilderAsset,
   BuilderComponent,
@@ -12,6 +12,8 @@ import {
   UnityColor
 } from './types'
 import { BuilderServerAPIManager } from './BuilderServerAPIManager'
+import { toHumanReadableType, fromHumanReadableType } from './utils'
+import { SceneTransformTranslator } from './SceneTransformTranslator'
 
 const CURRENT_SCHEMA_VERSION = 1
 
@@ -33,7 +35,8 @@ type StorableComponent = {
 export async function toBuilderFromStateDefinitionFormat(
   scene: SceneStateDefinition,
   builderManifest: BuilderManifest,
-  builderApiManager: BuilderServerAPIManager
+  builderApiManager: BuilderServerAPIManager,
+  transfromTranslator: SceneTransformTranslator
 ): Promise<BuilderManifest> {
   let entities: Record<string, BuilderEntity> = {}
   let builderComponents: Record<string, BuilderComponent> = {}
@@ -57,19 +60,29 @@ export async function toBuilderFromStateDefinitionFormat(
       }
 
       // we add the component to the builder format
-      let builderComponent: BuilderComponent = {
+      let builderComponent: BuilderComponent = transfromTranslator.transformBuilderComponent({
         id: newId,
         type: componentType,
         data: component.data
-      }
+      })
       builderComponents[builderComponent.id] = builderComponent
+    }
+
+    let entityName = entityId
+
+    // We iterate over the name of the entities to asign it in a builder format
+    for (let component of Object.values(builderComponents)) {
+      if (component.type === 'Name') {
+        entityName = component.data.builderValue
+      }
     }
 
     // we add the entity to builder format
     let builderEntity: BuilderEntity = {
       id: entityId,
       components: builderComponentsIds,
-      disableGizmos: false
+      disableGizmos: false,
+      name: entityName
     }
     entities[builderEntity.id] = builderEntity
   }
@@ -153,7 +166,10 @@ export async function toBuilderFromStateDefinitionFormat(
   return builderManifest
 }
 
-export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneStateDefinition {
+export function fromBuildertoStateDefinitionFormat(
+  scene: BuilderScene,
+  transfromTranslator: SceneTransformTranslator
+): SceneStateDefinition {
   const sceneState = new SceneStateDefinition()
 
   const componentMap = new Map(Object.entries(scene.components))
@@ -183,17 +199,47 @@ export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneSt
           componentData.color = color
           componentData.style = 0
         }
-        let component: Component = {
+
+        let component: Component = transfromTranslator.transformStateDefinitionComponent({
           componentId: fromHumanReadableType(componentMap.get(componentId)!.type),
           data: componentData
-        }
+        })
         components.push(component)
       }
     }
 
+    // We need to mantain the builder name of the entity, so we create the equivalent part in biw. We do this so we can mantain the smart-item references
+    let componentFound = false
+
+    for (let component of components) {
+      if (component.componentId === CLASS_ID.NAME) {
+        componentFound = true
+        component.data.values = component.data.value
+        component.data.builderValue = entity.name
+        break
+      }
+    }
+    if (!componentFound) components.push(CreateStatelessNameComponent(entity.name, entity.name, transfromTranslator))
+
     sceneState.addEntity(entity.id, components)
   }
   return sceneState
+}
+
+function CreateStatelessNameComponent(
+  name: string,
+  builderName: string,
+  transfromTranslator: SceneTransformTranslator
+): Component {
+  let nameComponentData = {
+    value: name,
+    builderValue: builderName
+  }
+  let nameComponent: Component = transfromTranslator.transformStateDefinitionComponent({
+    componentId: CLASS_ID.NAME,
+    data: nameComponentData
+  })
+  return nameComponent
 }
 
 export function fromSerializedStateToStorableFormat(state: SerializedSceneState): StorableSceneState {
@@ -213,36 +259,4 @@ export function fromStorableFormatToSerializedState(state: StorableSceneState): 
     components: components.map(({ type, value }) => ({ type: fromHumanReadableType(type), value }))
   }))
   return { entities }
-}
-
-/**
- * We are converting from numeric ids to a more human readable format. It might make sense to change this in the future,
- * but until this feature is stable enough, it's better to store it in a way that it is easy to debug.
- */
-
-const HUMAN_READABLE_TO_ID: Map<string, number> = new Map([
-  ['Transform', CLASS_ID.TRANSFORM],
-  ['GLTFShape', CLASS_ID.GLTF_SHAPE],
-  ['NFTShape', CLASS_ID.NFT_SHAPE],
-  ['Name', CLASS_ID.NAME],
-  ['LockedOnEdit', CLASS_ID.LOCKED_ON_EDIT],
-  ['VisibleOnEdit', CLASS_ID.VISIBLE_ON_EDIT]
-])
-
-function toHumanReadableType(type: number): string {
-  const humanReadableType = Array.from(HUMAN_READABLE_TO_ID.entries())
-    .filter(([, componentId]) => componentId === type)
-    .map(([type]) => type)[0]
-  if (!humanReadableType) {
-    throw new Error(`Unknown type ${type}`)
-  }
-  return humanReadableType
-}
-
-function fromHumanReadableType(humanReadableType: string): number {
-  const type = HUMAN_READABLE_TO_ID.get(humanReadableType)
-  if (!type) {
-    throw new Error(`Unknown human readable type ${humanReadableType}`)
-  }
-  return type
 }

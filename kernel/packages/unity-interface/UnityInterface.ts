@@ -355,14 +355,6 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'FailGIFFetch', id)
   }
 
-  public ConfigureEmailPrompt(tutorialStep: number) {
-    const emailCompletedFlag = 128
-    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
-      active: (tutorialStep & emailCompletedFlag) === 0,
-      visible: false
-    })
-  }
-
   public ConfigureTutorial(tutorialStep: number, tutorialConfig: TutorialInitializationMessage) {
     const tutorialCompletedFlag = 256
 
@@ -413,8 +405,12 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
   }
 
-  public SendBuilderProjectInfo(projectName: string, projectDescription: string) {
-    this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription }))
+  public SendBuilderProjectInfo(projectName: string, projectDescription: string, isNewEmptyProject: boolean) {
+    this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription, isNewEmptyProject: isNewEmptyProject }))
+  }
+
+  public SendBuilderCatalogHeaders(headers: Record<string, string>) {
+    this.SendMessageToUnity('Main', 'BuilderInWorldCatalogHeaders', JSON.stringify(headers))
   }
 
   public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {

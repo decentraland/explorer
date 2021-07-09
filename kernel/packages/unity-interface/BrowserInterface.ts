@@ -5,6 +5,7 @@ import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
+import { getCurrentIdentity, getCurrentUserId } from 'shared/session/selectors'
 import {
   decentralandConfigurations,
   ethereumConfigurations,
@@ -16,7 +17,12 @@ import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../dec
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { identifyEmail, trackEvent } from 'shared/analytics'
-import { aborted, BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithUnityPayload } from 'shared/loading/ReportFatalError'
+import {
+  aborted,
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithUnityPayload
+} from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, ProfileType } from 'shared/profiles/types'
@@ -44,9 +50,9 @@ import { fetchENSOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
-import { getIdentity, hasWallet } from 'shared/session'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { logout, redirectToSignUp, signUp, signUpCancel, signupForm, signUpSetProfile } from 'shared/session/actions'
+import { authenticateWhenItsReady, getIdentity, hasWallet } from 'shared/session'
+import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
@@ -55,9 +61,7 @@ import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
-import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
-import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
 import { killPortableExperienceScene } from './portableExperiencesUtils'
@@ -68,6 +72,11 @@ import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
+import { ProviderType } from 'decentraland-connect'
+import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
+import { Store } from 'redux'
+import { areCandidatesFetched } from 'shared/dao/selectors'
+import Html from 'shared/Html'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -110,7 +119,7 @@ export class BrowserInterface {
   public handleUnityMessage(type: string, message: any) {
     if (type in this) {
       // tslint:disable-next-line:semicolon
-      ;(this as any)[type](message)
+      ; (this as any)[type](message)
     } else {
       defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
     }
@@ -276,10 +285,20 @@ export class BrowserInterface {
       globalThis.globalStore.dispatch(saveProfileRequest(update))
     } else {
       globalThis.globalStore.dispatch(signUpSetProfile(update))
-      globalThis.globalStore.dispatch(changeSignUpStage('passport'))
-      Html.switchGameContainer(false)
-      unityInterface.DeactivateRendering()
     }
+  }
+
+  public SendAuthentication(data: { rendererAuthenticationType: string }) {
+    const providerType: ProviderType | null = Object.values(ProviderType).includes(data.rendererAuthenticationType as ProviderType) ? data.rendererAuthenticationType as ProviderType : null
+
+    authenticateWhenItsReady(providerType)
+  }
+
+  public SendPassport(passport: { name: string; email: string }) {
+    Html.switchGameContainer(false)
+    unityInterface.DeactivateRendering()
+    globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
+    globalThis.globalStore.dispatch(signUp())
   }
 
   public RequestOwnProfileUpdate() {
@@ -470,7 +489,9 @@ export class BrowserInterface {
     notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
 
     const future = candidatesFetched()
-    if (future.isPending) {
+
+    const store: Store<RootState> = (window as any)['globalStore']
+    if (!areCandidatesFetched(store.getState())) {
       notifyStatusThroughChat(`Waiting while realms are initialized, this may take a while...`)
     }
 
@@ -552,6 +573,18 @@ export class BrowserInterface {
     await killPortableExperienceScene(data.portableExperienceId)
   }
 
+  public RequestBIWCatalogHeader() {
+    const store: Store<RootState> = globalThis['globalStore']
+    const identity = getCurrentIdentity(store.getState())
+    if (!identity) {
+      let emptyHeader: Record<string, string> = {}
+      unityInterface.SendBuilderCatalogHeaders(emptyHeader)
+    } else {
+      const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
+      unityInterface.SendBuilderCatalogHeaders(headers)
+    }
+  }
+
   public RequestWearables(data: {
     filters: {
       ownedByUser: string | null
@@ -577,8 +610,8 @@ export class BrowserInterface {
 
   public ReportAvatarFatalError() {
     // TODO(Brian): Add more parameters?
-    BringDownClientAndShowError(AVATAR_LOADING_ERROR)
     ReportFatalErrorWithUnityPayload(new Error(AVATAR_LOADING_ERROR), ErrorContext.RENDERER_AVATARS)
+    BringDownClientAndShowError(AVATAR_LOADING_ERROR)
   }
 
   public UnpublishScene(data: { coordinates: string }) {

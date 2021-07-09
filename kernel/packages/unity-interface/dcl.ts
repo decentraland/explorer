@@ -26,7 +26,7 @@ import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'sh
 import { UnityParcelScene } from './UnityParcelScene'
 import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
-import { clientDebug, ClientDebug } from "./ClientDebug"
+import { clientDebug, ClientDebug } from './ClientDebug'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
@@ -36,7 +36,8 @@ import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { TeleportController } from 'shared/world/TeleportController'
 
-declare const globalThis: RendererInterfaces & StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
+declare const globalThis: RendererInterfaces &
+  StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
 
 export type RendererInterfaces = {
   unityInterface: UnityInterface
@@ -50,9 +51,6 @@ globalThis.clientDebug = clientDebug
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
 }
-
-const rendererVersion = require('@dcl/unity-renderer/package.json')
-window['console'].log('Renderer version: ' + rendererVersion.version)
 
 export let gameInstance!: GameInstance
 export let isTheFirstLoading = true

@@ -1,6 +1,6 @@
 declare const globalThis: { UnityLoader: any } & StoreContainer
 declare const global: any
-;(window as any).reactVersion = true
+  ; (window as any).reactVersion = true
 
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
@@ -21,6 +21,7 @@ import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
+import { trackEvent } from 'shared/analytics'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
@@ -85,13 +86,13 @@ namespace webApp {
       await loadWebsiteSystems()
     } catch (err) {
       document.body.classList.remove('dcl-loading')
+      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
         BringDownClientAndShowError(NOT_INVITED)
       } else {
         console['error']('Error loading Unity', err)
         BringDownClientAndShowError(FAILED_FETCHING_UNITY)
       }
-      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       throw err
     }
   }
@@ -109,6 +110,7 @@ namespace webApp {
       active: true,
       visible: OPEN_AVATAR_EDITOR
     })
+    i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
@@ -165,7 +167,6 @@ namespace webApp {
 
         EnsureProfile(identity.address)
           .then((profile) => {
-            i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, tutorialConfig)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 
@@ -188,8 +189,6 @@ namespace webApp {
     await startUnitySceneWorkers()
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
-
-    await ensureMetaConfigurationInitialized()
 
     i.SetRenderProfile(renderProfile)
 
@@ -233,7 +232,8 @@ namespace webApp {
   // In the future, we should probably replace this with a library
   export const utils = {
     isBadWord,
-    filterInvalidNameCharacters
+    filterInvalidNameCharacters,
+    trackEvent
   }
 
   function setUserPositionAfterTutorial() {
