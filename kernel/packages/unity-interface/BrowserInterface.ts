@@ -75,7 +75,7 @@ import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/
 import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
-import { areCandidatesFetched, getRealm } from 'shared/dao/selectors'
+import { areCandidatesFetched } from 'shared/dao/selectors'
 import Html from 'shared/Html'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
@@ -243,6 +243,7 @@ export class BrowserInterface {
   }
 
   public GoTo(data: { x: number; y: number }) {
+    notifyStatusThroughChat(`Jumped to ${data.x},${data.y}!`)
     TeleportController.goTo(data.x, data.y)
   }
 
@@ -508,20 +509,17 @@ export class BrowserInterface {
         },
         (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
-          notifyStatusThroughChat('Could not join realm.' + cause)
-
-          defaultLogger.error('Error joining realm', e)
+          if (data.tryOtherRealms) {
+            this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
+          } else {
+            notifyStatusThroughChat('Could not join realm.' + cause)
+            defaultLogger.error('Error joining realm', e)
+          }
         }
       )
     } else {
-      if (data.candidateRealms.length > 0) {
-        if (nextRealmIndexToTry < data.candidateRealms.length) {
-          notifyStatusThroughChat(`Couldn't find realm ${realmString}. Trying to connect to the next more populated one...`)
-          this.TryToJumpToTheNextMostPopulatedRealm(nextRealmIndexToTry, data)
-        } else {
-          notifyStatusThroughChat(`Couldn't find realm ${realmString}. You'll stay in your current realm.`)
-          this.JumpToTheCurrentRealm(store, data)
-        }
+      if (data.tryOtherRealms) {
+        this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
       } else {
         notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
       }
@@ -634,36 +632,38 @@ export class BrowserInterface {
     return !array || array.length === 0 ? undefined : array
   }
 
-  private TryToJumpToTheNextMostPopulatedRealm(realmCandidateIndex: number, jumpInData: JumpInPayload) {
-    let realmIndexToJump = realmCandidateIndex
-    let newJumpInData = jumpInData
+  private JumpToAnotherRealm(store: Store<RootState>, nextRealmIndexToTry: number, jumpInData: JumpInPayload) {
+    const realmString = jumpInData.realm.serverName + '-' + jumpInData.realm.layer
 
-    for (let i = realmCandidateIndex; i < jumpInData.candidateRealms.length; i++) {
-      const realm = jumpInData.candidateRealms[i]
-      if (realm.usersCount < realm.usersMax) {
+    if (nextRealmIndexToTry < jumpInData.nextMostPopulatedRealms.length) {
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}. Trying to connect to the next more populated one...`)
+      this.TryToJumpToTheNextMostPopulatedRealm(store, nextRealmIndexToTry, jumpInData)
+    } else {
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}. You'll stay in your current realm.`)
+      this.GoTo(jumpInData.gridPosition)
+    }
+  }
+
+  private TryToJumpToTheNextMostPopulatedRealm(store: Store<RootState>, realmIndex: number, jumpInData: JumpInPayload) {
+    let realmIndexToJump = realmIndex
+    let newJumpInData = jumpInData
+    let realmFound = false
+
+    for (let i = realmIndex; i < jumpInData.nextMostPopulatedRealms.length; i++) {
+      const realm = jumpInData.nextMostPopulatedRealms[i]
+      if (realm.usersCount < realm.usersMax && (realm.serverName != jumpInData.realm.serverName || realm.layer != jumpInData.realm.layer)) {
         newJumpInData.realm.serverName = realm.serverName
         newJumpInData.realm.layer = realm.layer
         realmIndexToJump = i
+        realmFound = true
         break
       }
     }
 
-    this.JumpIn(newJumpInData, realmIndexToJump + 1)
-  }
-
-  private JumpToTheCurrentRealm(store: Store<RootState>, jumpInData: JumpInPayload) {
-    const currentRealm = getRealm(store.getState())
-    if (currentRealm) {
-      const newData: JumpInPayload = {
-        gridPosition: jumpInData.gridPosition,
-        realm: {
-          serverName: currentRealm?.catalystName,
-          layer: currentRealm?.layer
-        },
-        candidateRealms: jumpInData.candidateRealms
-      }
-
-      this.JumpIn(newData)
+    if (realmFound) {
+      this.JumpIn(newJumpInData, realmIndexToJump + 1)
+    } else {
+      this.GoTo(jumpInData.gridPosition)
     }
   }
 }

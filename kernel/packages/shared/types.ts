@@ -503,7 +503,8 @@ export type JumpInPayload = {
     x: number
     y: number
   }
-  candidateRealms: {
+  tryOtherRealms: boolean
+  nextMostPopulatedRealms: {
     layer: string
     serverName: string
     usersCount: number
