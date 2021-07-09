@@ -17,6 +17,7 @@ export type MetaConfiguration = {
     contentWhitelist: string[]
     catalystsNodesEndpoint?: string
   }
+  synapseUrl: string
   world: WorldConfig
   comms: CommsConfig
   minCatalystVersion?: string
@@ -64,5 +65,6 @@ export type CommsConfig = {
 
 export enum FeatureFlags {
   QUESTS = 'quests',
-  BUILDER_IN_WORLD = 'builder_in_world'
+  BUILDER_IN_WORLD = 'builder_in_world',
+  AVATAR_LODS = 'avatar_lods'
 }

@@ -5,11 +5,7 @@ declare var self: WorkerGlobalScope & any
 
 declare function postMessage(message: any, transferables: any[]): void
 
-declare const libopus: any
-
-self.LIBOPUS_WASM_URL = 'libopus.wasm'
-
-importScripts('libopus.wasm.js')
+const libopus = require('./libopus.wasm')
 
 type CodecWorklet = {
   working: boolean

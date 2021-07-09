@@ -56,7 +56,7 @@ export async function initialize(segmentKey: string): Promise<void> {
     window.analytics.load(segmentKey)
     window.analytics.page()
     window.analytics.ready(() => {
-      window.analytics.timeout(10000)
+      window.analytics.timeout(1000)
     })
   }
 }
@@ -92,7 +92,7 @@ export function trackEvent(eventName: string, eventData: Record<string, any>) {
     return
   }
 
-  window.analytics.track(eventName, data, { integrations: { Klaviyo: false } })
+  window.analytics.track(eventName, data)
 }
 
 const TRACEABLE_AVATAR_EVENTS = [

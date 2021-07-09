@@ -40,7 +40,8 @@ const whitelist = [
   'eth_getTransactionCount',
   'eth_getBlockByNumber',
   'eth_requestAccounts', // TODO: implement error-proof solution https://github.com/decentraland/explorer/issues/2156
-  'eth_signTypedData_v4'
+  'eth_signTypedData_v4',
+  'eth_getCode'
 ]
 
 function isWhitelistedRPC(msg: RPCSendableMessage) {

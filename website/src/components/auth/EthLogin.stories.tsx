@@ -1,39 +1,34 @@
-import React from "react";
-import { Meta, Story } from "@storybook/react";
-import { EthLogin, EthLoginProps } from "./EthLogin";
+import React from 'react'
+import { Meta, Story } from '@storybook/react'
+import { EthLogin, EthLoginProps } from './EthLogin'
 
 export default {
-  title: "Explorer/auth/EthLogin",
+  title: 'Explorer/auth/EthLogin',
   args: {
-    loading: false,
     provider: null,
-    hasMetamask: true,
+    hasMetamask: true
   },
   component: EthLogin,
   argTypes: {
-    onLogin: { action: "signing in/up..." },
-    onGuest: { action: "guest click..." },
-    onTermsChange: { action: "terms changed..." },
-  },
-} as Meta;
+    onLogin: { action: 'signing in/up...' },
+    onGuest: { action: 'guest click...' },
+    onTermsChange: { action: 'terms changed...' }
+  }
+} as Meta
 
-const Template: Story<EthLoginProps> = (args: EthLoginProps) => (
-  <EthLogin {...args} />
-);
+const Template: Story<EthLoginProps> = (args: EthLoginProps) => <EthLogin {...args} />
 
-export const LoginHome = Template.bind({});
+export const LoginHome = Template.bind({})
 LoginHome.args = {
-  ...Template.args,
-};
+  ...Template.args
+}
 
-export const LoginSigning = Template.bind({});
+export const LoginSigning = Template.bind({})
 LoginSigning.args = {
-  ...Template.args,
-  loading: true,
-};
+  ...Template.args
+}
 
-export const LoginPreviousSession = Template.bind({});
+export const LoginPreviousSession = Template.bind({})
 LoginPreviousSession.args = {
-  ...Template.args,
-  loading: false,
-};
+  ...Template.args
+}
