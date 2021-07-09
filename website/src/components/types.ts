@@ -1,4 +1,4 @@
-import { Store } from "redux"
+import { Store } from 'redux'
 
 export type InitializeUnityResult = {
   container: HTMLElement

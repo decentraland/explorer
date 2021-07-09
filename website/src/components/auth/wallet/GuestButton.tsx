@@ -1,21 +1,17 @@
-import React from "react";
-import "./GuestButton.css";
+import React from 'react'
+import './GuestButton.css'
 
 export interface WalletButtonProps {
-  active?: boolean;
-  onClick: (providerType: null) => void;
+  active?: boolean
+  onClick: (providerType: null) => void
 }
 
-export const GuestButton: React.FC<WalletButtonProps> = ({
-  active,
-  onClick,
-}) => {
-
+export const GuestButton: React.FC<WalletButtonProps> = ({ active, onClick }) => {
   function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
     if (active !== false) {
-      event.preventDefault();
+      event.preventDefault()
       if (onClick) {
-        onClick(null);
+        onClick(null)
       }
     }
   }
@@ -27,6 +23,8 @@ export const GuestButton: React.FC<WalletButtonProps> = ({
       rel="noopener noreferrer"
       className={`guestButton ${active ? 'active' : 'inactive'}`}
       onClick={handleClick}
-    >Play as Guest</a>
-  );
-};
+    >
+      Play as Guest
+    </a>
+  )
+}
