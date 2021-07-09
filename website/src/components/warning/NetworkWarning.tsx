@@ -1,8 +1,8 @@
-import React from "react";
-import "./NetworkWarning.css";
+import React from 'react'
+import './NetworkWarning.css'
 
 export interface NetworkWarningProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 export const NetworkWarning: React.FC<NetworkWarningProps> = ({ onClose }) => (
@@ -11,11 +11,11 @@ export const NetworkWarning: React.FC<NetworkWarningProps> = ({ onClose }) => (
       <strong>Warning:</strong> you’re running on the Ethereum Mainnet.
     </div>
     <div className="network-warning-description">
-      Blockchain transactions in this network have a cost and real consequences.
-      We recommend you use the <strong>Ropsten</strong> test network instead.
+      Blockchain transactions in this network have a cost and real consequences. We recommend you use the{' '}
+      <strong>Ropsten</strong> test network instead.
     </div>
     <button className="network-warning-button" onClick={onClose}>
       ⨯
     </button>
   </div>
-);
+)
