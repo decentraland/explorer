@@ -507,10 +507,10 @@ export class BrowserInterface {
           notifyStatusThroughChat(successMessage)
           TeleportController.goTo(x, y, successMessage)
         },
-        (e) => {
+        async (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           if (data.tryOtherRealms) {
-            this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
+            await this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
           } else {
             notifyStatusThroughChat('Could not join realm.' + cause)
             defaultLogger.error('Error joining realm', e)
@@ -519,7 +519,7 @@ export class BrowserInterface {
       )
     } else {
       if (data.tryOtherRealms) {
-        this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
+        await this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
       } else {
         notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
       }
@@ -632,26 +632,26 @@ export class BrowserInterface {
     return !array || array.length === 0 ? undefined : array
   }
 
-  private JumpToAnotherRealm(store: Store<RootState>, nextRealmIndexToTry: number, jumpInData: JumpInPayload) {
+  private async JumpToAnotherRealm(store: Store<RootState>, nextRealmIndexToTry: number, jumpInData: JumpInPayload) {
     const realmString = jumpInData.realm.serverName + '-' + jumpInData.realm.layer
 
     if (nextRealmIndexToTry < jumpInData.nextMostPopulatedRealms.length) {
       notifyStatusThroughChat(`Couldn't find realm ${realmString}. Trying to connect to the next more populated one...`)
-      this.TryToJumpToTheNextMostPopulatedRealm(store, nextRealmIndexToTry, jumpInData)
+      await this.TryToJumpToTheNextMostPopulatedRealm(store, nextRealmIndexToTry, jumpInData)
     } else {
       notifyStatusThroughChat(`Couldn't find realm ${realmString}. You'll stay in your current realm.`)
       this.GoTo(jumpInData.gridPosition)
     }
   }
 
-  private TryToJumpToTheNextMostPopulatedRealm(store: Store<RootState>, realmIndex: number, jumpInData: JumpInPayload) {
+  private async TryToJumpToTheNextMostPopulatedRealm(store: Store<RootState>, realmIndex: number, jumpInData: JumpInPayload) {
     let realmIndexToJump = realmIndex
     let newJumpInData = jumpInData
     let realmFound = false
 
     for (let i = realmIndex; i < jumpInData.nextMostPopulatedRealms.length; i++) {
       const realm = jumpInData.nextMostPopulatedRealms[i]
-      if (realm.usersCount < realm.usersMax && (realm.serverName != jumpInData.realm.serverName || realm.layer != jumpInData.realm.layer)) {
+      if (realm.usersCount < realm.usersMax && (realm.serverName !== jumpInData.realm.serverName || realm.layer !== jumpInData.realm.layer)) {
         newJumpInData.realm.serverName = realm.serverName
         newJumpInData.realm.layer = realm.layer
         realmIndexToJump = i
@@ -661,7 +661,7 @@ export class BrowserInterface {
     }
 
     if (realmFound) {
-      this.JumpIn(newJumpInData, realmIndexToJump + 1)
+      await this.JumpIn(newJumpInData, realmIndexToJump + 1)
     } else {
       this.GoTo(jumpInData.gridPosition)
     }
