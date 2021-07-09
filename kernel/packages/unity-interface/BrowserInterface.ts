@@ -118,7 +118,7 @@ export class BrowserInterface {
   public handleUnityMessage(type: string, message: any) {
     if (type in this) {
       // tslint:disable-next-line:semicolon
-      ;(this as any)[type](message)
+      ; (this as any)[type](message)
     } else {
       defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
     }
@@ -611,8 +611,8 @@ export class BrowserInterface {
 
   public ReportAvatarFatalError() {
     // TODO(Brian): Add more parameters?
-    BringDownClientAndShowError(AVATAR_LOADING_ERROR)
     ReportFatalErrorWithUnityPayload(new Error(AVATAR_LOADING_ERROR), ErrorContext.RENDERER_AVATARS)
+    BringDownClientAndShowError(AVATAR_LOADING_ERROR)
   }
 
   public UnpublishScene(data: { coordinates: string }) {

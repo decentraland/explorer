@@ -1,6 +1,6 @@
-import React from "react"
-import "./errors.css"
-import errorImage from "../../images/errors/error-robotdead.png"
+import React from 'react'
+import './errors.css'
+import errorImage from '../../images/errors/error-robotdead.png'
 
 export const ErrorComms: React.FC = () => (
   <div id="error-comms" className="error-container">
@@ -17,7 +17,7 @@ export const ErrorComms: React.FC = () => (
           This might be because you are behind a restrictive network firewall, or a temporary problem with our
           coordinator server. <br />
           <br />
-          Please try again later, or reach out to us at{" "}
+          Please try again later, or reach out to us at{' '}
           <a href="mailto:hello@decentraland.org">hello@decentraland.org</a>
           .<br />
           <br />

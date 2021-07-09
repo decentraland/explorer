@@ -86,13 +86,13 @@ namespace webApp {
       await loadWebsiteSystems()
     } catch (err) {
       document.body.classList.remove('dcl-loading')
+      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
         BringDownClientAndShowError(NOT_INVITED)
       } else {
         console['error']('Error loading Unity', err)
         BringDownClientAndShowError(FAILED_FETCHING_UNITY)
       }
-      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       throw err
     }
   }

@@ -1,6 +1,6 @@
-import React from "react"
+import React from 'react'
 
-import "./EthLogin.css"
+import './EthLogin.css'
 
 export interface EthConnectAdviceProps {
   onLogin: any

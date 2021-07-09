@@ -8,6 +8,8 @@ export function getTLD() {
   return globalThis.location.hostname.match(/(\w+)$/)![0]
 }
 
+let analyticsDisabled = false
+
 enum AnalyticsAccount {
   PRD = "1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU",
   DEV = "a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc",
@@ -34,6 +36,14 @@ export function configureSegment() {
   }
 }
 
+// once this function is called, no more errors will be tracked neither reported to rollbar
+export function disableAnalytics(){
+  analyticsDisabled = true
+  if ((window as any).Rollbar) {
+    (window as any).Rollbar.configure({ enabled: false })
+  }
+}
+
 export function identifyUser(userId: string) {
   if (window.analytics) {
     window.analytics.identify(userId, getAnalyticsContext(store.getState()))
@@ -52,11 +62,11 @@ async function initialize(segmentKey: string): Promise<void> {
 }
 
 export function trackEvent(eventName: string, eventData: Record<string, any>) {
-  if (!window.analytics) {
+  if (!window.analytics || analyticsDisabled) {
     return
   }
 
   const data = { ...eventData, ...getAnalyticsContext(store.getState()) }
 
-  window.analytics.track(eventName, data, { integrations: { Klaviyo: false } })
+  window.analytics.track(eventName, data)
 }

@@ -1,6 +1,6 @@
-import React from "react"
+import React from 'react'
 
-import "./ProgressBar.css"
+import './ProgressBar.css'
 
 export interface ProgressBarProps {
   percentage: number
@@ -8,12 +8,12 @@ export interface ProgressBarProps {
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ percentage }) => {
   const progress = {
-    width: `${percentage}%`,
+    width: `${percentage}%`
   }
   return (
     <div className="progress">
       <div id="progress-bar-inner" className="full" style={progress}>
-        {" "}
+        {' '}
       </div>
     </div>
   )

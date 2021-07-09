@@ -1,31 +1,31 @@
-import React from "react"
-import { connect } from "react-redux"
-import { connection } from "decentraland-connect/dist/index"
-import { ProviderType } from "decentraland-connect/dist/types"
-import { Navbar } from "../common/Navbar"
-import { EthLogin } from "./EthLogin"
-import { EthConnectAdvice } from "./EthConnectAdvice"
-import { EthSignAdvice } from "./EthSignAdvice"
-import { Container } from "../common/Container"
-import { BeginnersGuide } from "./BeginnersGuide"
-import { BigFooter } from "../common/BigFooter"
-import "./LoginContainer.css"
-import { StoreType } from "../../state/redux"
+import React from 'react'
+import { connect } from 'react-redux'
+import { connection } from 'decentraland-connect/dist/index'
+import { ProviderType } from 'decentraland-connect/dist/types'
+import { Navbar } from '../common/Navbar'
+import { EthLogin } from './EthLogin'
+import { EthConnectAdvice } from './EthConnectAdvice'
+import { EthSignAdvice } from './EthSignAdvice'
+import { Container } from '../common/Container'
+import { BeginnersGuide } from './BeginnersGuide'
+import { BigFooter } from '../common/BigFooter'
+import './LoginContainer.css'
+import { StoreType } from '../../state/redux'
 
 export enum LoginStage {
-  LOADING = "loading",
-  SIGN_IN = "signIn",
-  SIGN_UP = "signUp",
-  CONNECT_ADVICE = "connect_advice",
-  SIGN_ADVICE = "sign_advice",
-  COMPLETED = "completed",
+  LOADING = 'loading',
+  SIGN_IN = 'signIn',
+  SIGN_UP = 'signUp',
+  CONNECT_ADVICE = 'connect_advice',
+  SIGN_ADVICE = 'sign_advice',
+  COMPLETED = 'completed'
 }
 
 const mapStateToProps = (state: StoreType): LoginContainerProps => {
   // test all connectors
   const enableProviders = new Set([
     ProviderType.INJECTED, // Ready
-    ProviderType.FORTMATIC, // Ready
+    ProviderType.FORTMATIC // Ready
     // ProviderType.WALLET_CONNECT, // Missing configuration
   ])
   const availableProviders = connection.getAvailableProviders().filter((provider) => enableProviders.has(provider))
@@ -33,12 +33,12 @@ const mapStateToProps = (state: StoreType): LoginContainerProps => {
     stage: state.session.kernelState?.loginStatus,
     signing: state.session.kernelState?.signing || false,
     availableProviders,
-    engineReady: state.kernel.ready,
+    engineReady: state.kernel.ready
   }
 }
 
 const mapDispatchToProps = (dispatch: any) => ({
-  onLogin: (provider: ProviderType | null) => dispatch({ type: "[Authenticate]", payload: { provider } }),
+  onLogin: (provider: ProviderType | null) => dispatch({ type: '[Authenticate]', payload: { provider } })
 })
 
 export interface LoginContainerProps {
@@ -59,7 +59,8 @@ export const LoginContainer: React.FC<LoginContainerProps & LoginContainerDispat
   return (
     <React.Fragment>
       {shouldShow && (
-        <div className={"LoginContainer" + (full ? " FullPage" : "")}>
+        <div className={'LoginContainer' + (full ? ' FullPage' : '')}>
+          {/* Nabvar */}
           <Navbar full={full} />
           <main>
             <Container className="eth-login-popup">

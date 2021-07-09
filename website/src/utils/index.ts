@@ -1,5 +1,5 @@
-import { ProviderType } from "decentraland-connect/dist/types"
-import { trackEvent } from "../integration/analytics"
+import { ProviderType } from 'decentraland-connect/dist/types'
+import { trackEvent } from '../integration/analytics'
 
 const ethereum = window.ethereum as any
 
@@ -16,38 +16,38 @@ export function callOnce<T>(fun: () => T): () => T {
 
 export const getWalletName = callOnce(() => {
   if (!ethereum) {
-    return "none"
+    return 'none'
   } else if (ethereum?.isMetaMask) {
-    return "metamask"
+    return 'metamask'
   } else if (ethereum?.isDapper) {
-    return "dapper"
+    return 'dapper'
   } else if (ethereum?.isCucumber) {
-    return "cucumber"
+    return 'cucumber'
   } else if (ethereum?.isTrust) {
-    return "trust"
+    return 'trust'
   } else if (ethereum?.isToshi) {
-    return "coinbase"
+    return 'coinbase'
   } else if (ethereum?.isGoWallet) {
-    return "goWallet"
+    return 'goWallet'
   } else if (ethereum?.isAlphaWallet) {
-    return "alphaWallet"
+    return 'alphaWallet'
   } else if (ethereum?.isStatus) {
-    return "status"
+    return 'status'
   } else {
-    return "other"
+    return 'other'
   }
 })
 
 export const getWalletProps = callOnce(() => {
   return Object.keys(ethereum || {})
-    .filter((prop) => prop.startsWith("is") && typeof ethereum[prop] === "boolean")
-    .join(",")
+    .filter((prop) => prop.startsWith('is') && typeof ethereum[prop] === 'boolean')
+    .join(',')
 })
 
 export type TrackEvents = {
-  ["open_login_popup"]: {}
-  ["click_login_button"]: {
-    provider_type: ProviderType | "guest"
+  ['open_login_popup']: {}
+  ['click_login_button']: {
+    provider_type: ProviderType | 'guest'
   }
 }
 

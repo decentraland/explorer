@@ -17,6 +17,7 @@ export type MetaConfiguration = {
     contentWhitelist: string[]
     catalystsNodesEndpoint?: string
   }
+  synapseUrl: string
   world: WorldConfig
   comms: CommsConfig
   minCatalystVersion?: string

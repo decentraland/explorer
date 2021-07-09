@@ -1,7 +1,7 @@
-import React from "react"
-import { Accordion } from "../common/Accordion"
-import { Container, Content } from "../common/Container"
-import "./BeginnersGuide.css"
+import React from 'react'
+import { Accordion } from '../common/Accordion'
+import { Container, Content } from '../common/Container'
+import './BeginnersGuide.css'
 
 export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) => (
   <div className="eth-beginners-guide">
@@ -56,7 +56,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (p
             same Guest ID and Avatar.
           </p>
           <p>
-            If this is the first time you’re hearing about digital wallets, we recommend reading{" "}
+            If this is the first time you’re hearing about digital wallets, we recommend reading{' '}
             <a href="https://docs.decentraland.org/examples/get-a-wallet/" target="_blank" rel="noreferrer">
               Get a Wallet – Beginners Guide
             </a>
@@ -73,7 +73,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (p
           <p>
             MANA is Decentraland’s fungible, ERC20 cryptocurrency token. MANA is burned, or spent, in exchange for LAND
             parcels. For a current summary of critical stats like total and circulating supply, please visit our MANA
-            Token Information transparency dashboard. See the{" "}
+            Token Information transparency dashboard. See the{' '}
             <a href="https://docs.decentraland.org/decentraland/glossary/" target="_blank" rel="noreferrer">
               Glossary
             </a>
@@ -103,7 +103,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (p
         >
           <p>The Marketplace is the go-to place to trade and manage all your Decentraland on-chain assets.</p>
           <p>
-            Access the Marketplace at{" "}
+            Access the Marketplace at{' '}
             <a href="https://market.decentraland.org" target="_blank" rel="noreferrer">
               market.decentraland.org
             </a>

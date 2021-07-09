@@ -1,7 +1,7 @@
-import React from "react"
+import React from 'react'
 
-import "./errors.css"
-import errorImage from "../../images/errors/error-robotmobile.png"
+import './errors.css'
+import errorImage from '../../images/errors/error-robotmobile.png'
 
 export const ErrorNotSupported: React.FC = () => (
   <div id="error-notsupported" className="error-container">

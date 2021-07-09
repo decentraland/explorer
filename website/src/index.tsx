@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom"
 import { Provider } from "react-redux"
 import App from "./components/App"
 import { restoreConnection } from "./eth/provider"
-import { identifyUser, trackEvent } from "./integration/analytics"
+import { disableAnalytics, identifyUser, trackEvent } from "./integration/analytics"
 import { injectKernel } from "./kernel-loader"
 import { setKernelAccountState, setKernelError, setKernelLoaded, setRendererLoading } from "./state/actions"
 import { store } from "./state/redux"
@@ -40,7 +40,12 @@ async function initWebsite() {
     identifyUser(email)
   })
 
-  kernel.errorObservable.add((error) => store.dispatch(setKernelError(error)))
+  kernel.errorObservable.add((error) => {
+    store.dispatch(setKernelError(error))
+    if(error.level == "fatal"){
+      disableAnalytics()
+    }
+  })
   kernel.loadingProgressObservable.add((event) => store.dispatch(setRendererLoading(event)))
 
   store.dispatch(setKernelLoaded(kernel))
@@ -69,13 +74,13 @@ ReactDOM.render(
       <App />
     </Provider>
   </React.StrictMode>,
-  document.getElementById("root"),
+  document.getElementById('root'),
   () => {
     if (INITIAL_RENDER) {
       INITIAL_RENDER = false
-      const initial = document.getElementById("root-loading")
+      const initial = document.getElementById('root-loading')
       if (initial) {
-        initial.style.opacity = "0"
+        initial.style.opacity = '0'
         setTimeout(() => {
           initial.remove()
         }, 300)

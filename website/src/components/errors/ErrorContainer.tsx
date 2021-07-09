@@ -1,21 +1,19 @@
-import React from "react"
-import { connect } from "react-redux"
-import { ErrorComms } from "./ErrorComms"
-import { ErrorFatal } from "./ErrorFatal"
-import { ErrorNoMobile } from "./ErrorNoMobile"
-import { ErrorNewLogin } from "./ErrorNewLogin"
-import { ErrorNetworkMismatch } from "./ErrorNetworkMismatch"
-import { ErrorNotInvited } from "./ErrorNotInvited"
-import { ErrorNotSupported } from "./ErrorNotSupported"
-import { ErrorAvatarLoading } from "./ErrorAvatarLoading"
-
-import "./errors.css"
-import { ErrorType, StoreType } from "../../state/redux"
+import React from 'react'
+import { connect } from 'react-redux'
+import { ErrorType, StoreType } from '../../state/redux'
+import { ErrorAvatarLoading } from './ErrorAvatarLoading'
+import { ErrorComms } from './ErrorComms'
+import { ErrorFatal } from './ErrorFatal'
+import { ErrorNetworkMismatch } from './ErrorNetworkMismatch'
+import { ErrorNewLogin } from './ErrorNewLogin'
+import { ErrorNoMobile } from './ErrorNoMobile'
+import { ErrorNotInvited } from './ErrorNotInvited'
+import { ErrorNotSupported } from './ErrorNotSupported'
 
 const mapStateToProps = (state: StoreType): ErrorContainerProps => {
   return {
     error: state.error?.type || null,
-    details: state.error?.details || null,
+    details: state.error?.details || null
   }
 }
 

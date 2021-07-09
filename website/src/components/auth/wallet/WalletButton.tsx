@@ -1,18 +1,18 @@
-import React from "react";
-import { ProviderType } from "decentraland-connect";
-import MetamaskLogo from "../../../images/login/metamask.svg";
-import DapperLogo from "../../../images/login/dapper.png";
-import SamsungBlockchainWalletLogo from "../../../images/login/samsung-blockchain-wallet.svg";
-import FortmaticLogo from "../../../images/login/fortmatic.svg";
-import WalletConnect from "../../../images/login/wallet-connect.svg";
-import "./WalletButton.css";
+import React from 'react'
+import { ProviderType } from 'decentraland-connect'
+import MetamaskLogo from '../../../images/login/metamask.svg'
+import DapperLogo from '../../../images/login/dapper.png'
+import SamsungBlockchainWalletLogo from '../../../images/login/samsung-blockchain-wallet.svg'
+import FortmaticLogo from '../../../images/login/fortmatic.svg'
+import WalletConnect from '../../../images/login/wallet-connect.svg'
+import './WalletButton.css'
 
 export enum WalletButtonLogo {
-  METAMASK = "Metamask",
-  DAPPER = "Dapper",
-  FORTMATIC = "Fortmatic",
-  WALLET_CONNECT = "WalletConnect",
-  SAMSUNG_BLOCKCHAIN_WALLET = "SamsungBlockChainWallet",
+  METAMASK = 'Metamask',
+  DAPPER = 'Dapper',
+  FORTMATIC = 'Fortmatic',
+  WALLET_CONNECT = 'WalletConnect',
+  SAMSUNG_BLOCKCHAIN_WALLET = 'SamsungBlockChainWallet'
 }
 
 const options = {
@@ -49,31 +49,26 @@ const options = {
   },
 
   description: {
-    [WalletButtonLogo.METAMASK]: "Using your browser account",
-    [WalletButtonLogo.DAPPER]: "Using your browser account",
-    [WalletButtonLogo.FORTMATIC]: "Using your email account",
-    [WalletButtonLogo.WALLET_CONNECT]: "Using your mobile account",
-    [WalletButtonLogo.SAMSUNG_BLOCKCHAIN_WALLET]: "Using your mobile account"
+    [WalletButtonLogo.METAMASK]: 'Using your browser account',
+    [WalletButtonLogo.DAPPER]: 'Using your browser account',
+    [WalletButtonLogo.FORTMATIC]: 'Using your email account',
+    [WalletButtonLogo.WALLET_CONNECT]: 'Using your mobile account',
+    [WalletButtonLogo.SAMSUNG_BLOCKCHAIN_WALLET]: 'Using your mobile account'
   }
 }
 
 export interface WalletButtonProps {
-  type: WalletButtonLogo;
-  active?: boolean;
-  onClick: (providerType: ProviderType) => void;
+  type: WalletButtonLogo
+  active?: boolean
+  onClick: (providerType: ProviderType) => void
 }
 
-export const WalletButton: React.FC<WalletButtonProps> = ({
-  type,
-  active,
-  onClick,
-}) => {
-
+export const WalletButton: React.FC<WalletButtonProps> = ({ type, active, onClick }) => {
   function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
     if (active !== false) {
-      event.preventDefault();
+      event.preventDefault()
       if (onClick) {
-        onClick(options.provider[type]);
+        onClick(options.provider[type])
       }
     }
   }
@@ -96,5 +91,5 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
         <p>{options.description[type]}</p>
       </div>
     </a>
-  );
-};
+  )
+}
