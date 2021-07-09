@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export function Twitter(props: React.SVGAttributes<SVGElement>) {
   return (
@@ -9,5 +9,5 @@ export function Twitter(props: React.SVGAttributes<SVGElement>) {
         transform="translate(5 5)"
       />
     </svg>
-  );
+  )
 }
