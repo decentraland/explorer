@@ -1,10 +1,10 @@
-import React from "react";
-import { Meta, Story } from "@storybook/react";
-import { InitialLoading } from "./InitialLoading";
+import React from 'react'
+import { Meta, Story } from '@storybook/react'
+import { InitialLoading } from './InitialLoading'
 
 export default {
-  title: "Explorer/auth/InitialLoading",
-  component: InitialLoading,
-} as Meta;
+  title: 'Explorer/auth/InitialLoading',
+  component: InitialLoading
+} as Meta
 
-export const Template: Story = () => <InitialLoading />;
+export const Template: Story = () => <InitialLoading />

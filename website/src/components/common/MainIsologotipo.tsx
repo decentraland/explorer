@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export const MainIsologotipo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -6,7 +6,7 @@ export const MainIsologotipo = (props: React.SVGProps<SVGSVGElement>) => (
     height="51"
     viewBox="0 0 266 51"
     {...props}
-    className={"dcl-main-isologotipo " + (props.className || "")}
+    className={'dcl-main-isologotipo ' + (props.className || '')}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -30,12 +30,7 @@ export const MainIsologotipo = (props: React.SVGProps<SVGSVGElement>) => (
       d="M18.0172 16.5577V35.3077H33.637L18.0172 16.5577Z"
       fill="url(#paint1_linear)"
     />
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M2.39709 35.3078H18.0168V16.5579L2.39709 35.3078Z"
-      fill="white"
-    />
+    <path fillRule="evenodd" clipRule="evenodd" d="M2.39709 35.3078H18.0168V16.5579L2.39709 35.3078Z" fill="white" />
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -60,12 +55,7 @@ export const MainIsologotipo = (props: React.SVGProps<SVGSVGElement>) => (
       d="M33.8363 26.5577V40.3077H45.2951L33.8363 26.5577Z"
       fill="url(#paint2_linear)"
     />
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M22.3887 40.3083H33.8348V26.5583L22.3887 40.3083Z"
-      fill="white"
-    />
+    <path fillRule="evenodd" clipRule="evenodd" d="M22.3887 40.3083H33.8348V26.5583L22.3887 40.3083Z" fill="white" />
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -89,27 +79,11 @@ export const MainIsologotipo = (props: React.SVGProps<SVGSVGElement>) => (
         colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
-        <feColorMatrix
-          in="SourceAlpha"
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-        />
+        <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
         <feOffset dy="0.902767" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.8 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow"
-        />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="effect1_dropShadow"
-          result="shape"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.8 0" />
+        <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
+        <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
       </filter>
       <linearGradient
         id="paint0_linear"
@@ -146,4 +120,4 @@ export const MainIsologotipo = (props: React.SVGProps<SVGSVGElement>) => (
       </linearGradient>
     </defs>
   </svg>
-);
+)
