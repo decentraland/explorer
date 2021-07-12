@@ -184,10 +184,10 @@
         captureUnhandledRejections: true,
         payload: {
           environment: document.domain.endsWith(".org") ? "production" : "development",
-          code_version: "%WEBSITE_COMMIT_HASH%"
+          code_version: "%REACT_APP_WEBSITE_VERSION%"
         },
-        code_version: "%WEBSITE_COMMIT_HASH%",
-        codeVersion: "%WEBSITE_COMMIT_HASH%",
+        code_version: "%REACT_APP_WEBSITE_VERSION%",
+        codeVersion: "%REACT_APP_WEBSITE_VERSION%",
       };
       // Rollbar Snippet
       // prettier-ignore

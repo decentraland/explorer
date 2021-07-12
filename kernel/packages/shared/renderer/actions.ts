@@ -1,12 +1,13 @@
 import { action } from 'typesafe-actions'
 
-import { UnityGame } from 'unity-interface/loader'
+import type { CommonRendererOptions } from 'unity-interface/loader'
+import type { UnityGame } from '@dcl/unity-renderer/index'
 
 import { RENDERER_INITIALIZED, PARCEL_LOADING_STARTED, ENGINE_STARTED } from './types'
 
 export const INITIALIZE_RENDERER = '[Request] Initialize renderer'
 export const initializeRenderer = (
-  delegate: (container: HTMLElement, onMessage: (type: string, payload: string) => void) => Promise<UnityGame>,
+  delegate: (container: HTMLElement, options: CommonRendererOptions) => Promise<UnityGame>,
   container: HTMLElement
 ) => action(INITIALIZE_RENDERER, { delegate, container })
 export type InitializeRenderer = ReturnType<typeof initializeRenderer>
