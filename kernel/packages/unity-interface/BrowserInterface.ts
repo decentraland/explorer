@@ -30,7 +30,7 @@ import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
   FriendshipAction,
-  JumpInPayload,
+  WorldPosition,
   LoadableParcelScene
 } from 'shared/types'
 import {
@@ -479,7 +479,7 @@ export class BrowserInterface {
       })
   }
 
-  public async JumpIn(data: JumpInPayload, nextRealmIndexToTry: number = 0) {
+  public async JumpIn(data: WorldPosition) {
     const {
       gridPosition: { x, y },
       realm: { serverName, layer }
@@ -505,24 +505,19 @@ export class BrowserInterface {
         () => {
           const successMessage = `Jumped to ${x},${y} in realm ${realmString}!`
           notifyStatusThroughChat(successMessage)
+          unityInterface.ConnectionToRealmSuccess(data)
           TeleportController.goTo(x, y, successMessage)
         },
-        async (e) => {
+        (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
-          if (data.tryOtherRealms) {
-            await this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
-          } else {
-            notifyStatusThroughChat('Could not join realm.' + cause)
-            defaultLogger.error('Error joining realm', e)
-          }
+          notifyStatusThroughChat('Could not join realm.' + cause)
+          unityInterface.ConnectionToRealmFailed(data)
+          defaultLogger.error('Error joining realm', e)
         }
       )
     } else {
-      if (data.tryOtherRealms) {
-        await this.JumpToAnotherRealm(store, nextRealmIndexToTry, data)
-      } else {
-        notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
-      }
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
+      unityInterface.ConnectionToRealmFailed(data)
     }
   }
 
@@ -630,41 +625,6 @@ export class BrowserInterface {
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
     return !array || array.length === 0 ? undefined : array
-  }
-
-  private async JumpToAnotherRealm(store: Store<RootState>, nextRealmIndexToTry: number, jumpInData: JumpInPayload) {
-    const realmString = jumpInData.realm.serverName + '-' + jumpInData.realm.layer
-
-    if (nextRealmIndexToTry < jumpInData.nextMostPopulatedRealms.length) {
-      notifyStatusThroughChat(`Couldn't find realm ${realmString}. Trying to connect to the next more populated one...`)
-      await this.TryToJumpToTheNextMostPopulatedRealm(store, nextRealmIndexToTry, jumpInData)
-    } else {
-      notifyStatusThroughChat(`Couldn't find realm ${realmString}. You'll stay in your current realm.`)
-      this.GoTo(jumpInData.gridPosition)
-    }
-  }
-
-  private async TryToJumpToTheNextMostPopulatedRealm(store: Store<RootState>, realmIndex: number, jumpInData: JumpInPayload) {
-    let realmIndexToJump = realmIndex
-    let newJumpInData = jumpInData
-    let realmFound = false
-
-    for (let i = realmIndex; i < jumpInData.nextMostPopulatedRealms.length; i++) {
-      const realm = jumpInData.nextMostPopulatedRealms[i]
-      if (realm.usersCount < realm.usersMax && (realm.serverName !== jumpInData.realm.serverName || realm.layer !== jumpInData.realm.layer)) {
-        newJumpInData.realm.serverName = realm.serverName
-        newJumpInData.realm.layer = realm.layer
-        realmIndexToJump = i
-        realmFound = true
-        break
-      }
-    }
-
-    if (realmFound) {
-      await this.JumpIn(newJumpInData, realmIndexToJump + 1)
-    } else {
-      this.GoTo(jumpInData.gridPosition)
-    }
   }
 }
 

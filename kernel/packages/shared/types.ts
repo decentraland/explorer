@@ -494,7 +494,7 @@ export enum ChatMessageType {
   SYSTEM
 }
 
-export type JumpInPayload = {
+export type WorldPosition = {
   realm: {
     serverName: string
     layer: string
@@ -503,14 +503,6 @@ export type JumpInPayload = {
     x: number
     y: number
   }
-  tryOtherRealms: boolean
-  nextMostPopulatedRealms: {
-    layer: string
-    serverName: string
-    usersCount: number
-    usersMax: number
-    userParcels: [number, number][]
-  }[]
 }
 
 export type ChatMessage = {
