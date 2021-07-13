@@ -295,7 +295,6 @@ export class BrowserInterface {
   }
 
   public SendPassport(passport: { name: string; email: string }) {
-    Html.switchGameContainer(false)
     unityInterface.DeactivateRendering()
     globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
     globalThis.globalStore.dispatch(signUp())
