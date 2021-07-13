@@ -207,6 +207,7 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
 
 function* showAvatarEditor() {
   yield put(setLoadingScreen(true))
+  refreshLoadingScreen()
   yield put(changeLoginStage(LoginStage.SIGN_UP))
 
   const profile: Partial<Profile> = yield select(getSignUpProfile)
@@ -215,6 +216,7 @@ function* showAvatarEditor() {
   unityInterface.LoadProfile(profile as any)
   unityInterface.ShowAvatarEditorInSignIn()
   yield put(setLoadingScreen(false))
+  refreshLoadingScreen()
   Html.switchGameContainer(true)
 }
 
@@ -313,6 +315,7 @@ function* setUserAuthentified(userId: string, identity: ExplorerIdentity) {
 
 function* signUp() {
   yield put(setLoadingScreen(true))
+  refreshLoadingScreen()
   yield put(changeLoginStage(LoginStage.COMPLETED))
   const session = yield select(getSignUpIdentity)
 
@@ -330,6 +333,7 @@ function* signUp() {
   delete profile.email // We don't deploy the email because it is public
 
   yield put(setLoadingWaitTutorial(true))
+  refreshLoadingScreen()
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
