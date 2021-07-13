@@ -72,7 +72,7 @@ export function refreshLoadingScreen() {
   let loading = state?.loading
   let session = state?.session
   unityInterface.SetLoadingScreen({
-    isVisible: loading?.showLoadingScreen || loading?.waitingTutorial || false,
+    isVisible: loading?.showLoadingScreen || false,
     message: loading?.message || "",
     showWalletPrompt: session?.showWalletPrompt || false,
     showTips: loading?.initialLoad || false
