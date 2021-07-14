@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Overlay from './common/Overlay'
 import ErrorContainer from './errors/ErrorContainer'
 import LoginContainer from './auth/LoginContainer'
 import { Audio } from './common/Audio'
@@ -22,7 +21,6 @@ export interface AppProps {
 const App: React.FC<AppProps> = (props) => (
   <div>
     {props.sound && <Audio track="/tone4.mp3" play={true} />}
-    <Overlay />
     {!props.error && <LoginContainer />}
     {props.error && <ErrorContainer />}
   </div>

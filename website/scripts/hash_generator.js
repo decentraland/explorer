@@ -20,13 +20,11 @@ ENV_CONTENT = ENV_CONTENT.filter((l) => {
   return !VARS.includes(name) && l.trim() !== ""
 })
 
-const commitVersion = childProcess.execSync("git rev-parse HEAD").toString().trim()
-
-const websiteVersion = md5File.sync(path.resolve("./public/website.js"))
+const commitVersion =
+  childProcess.execSync("git rev-parse HEAD").toString().trim() || md5File.sync(path.resolve("./public/website.js"))
 
 ENV_CONTENT.push("REACT_APP_EXPLORER_VERSION=" + commitVersion)
-ENV_CONTENT.push("REACT_APP_WEBSITE_VERSION=" + websiteVersion)
-ENV_CONTENT.push("WEBSITE_COMMIT_HASH=" + commitVersion)
+ENV_CONTENT.push("REACT_APP_WEBSITE_VERSION=" + commitVersion)
 ENV_CONTENT.push("GENERATE_SOURCEMAP=true")
 
 console.log("VERSIONS:", ENV_CONTENT, "\n")
