@@ -109,6 +109,7 @@ export const RESIZE_SERVICE = ensureSingleString(qs.RESIZE_SERVICE)
 export const HOTSCENES_SERVICE = ensureSingleString(qs.HOTSCENES_SERVICE)
 export const POI_SERVICE = ensureSingleString(qs.POI_SERVICE)
 export const REALM = ensureSingleString(qs.realm)
+export const PREFERED_ISLAND = ensureSingleString(qs.island)
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
 

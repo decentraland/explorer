@@ -104,7 +104,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     private peerId: string,
     private realm: Realm,
     private lighthouseUrl: string,
-    private peerConfig: PeerConfig & { onIslandChange: (island: string | undefined) => any },
+    private peerConfig: PeerConfig & { onIslandChange: (island: string | undefined) => any, preferedIslandId?: string },
     private statusHandler: (status: CommsStatus) => void
   ) {
     // This assignment is to "definetly initialize" peer
@@ -289,6 +289,11 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
     global.__DEBUG_PEER = this.peer
+
+    if (this.peerConfig.preferedIslandId && "setPreferedIslandId" in this.peer) {
+      this.peer.setPreferedIslandId(this.peerConfig.preferedIslandId)
+    }
+
     return this.peer
   }
 

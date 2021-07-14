@@ -93,7 +93,7 @@ import { getIdentity, getStoredSession } from 'shared/session'
 import { createLogger } from '../logger'
 import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
 import { setCommsIsland, voicePlayingUpdate, voiceRecordingUpdate } from './actions'
-import { getCommsIsland, getVoicePolicy, isVoiceChatRecording } from './selectors'
+import { getCommsIsland, getPreferedIsland, getVoicePolicy, isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
 import future, { IFuture } from 'fp-future'
 import { getProfileType } from 'shared/profiles/getProfileType'
@@ -961,7 +961,8 @@ export async function connect(userId: string) {
           },
           onIslandChange: (island: string | undefined) => {
             store.dispatch(setCommsIsland(island))
-          }
+          },
+          preferedIslandId: getPreferedIsland(store.getState())
         }
 
         if (!commsConfig.relaySuspensionDisabled) {

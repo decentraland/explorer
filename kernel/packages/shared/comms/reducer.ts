@@ -4,11 +4,13 @@ import { COMMS_ESTABLISHED } from 'shared/loading/types'
 
 import { CommsState, VoicePolicy } from './types'
 import { SET_COMMS_ISLAND, SET_VOICE_CHAT_RECORDING, SET_VOICE_POLICY, TOGGLE_VOICE_CHAT_RECORDING } from './actions'
+import { PREFERED_ISLAND } from 'config'
 
 const INITIAL_COMMS = {
   initialized: false,
   voiceChatRecording: false,
-  voicePolicy: VoicePolicy.ALLOW_ALL
+  voicePolicy: VoicePolicy.ALLOW_ALL,
+  preferedIsland: PREFERED_ISLAND ?? undefined
 }
 
 export function commsReducer(state?: CommsState, action?: AnyAction): CommsState {
