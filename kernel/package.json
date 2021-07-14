@@ -95,7 +95,7 @@
     "web3x-codegen": "^4.0.6"
   },
   "dependencies": {
-    "@dcl/catalyst-peer": "^1.0.1",
+    "@dcl/catalyst-peer": "^1.0.2",
     "@dcl/ecs-quests": "^1.2.3-20210422200033.commit-48c967e",
     "@dcl/schemas": "^1.2.0",
     "@dcl/urn-resolver": "^1.1.0",
