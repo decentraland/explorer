@@ -623,6 +623,10 @@ export class BrowserInterface {
     unpublishSceneByCoords(data.coordinates).catch((error) => defaultLogger.log(error))
   }
 
+  public async NotifyStatusThroughChat(data: { value: string }) {
+    notifyStatusThroughChat(data.value)
+  }
+
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
     return !array || array.length === 0 ? undefined : array
   }
