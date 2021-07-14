@@ -55,7 +55,7 @@ export interface LoginContainerProps {
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const loading = props.stage === LoginStage.LOADING || !props.engineReady
   const full = loading || props.stage === LoginStage.SIGN_IN
-  const shouldShow = LoginStage.COMPLETED !== props.stage && LoginStage.SIGN_UP !== props.stage
+  const shouldShow = (LoginStage.COMPLETED !== props.stage && LoginStage.SIGN_UP !== props.stage) || !props.engineReady
   return (
     <React.Fragment>
       {shouldShow && (
@@ -70,7 +70,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
                 <EthLogin
                   availableProviders={props.availableProviders}
                   onLogin={props.onLogin}
-                  signing={props.signing}
+                  signing={props.signing || LoginStage.COMPLETED === props.stage}
                 />
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && <EthConnectAdvice onLogin={props.onLogin} />}
