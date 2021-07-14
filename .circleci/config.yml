@@ -328,7 +328,7 @@ jobs:
             AWS_ACCESS_KEY_ID="${AWS_PRD_ACCESS_KEY_ID}" \
             AWS_SECRET_ACCESS_KEY="${AWS_PRD_SECRET_ACCESS_KEY}" \
               npx @dcl/cdn-uploader@next \
-                --bucket "explorer.decentraland.org/" \
+                --bucket "explorer.decentraland.org" \
                 --local-folder "/tmp/explorer/website/build" \
                 --bucket-folder "branch/${CIRCLE_BRANCH}"
       - run:
