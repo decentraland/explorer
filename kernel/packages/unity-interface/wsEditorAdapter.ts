@@ -1,7 +1,8 @@
 import { DEBUG_MESSAGES } from 'config'
 import future from 'fp-future'
 import { createLogger } from 'shared/logger'
-import { UnityGame } from './loader'
+import type { CommonRendererOptions } from './loader'
+import type { UnityGame } from '@dcl/unity-renderer/index'
 
 const logger = createLogger('ws-adapter: ')
 
@@ -9,9 +10,8 @@ const logger = createLogger('ws-adapter: ')
 export async function initializeUnityEditor(
   webSocketUrl: string,
   container: HTMLElement,
-  onMessageFromEngine: (type: string, payload: any) => void
-  ): Promise<UnityGame> {
-
+  options: CommonRendererOptions
+): Promise<UnityGame> {
   const engineStartedFuture = future<UnityGame>()
 
   logger.info(`Connecting WS to ${webSocketUrl}`)
@@ -37,7 +37,7 @@ export async function initializeUnityEditor(
     try {
       const m = JSON.parse(ev.data)
       if (m.type && m.payload) {
-        onMessageFromEngine(m.type, m.payload)
+        options.onMessage(m.type, m.payload)
       } else {
         logger.error('Unexpected message: ', m)
       }

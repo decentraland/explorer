@@ -5,10 +5,10 @@ import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
 import { initializeRenderer } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
-import { loadUnity, UnityGame } from './loader'
+import { CommonRendererOptions, loadUnity } from './loader'
+import type { UnityGame } from '@dcl/unity-renderer/index'
 
 import { initializeUnityEditor } from './wsEditorAdapter'
-import future from 'fp-future'
 import {
   BringDownClientAndShowError,
   ErrorContext,
@@ -24,47 +24,24 @@ export type InitializeUnityResult = {
   container: HTMLElement
 }
 
-async function loadInjectedUnityDelegate(
-  container: HTMLElement,
-  onMessage: (type: string, payload: string) => void
-): Promise<UnityGame> {
+async function loadInjectedUnityDelegate(container: HTMLElement, options: CommonRendererOptions): Promise<UnityGame> {
   const queryParams = new URLSearchParams(document.location.search)
 
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
-  const engineStartedFuture = future<void>()
-
-  // The namespace DCL is exposed to global because the unity template uses it to send the messages
-  // @see https://github.com/decentraland/unity-renderer/blob/bc2bf1ee0d685132c85606055e592bac038b3471/unity-renderer/Assets/Plugins/JSFunctions.jslib#L6-L29
-  ;(globalThis as any)['DCL'] = {
-    // This function get's called by the engine
-    EngineStarted() {
-      engineStartedFuture.resolve()
-    },
-
-    // This function is called from the unity renderer to send messages back to the scenes
-    MessageFromEngine(type: string, jsonEncodedMessage: string) {
-      onMessage(type, jsonEncodedMessage)
-    }
-  }
-
   // inject unity loader
-  const { createUnityInstance } = await loadUnity(queryParams.get('renderer') || undefined)
+  const { createWebRenderer } = await loadUnity(queryParams.get('renderer') || null, options)
 
   preventUnityKeyboardLock()
 
   const canvas = document.createElement('canvas')
-  canvas.addEventListener('contextmenu', function (e) {
-    e.preventDefault()
-  })
   canvas.id = '#canvas'
   container.appendChild(canvas)
 
-  const instance = await createUnityInstance(canvas, function (_progress) {
-    // In the future we could report progress of the loading: console.log('progress', _progress)
-  })
+  const { originalUnity, engineStartedFuture } = await createWebRenderer(canvas)
 
-  instance.Module.errorHandler = (message: string, filename: string, lineno: number) => {
+  // TODO: move to unity-renderer js project
+  originalUnity.Module.errorHandler = (message: string, filename: string, lineno: number) => {
     console['error'](message, filename, lineno)
 
     if (message.includes('The error you provided does not contain a stack trace')) {
@@ -81,17 +58,14 @@ async function loadInjectedUnityDelegate(
 
   await engineStartedFuture
 
-  return instance
+  return originalUnity
 }
 
 /** Initialize engine using WS transport (UnityEditor) */
-async function loadWsEditorDelegate(
-  container: HTMLElement,
-  onMessage: (type: string, payload: string) => void
-): Promise<UnityGame> {
+async function loadWsEditorDelegate(container: HTMLElement, options: CommonRendererOptions): Promise<UnityGame> {
   const queryParams = new URLSearchParams(document.location.search)
 
-  return initializeUnityEditor(queryParams.get('ws')!, container, onMessage)
+  return initializeUnityEditor(queryParams.get('ws')!, container, options)
 }
 
 /** Initialize the injected engine in a container */

@@ -111,7 +111,7 @@ async function fetchFeatureFlags(): Promise<Record<string, boolean> | undefined>
   const featureFlagsEndpoint = getServerConfigurations().explorerFeatureFlags
   try {
     const response = await fetch(featureFlagsEndpoint, {
-      credentials: 'same-origin'
+      credentials: 'include'
     })
     if (response.ok) {
       const { flags } = await response.json()
