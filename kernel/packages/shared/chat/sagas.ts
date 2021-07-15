@@ -105,7 +105,7 @@ function* handleReceivedMessage(action: MessageReceived) {
 function* handleSendMessage(action: SendMessage) {
   const { body: message } = action.payload
 
-  let entry: ChatMessage | null | undefined = null
+  let entry: ChatMessage | null = null
 
   // Check if message is a command
   if (message[0] === '/') {
