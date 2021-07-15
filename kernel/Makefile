@@ -122,7 +122,7 @@ static/dist/%.js: build-essentials packages/entryPoints/%.ts
 
 # Release
 
-DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/kernel.js
+DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/website.js
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
@@ -234,7 +234,7 @@ watch-cli: build-essentials ## Watch the files required for building the CLI
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/entryPoints/preview.json --watch" \
-			"$(COMPILER) targets/entryPoints/kernel.json --watch" \
+			"$(COMPILER) targets/entryPoints/website.json --watch" \
 			"node ./scripts/runTestServer.js --keep-open"
 
 # Aesthetics
@@ -250,7 +250,7 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 
 # Development
 
-watch: $(SOME_MAPPINGS) build-essentials static/dist/kernel.js ## Watch the files required for hacking the explorer
+watch: $(SOME_MAPPINGS) build-essentials static/dist/website.js ## Watch the files required for hacking the explorer
 	cd ../website && npm run start &
 	cd $(PWD);
 	@NODE_ENV=development npx concurrently \
@@ -260,7 +260,7 @@ watch: $(SOME_MAPPINGS) build-essentials static/dist/kernel.js ## Watch the file
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/scenes/basic-scenes.json --watch" \
-			"$(COMPILER) targets/entryPoints/kernel.json --watch" \
+			"$(COMPILER) targets/entryPoints/website.json --watch" \
 			"$(COMPILER) targets/test.json --watch" \
 			"node ./scripts/runPathSimulator.js" \
 			"node ./scripts/runTestServer.js --keep-open"

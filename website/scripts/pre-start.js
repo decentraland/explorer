@@ -5,7 +5,7 @@ const path = require('path')
 
 let files = [
   { origin: '/static/default-profile', dest: './public/default-profile' },
-  { origin: '/static/dist/kernel.js', dest: './public/kernel.js' },
+  { origin: '/static/dist/website.js', dest: './public/website.js' },
   { origin: '/static/dist/0.js', dest: './public/0.js' },
   { origin: '/static/dist/1.js', dest: './public/1.js' },
   { origin: '/static/dist/2.js', dest: './public/2.js' },
