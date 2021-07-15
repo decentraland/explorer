@@ -111,7 +111,7 @@ function* handleSendMessage(action: SendMessage) {
   if (message[0] === '/') {
     entry = handleChatCommand(message)
 
-    if (entry && entry.body.length  == 0) { // Command is found but has no feedback message
+    if (entry && entry.body.length === 0) { // Command is found but has no feedback message
       return
     }
 
