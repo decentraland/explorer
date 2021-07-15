@@ -21,7 +21,7 @@ import { TeleportController } from 'shared/world/TeleportController'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
-import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
+import { isValidExpression, validExpressions } from 'shared/apis/expressionExplainer'
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
@@ -111,6 +111,10 @@ function* handleSendMessage(action: SendMessage) {
   // Check if message is a command
   if (message[0] === '/') {
     entry = handleChatCommand(message)
+
+    if (entry && entry.body.length === 0) { // Command is found but has no feedback message
+      return
+    }
 
     // If no such command was found, provide some feedback
     if (!entry) {
@@ -340,7 +344,7 @@ function initChatCommands() {
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: expressionExplainer[expression]
+        body: ""
       }
     }
   )
