@@ -1,6 +1,6 @@
 import future from 'fp-future'
 import { parseUrn } from '@dcl/urn-resolver'
-import type * as _TheRenderer from '@dcl/unity-renderer/index'
+import type * as _TheRenderer from '@dcl/unity-renderer/src/index'
 import { trackEvent } from 'shared/analytics'
 
 declare const globalThis: { DclRenderer?: DclRenderer; RENDERER_ARTIFACTS_ROOT?: string }
