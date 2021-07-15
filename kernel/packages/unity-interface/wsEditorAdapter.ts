@@ -2,7 +2,7 @@ import { DEBUG_MESSAGES } from 'config'
 import future from 'fp-future'
 import { createLogger } from 'shared/logger'
 import type { CommonRendererOptions } from './loader'
-import type { UnityGame } from '@dcl/unity-renderer/index'
+import type { UnityGame } from '@dcl/unity-renderer/src/index'
 
 const logger = createLogger('ws-adapter: ')
 
