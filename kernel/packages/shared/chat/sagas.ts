@@ -37,7 +37,7 @@ declare const globalThis: RendererInterfaces & StoreContainer
 interface IChatCommand {
   name: string
   description: string
-  run: (message: string) => ChatMessage | undefined
+  run: (message: string) => ChatMessage
 }
 
 const chatCommands: { [key: string]: IChatCommand } = {}
@@ -111,7 +111,7 @@ function* handleSendMessage(action: SendMessage) {
   if (message[0] === '/') {
     entry = handleChatCommand(message)
 
-    if (entry === undefined) { // Command is found but has no feedback message
+    if (entry && entry.body.length  == 0) { // Command is found but has no feedback message
       return
     }
 
@@ -162,7 +162,7 @@ function handleChatCommand(message: string) {
   return null
 }
 
-function addChatCommand(name: string, description: string, fn: (message: string) => ChatMessage | undefined): void {
+function addChatCommand(name: string, description: string, fn: (message: string) => ChatMessage): void {
   if (chatCommands[name]) {
     // Chat command already registered
     return
@@ -338,7 +338,13 @@ function initChatCommands() {
 
       globalThis.unityInterface.TriggerSelfUserExpression(expression)
 
-      return undefined // We dont want to send any feedback message
+      return {
+        messageId: uuid(),
+        messageType: ChatMessageType.SYSTEM,
+        sender: 'Decentraland',
+        timestamp: Date.now(),
+        body: ""
+      }
     }
   )
 
