@@ -35,7 +35,6 @@ import { FeatureFlags, WorldConfig } from 'shared/meta/types'
 import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
-import Html from 'shared/Html'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 import { isWaitingTutorial } from 'shared/loading/selectors'
 import { ensureUnityInterface } from 'shared/renderer'
@@ -161,7 +160,6 @@ async function loadWebsiteSystems() {
           globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
           globalThis.globalStore.dispatch(experienceStarted())
           globalThis.globalStore.dispatch(setLoadingScreen(false))
-          Html.switchGameContainer(true)
         })
         .catch(logger.error)
 

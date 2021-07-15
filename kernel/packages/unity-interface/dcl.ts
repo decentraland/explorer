@@ -69,11 +69,10 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
 export function refreshLoadingScreen() {
   let state = globalThis.globalStore.getState()
   let loading = state?.loading
-  let session = state?.session
   unityInterface.SetLoadingScreen({
     isVisible: loading?.showLoadingScreen || false,
-    message: loading?.message || "",
-    showWalletPrompt: session?.showWalletPrompt || false,
+    message: loading?.message || '',
+    showWalletPrompt: false,
     showTips: loading?.initialLoad || false
   })
 }

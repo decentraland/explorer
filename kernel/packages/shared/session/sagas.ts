@@ -320,7 +320,7 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
 
-  return { ...auth, rawAddress: address, address: address.toLocaleLowerCase(), hasConnectedWeb3, provider }
+  return { ...auth, rawAddress: address, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 }
 
 function* logout() {

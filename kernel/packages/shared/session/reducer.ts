@@ -3,7 +3,6 @@ import { AnyAction } from 'redux'
 import { SessionState } from './types'
 import {
   CHANGE_LOGIN_STAGE,
-  SIGNIN_SET_SIGNING,
   SIGNUP_CLEAR_DATA,
   SIGNUP_FORM,
   SIGNUP_SET_IDENTITY,

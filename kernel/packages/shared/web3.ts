@@ -12,7 +12,6 @@ import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { StoreContainer } from './store/rootTypes'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
-import Html from './Html'
 import { Eth } from 'web3x/eth'
 import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
 
