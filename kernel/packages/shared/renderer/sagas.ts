@@ -3,7 +3,7 @@ import { waitingForRenderer } from 'shared/loading/types'
 import { createLogger } from 'shared/logger'
 import { browserInterface } from 'unity-interface/BrowserInterface'
 import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
-import { UnityGame } from 'unity-interface/loader'
+import type { UnityGame } from '@dcl/unity-renderer/src/index'
 import { engineStarted, InitializeRenderer, INITIALIZE_RENDERER } from './actions'
 import { isInitialized } from './selectors'
 import { RENDERER_INITIALIZED } from './types'
@@ -31,7 +31,9 @@ function* initializeRenderer(action: InitializeRenderer) {
   yield put(waitingForRenderer())
 
   // start loading the renderer
-  const renderer: UnityGame = yield delegate(container, handleMessageFromEngine)
+  const renderer: UnityGame = yield delegate(container, {
+    onMessage: handleMessageFromEngine
+  })
 
   // wire the kernel to the renderer
   yield initializeEngine(renderer)

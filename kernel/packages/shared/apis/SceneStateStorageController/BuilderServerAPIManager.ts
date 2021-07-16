@@ -287,11 +287,6 @@ export class BuilderServerAPIManager {
   }
 
   private async setThumbnailOnServer(projectId: string, thumbnailBlob: Blob, identity: ExplorerIdentity) {
-    // TODO: We should delete this when we enter in production or we won't be able to set the project in production
-    if (getDefaultTLD() === 'org') {
-      defaultLogger.log('Project thumbnail saving is disable in org for the moment!')
-      return undefined
-    }
     const queryParams = 'projects/' + projectId + '/media'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 

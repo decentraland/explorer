@@ -86,13 +86,13 @@ namespace webApp {
       await loadWebsiteSystems()
     } catch (err) {
       document.body.classList.remove('dcl-loading')
+      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
         BringDownClientAndShowError(NOT_INVITED)
       } else {
         console['error']('Error loading Unity', err)
         BringDownClientAndShowError(FAILED_FETCHING_UNITY)
       }
-      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
       throw err
     }
   }
@@ -111,6 +111,7 @@ namespace webApp {
       visible: OPEN_AVATAR_EDITOR
     })
     i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.LOADING_HUD, { active: true, visible: false})
     i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
