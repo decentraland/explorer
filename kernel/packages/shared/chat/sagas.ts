@@ -486,7 +486,7 @@ function initChatCommands() {
           const count = sceneInfo.realms.reduce((a, b) => a + b.usersCount, 0)
           body += `${count} ${count > 1 ? 'users' : 'user'} @ ${sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
             } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
-              (a, b) => a + `\n\t realm: ${b.serverName}-${b.layer} users: ${b.usersCount}`,
+              (a, b) => a + `\n\t realm: ${realmToString(b)} users: ${b.usersCount}`,
               ''
             )}\n`
         })

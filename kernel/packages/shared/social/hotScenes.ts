@@ -21,7 +21,7 @@ declare const window: {
 
 type RealmInfo = {
   serverName: string
-  layer: string
+  layer?: string
   usersCount: number
   usersMax: number
   userParcels: { x: number; y: number }[]
