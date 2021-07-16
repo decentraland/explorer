@@ -255,7 +255,14 @@ jobs:
           command: cp decentraland-ecs-1.0.0.tgz /tmp/explorer/website/build/decentraland-ecs.tgz
       - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+          command: |
+            AWS_DEFAULT_REGION="us-east-1" \
+            AWS_ACCESS_KEY_ID="${AWS_DEV_ACCESS_KEY_ID}" \
+            AWS_SECRET_ACCESS_KEY="${AWS_DEV_SECRET_ACCESS_KEY}" \
+              npx @dcl/cdn-uploader@next \
+                --bucket "explorer.decentraland.zone" \
+                --local-folder "/tmp/explorer/website/build" \
+                --bucket-folder "branch/${CIRCLE_BRANCH}"
 
       - run:
           name: Invalidate cloudfront cache .zone
@@ -275,7 +282,14 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) if tests pass and branch is master
-          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/ --acl public-read
+          command: |
+            AWS_DEFAULT_REGION="us-east-1" \
+            AWS_ACCESS_KEY_ID="${AWS_DEV_ACCESS_KEY_ID}" \
+            AWS_SECRET_ACCESS_KEY="${AWS_DEV_SECRET_ACCESS_KEY}" \
+              npx @dcl/cdn-uploader@next \
+                --bucket "explorer.decentraland.zone" \
+                --local-folder "/tmp/explorer/website/build" \
+                --bucket-folder ""
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -295,7 +309,9 @@ jobs:
       - run:
           name: Deploy to .today
           command: |
-            aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
+            # aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
+            echo 'staging is disabled in this town'
+            exit 1
       - run:
           name: Invalidate cloudfront cache .today
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E315GYHDRD7XX6 --paths "/*"
@@ -315,7 +331,13 @@ jobs:
       - run:
           name: Deploy to .org
           command: |
-            aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.org/ --exclude "tags/*" --acl public-read
+            AWS_DEFAULT_REGION="us-east-1" \
+            AWS_ACCESS_KEY_ID="${AWS_PRD_ACCESS_KEY_ID}" \
+            AWS_SECRET_ACCESS_KEY="${AWS_PRD_SECRET_ACCESS_KEY}" \
+              npx @dcl/cdn-uploader@next \
+                --bucket "explorer.decentraland.org" \
+                --local-folder "/tmp/explorer/website/build" \
+                --bucket-folder ""
       - run:
           name: Invalidate cloudfront cache .org
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
