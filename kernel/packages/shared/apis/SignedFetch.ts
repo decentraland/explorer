@@ -66,7 +66,7 @@ export class SignedFetch extends ExposableAPI {
             tld: getTLD(),
             isGuest: await isGuest(),
             origin: location.origin,
-            realm
+            realm: realm ? { ...realm, layer: realm.layer ?? '' } : undefined // If the realm doesn't have layer, we send it
           },
           (payload) => Authenticator.signPayload(identity, payload)
         ),

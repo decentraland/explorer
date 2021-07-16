@@ -27,7 +27,7 @@ export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   return web3net
 }
 
-export async function checkTldVsWeb3Network() {
+export async function checkTldVsWeb3Network(): Promise<boolean> {
   try {
     const web3Net = await getAppNetwork()
 
