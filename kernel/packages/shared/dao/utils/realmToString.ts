@@ -1,5 +1,5 @@
-import { Realm } from '../types'
+export function realmToString(realm: ({ catalystName: string } | { serverName: string }) & { layer?: string }) {
+  const name = "catalystName" in realm ? realm.catalystName : realm.serverName
 
-export function realmToString(realm: Realm) {
-  return `${realm.catalystName}-${realm.layer}`
+  return realm.layer ? `${name}-${realm.layer}` : name
 }

@@ -31,6 +31,7 @@ import { isFriend } from 'shared/friends/selectors'
 import { fetchHotScenes } from 'shared/social/hotScenes'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
+import { realmToString } from 'shared/dao/utils/realmToString'
 
 declare const globalThis: RendererInterfaces & StoreContainer
 
@@ -226,7 +227,7 @@ function initChatCommands() {
         ([changed, realm]) => {
           if (changed) {
             notifyStatusThroughChat(
-              `Found a crowded realm to join. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              `Found a crowded realm to join. Welcome to the realm ${realmToString(realm)}!`
             )
           } else {
             notifyStatusThroughChat(`Already on most crowded realm for location. Nothing changed.`)
@@ -242,12 +243,12 @@ function initChatCommands() {
       const realm = changeRealm(realmString)
 
       if (realm) {
-        response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
+        response = `Changing to Realm ${realmToString(realm)}...`
         // TODO: This status should be shown in the chat window
         catalystRealmConnected().then(
           () =>
             notifyStatusThroughChat(
-              `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              `Changed realm successfuly. Welcome to the realm ${realmToString(realm)}!`
             ),
           (e) => {
             const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
@@ -487,12 +488,11 @@ function initChatCommands() {
         let body = ''
         $.slice(0, 5).forEach((sceneInfo) => {
           const count = sceneInfo.realms.reduce((a, b) => a + b.usersCount, 0)
-          body += `${count} ${count > 1 ? 'users' : 'user'} @ ${
-            sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
-          } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
-            (a, b) => a + `\n\t realm: ${b.serverName}-${b.layer} users: ${b.usersCount}`,
-            ''
-          )}\n`
+          body += `${count} ${count > 1 ? 'users' : 'user'} @ ${sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
+            } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
+              (a, b) => a + `\n\t realm: ${realmToString(b)} users: ${b.usersCount}`,
+              ''
+            )}\n`
         })
         notifyStatusThroughChat(body)
       },

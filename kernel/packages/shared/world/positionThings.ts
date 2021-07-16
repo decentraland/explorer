@@ -1,4 +1,4 @@
-const qs: any = require('query-string')
+import * as qs from 'query-string'
 import {
   Vector3,
   ReadOnlyVector3,
@@ -88,10 +88,10 @@ export function initializeUrlPositionObserver() {
     // LOAD INITIAL POSITION IF SET TO ZERO
     const query = qs.parse(location.search)
 
-    if (query.position) {
-      let [x, y] = query.position.split(',')
-      x = parseFloat(x)
-      y = parseFloat(y)
+    if (typeof query.position === 'string') {
+      const [xString, yString] = query.position.split(',')
+      let x = parseFloat(xString)
+      let y = parseFloat(yString)
 
       if (!isInsideWorldLimits(x, y)) {
         x = 0

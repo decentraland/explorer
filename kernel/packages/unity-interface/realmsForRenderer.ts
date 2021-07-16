@@ -54,7 +54,7 @@ function convertCurrentRealmType(realm: Realm): CurrentRealmInfoForRenderer {
   const contentServerUrl = getFetchContentServer(globalThis.globalStore.getState())
   return {
     serverName: realm.catalystName,
-    layer: realm.layer,
+    layer: realm.layer ?? '',
     domain: realm.domain,
     contentServerUrl: contentServerUrl
   }

@@ -53,7 +53,7 @@ export class EnvironmentAPI extends ExposableAPI {
     const { domain, layer, catalystName: serverName } = realm
     return {
       domain,
-      layer,
+      layer: layer ?? '', // We shouldn't send undefined because it would break contract
       serverName,
       displayName: `${serverName}-${layer}`
     }
