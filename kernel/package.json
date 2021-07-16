@@ -41,7 +41,7 @@
     "all": true
   },
   "devDependencies": {
-    "@dcl/unity-renderer": "^1.0.7098",
+    "@dcl/unity-renderer": "^1.0.7227",
     "@microsoft/api-documenter": "^7.2.2",
     "@microsoft/api-extractor": "^7.1.7",
     "@tweenjs/tween.js": "^17.2.0",
