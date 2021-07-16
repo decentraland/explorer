@@ -6,7 +6,7 @@ import { initializeRenderer } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
 import { CommonRendererOptions, loadUnity } from './loader'
-import type { UnityGame } from '@dcl/unity-renderer/index'
+import type { UnityGame } from '@dcl/unity-renderer/src/index'
 
 import { initializeUnityEditor } from './wsEditorAdapter'
 import {
