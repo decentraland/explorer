@@ -337,7 +337,7 @@ jobs:
               npx @dcl/cdn-uploader@next \
                 --bucket "explorer.decentraland.org" \
                 --local-folder "/tmp/explorer/website/build" \
-                --bucket-folder "branch/${CIRCLE_BRANCH}"
+                --bucket-folder ""
       - run:
           name: Invalidate cloudfront cache .org
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
