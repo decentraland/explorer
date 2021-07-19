@@ -242,6 +242,7 @@ export class BrowserInterface {
   }
 
   public GoTo(data: { x: number; y: number }) {
+    notifyStatusThroughChat(`Jumped to ${data.x},${data.y}!`)
     TeleportController.goTo(data.x, data.y)
   }
 
@@ -500,17 +501,21 @@ export class BrowserInterface {
     if (realm) {
       catalystRealmConnected().then(
         () => {
-          TeleportController.goTo(x, y, `Jumped to ${x},${y} in realm ${realmString}!`)
+          const successMessage = `Jumped to ${x},${y} in realm ${realmString}!`
+          notifyStatusThroughChat(successMessage)
+          unityInterface.ConnectionToRealmSuccess(data)
+          TeleportController.goTo(x, y, successMessage)
         },
         (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           notifyStatusThroughChat('Could not join realm.' + cause)
-
+          unityInterface.ConnectionToRealmFailed(data)
           defaultLogger.error('Error joining realm', e)
         }
       )
     } else {
-      notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
+      unityInterface.ConnectionToRealmFailed(data)
     }
   }
 
@@ -614,6 +619,10 @@ export class BrowserInterface {
 
   public UnpublishScene(data: { coordinates: string }) {
     unpublishSceneByCoords(data.coordinates).catch((error) => defaultLogger.log(error))
+  }
+
+  public async NotifyStatusThroughChat(data: { value: string }) {
+    notifyStatusThroughChat(data.value)
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
