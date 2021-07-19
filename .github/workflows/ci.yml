@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types:
+      - created
+
+name: CI
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: install
+        working-directory: kernel
+        run: npm ci
+      - name: build
+        working-directory: kernel
+        run: make build
+      # - name: Publish
+      #   uses: menduz/oddish-action@master
+      #   with:
+      #     registry-url: "https://registry.npmjs.org"
+      #     access: public
+      #     cwd: ./build
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

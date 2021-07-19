@@ -10,7 +10,7 @@ references:
       at: *workspace_root
 
   .image_kernel: &image_kernel
-    image: circleci/node:10-browsers
+    image: circleci/node:14-browsers
 
   .working_directory_root: &working_directory_root
     working_directory: *workspace_root

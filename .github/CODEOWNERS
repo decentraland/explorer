@@ -12,4 +12,3 @@ kernel/packages/decentraland-amd/**/*        @decentraland/kernel-team
 kernel/packages/decentraland-ecs/**/*        @decentraland/kernel-team
 kernel/packages/decentraland-ecs/**/*        menduz
 kernel/packages/scene-system/**/*            menduz
-anti-corruption-layer/kernel-types.ts        @decentraland/protocol-guardians

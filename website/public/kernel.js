@@ -1,1 +1,0 @@
-/Users/user/code/explorer/kernel/static/dist/kernel.js
