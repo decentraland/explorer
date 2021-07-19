@@ -1,10 +1,8 @@
 {
-  "name": "decentraland-kernel",
+  "name": "@dcl/decentraland-kernel",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "bundleDependencies": [
-    "@dcl/unity-renderer"
-  ],
+  "bundleDependencies": [],
   "devDependencies": {
     "@dcl/unity-renderer": "latest"
   }
