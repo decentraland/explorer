@@ -10,25 +10,37 @@ export enum ServerConnectionStatus {
   UNREACHABLE
 }
 
-export type CatalystLayers = {
+export type CatalystStatus = {
   name: string
   version: string
-  layers: Layer[]
+  layers?: Layer[]
+  usersCount?: number
   env: {
     catalystVersion: string
   }
 }
 
-export type Candidate = {
+type BaseCandidate = {
   domain: string
   catalystName: string
   elapsed: number
   score: number
-  layer: Layer
   status: ServerConnectionStatus
   lighthouseVersion: string
   catalystVersion: string
 }
+
+export type LayerBasedCandidate = {
+  type: 'layer-based'
+  layer: Layer
+} & BaseCandidate
+
+export type IslandsBasedCandidate = {
+  type: 'islands-based'
+  usersCount: number
+} & BaseCandidate
+
+export type Candidate = LayerBasedCandidate | IslandsBasedCandidate
 
 export type LayerUserInfo = {
   userId: string
@@ -40,7 +52,7 @@ export type LayerUserInfo = {
 export type Realm = {
   domain: string
   catalystName: string
-  layer: string
+  layer?: string
   lighthouseVersion: string
 }
 
@@ -83,7 +95,7 @@ export type CommsStatus = {
 export type PingResult = {
   elapsed?: number
   status?: ServerConnectionStatus
-  result?: CatalystLayers
+  result?: CatalystStatus
 }
 
 export enum HealthStatus {

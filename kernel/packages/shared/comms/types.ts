@@ -2,6 +2,8 @@ export type CommsState = {
   initialized: boolean
   voiceChatRecording: boolean
   voicePolicy: VoicePolicy
+  island?: string
+  preferedIsland?: string
 }
 
 export type RootCommsState = {
