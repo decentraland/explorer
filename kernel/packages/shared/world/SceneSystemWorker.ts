@@ -124,15 +124,17 @@ export class SceneSystemWorker extends SceneWorker {
   private subscribeToSceneChangeEvents() {
     this.getAPIInstance(UserIdentity)
       .then((userIdentity) => userIdentity.getUserData())
-      .then((userData) => userData!.userId)
-      .then((userId) => {
-        this.sceneChangeObserver = sceneObservable.add((report) => {
-          if (report.newScene?.sceneId === this.getSceneId()) {
-            this.engineAPI!.sendSubscriptionEvent('onEnterScene', { userId })
-          } else if (report.previousScene?.sceneId === this.getSceneId()) {
-            this.engineAPI!.sendSubscriptionEvent('onLeaveScene', { userId })
-          }
-        })
+      .then((userData) => {
+        if (!userData || !userData.userId) {
+          debugger
+        } else
+          this.sceneChangeObserver = sceneObservable.add((report) => {
+            if (report.newScene?.sceneId === this.getSceneId()) {
+              this.engineAPI!.sendSubscriptionEvent('onEnterScene', { userId: userData.userId })
+            } else if (report.previousScene?.sceneId === this.getSceneId()) {
+              this.engineAPI!.sendSubscriptionEvent('onLeaveScene', { userId: userData.userId })
+            }
+          })
       })
       .catch((e) => {
         // @ts-ignore

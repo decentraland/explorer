@@ -12,7 +12,6 @@ import { DEBUG_WS_MESSAGES, FORCE_RENDERING_STYLE } from 'config'
 import defaultLogger from 'shared/logger'
 import { ILand, HUDElementID } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
-import { signalRendererInitialized } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { future, IFuture } from 'fp-future'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
@@ -99,8 +98,6 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: questEnabled, visible: false })
     i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: questEnabled, visible: true })
-
-    global.globalStore.dispatch(signalRendererInitialized())
 
     if (FORCE_RENDERING_STYLE) {
       i.SetRenderProfile(FORCE_RENDERING_STYLE)

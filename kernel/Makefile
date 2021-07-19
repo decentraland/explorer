@@ -251,8 +251,6 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 # Development
 
 watch: $(SOME_MAPPINGS) build-essentials static/dist/website.js ## Watch the files required for hacking the explorer
-	cd ../website && npm run start &
-	cd $(PWD);
 	@NODE_ENV=development npx concurrently \
 		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,kernel,test,simulator,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \

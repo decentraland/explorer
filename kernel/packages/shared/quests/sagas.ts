@@ -5,15 +5,14 @@ import { questsInitialized, questsUpdated, QUESTS_INITIALIZED, QUESTS_UPDATED } 
 import { questsRequest } from './client'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { toRendererQuest } from '@dcl/ecs-quests/@dcl/mappings'
-import { rendererInitialized } from 'shared/renderer'
+import { ensureUnityInterface } from 'shared/renderer'
 import { getPreviousQuests, getQuests } from './selectors'
 import { deepEqual } from 'atomicHelpers/deepEqual'
-import { isFeatureEnabled } from "../meta/selectors"
-import { FeatureFlags } from "../meta/types"
-import { RendererInterfaces } from "../../unity-interface/dcl"
-import { StoreContainer } from "../store/rootTypes"
+import { isFeatureEnabled } from '../meta/selectors'
+import { FeatureFlags } from '../meta/types'
+import { StoreContainer } from '../store/rootTypes'
 
-declare const globalThis: Window & RendererInterfaces & StoreContainer
+declare const globalThis: Window & StoreContainer
 const QUESTS_REFRESH_INTERVAL = 30000
 
 export function* questsSaga(): any {
@@ -35,7 +34,7 @@ function* initUpdateQuestsInterval() {
 function* initializeQuests(): any {
   const questsResponse: ClientResponse<PlayerQuestDetails[]> = yield questsRequest((c) => c.getQuests())
   if (questsResponse.ok) {
-    yield rendererInitialized()
+    yield ensureUnityInterface()
     initQuestsLogData(questsResponse.body)
     yield put(questsInitialized(questsResponse.body))
   } else {

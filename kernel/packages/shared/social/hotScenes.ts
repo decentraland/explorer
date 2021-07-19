@@ -10,6 +10,7 @@ import {
   getThumbnailUrlFromJsonDataAndContent,
   getSceneDescriptionFromJsonData
 } from 'shared/selectors'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 declare const globalThis: StoreContainer
 
@@ -76,7 +77,8 @@ export async function reportHotScenes() {
   globalThis.globalStore.dispatch(
     reportScenesFromTiles(report.map((scene) => `${scene.baseCoords.x},${scene.baseCoords.y}`))
   )
-  window.unityInterface.UpdateHotScenesList(report)
+
+  unityInterface.UpdateHotScenesList(report)
 }
 
 function getSceneName(baseCoord: string, sceneJsonData: SceneJsonData | undefined): string {
@@ -105,9 +107,9 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
       baseCoords: TileStringToVector2(land.sceneJsonData.scene.base),
       parcels: land.sceneJsonData
         ? land.sceneJsonData.scene.parcels.map((parcel) => {
-          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-          return { x: coord[0], y: coord[1] }
-        })
+            const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+            return { x: coord[0], y: coord[1] }
+          })
         : [],
       realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0, userParcels: [] }],
       usersTotalCount: 0

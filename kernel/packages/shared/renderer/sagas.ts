@@ -4,7 +4,7 @@ import { createLogger } from 'shared/logger'
 import { browserInterface } from 'unity-interface/BrowserInterface'
 import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
 import type { UnityGame } from '@dcl/unity-renderer/src/index'
-import { engineStarted, InitializeRenderer, INITIALIZE_RENDERER } from './actions'
+import { signalRendererInitialized, InitializeRenderer, INITIALIZE_RENDERER } from './actions'
 import { isInitialized } from './selectors'
 import { RENDERER_INITIALIZED } from './types'
 
@@ -39,7 +39,7 @@ function* initializeRenderer(action: InitializeRenderer) {
   yield initializeEngine(renderer)
 
   // send an "engineStarted" notification
-  yield put(engineStarted())
+  yield put(signalRendererInitialized())
 
   return renderer
 }

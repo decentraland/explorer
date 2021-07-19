@@ -27,8 +27,7 @@ export const SAVE_PROFILE_REQUEST = '[Request] Save Profile'
 export const SAVE_PROFILE_SUCCESS = '[Success] Save Profile'
 export const SAVE_PROFILE_FAILURE = '[Failure] Save Profile'
 
-export const saveProfileRequest = (profile: Partial<Profile>, userId?: string) =>
-  action(SAVE_PROFILE_REQUEST, { userId, profile })
+export const saveProfileRequest = (profile: Partial<Profile>) => action(SAVE_PROFILE_REQUEST, { profile })
 export const saveProfileSuccess = (userId: string, version: number, profile: Profile) =>
   action(SAVE_PROFILE_SUCCESS, { userId, version, profile })
 export const saveProfileFailure = (userId: string, error: any) => action(SAVE_PROFILE_FAILURE, { userId, error })

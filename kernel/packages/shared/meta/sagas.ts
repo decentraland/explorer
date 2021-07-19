@@ -6,7 +6,7 @@ import { buildNumber } from './env'
 import { MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE, WorldConfig } from './types'
 import { isMetaConfigurationInitiazed } from './selectors'
 import { USER_AUTHENTIFIED } from '../session/actions'
-import { getUserId } from '../session/selectors'
+import { getCurrentUserId } from '../session/selectors'
 
 const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
   explorer: {
@@ -50,7 +50,7 @@ export function* metaSaga(): any {
   yield call(checkIndexedDB, merge)
   if (WORLD_EXPLORER) {
     // No need to fetch the message of the day on preview or builder mode
-    const userId = yield select(getUserId)
+    const userId = yield select(getCurrentUserId)
     if (userId) {
       yield call(fetchMessageOfTheDay)
     } else {
@@ -60,19 +60,21 @@ export function* metaSaga(): any {
 }
 
 function* fetchMessageOfTheDay() {
-  const userId = yield select((state) => state.session.userId)
-  const url = `https://dclcms.club/api/notifications?address=${userId}`
-  const result = yield call(async () => {
-    try {
-      const response = await fetch(url)
-      const data = await response.json()
-      return data?.length ? data[0] : null
-    } catch (e) {
-      defaultLogger.error(`Error fetching Message of the day ${e}`)
-      return null
-    }
-  })
-  yield put(metaUpdateMessageOfTheDay(result))
+  const userId: string | undefined = yield select(getCurrentUserId)
+  if (userId) {
+    const url = `https://dclcms.club/api/notifications?address=${userId}`
+    const result = yield call(async () => {
+      try {
+        const response = await fetch(url)
+        const data = await response.json()
+        return data?.length ? data[0] : null
+      } catch (e) {
+        defaultLogger.error(`Error fetching Message of the day ${e}`)
+        return null
+      }
+    })
+    yield put(metaUpdateMessageOfTheDay(result))
+  }
 }
 
 function checkIndexedDB(config: Partial<MetaConfiguration>) {

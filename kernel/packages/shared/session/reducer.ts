@@ -12,9 +12,11 @@ import {
   SignUpSetIdentityAction,
   SignUpSetProfileAction,
   USER_AUTHENTIFIED,
-  UserAuthentified
+  UserAuthentified,
+  AUTHENTICATE,
+  AuthenticateAction
 } from './actions'
-import { LoginStage } from '../../../../anti-corruption-layer/kernel-types'
+import { LoginState } from '@dcl/kernel-interface'
 
 const SIGNUP_INITIAL_STATE = {
   stage: '',
@@ -24,11 +26,9 @@ const SIGNUP_INITIAL_STATE = {
 }
 
 const INITIAL_STATE: SessionState = {
-  initialized: false,
   identity: undefined,
-  userId: undefined,
   network: undefined,
-  loginStage: LoginStage.LOADING,
+  loginStage: LoginState.LOADING,
   isSignUp: false,
   signup: SIGNUP_INITIAL_STATE
 }
@@ -42,10 +42,17 @@ export function sessionReducer(state?: SessionState, action?: AnyAction): Sessio
   }
   switch (action.type) {
     case USER_AUTHENTIFIED: {
-      return { ...state, initialized: true, ...(action as UserAuthentified).payload }
+      return { ...state, ...(action as UserAuthentified).payload }
     }
     case CHANGE_LOGIN_STAGE: {
       return { ...state, loginStage: action.payload.stage }
+    }
+    case AUTHENTICATE: {
+      return {
+        ...state,
+        isGuestLogin: (action as AuthenticateAction).payload.isGuest,
+        provider: (action as AuthenticateAction).payload.provider
+      }
     }
     case SIGNUP_FORM:
       const { name, email } = (action as SignUpFormAction).payload

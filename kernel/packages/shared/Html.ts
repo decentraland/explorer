@@ -99,11 +99,6 @@ export default class Html {
     }
   }
 
-  static showAwaitingSignaturePrompt(show: boolean) {
-    if (isReact) return
-    showElementById('check-wallet-prompt', show)
-  }
-
   static showEthSignAdvice(show: boolean) {
     if (isReact) return
     showElementById('eth-sign-advice', show)

@@ -14,8 +14,7 @@ import {
 } from 'atomicHelpers/localStorage'
 import { StoredSession } from './types'
 import { authenticate } from './actions'
-import { IEthereumProvider, LoginStage } from '../../../../anti-corruption-layer/kernel-types'
-import { login } from 'shared/ethereum/provider'
+import { IEthereumProvider, LoginState } from '@dcl/kernel-interface'
 
 declare const globalThis: StoreContainer
 
@@ -27,8 +26,8 @@ function sessionKey(userId: string) {
 }
 
 export const setStoredSession: (session: StoredSession) => void = (session) => {
-  saveToLocalStorage(LAST_SESSION_KEY, session.userId)
-  saveToLocalStorage(sessionKey(session.userId), session)
+  saveToLocalStorage(LAST_SESSION_KEY, session.identity.address)
+  saveToLocalStorage(sessionKey(session.identity.address), session)
 }
 
 export const getStoredSession: (userId: string) => StoredSession | null = (userId) => {
@@ -39,7 +38,7 @@ export const getStoredSession: (userId: string) => StoredSession | null = (userI
   } else {
     // If not existing session was found, we check the old session storage
     const oldSession: StoredSession | null = getFromLocalStorage('dcl-profile') || {}
-    if (oldSession && oldSession.userId === userId) {
+    if (oldSession && oldSession.identity.address === userId) {
       setStoredSession(oldSession)
       return oldSession
     }
@@ -106,15 +105,15 @@ export class Session {
 export async function userAuthentified(): Promise<void> {
   const store: Store<RootState> = globalThis.globalStore
 
-  const initialized = store.getState().session.initialized
-  if (initialized) {
+  const hasIdentity = !!store.getState().session.identity
+  if (hasIdentity) {
     return Promise.resolve()
   }
 
   return new Promise((resolve) => {
     const unsubscribe = store.subscribe(() => {
-      const initialized = store.getState().session.initialized
-      if (initialized) {
+      const hasIdentity = !!store.getState().session.identity
+      if (hasIdentity) {
         unsubscribe()
         return resolve()
       }
@@ -123,20 +122,19 @@ export async function userAuthentified(): Promise<void> {
 }
 
 export function authenticateWhenItsReady(provider: IEthereumProvider, isGuest: boolean) {
-  login(provider, isGuest)
-
   const store: Store<RootState> = globalThis.globalStore
   const loginStage = store.getState().session.loginStage
-  if (loginStage === LoginStage.LOADING || loginStage === undefined) {
+
+  if (loginStage === LoginState.WAITING_PROVIDER) {
+    globalThis.globalStore.dispatch(authenticate(provider, isGuest))
+  } else {
     const unsubscribe = store.subscribe(() => {
       const loginStage = store.getState().session.loginStage
-      if (loginStage === LoginStage.SIGN_IN) {
+      if (loginStage === LoginState.WAITING_PROVIDER) {
         unsubscribe()
-        globalThis.globalStore.dispatch(authenticate())
+        globalThis.globalStore.dispatch(authenticate(provider, isGuest))
       }
     })
-  } else {
-    globalThis.globalStore.dispatch(authenticate())
   }
 }
 

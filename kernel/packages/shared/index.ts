@@ -3,14 +3,19 @@ import './events'
 
 import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED, NO_WEBGL_COULD_BE_CREATED } from './loading/types'
-import { buildStore } from './store/store'
+import { buildStore, store } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { StoreContainer } from './store/rootTypes'
+import { RootState, StoreContainer } from './store/rootTypes'
 import { initSession } from './session/actions'
 import { initializeUrlIslandObserver } from './comms'
 import { initializeUrlRealmObserver } from './dao'
 import { isMobile } from './comms/mobile'
 import { isWebGLCompatible } from './comms/browser'
+import { Store } from 'redux'
+import { rendererVisibleObservable } from './observables'
+import { LoadingState } from './loading/reducer'
+import { initializeSessionObserver } from './ethereum/provider'
+import { isRendererEnabled, renderStateObservable } from './world/worldState'
 
 declare const globalThis: StoreContainer
 
@@ -41,4 +46,38 @@ export function initShared() {
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()
   initializeUrlIslandObserver()
+  initializeRendererVisibleObserver()
+  initializeSessionObserver()
+}
+
+function observeLoadingStateChange(
+  store: Store<RootState>,
+  onLoadingChange: (previous: LoadingState, current: LoadingState) => any
+) {
+  let previousState = store.getState().loading
+
+  store.subscribe(() => {
+    const currentState = store.getState().loading
+    if (previousState !== currentState) {
+      previousState = currentState
+      onLoadingChange(previousState, currentState)
+    }
+  })
+}
+
+export function initializeRendererVisibleObserver() {
+  function sendRefreshedValues() {
+    rendererVisibleObservable.notifyObservers({
+      loadingScreen: !!store.getState().loading.showLoadingScreen,
+      visible: isRendererEnabled()
+    })
+  }
+
+  observeLoadingStateChange(store, () => {
+    sendRefreshedValues()
+  })
+
+  renderStateObservable.add(() => {
+    sendRefreshedValues()
+  })
 }

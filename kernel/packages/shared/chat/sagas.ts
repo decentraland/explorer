@@ -1,7 +1,6 @@
 import { takeEvery, put, select } from 'redux-saga/effects'
 import { PayloadAction } from 'typesafe-actions'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
-import { RendererInterfaces } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -25,15 +24,15 @@ import { isValidExpression, validExpressions } from 'shared/apis/expressionExpla
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
-import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { findProfileByName, getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
 import { isFriend } from 'shared/friends/selectors'
 import { fetchHotScenes } from 'shared/social/hotScenes'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { realmToString } from 'shared/dao/utils/realmToString'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
-declare const globalThis: RendererInterfaces & StoreContainer
+declare const globalThis: StoreContainer
 
 interface IChatCommand {
   name: string
@@ -100,7 +99,7 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
 }
 
 function* handleReceivedMessage(action: MessageReceived) {
-  globalThis.unityInterface.AddMessageToChatWindow(action.payload)
+  unityInterface.AddMessageToChatWindow(action.payload)
 }
 
 function* handleSendMessage(action: SendMessage) {
@@ -112,7 +111,8 @@ function* handleSendMessage(action: SendMessage) {
   if (message[0] === '/') {
     entry = handleChatCommand(message)
 
-    if (entry && entry.body.length === 0) { // Command is found but has no feedback message
+    if (entry && entry.body.length === 0) {
+      // Command is found but has no feedback message
       return
     }
 
@@ -142,7 +142,7 @@ function* handleSendMessage(action: SendMessage) {
     sendPublicChatMessage(entry.messageId, entry.body)
   }
 
-  globalThis.unityInterface.AddMessageToChatWindow(entry)
+  unityInterface.AddMessageToChatWindow(entry)
 }
 
 function handleChatCommand(message: string) {
@@ -226,9 +226,7 @@ function initChatCommands() {
       changeToCrowdedRealm().then(
         ([changed, realm]) => {
           if (changed) {
-            notifyStatusThroughChat(
-              `Found a crowded realm to join. Welcome to the realm ${realmToString(realm)}!`
-            )
+            notifyStatusThroughChat(`Found a crowded realm to join. Welcome to the realm ${realmToString(realm)}!`)
           } else {
             notifyStatusThroughChat(`Already on most crowded realm for location. Nothing changed.`)
           }
@@ -246,10 +244,7 @@ function initChatCommands() {
         response = `Changing to Realm ${realmToString(realm)}...`
         // TODO: This status should be shown in the chat window
         catalystRealmConnected().then(
-          () =>
-            notifyStatusThroughChat(
-              `Changed realm successfuly. Welcome to the realm ${realmToString(realm)}!`
-            ),
+          () => notifyStatusThroughChat(`Changed realm successfuly. Welcome to the realm ${realmToString(realm)}!`),
           (e) => {
             const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
             notifyStatusThroughChat('Could not join realm.' + cause)
@@ -295,8 +290,7 @@ function initChatCommands() {
 
   addChatCommand('showfps', 'Show FPS counter', (message) => {
     fpsConfiguration.visible = !fpsConfiguration.visible
-    const unityWindow: any = window
-    fpsConfiguration.visible ? unityWindow.unityInterface.ShowFPSPanel() : unityWindow.unityInterface.HideFPSPanel()
+    fpsConfiguration.visible ? unityInterface.ShowFPSPanel() : unityInterface.HideFPSPanel()
 
     return {
       messageId: uuid(),
@@ -337,14 +331,14 @@ function initChatCommands() {
 
       sendPublicChatMessage(uuid(), `␐${expression} ${time}`)
 
-      globalThis.unityInterface.TriggerSelfUserExpression(expression)
+      unityInterface.TriggerSelfUserExpression(expression)
 
       return {
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: ""
+        body: ''
       }
     }
   )
@@ -394,17 +388,17 @@ function initChatCommands() {
 
   addChatCommand('w', 'Send a private message to a friend', whisperFn)
 
-  addChatCommand('airdrop', 'fake an airdrop', () => {
-    const unityWindow: any = window
-    unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
-    return {
-      messageId: uuid(),
-      messageType: ChatMessageType.SYSTEM,
-      sender: 'Decentraland',
-      timestamp: Date.now(),
-      body: 'Faking airdrop...'
-    }
-  })
+  // TODO: Types are not working
+  // addChatCommand('airdrop', 'fake an airdrop', () => {
+  //   unityInterface.TriggerAirdropDisplay(sampleDropData)
+  //   return {
+  //     messageId: uuid(),
+  //     messageType: ChatMessageType.SYSTEM,
+  //     sender: 'Decentraland',
+  //     timestamp: Date.now(),
+  //     body: 'Faking airdrop...'
+  //   }
+  // })
 
   function performSocialActionOnPlayer(
     username: string,
@@ -488,11 +482,12 @@ function initChatCommands() {
         let body = ''
         $.slice(0, 5).forEach((sceneInfo) => {
           const count = sceneInfo.realms.reduce((a, b) => a + b.usersCount, 0)
-          body += `${count} ${count > 1 ? 'users' : 'user'} @ ${sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
-            } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
-              (a, b) => a + `\n\t realm: ${realmToString(b)} users: ${b.usersCount}`,
-              ''
-            )}\n`
+          body += `${count} ${count > 1 ? 'users' : 'user'} @ ${
+            sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
+          } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
+            (a, b) => a + `\n\t realm: ${realmToString(b)} users: ${b.usersCount}`,
+            ''
+          )}\n`
         })
         notifyStatusThroughChat(body)
       },

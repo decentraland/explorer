@@ -26,7 +26,6 @@ import {
 } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
-import { RendererInterfaces } from 'unity-interface/dcl'
 import { StoreContainer } from '../store/rootTypes'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
@@ -40,8 +39,9 @@ import {
 } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
-declare const globalThis: Window & RendererInterfaces & StoreContainer
+declare const globalThis: Window & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
 export const WRONG_FILTERS_ERROR = `You must set one and only one filter for V1. Also, the only collection id allowed is '${BASE_AVATARS_COLLECTION_ID}'`
 
@@ -297,11 +297,11 @@ function areFiltersValid(filters: WearablesRequestFilters) {
 }
 
 export function informRequestFailure(error: string, context: string | undefined) {
-  globalThis.unityInterface.WearablesRequestFailed(error, context)
+  unityInterface.WearablesRequestFailed(error, context)
 }
 
 export function sendWearablesCatalog(wearables: WearableV2[], context: string | undefined) {
-  globalThis.unityInterface.AddWearablesToCatalog(wearables, context)
+  unityInterface.AddWearablesToCatalog(wearables, context)
 }
 
 export function* ensureBaseCatalogs() {

@@ -102,8 +102,6 @@ export function* initialSceneLoading() {
     finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
       yield put(setLoadingScreen(false))
-      yield call(Html.hideLoadingTips)
-      yield call(Html.cleanSubTextInScreen)
     })
   })
 }

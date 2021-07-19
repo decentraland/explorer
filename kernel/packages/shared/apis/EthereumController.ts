@@ -4,12 +4,12 @@ import {
   requirePayment,
   sendAsync,
   convertMessageToObject,
-  signMessage,
-  getUserAccount
+  signMessage
 } from 'shared/ethereum/EthereumService'
 import { ExposableAPI } from './ExposableAPI'
 import { RPCSendableMessage } from 'shared/types'
 import { PREVIEW, ENABLE_WEB3 } from 'config/index'
+import { getUserAccount, requestManager } from 'shared/ethereum/provider'
 
 export interface IEthereumController {
   /**
@@ -75,7 +75,7 @@ export class EthereumController extends ExposableAPI implements IEthereumControl
   @exposeMethod
   async getUserAccount(): Promise<string | undefined> {
     logWeb3WarningIfNecessary()
-    return getUserAccount()
+    return getUserAccount(requestManager)
   }
 }
 

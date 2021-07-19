@@ -4,7 +4,11 @@ import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redu
 import { parcelLimits } from 'config'
 import { fetchSceneJson } from '../../decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { fetchSceneIds } from '../../decentraland-loader/lifecycle/utils/fetchSceneIds'
-import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData, getThumbnailUrlFromJsonDataAndContent } from 'shared/selectors'
+import {
+  getOwnerNameFromJsonData,
+  getSceneDescriptionFromJsonData,
+  getThumbnailUrlFromJsonDataAndContent
+} from 'shared/selectors'
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
@@ -41,12 +45,8 @@ import { retrieve, store as cacheStore } from 'shared/cache'
 import { getPOIService, getUpdateProfileServer } from 'shared/dao/selectors'
 import { store } from 'shared/store/store'
 import { realmInitialized } from 'shared/dao'
-
-declare const window: {
-  unityInterface: {
-    UpdateMinimapSceneInformation: (data: MinimapSceneInfo[]) => void
-  }
-}
+import { unityInterface } from 'unity-interface/UnityInterface'
+import { ensureRenderer } from 'shared/renderer/sagas'
 
 const tiles = {
   id: 'tiles',
@@ -60,6 +60,8 @@ type CachedMarketplaceTiles = { version: string; data: string }
 
 export function* atlasSaga(): any {
   yield fork(loadMarketplace, tiles)
+
+  yield call(ensureRenderer)
 
   yield takeEvery(SCENE_LOAD, checkAndReportAround)
 
@@ -239,7 +241,7 @@ function* reportScenes(sceneIds: string[]): any {
       })
     })
 
-  window.unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
+  unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }
 
 async function fetchPOIsFromDAO(): Promise<string[] | undefined> {

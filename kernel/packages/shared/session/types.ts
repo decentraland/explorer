@@ -2,7 +2,7 @@ import { AuthIdentity } from 'dcl-crypto'
 
 import { ETHEREUM_NETWORK } from 'config'
 import { Profile } from '../profiles/types'
-import { LoginStage } from '../../../../anti-corruption-layer/kernel-types'
+import { IEthereumProvider, LoginState } from '@dcl/kernel-interface'
 
 export type RootSessionState = {
   session: SessionState
@@ -17,21 +17,19 @@ export type ExplorerIdentity = AuthIdentity & {
 export type SignUpData = {
   stage: string
   profile: Partial<Profile>
-  userId?: string
   identity?: ExplorerIdentity
 }
 
 export type SessionState = {
-  initialized: boolean
-  userId: string | undefined
   identity: ExplorerIdentity | undefined
   network: ETHEREUM_NETWORK | undefined
-  loginStage: LoginStage | undefined
+  loginStage: LoginState | undefined
   isSignUp?: boolean
   signup: SignUpData
+  isGuestLogin?: boolean
+  provider?: IEthereumProvider
 }
 
 export type StoredSession = {
-  userId: string
   identity: ExplorerIdentity
 }

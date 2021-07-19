@@ -4,8 +4,7 @@ import { future, IFuture } from 'fp-future'
 import { defaultLogger } from 'shared/logger'
 import { RPCSendableMessage } from 'shared/types'
 import { getERC20 } from './ERC20'
-import { getERC721 } from './ERC721'
-import { requestManager, getUserAccount as getUserAccountPrime } from './provider'
+import { requestManager, getUserAccount } from './provider'
 
 export interface MessageDict {
   [key: string]: string
@@ -46,14 +45,6 @@ const whitelist = [
 
 function isWhitelistedRPC(msg: RPCSendableMessage) {
   return msg.method && whitelist.includes(msg.method)
-}
-
-export async function getUserAccount(): Promise<string | undefined> {
-  return getUserAccountPrime()
-}
-
-export async function getNetwork(): Promise<string> {
-  return requestManager.net_version()
 }
 
 export async function sendAsync(message: RPCSendableMessage): Promise<any> {
@@ -119,21 +110,6 @@ export async function getERC20Balance(
 }
 
 /**
- * Check a ERC721 contract for ownership status
- * @param  {string} [ownerAddress] - namespace to resolve
- * @param  {string} [tokenId] - tokenId in the registry contract
- * @param  {string} [registryAddress] - address of the ERC721 DAR.
- * @return {string} - true if provided address is the owner of the asset.
- */
-export async function getERC721Owner(ownerAddress: string, tokenId: string, registryAddress: string): Promise<boolean> {
-  const contract = await getERC721(requestManager, registryAddress)
-
-  const owner = await contract.ownerOf(tokenId)
-
-  return owner.toLowerCase() === ownerAddress.toLowerCase()
-}
-
-/**
  * Requires a generic payment in ETH or ERC20.
  * @param  {string} [toAddress] - NFT asset id.
  * @param  {string} [amount] - Exact amount of the order.
@@ -141,7 +117,7 @@ export async function getERC721Owner(ownerAddress: string, tokenId: string, regi
  */
 export async function requirePayment(toAddress: string, amount: number, currency: string): Promise<any> {
   try {
-    let fromAddress = await getUserAccount()
+    let fromAddress = await getUserAccount(requestManager)
     if (!fromAddress) {
       throw new Error(`Not a web3 game session`)
     }
@@ -206,7 +182,7 @@ export async function messageToString(dict: MessageDict) {
  * @return {object} - Promise of message, hashed message and signature in an object.
  */
 export async function signMessage(messageDict: MessageDict) {
-  const signerAccount = await getUserAccount()
+  const signerAccount = await getUserAccount(requestManager)
   if (!signerAccount) {
     throw new Error(`Not a web3 game session`)
   }

@@ -1,41 +1,70 @@
-import { ETHEREUM_NETWORK, PREVIEW, WORLD_EXPLORER } from 'config'
 import { RequestManager } from 'eth-connect'
-import { future } from 'fp-future'
-import Html from 'shared/Html'
-import { checkTldVsWeb3Network, getAppNetwork } from 'shared/web3'
-import { IEthereumProvider } from '../../../../anti-corruption-layer/kernel-types'
+import { Store } from 'redux'
+import { accountStateObservable } from 'shared/observables'
+import { RootState } from 'shared/store/rootTypes'
+import { SessionState } from 'shared/session/types'
+import { store } from 'shared/store/store'
+import { LoginState } from '@dcl/kernel-interface'
 
 export const requestManager = new RequestManager((window as any).ethereum ?? null)
 
-export type LoginCompletedResult = { provider: IEthereumProvider; isGuest: boolean }
-export const loginCompleted = future<LoginCompletedResult>()
+function observeAccountStateChange(
+  store: Store<RootState>,
+  onIslandChange: (previous: SessionState, current: SessionState) => any
+) {
+  let previousState = store.getState().session
 
-export function login(provider: IEthereumProvider, isGuest: boolean) {
-  if (!loginCompleted.isPending) throw new Error('Double login is not enabled')
-  loginCompleted.resolve({ provider, isGuest })
+  store.subscribe(() => {
+    const currentState = store.getState().session
+    if (previousState !== currentState) {
+      previousState = currentState
+      onIslandChange(previousState, currentState)
+    }
+  })
 }
 
-loginCompleted.then(async ({ provider }) => {
-  requestManager.setProvider(provider)
-
-  if (WORLD_EXPLORER && (await checkTldVsWeb3Network())) {
-    throw new Error('Network mismatch')
+export async function onLoginCompleted(): Promise<SessionState> {
+  function isLoginCompleted(state: SessionState) {
+    return state.identity && state.provider && state.loginStage == LoginState.COMPLETED
   }
 
-  if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (await getAppNetwork())) {
-    Html.showNetworkWarning()
-  }
-})
+  const state = store.getState().session
+  if (isLoginCompleted(state)) return state
+
+  return new Promise<SessionState>((resolve) => {
+    const unsubscribe = store.subscribe(() => {
+      const state = store.getState().session
+      if (isLoginCompleted(state)) {
+        unsubscribe()
+        return resolve(state)
+      }
+    })
+  })
+}
+
+export function initializeSessionObserver() {
+  observeAccountStateChange(store, (_, session) => {
+    accountStateObservable.notifyObservers({
+      hasProvider: false,
+      loginStatus: session.loginStage!,
+      identity: session.identity,
+      network: session.network
+    })
+  })
+}
 
 export async function isGuest(): Promise<boolean> {
-  return (await loginCompleted).isGuest
+  return !!(await onLoginCompleted()).isGuestLogin
 }
 
 export function isSessionExpired(userData: any) {
   return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
 }
 
-export async function getUserAccount(returnChecksum: boolean = false): Promise<string | undefined> {
+export async function getUserAccount(
+  requestManager: RequestManager,
+  returnChecksum: boolean = false
+): Promise<string | undefined> {
   try {
     const accounts = await requestManager.eth_accounts()
 

@@ -23,28 +23,25 @@ import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
-import { loginCompleted } from 'shared/ethereum/provider'
+import { onLoginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { clientDebug, ClientDebug } from './ClientDebug'
-import { BrowserInterface, browserInterface } from './BrowserInterface'
+import { BrowserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
-import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { TeleportController } from 'shared/world/TeleportController'
+import { rendererVisibleObservable } from 'shared/observables'
 
-declare const globalThis: RendererInterfaces &
-  StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
+declare const globalThis: StoreContainer & { clientDebug: ClientDebug }
 
 export type RendererInterfaces = {
   unityInterface: UnityInterface
   browserInterface: BrowserInterface
 }
 
-globalThis.browserInterface = browserInterface
-globalThis.unityInterface = unityInterface
 globalThis.clientDebug = clientDebug
 
 type GameInstance = {
@@ -56,17 +53,14 @@ export let isTheFirstLoading = true
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
   globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
-  Html.setLoadingScreen(shouldShow)
 
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
   }
-
-  refreshLoadingScreen()
 }
 
-export function refreshLoadingScreen() {
+rendererVisibleObservable.add((_) => {
   let state = globalThis.globalStore.getState()
   let loading = state?.loading
   unityInterface.SetLoadingScreen({
@@ -75,7 +69,7 @@ export function refreshLoadingScreen() {
     showWalletPrompt: false,
     showTips: loading?.initialLoad || false
   })
-}
+})
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -295,7 +289,7 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
 renderStateObservable.add(async (isRunning) => {
   if (isRunning) {
     if (PREVIEW) {
-      await loginCompleted
+      await onLoginCompleted()
     }
     setLoadingScreenVisible(false)
   }

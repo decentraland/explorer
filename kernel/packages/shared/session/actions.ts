@@ -4,21 +4,23 @@ import { ETHEREUM_NETWORK } from 'config'
 
 import { ExplorerIdentity } from './types'
 import { Profile } from '../profiles/types'
+import { IEthereumProvider } from '@dcl/kernel-interface'
 
 export const INIT_SESSION = '[Session] initializing'
 export const initSession = () => action(INIT_SESSION)
 export type InitSession = ReturnType<typeof initSession>
 
 export const AUTHENTICATE = '[Authenticate]'
-export const authenticate = () => action(AUTHENTICATE)
+export const authenticate = (provider: IEthereumProvider, isGuest: boolean) =>
+  action(AUTHENTICATE, { provider, isGuest })
 export type AuthenticateAction = ReturnType<typeof authenticate>
 
 export const SIGNUP = '[SIGNUP]'
 export const signUp = () => action(SIGNUP)
 
 export const USER_AUTHENTIFIED = '[Success] User authentified'
-export const userAuthentified = (userId: string, identity: ExplorerIdentity, network: ETHEREUM_NETWORK) =>
-  action(USER_AUTHENTIFIED, { userId, identity, network })
+export const userAuthentified = (identity: ExplorerIdentity, network: ETHEREUM_NETWORK) =>
+  action(USER_AUTHENTIFIED, { identity, network })
 export type UserAuthentified = ReturnType<typeof userAuthentified>
 
 export const LOGIN_COMPLETED = '[Success] Login'
@@ -42,16 +44,12 @@ export type SignUpFormAction = ReturnType<typeof signupForm>
 export const CHANGE_LOGIN_STAGE = '[LOGIN_STAGE] change login stage'
 export const changeLoginStage = (stage: string) => action(CHANGE_LOGIN_STAGE, { stage })
 
-export const TOGGLE_WALLET_PROMPT = '[WALLET_PROMPT] show wallet prompt'
-export const toggleWalletPrompt = (show: boolean) => action(TOGGLE_WALLET_PROMPT, { show })
-
 export const SIGNUP_SET_PROFILE = '[SIGN-UP] signup set profile'
 export const signUpSetProfile = (profile: Partial<Profile>) => action(SIGNUP_SET_PROFILE, profile)
 export type SignUpSetProfileAction = ReturnType<typeof signUpSetProfile>
 
 export const SIGNUP_SET_IDENTITY = '[SIGN-UP] set identity'
-export const signUpSetIdentity = (userId: string, identity: ExplorerIdentity) =>
-  action(SIGNUP_SET_IDENTITY, { userId, identity })
+export const signUpSetIdentity = (identity: ExplorerIdentity) => action(SIGNUP_SET_IDENTITY, { identity })
 export type SignUpSetIdentityAction = ReturnType<typeof signUpSetIdentity>
 
 export const SIGNUP_CANCEL = '[SIGN-UP-CANCEL]'

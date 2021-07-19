@@ -3,7 +3,6 @@ import { Address } from 'web3x/address'
 import { ETHEREUM_NETWORK } from '../config'
 import { decentralandConfigurations } from '../config/index'
 import { Catalyst } from './dao/contracts/Catalyst'
-import { getNetwork } from './ethereum/EthereumService'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
@@ -14,6 +13,7 @@ import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
 import { Eth } from 'web3x/eth'
 import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
+import { requestManager } from './ethereum/provider'
 
 declare const globalThis: StoreContainer
 
@@ -22,7 +22,7 @@ declare var window: Window & {
 }
 
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
-  const web3Network = await getNetwork()
+  const web3Network = await requestManager.net_version()
   const web3net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
   return web3net
 }

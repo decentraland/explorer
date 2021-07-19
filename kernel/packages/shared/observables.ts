@@ -4,11 +4,13 @@ import type {
   KernelLoadingProgress,
   KernelTrackingEvent,
   KernelAccountState,
-  KernelSignUpEvent
-} from '../../../anti-corruption-layer/kernel-types'
+  KernelSignUpEvent,
+  KernelRendererVisibleEvent
+} from '@dcl/kernel-interface'
 
 export const errorObservable = new Observable<KernelError>()
 export const loadingProgressObservable = new Observable<KernelLoadingProgress>()
 export const trackingEventObservable = new Observable<KernelTrackingEvent>()
 export const accountStateObservable = new Observable<KernelAccountState>()
 export const signUpObservable = new Observable<KernelSignUpEvent>()
+export const rendererVisibleObservable = new Observable<KernelRendererVisibleEvent>()

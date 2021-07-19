@@ -1,4 +1,4 @@
-import type { IDecentralandKernel, KernelOptions, KernelResult } from '../../../anti-corruption-layer/kernel-types'
+import type { IDecentralandKernel, KernelOptions, KernelResult } from '@dcl/kernel-interface'
 declare const globalThis: StoreContainer & { DecentralandKernel: IDecentralandKernel; enableWeb3: boolean }
 ;(window as any).reactVersion = true
 
@@ -12,13 +12,12 @@ import {
   AUTH_ERROR_LOGGED_OUT,
   experienceStarted,
   FAILED_FETCHING_UNITY,
-  NOT_INVITED,
-  setLoadingScreen,
-  setLoadingWaitTutorial
+  NOT_INVITED
+  // setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
-import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
+import { signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { trackEvent } from 'shared/analytics'
@@ -43,7 +42,8 @@ import {
   loadingProgressObservable,
   trackingEventObservable,
   accountStateObservable,
-  signUpObservable
+  signUpObservable,
+  rendererVisibleObservable
 } from 'shared/observables'
 
 const logger = createLogger('kernel.ts: ')
@@ -95,6 +95,7 @@ globalThis.DecentralandKernel = {
       loadingProgressObservable,
       trackingEventObservable,
       signUpObservable,
+      rendererVisibleObservable,
       version: 'mockedversion'
     }
   }
@@ -157,9 +158,9 @@ async function loadWebsiteSystems() {
 
       ensureRendererEnabled()
         .then(() => {
-          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+          // globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
           globalThis.globalStore.dispatch(experienceStarted())
-          globalThis.globalStore.dispatch(setLoadingScreen(false))
+          // globalThis.globalStore.dispatch(setLoadingScreen(false))
         })
         .catch(logger.error)
 
@@ -183,8 +184,6 @@ async function loadWebsiteSystems() {
       logger.error('error on configuring taskbar & friends hud / tutorial. Trying to default to simple taskbar', e)
       configureTaskbarDependentHUD(i, false, false)
     })
-
-  globalThis.globalStore.dispatch(signalRendererInitialized())
 
   await realmInitialized()
   startRealmsReportToRenderer()

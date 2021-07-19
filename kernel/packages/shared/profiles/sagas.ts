@@ -43,7 +43,6 @@ import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getResourcesURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
-import { RendererInterfaces } from 'unity-interface/dcl'
 import { StoreContainer } from '../store/rootTypes'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
@@ -60,10 +59,11 @@ import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'sha
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 const toBuffer = require('blob-to-buffer')
 
-declare const globalThis: Window & RendererInterfaces & StoreContainer
+declare const globalThis: Window & StoreContainer
 
 const concatenatedActionTypeUserId = (action: { type: string; payload: { userId: string } }) =>
   action.type + action.payload.userId
@@ -334,21 +334,21 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     const forRenderer = profileToRendererFormat(profile)
     forRenderer.hasConnectedWeb3 = action.payload.hasConnectedWeb3
 
-    globalThis.unityInterface.AddUserProfileToCatalog(forRenderer)
+    unityInterface.AddUserProfileToCatalog(forRenderer)
 
     yield put(addedProfileToCatalog(action.payload.userId, forRenderer))
   }
 }
 
 function* sendLoadProfile(profile: Profile) {
-  const identity = yield select(getCurrentIdentity)
+  const identity: ExplorerIdentity = yield select(getCurrentIdentity)
   const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
-  globalThis.unityInterface.LoadProfile(rendererFormat)
+  unityInterface.LoadProfile(rendererFormat)
 }
 
 function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
-  const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
+  const userId: string = saveAvatar.payload.profile.userId || (yield select(getCurrentUserId))
 
   try {
     const savedProfile: Profile | null = yield select(getProfile, userId)

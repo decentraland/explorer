@@ -87,7 +87,7 @@ export class TeleportController {
       Html.hideTeleportAnimation()
       if (WORLD_EXPLORER) {
         ensureUnityInterface()
-          .then((unity) => unity.unityInterface.ShowWelcomeNotification())
+          .then(({ unityInterface }) => unityInterface.ShowWelcomeNotification())
           .catch(defaultLogger.error)
       }
     }
