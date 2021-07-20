@@ -18,7 +18,8 @@ import {
   RealmsInfoForRenderer,
   ContentMapping,
   Profile,
-  TutorialInitializationMessage
+  TutorialInitializationMessage,
+  WorldPosition
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -349,6 +350,14 @@ export class UnityInterface {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       this.SendMessageToUnity('Main', 'UpdateHotScenesList', JSON.stringify(payload))
     }
+  }
+
+  public ConnectionToRealmSuccess(successData: WorldPosition) {
+    this.SendMessageToUnity('Main', 'ConnectionToRealmSuccess', JSON.stringify(successData))
+  }
+
+  public ConnectionToRealmFailed(failedData: WorldPosition) {
+    this.SendMessageToUnity('Main', 'ConnectionToRealmFailed', JSON.stringify(failedData))
   }
 
   public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
