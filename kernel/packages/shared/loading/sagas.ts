@@ -16,7 +16,6 @@ import {
   unityClientLoaded,
   authSuccessful
 } from './types'
-import Html from '../Html'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { onLoginCompleted } from 'shared/ethereum/provider'
 import { RootState } from 'shared/store/rootTypes'
@@ -80,7 +79,6 @@ function* refreshTeleport() {
 function* refreshTextInScreen() {
   while (true) {
     const status = yield select((state) => state.loading)
-    yield call(() => Html.updateTextInScreen(status))
     yield delay(600)
   }
 }
@@ -112,9 +110,7 @@ export function* teleportSceneLoading() {
     textInScreen: call(function* () {
       yield delay(2000)
       yield call(refreshTextInScreen)
-    })
+    }),
+    finish: call(waitForSceneLoads)
   })
-  yield take(EXPERIENCE_STARTED)
-  yield onLoginCompleted()
-  yield put(setLoadingScreen(false))
 }

@@ -1,8 +1,12 @@
 import { store } from 'shared/store/store'
-import { browserInterface } from 'unity-interface/BrowserInterface'
-import { RendererInterfaces } from 'unity-interface/dcl'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { BrowserInterface, browserInterface } from 'unity-interface/BrowserInterface'
+import { UnityInterface, unityInterface } from 'unity-interface/UnityInterface'
 import { isInitialized } from './selectors'
+
+export type RendererInterfaces = {
+  unityInterface: UnityInterface
+  browserInterface: BrowserInterface
+}
 
 export async function ensureUnityInterface(): Promise<RendererInterfaces> {
   if (isInitialized(store.getState())) {

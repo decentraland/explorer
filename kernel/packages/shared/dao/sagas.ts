@@ -141,13 +141,16 @@ function* initLocalCatalyst() {
   )
 }
 
-export function* selectRealm() {
-  let allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
-
-  while (allCandidates.length == 0) {
+function* waitForCandidates() {
+  while ((yield select(getAllCatalystCandidates)).length == 0) {
     yield take(SET_ADDED_CATALYST_CANDIDATES)
-    allCandidates = yield select(getAllCatalystCandidates)
   }
+}
+
+export function* selectRealm() {
+  yield call(waitForCandidates)
+
+  const allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
 
   let realm = yield call(getConfiguredRealm, allCandidates)
   if (!realm) {

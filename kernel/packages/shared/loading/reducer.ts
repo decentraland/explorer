@@ -3,7 +3,6 @@ import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './ac
 import {
   FATAL_ERROR,
   ExecutionLifecycleEvent,
-  ExecutionLifecycleEventsList,
   EXPERIENCE_STARTED,
   loadingTips,
   NOT_STARTED,
@@ -11,7 +10,6 @@ import {
   SET_ERROR_TLD,
   SET_LOADING_SCREEN,
   SET_LOADING_WAIT_TUTORIAL,
-  SUBSYSTEMS_EVENTS,
   TELEPORT_TRIGGERED,
   RENDERING_ACTIVATED,
   RENDERING_DEACTIVATED,
@@ -24,7 +22,6 @@ export type LoadingState = {
   helpText: number
   pendingScenes: number
   message: string
-  subsystemsLoad: number
   loadPercentage: number
   renderingActivated: boolean
   isForeground: boolean
@@ -53,7 +50,6 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction): Loadin
       renderingActivated: false,
       isForeground: true,
       loadPercentage: 0,
-      subsystemsLoad: 0,
       initialLoad: true,
       showLoadingScreen: false,
       error: null,
@@ -84,15 +80,8 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction): Loadin
   if (action.type === RENDERING_BACKGROUND) {
     return { ...state, isForeground: false }
   }
-  if (ExecutionLifecycleEventsList.includes(action.type)) {
-    const newState = { ...state, status: action.type }
-    if (SUBSYSTEMS_EVENTS.includes(action.type)) {
-      newState.subsystemsLoad = state.subsystemsLoad + 100 / SUBSYSTEMS_EVENTS.length
-    }
-    if (EXPERIENCE_STARTED === action.type) {
-      newState.initialLoad = false
-    }
-    return newState
+  if (action.type === EXPERIENCE_STARTED) {
+    return { ...state, status: action.type, initialLoad: false }
   }
   if (action.type === TELEPORT_TRIGGERED) {
     return { ...state, helpText: 0, message: action.payload }

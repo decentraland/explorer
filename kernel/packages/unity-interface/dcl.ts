@@ -16,7 +16,6 @@ import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'sh
 import { UnityParcelScene } from './UnityParcelScene'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { clientDebug, ClientDebug } from './ClientDebug'
-import { BrowserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import { WebSocketTransport } from 'decentraland-rpc'
@@ -25,11 +24,6 @@ import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/ty
 import { store } from 'shared/store/store'
 
 declare const globalThis: { clientDebug: ClientDebug }
-
-export type RendererInterfaces = {
-  unityInterface: UnityInterface
-  browserInterface: BrowserInterface
-}
 
 globalThis.clientDebug = clientDebug
 
