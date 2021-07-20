@@ -14,7 +14,8 @@ import {
   USER_AUTHENTIFIED,
   UserAuthentified,
   AUTHENTICATE,
-  AuthenticateAction
+  AuthenticateAction,
+  ChangeLoginStateAction
 } from './actions'
 import { LoginState } from '@dcl/kernel-interface'
 
@@ -28,7 +29,7 @@ const SIGNUP_INITIAL_STATE = {
 const INITIAL_STATE: SessionState = {
   identity: undefined,
   network: undefined,
-  loginStage: LoginState.LOADING,
+  loginState: LoginState.LOADING,
   isSignUp: false,
   signup: SIGNUP_INITIAL_STATE
 }
@@ -45,7 +46,7 @@ export function sessionReducer(state?: SessionState, action?: AnyAction): Sessio
       return { ...state, ...(action as UserAuthentified).payload }
     }
     case CHANGE_LOGIN_STAGE: {
-      return { ...state, loginStage: action.payload.stage }
+      return { ...state, loginState: (action as ChangeLoginStateAction).payload.stage }
     }
     case AUTHENTICATE: {
       return {

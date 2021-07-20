@@ -1,13 +1,5 @@
-import {
-  DEBUG,
-  EDITOR,
-  ENGINE_DEBUG_PANEL,
-  NO_ASSET_BUNDLES,
-  PREVIEW,
-  SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER
-} from 'config'
-import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, NO_ASSET_BUNDLES, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from 'config'
+import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
@@ -19,11 +11,9 @@ import {
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
-import { renderStateObservable } from 'shared/world/worldState'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { observeLoadingStateChange, renderStateObservable } from 'shared/world/worldState'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
-import { onLoginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { clientDebug, ClientDebug } from './ClientDebug'
 import { BrowserInterface } from './BrowserInterface'
@@ -32,10 +22,9 @@ import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { TeleportController } from 'shared/world/TeleportController'
-import { rendererVisibleObservable } from 'shared/observables'
+import { store } from 'shared/store/store'
 
-declare const globalThis: StoreContainer & { clientDebug: ClientDebug }
+declare const globalThis: { clientDebug: ClientDebug }
 
 export type RendererInterfaces = {
   unityInterface: UnityInterface
@@ -49,27 +38,18 @@ type GameInstance = {
 }
 
 export let gameInstance!: GameInstance
-export let isTheFirstLoading = true
 
-export function setLoadingScreenVisible(shouldShow: boolean) {
-  globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
-
-  if (!shouldShow && !EDITOR) {
-    isTheFirstLoading = false
-    TeleportController.stopTeleportAnimation()
-  }
-}
-
-rendererVisibleObservable.add((_) => {
-  let state = globalThis.globalStore.getState()
+function setLoadingScreenBasedOnState() {
+  let state = store.getState()
   let loading = state?.loading
+
   unityInterface.SetLoadingScreen({
-    isVisible: loading?.showLoadingScreen || false,
-    message: loading?.message || '',
+    isVisible: !loading.renderingActivated || loading?.showLoadingScreen || false,
+    message: loading?.message || loading?.status || '',
     showWalletPrompt: false,
     showTips: loading?.initialLoad || false
   })
-})
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -121,6 +101,16 @@ export async function initializeEngine(_gameInstance: GameInstance): Promise<voi
     unityInterface.SetEngineDebugPanel()
   }
 
+  observeLoadingStateChange(() => {
+    setLoadingScreenBasedOnState()
+  })
+
+  renderStateObservable.add(() => {
+    setLoadingScreenBasedOnState()
+  })
+
+  setLoadingScreenBasedOnState()
+
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
   }
@@ -156,7 +146,7 @@ export async function startGlobalScene(
 }
 
 export async function startUnitySceneWorkers() {
-  globalThis.globalStore.dispatch(loadingScenes())
+  store.dispatch(loadingScenes())
 
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
@@ -282,17 +272,7 @@ export function updateBuilderScene(sceneData: ILand) {
 
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
-  setLoadingScreenVisible(true)
-  globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
-})
-
-renderStateObservable.add(async (isRunning) => {
-  if (isRunning) {
-    if (PREVIEW) {
-      await onLoginCompleted()
-    }
-    setLoadingScreenVisible(false)
-  }
+  store.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
 document.addEventListener('pointerlockchange', pointerLockChange, false)

@@ -23,7 +23,7 @@ export type SignUpData = {
 export type SessionState = {
   identity: ExplorerIdentity | undefined
   network: ETHEREUM_NETWORK | undefined
-  loginStage: LoginState | undefined
+  loginState: LoginState | undefined
   isSignUp?: boolean
   signup: SignUpData
   isGuestLogin?: boolean
@@ -32,4 +32,5 @@ export type SessionState = {
 
 export type StoredSession = {
   identity: ExplorerIdentity
+  isGuest?: boolean
 }

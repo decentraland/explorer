@@ -1,6 +1,3 @@
-import { setLoadingScreenVisible } from 'unity-interface/dcl'
-import { ProviderType } from 'decentraland-connect'
-
 import { disconnect, sendToMordor } from 'shared/comms'
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 
@@ -60,11 +57,20 @@ export const getLastSessionWithoutWallet: () => StoredSession | null = () => {
   }
 }
 
-export const getLastSessionByProvider = (provider: ProviderType | null): StoredSession | null => {
+export const getLastSessionByAddress = (address: string): StoredSession | null => {
   const sessions: StoredSession[] = getKeysFromLocalStorage()
     .filter((k) => k.indexOf(SESSION_KEY_PREFIX) === 0)
-    .map((id) => getFromLocalStorage(id))
-    .filter(({ identity }) => identity.provider === provider)
+    .map((id) => getFromLocalStorage(id) as StoredSession)
+    .filter(({ identity }) => ('' + identity.address).toLowerCase() === address.toLowerCase())
+
+  return sessions.length > 0 ? sessions[0] : null
+}
+
+export const getLastGuestSession = (): StoredSession | null => {
+  const sessions: StoredSession[] = getKeysFromLocalStorage()
+    .filter((k) => k.indexOf(SESSION_KEY_PREFIX) === 0)
+    .map((id) => getFromLocalStorage(id) as StoredSession)
+    .filter(({ isGuest }) => isGuest)
     .sort((a, b) => {
       const da = new Date(a.identity.expiration)
       const db = new Date(b.identity.expiration)
@@ -88,7 +94,6 @@ export class Session {
   }
 
   async logout() {
-    setLoadingScreenVisible(true)
     sendToMordor()
     disconnect()
     removeStoredSession(getIdentity()?.address)
@@ -123,14 +128,14 @@ export async function userAuthentified(): Promise<void> {
 
 export function authenticateWhenItsReady(provider: IEthereumProvider, isGuest: boolean) {
   const store: Store<RootState> = globalThis.globalStore
-  const loginStage = store.getState().session.loginStage
+  const loginState = store.getState().session.loginState
 
-  if (loginStage === LoginState.WAITING_PROVIDER) {
+  if (loginState === LoginState.WAITING_PROVIDER) {
     globalThis.globalStore.dispatch(authenticate(provider, isGuest))
   } else {
     const unsubscribe = store.subscribe(() => {
-      const loginStage = store.getState().session.loginStage
-      if (loginStage === LoginState.WAITING_PROVIDER) {
+      const loginState = store.getState().session.loginState
+      if (loginState === LoginState.WAITING_PROVIDER) {
         unsubscribe()
         globalThis.globalStore.dispatch(authenticate(provider, isGuest))
       }

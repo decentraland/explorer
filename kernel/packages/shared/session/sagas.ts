@@ -1,9 +1,9 @@
-import { call, delay, put, select, takeEvery, takeLatest } from 'redux-saga/effects'
+import { call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, ETHEREUM_NETWORK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
+import { ETHEREUM_NETWORK, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -22,11 +22,11 @@ import { connection } from 'decentraland-connect'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
-import { getLastSessionByProvider, getStoredSession, Session, setStoredSession } from './index'
+import { getLastGuestSession, getStoredSession, Session, setStoredSession } from './index'
 import { ExplorerIdentity, StoredSession } from './types'
 import {
   AUTHENTICATE,
-  changeLoginStage,
+  changeLoginState,
   INIT_SESSION,
   loginCompleted as loginCompletedAction,
   LOGOUT,
@@ -42,18 +42,16 @@ import {
   userAuthentified,
   AuthenticateAction
 } from './actions'
-import Html from '../Html'
 import { fetchProfileLocally, doesProfileExist } from '../profiles/sagas'
 import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
 import { unityInterface } from '../../unity-interface/UnityInterface'
-import { getSignUpIdentity, getSignUpProfile, getIsGuestLogin } from './selectors'
+import { getIsGuestLogin, getSignUpIdentity, getSignUpProfile } from './selectors'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
 import { ensureUnityInterface } from '../renderer'
 import { LoginState } from '@dcl/kernel-interface'
 import { RequestManager } from 'eth-connect'
-import { RootState } from 'shared/store/rootTypes'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -69,7 +67,7 @@ export function* sessionSaga(): any {
   yield takeLatest(SIGNUP, signUp)
   yield takeLatest(SIGNUP_CANCEL, cancelSignUp)
   yield takeLatest(AUTHENTICATE, authenticate)
-  yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
+  yield takeLatest(AWAITING_USER_SIGNATURE, signaturePrompt)
 }
 
 function* initialize() {
@@ -81,45 +79,39 @@ function* updateTermOfService(action: any) {
   return saveToLocalStorage(TOS_KEY, action.payload)
 }
 
-function* scheduleAwaitingSignaturePrompt() {
-  yield delay(10000)
-  const isStillWaiting: boolean = yield select((state: RootState) => !state.session?.identity)
-
-  if (isStillWaiting) {
-    yield put(changeLoginStage(LoginState.SIGNATURE_PENDING))
-  }
+function* signaturePrompt() {
+  yield put(changeLoginState(LoginState.SIGNATURE_PENDING))
 }
 
 function* initSession() {
   yield ensureRealmInitialized()
-
-  // TODO: Move this to website
-
-  yield put(changeLoginStage(LoginState.WAITING_PROVIDER))
-
-  // TODO: if isConnected, connect
+  yield put(changeLoginState(LoginState.WAITING_PROVIDER))
 }
 
 function* authenticate(action: AuthenticateAction) {
   requestManager.setProvider(action.payload.provider)
 
-  const identity: ExplorerIdentity = yield authorize(requestManager, action.payload.isGuest)
+  yield put(changeLoginState(LoginState.LOADING))
+
+  const identity: ExplorerIdentity = yield authorize(requestManager)
+
+  yield put(changeLoginState(LoginState.WAITING_PROFILE))
+
   const profileExists: boolean = yield doesProfileExist(identity.address)
-  const isGuestWithProfileLocal: boolean = yield call(isGuestWithProfile, identity)
+  const isGuest: boolean = yield select(getIsGuestLogin)
+  const isGuestWithProfileLocal: boolean = isGuest && !!fetchProfileLocally(identity.address)
 
   yield ensureUnityInterface()
 
-  if (profileExists || isGuestWithProfileLocal || PREVIEW) {
+  if (profileExists || isGuestWithProfileLocal) {
+    yield put(setLoadingWaitTutorial(false))
     yield signIn(identity)
   } else {
     yield startSignUp(identity)
+    yield take(SIGNUP)
   }
-}
 
-function* isGuestWithProfile(identity: ExplorerIdentity) {
-  const profile = fetchProfileLocally(identity.address)
-  const guest: boolean = yield select(getIsGuestLogin)
-  return guest && !!profile
+  // yield put(experienceStarted())
 }
 
 function* startSignUp(identity: ExplorerIdentity) {
@@ -137,68 +129,59 @@ function* startSignUp(identity: ExplorerIdentity) {
   yield put(signUpSetProfile(profile))
 
   if (cachedProfile) {
-    return yield signUp()
-  }
-
-  yield showAvatarEditor()
-}
-
-function* showAvatarEditor() {
-  const profile: Partial<Profile> = yield select(getSignUpProfile)
-
-  // TODO: Fix as any
-  unityInterface.LoadProfile(profile as any)
-  unityInterface.ShowAvatarEditorInSignIn()
-}
-
-function* authorize(requestManager: RequestManager, isGuest: boolean) {
-  if (ENABLE_WEB3) {
-    try {
-      let userData: StoredSession | null = null
-
-      if (isGuest) {
-        userData = getLastSessionByProvider(null)
-      } else {
-        try {
-          const address: string = yield getUserAccount(requestManager, false)
-          if (address) {
-            userData = getStoredSession(address)
-
-            if (userData) {
-              // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
-              userData.identity.rawAddress = address
-            }
-          }
-        } catch {}
-      }
-
-      // check that user data is stored & key is not expired
-      if (!userData || isSessionExpired(userData)) {
-        const identity: ExplorerIdentity = yield createAuthIdentity(requestManager, isGuest)
-        return identity
-      }
-
-      return userData.identity
-    } catch (e) {
-      logger.error(e)
-      ReportFatalError(e, ErrorContext.KERNEL_INIT)
-      BringDownClientAndShowError(AUTH_ERROR_LOGGED_OUT)
-      throw e
-    }
+    yield signUp()
   } else {
-    logger.log(`Using test user.`)
-    const identity: ExplorerIdentity = yield createAuthIdentity(requestManager, isGuest)
-    saveSession(identity)
-    return identity
+    const profile: Partial<Profile> = yield select(getSignUpProfile)
+
+    // TODO: Fix as any
+    unityInterface.LoadProfile(profile as any)
+    unityInterface.ShowAvatarEditorInSignIn()
+  }
+}
+
+function* authorize(requestManager: RequestManager) {
+  try {
+    let userData: StoredSession | null = null
+
+    const isGuest: boolean = yield select(getIsGuestLogin)
+
+    if (isGuest) {
+      userData = getLastGuestSession()
+    } else {
+      try {
+        const address: string = yield getUserAccount(requestManager, false)
+        if (address) {
+          userData = getStoredSession(address)
+
+          if (userData) {
+            // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
+            userData.identity.rawAddress = address
+          }
+        }
+      } catch {}
+    }
+
+    // check that user data is stored & key is not expired
+    if (!userData || isSessionExpired(userData)) {
+      const identity: ExplorerIdentity = yield createAuthIdentity(requestManager, isGuest)
+      return identity
+    }
+
+    return userData.identity
+  } catch (e) {
+    logger.error(e)
+    ReportFatalError(e, ErrorContext.KERNEL_INIT)
+    BringDownClientAndShowError(AUTH_ERROR_LOGGED_OUT)
+    throw e
   }
 }
 
 function* signIn(identity: ExplorerIdentity) {
   logger.log(`User ${identity.address} logged in`)
 
-  yield put(changeLoginStage(LoginState.COMPLETED))
+  const isGuest: boolean = yield select(getIsGuestLogin)
+  saveSession(identity, isGuest)
 
-  saveSession(identity)
   if (identity.hasConnectedWeb3) {
     referUser(identity)
   }
@@ -206,6 +189,7 @@ function* signIn(identity: ExplorerIdentity) {
   yield setUserAuthentified(identity)
 
   yield put(loginCompletedAction())
+  yield put(changeLoginState(LoginState.COMPLETED))
 }
 
 function* setUserAuthentified(identity: ExplorerIdentity) {
@@ -252,14 +236,15 @@ function* signUp() {
 function* cancelSignUp() {
   yield put(signUpClearData())
   yield put(signUpSetIsSignUp(false))
-  yield put(changeLoginStage(LoginState.WAITING_PROVIDER))
+  yield put(changeLoginState(LoginState.WAITING_PROVIDER))
 }
 
-function saveSession(identity: ExplorerIdentity) {
+function saveSession(identity: ExplorerIdentity, isGuest: boolean) {
   const userId = identity.address
 
   setStoredSession({
-    identity
+    identity,
+    isGuest
   })
 
   setLocalInformationForComms(userId, {
@@ -277,7 +262,7 @@ async function getSigner(
   signer: (message: string) => Promise<string>
   ephemeralLifespanMinutes: number
 }> {
-  if (ENABLE_WEB3 && !isGuest) {
+  if (!isGuest) {
     const address = await getUserAccount(requestManager, false)
 
     if (!address) throw new Error("Couldn't get an address from the Ethereum provider")
@@ -292,9 +277,9 @@ async function getSigner(
             return result
           } catch (e) {
             if (e.message && e.message.includes('User denied message signature')) {
-              put(changeLoginStage(LoginState.SIGNATURE_FAILED))
-              Html.showEthSignAdvice(true)
+              put(changeLoginState(LoginState.SIGNATURE_FAILED))
             }
+            throw e
           }
         }
       },
@@ -324,7 +309,7 @@ async function createAuthIdentity(requestManager: RequestManager, isGuest: boole
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
 
-  put(changeLoginStage(LoginState.COMPLETED))
+  put(changeLoginState(LoginState.COMPLETED))
 
   return { ...auth, rawAddress: address, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 }

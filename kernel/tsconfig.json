@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2017",
+    "target": "es2018",
     "diagnostics": false,
     "inlineSourceMap": false,
     "inlineSources": false,
@@ -26,7 +26,7 @@
     ],
     "baseUrl": "./packages",
     "lib": [
-      "es2017",
+      "es2018",
       "dom",
       "esnext.asynciterable"
     ]

@@ -40,7 +40,6 @@ import {
 } from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
-import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
@@ -69,12 +68,13 @@ import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
+import { AVATAR_LOADING_ERROR, experienceStarted, renderingActivated, renderingDectivated } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
 import { signUpObservable } from 'shared/observables'
+import { renderStateObservable } from 'shared/world/worldState'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -103,6 +103,8 @@ type SystemInfoPayload = {
   systemMemorySize: number
 }
 
+const mensajes: any[] = ((globalThis as any).mensajes = [])
+
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
@@ -115,6 +117,9 @@ export class BrowserInterface {
    * and independant workflows for both teams.
    */
   public handleUnityMessage(type: string, message: any) {
+    if (type !== 'ReportPosition' && type !== 'SceneEvent') {
+      mensajes.push({ type, message })
+    }
     if (type in this) {
       // tslint:disable-next-line:semicolon
       ;(this as any)[type](message)
@@ -287,7 +292,6 @@ export class BrowserInterface {
   }
 
   public SendPassport(passport: { name: string; email: string }) {
-    unityInterface.DeactivateRendering()
     globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
     globalThis.globalStore.dispatch(signUp())
   }
@@ -326,8 +330,21 @@ export class BrowserInterface {
         sceneLifeCycleObservable.notifyObservers({ sceneId, status: 'ready' })
         break
       }
+      case 'DeactivateRenderingACK': {
+        /**
+         * This event is called everytime the renderer deactivates its camera
+         */
+        globalThis.globalStore.dispatch(renderingDectivated())
+        renderStateObservable.notifyObservers()
+        break
+      }
       case 'ActivateRenderingACK': {
-        renderStateObservable.notifyObservers(true)
+        /**
+         * This event is called everytime the renderer activates the main camera
+         */
+        globalThis.globalStore.dispatch(experienceStarted())
+        globalThis.globalStore.dispatch(renderingActivated())
+        renderStateObservable.notifyObservers()
         break
       }
       case 'StartStatefulMode': {
@@ -586,8 +603,8 @@ export class BrowserInterface {
     const { filters, context } = data
     const newFilters: WearablesRequestFilters = {
       ownedByUser: filters.ownedByUser ?? undefined,
-      wearableIds: this.arrayCleanup(filters.wearableIds),
-      collectionIds: this.arrayCleanup(filters.collectionIds)
+      wearableIds: arrayCleanup(filters.wearableIds),
+      collectionIds: arrayCleanup(filters.collectionIds)
     }
     globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
   }
@@ -607,10 +624,10 @@ export class BrowserInterface {
   public UnpublishScene(data: { coordinates: string }) {
     unpublishSceneByCoords(data.coordinates).catch((error) => defaultLogger.log(error))
   }
+}
 
-  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
-    return !array || array.length === 0 ? undefined : array
-  }
+function arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
+  return !array || array.length === 0 ? undefined : array
 }
 
 export let browserInterface: BrowserInterface = new BrowserInterface()

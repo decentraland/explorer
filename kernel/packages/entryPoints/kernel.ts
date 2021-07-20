@@ -10,9 +10,10 @@ import { createLogger } from 'shared/logger'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
-  experienceStarted,
   FAILED_FETCHING_UNITY,
-  NOT_INVITED
+  NOT_INVITED,
+  renderingInBackground,
+  renderingInForeground
   // setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
@@ -24,7 +25,7 @@ import { trackEvent } from 'shared/analytics'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
-import { ensureRendererEnabled, foregroundObservable, isForeground } from 'shared/world/worldState'
+import { foregroundChangeObservable, isForeground } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { authenticateWhenItsReady, userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -73,18 +74,16 @@ globalThis.DecentralandKernel = {
 
     initShared()
 
-    try {
-      await initializeUnity(container)
-      await loadWebsiteSystems()
-    } catch (err) {
-      ReportFatalError(err, ErrorContext.WEBSITE_INIT)
-      if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
-        BringDownClientAndShowError(NOT_INVITED)
-      } else {
-        BringDownClientAndShowError(FAILED_FETCHING_UNITY)
-      }
-      throw err
-    }
+    initializeUnity(container)
+      .then(() => loadWebsiteSystems())
+      .catch((err) => {
+        ReportFatalError(err, ErrorContext.WEBSITE_INIT)
+        if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
+          BringDownClientAndShowError(NOT_INVITED)
+        } else {
+          BringDownClientAndShowError(FAILED_FETCHING_UNITY)
+        }
+      })
 
     return {
       authenticate(provider: any, isGuest: boolean) {
@@ -156,14 +155,6 @@ async function loadWebsiteSystems() {
       i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
-      ensureRendererEnabled()
-        .then(() => {
-          // globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-          globalThis.globalStore.dispatch(experienceStarted())
-          // globalThis.globalStore.dispatch(setLoadingScreen(false))
-        })
-        .catch(logger.error)
-
       const tutorialConfig = {
         fromDeepLink: HAS_INITIAL_POSITION_MARK,
         enableNewTutorialCamera: enableNewTutorialCamera
@@ -194,19 +185,18 @@ async function loadWebsiteSystems() {
 
   i.SetRenderProfile(renderProfile)
 
-  if (isForeground()) {
-    i.ReportFocusOn()
-  } else {
-    i.ReportFocusOff()
-  }
-
-  foregroundObservable.add((isForeground) => {
-    if (isForeground) {
+  function reportForeground() {
+    if (isForeground()) {
+      globalThis.globalStore.dispatch(renderingInForeground())
       i.ReportFocusOn()
     } else {
+      globalThis.globalStore.dispatch(renderingInBackground())
       i.ReportFocusOff()
     }
-  })
+  }
+
+  foregroundChangeObservable.add(reportForeground)
+  reportForeground()
 
   if (!NO_MOTD) {
     waitForMessageOfTheDay()

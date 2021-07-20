@@ -10,7 +10,7 @@ export const requestManager = new RequestManager((window as any).ethereum ?? nul
 
 function observeAccountStateChange(
   store: Store<RootState>,
-  onIslandChange: (previous: SessionState, current: SessionState) => any
+  accountStateChange: (previous: SessionState, current: SessionState) => any
 ) {
   let previousState = store.getState().session
 
@@ -18,14 +18,14 @@ function observeAccountStateChange(
     const currentState = store.getState().session
     if (previousState !== currentState) {
       previousState = currentState
-      onIslandChange(previousState, currentState)
+      accountStateChange(previousState, currentState)
     }
   })
 }
 
 export async function onLoginCompleted(): Promise<SessionState> {
   function isLoginCompleted(state: SessionState) {
-    return state.identity && state.provider && state.loginStage == LoginState.COMPLETED
+    return state.identity && state.provider && state.loginState == LoginState.COMPLETED
   }
 
   const state = store.getState().session
@@ -46,7 +46,7 @@ export function initializeSessionObserver() {
   observeAccountStateChange(store, (_, session) => {
     accountStateObservable.notifyObservers({
       hasProvider: false,
-      loginStatus: session.loginStage!,
+      loginStatus: session.loginState!,
       identity: session.identity,
       network: session.network
     })

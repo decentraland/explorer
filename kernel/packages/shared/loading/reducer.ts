@@ -12,7 +12,11 @@ import {
   SET_LOADING_SCREEN,
   SET_LOADING_WAIT_TUTORIAL,
   SUBSYSTEMS_EVENTS,
-  TELEPORT_TRIGGERED
+  TELEPORT_TRIGGERED,
+  RENDERING_ACTIVATED,
+  RENDERING_DEACTIVATED,
+  RENDERING_FOREGROUND,
+  RENDERING_BACKGROUND
 } from './types'
 
 export type LoadingState = {
@@ -22,6 +26,8 @@ export type LoadingState = {
   message: string
   subsystemsLoad: number
   loadPercentage: number
+  renderingActivated: boolean
+  isForeground: boolean
   initialLoad: boolean
   showLoadingScreen: boolean
   waitingTutorial?: boolean
@@ -37,13 +43,15 @@ export type RootLoadingState = {
   loading: LoadingState
 }
 
-export function loadingReducer(state?: LoadingState, action?: AnyAction) {
+export function loadingReducer(state?: LoadingState, action?: AnyAction): LoadingState {
   if (!state) {
     return {
       status: NOT_STARTED,
       helpText: 0,
       pendingScenes: 0,
       message: '',
+      renderingActivated: false,
+      isForeground: true,
       loadPercentage: 0,
       subsystemsLoad: 0,
       initialLoad: true,
@@ -63,6 +71,18 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   }
   if (action.type === SCENE_START) {
     return { ...state, pendingScenes: state.pendingScenes - 1 }
+  }
+  if (action.type === RENDERING_ACTIVATED) {
+    return { ...state, renderingActivated: true }
+  }
+  if (action.type === RENDERING_DEACTIVATED) {
+    return { ...state, renderingActivated: false }
+  }
+  if (action.type === RENDERING_FOREGROUND) {
+    return { ...state, isForeground: true }
+  }
+  if (action.type === RENDERING_BACKGROUND) {
+    return { ...state, isForeground: false }
   }
   if (ExecutionLifecycleEventsList.includes(action.type)) {
     const newState = { ...state, status: action.type }
@@ -85,7 +105,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     return { ...state, message: action.payload.message, loadPercentage: action.payload.loadPercentage }
   }
   if (action.type === SET_LOADING_SCREEN) {
-    return { ...state, showLoadingScreen: action.payload.show }
+    return { ...state, showLoadingScreen: action.payload.showLoadingScreen }
   }
   if (action.type === SET_LOADING_WAIT_TUTORIAL) {
     return { ...state, waitingTutorial: action.payload.waiting }

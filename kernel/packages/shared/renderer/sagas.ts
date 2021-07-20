@@ -1,8 +1,8 @@
 import { call, put, select, take } from 'redux-saga/effects'
-import { waitingForRenderer } from 'shared/loading/types'
+import { setLoadingScreen, waitingForRenderer } from 'shared/loading/types'
 import { createLogger } from 'shared/logger'
 import { browserInterface } from 'unity-interface/BrowserInterface'
-import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
+import { initializeEngine } from 'unity-interface/dcl'
 import type { UnityGame } from '@dcl/unity-renderer/src/index'
 import { signalRendererInitialized, InitializeRenderer, INITIALIZE_RENDERER } from './actions'
 import { isInitialized } from './selectors'
@@ -25,7 +25,7 @@ export function* ensureRenderer() {
 function* initializeRenderer(action: InitializeRenderer) {
   const { delegate, container } = action.payload
 
-  setLoadingScreenVisible(true)
+  yield put(setLoadingScreen(true))
 
   // will start loading
   yield put(waitingForRenderer())

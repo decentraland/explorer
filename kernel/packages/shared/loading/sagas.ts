@@ -18,6 +18,8 @@ import {
 } from './types'
 import Html from '../Html'
 import { getCurrentUserId } from 'shared/session/selectors'
+import { onLoginCompleted } from 'shared/ethereum/provider'
+import { RootState } from 'shared/store/rootTypes'
 
 const SECONDS = 1000
 
@@ -79,19 +81,16 @@ function* refreshTextInScreen() {
   while (true) {
     const status = yield select((state) => state.loading)
     yield call(() => Html.updateTextInScreen(status))
-    yield delay(200)
+    yield delay(600)
   }
 }
 
 export function* waitForSceneLoads() {
   while (true) {
-    yield race({
-      started: take(SCENE_START),
-      failed: take(SCENE_FAIL)
-    })
-    if (yield select((state) => state.loading.pendingScenes === 0)) {
+    if (yield select((state: RootState) => state.loading.pendingScenes === 0)) {
       break
     }
+    yield delay(600)
   }
 }
 
@@ -101,19 +100,21 @@ export function* initialSceneLoading() {
     textInScreen: call(refreshTextInScreen),
     finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
+      yield onLoginCompleted()
       yield put(setLoadingScreen(false))
     })
   })
 }
 
 export function* teleportSceneLoading() {
-  Html.cleanSubTextInScreen()
   yield race({
     refresh: call(refreshTeleport),
     textInScreen: call(function* () {
       yield delay(2000)
       yield call(refreshTextInScreen)
-    }),
-    finish: call(waitForSceneLoads)
+    })
   })
+  yield take(EXPERIENCE_STARTED)
+  yield onLoginCompleted()
+  yield put(setLoadingScreen(false))
 }

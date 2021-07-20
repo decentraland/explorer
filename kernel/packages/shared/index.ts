@@ -5,17 +5,15 @@ import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED, NO_WEBGL_COULD_BE_CREATED } from './loading/types'
 import { buildStore, store } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { RootState, StoreContainer } from './store/rootTypes'
+import { StoreContainer } from './store/rootTypes'
 import { initSession } from './session/actions'
 import { initializeUrlIslandObserver } from './comms'
 import { initializeUrlRealmObserver } from './dao'
 import { isMobile } from './comms/mobile'
 import { isWebGLCompatible } from './comms/browser'
-import { Store } from 'redux'
 import { rendererVisibleObservable } from './observables'
-import { LoadingState } from './loading/reducer'
 import { initializeSessionObserver } from './ethereum/provider'
-import { isRendererEnabled, renderStateObservable } from './world/worldState'
+import { isRendererEnabled, observeLoadingStateChange, renderStateObservable } from './world/worldState'
 
 declare const globalThis: StoreContainer
 
@@ -41,39 +39,33 @@ export function initShared() {
   store.dispatch(notStarted())
   store.dispatch(loadingStarted())
 
-  store.dispatch(initSession())
-
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()
   initializeUrlIslandObserver()
   initializeRendererVisibleObserver()
   initializeSessionObserver()
-}
 
-function observeLoadingStateChange(
-  store: Store<RootState>,
-  onLoadingChange: (previous: LoadingState, current: LoadingState) => any
-) {
-  let previousState = store.getState().loading
-
-  store.subscribe(() => {
-    const currentState = store.getState().loading
-    if (previousState !== currentState) {
-      previousState = currentState
-      onLoadingChange(previousState, currentState)
-    }
-  })
+  store.dispatch(initSession())
 }
 
 export function initializeRendererVisibleObserver() {
+  let prevValue: string | null = null
   function sendRefreshedValues() {
-    rendererVisibleObservable.notifyObservers({
-      loadingScreen: !!store.getState().loading.showLoadingScreen,
-      visible: isRendererEnabled()
-    })
+    const { loading } = store.getState()
+    const valueToSend = {
+      loadingScreen: !!loading.showLoadingScreen,
+      // the renderer is visible in game_mode and loading_mode
+      visible: isRendererEnabled() || loading.showLoadingScreen
+    }
+    const curValue = JSON.stringify(valueToSend)
+
+    if (prevValue != curValue) {
+      prevValue = curValue
+      rendererVisibleObservable.notifyObservers(valueToSend)
+    }
   }
 
-  observeLoadingStateChange(store, () => {
+  observeLoadingStateChange((prev, actual) => {
     sendRefreshedValues()
   })
 

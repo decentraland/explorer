@@ -4,7 +4,7 @@ import { ETHEREUM_NETWORK } from 'config'
 
 import { ExplorerIdentity } from './types'
 import { Profile } from '../profiles/types'
-import { IEthereumProvider } from '@dcl/kernel-interface'
+import { IEthereumProvider, LoginState } from '@dcl/kernel-interface'
 
 export const INIT_SESSION = '[Session] initializing'
 export const initSession = () => action(INIT_SESSION)
@@ -42,7 +42,8 @@ export const signupForm = (name: string, email: string) => action(SIGNUP_FORM, {
 export type SignUpFormAction = ReturnType<typeof signupForm>
 
 export const CHANGE_LOGIN_STAGE = '[LOGIN_STAGE] change login stage'
-export const changeLoginStage = (stage: string) => action(CHANGE_LOGIN_STAGE, { stage })
+export const changeLoginState = (stage: LoginState) => action(CHANGE_LOGIN_STAGE, { stage })
+export type ChangeLoginStateAction = ReturnType<typeof changeLoginState>
 
 export const SIGNUP_SET_PROFILE = '[SIGN-UP] signup set profile'
 export const signUpSetProfile = (profile: Partial<Profile>) => action(SIGNUP_SET_PROFILE, profile)

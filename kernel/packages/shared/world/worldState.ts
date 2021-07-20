@@ -1,5 +1,6 @@
 import { Observable } from '../../decentraland-ecs/src/ecs/Observable'
-import future, { IFuture } from 'fp-future'
+import { store } from 'shared/store/store'
+import { LoadingState } from 'shared/loading/reducer'
 
 let hidden: 'hidden' | 'msHidden' | 'webkitHidden' = 'hidden'
 let visibilityChange: 'visibilitychange' | 'msvisibilitychange' | 'webkitvisibilitychange' = 'visibilitychange'
@@ -18,23 +19,29 @@ if (typeof (document as any).hidden !== 'undefined') {
 
 if (hidden && visibilityChange) {
   document.addEventListener(visibilityChange, handleVisibilityChange, false)
+
+  function handleVisibilityChange() {
+    foregroundChangeObservable.notifyObservers()
+  }
 }
 
-let rendererEnabled: boolean = false
+export const renderStateObservable = new Observable<void>()
+export const foregroundChangeObservable = new Observable<void>()
 
-export const renderStateObservable = new Observable<Readonly<boolean>>()
-export const foregroundObservable = new Observable<Readonly<boolean>>()
+export function observeLoadingStateChange(onLoadingChange: (previous: LoadingState, current: LoadingState) => any) {
+  let previousState = store.getState().loading
 
-function handleVisibilityChange() {
-  foregroundObservable.notifyObservers(isForeground())
+  store.subscribe(() => {
+    const currentState = store.getState().loading
+    if (previousState !== currentState) {
+      previousState = currentState
+      onLoadingChange(previousState, currentState)
+    }
+  })
 }
-
-renderStateObservable.add((state) => {
-  rendererEnabled = state
-})
 
 export function isRendererEnabled(): boolean {
-  return rendererEnabled
+  return store.getState().loading.renderingActivated
 }
 
 export function isForeground(): boolean {
@@ -42,21 +49,16 @@ export function isForeground(): boolean {
 }
 
 export async function ensureRendererEnabled() {
-  const result: IFuture<void> = future()
-
   if (isRendererEnabled()) {
-    result.resolve()
-    return result
+    return
   }
 
-  onNextRendererEnabled(() => result.resolve())
-
-  return result
+  return new Promise<void>((resolve) => onNextRendererEnabled(resolve))
 }
 
-export function onNextRendererEnabled(callback: Function) {
-  const observer = renderStateObservable.add((isRunning) => {
-    if (isRunning) {
+function onNextRendererEnabled(callback: Function) {
+  const observer = renderStateObservable.add(() => {
+    if (isRendererEnabled()) {
       renderStateObservable.remove(observer)
       callback()
     }

@@ -37,7 +37,11 @@ import {
 import { getAllCatalystCandidates, isRealmInitialized } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
 import defaultLogger from '../logger'
-import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithCatalystPayload } from 'shared/loading/ReportFatalError'
+import {
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithCatalystPayload
+} from 'shared/loading/ReportFatalError'
 import { CATALYST_COULD_NOT_LOAD } from 'shared/loading/types'
 import { META_CONFIGURATION_INITIALIZED } from 'shared/meta/actions'
 import { checkTldVsWeb3Network, registerProviderNetChanges } from 'shared/web3'
@@ -138,7 +142,12 @@ function* initLocalCatalyst() {
 }
 
 export function* selectRealm() {
-  const allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
+  let allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
+
+  while (allCandidates.length == 0) {
+    yield take(SET_ADDED_CATALYST_CANDIDATES)
+    allCandidates = yield select(getAllCatalystCandidates)
+  }
 
   let realm = yield call(getConfiguredRealm, allCandidates)
   if (!realm) {

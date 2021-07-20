@@ -55,7 +55,7 @@ import {
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
+import { renderStateObservable, isRendererEnabled, ensureRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
@@ -81,7 +81,11 @@ import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
-import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithCommsPayload } from 'shared/loading/ReportFatalError'
+import {
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithCommsPayload
+} from 'shared/loading/ReportFatalError'
 import {
   NEW_LOGIN,
   commsEstablished,
@@ -106,7 +110,7 @@ import { isFriend } from 'shared/friends/selectors'
 import { EncodedFrame } from 'voice-chat-codec/types'
 import Html from 'shared/Html'
 import { isFeatureToggleEnabled } from 'shared/selectors'
-import * as qs from "query-string"
+import * as qs from 'query-string'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -526,28 +530,28 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (context.sendingProfileResponse) return
 
   context.sendingProfileResponse = true
-    ; (async () => {
-      const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+  ;(async () => {
+    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
-      // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
-      if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
-        await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
-      }
+    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+    }
 
-      const profile = await ProfileAsPromise(
-        myAddress,
-        message.data.version ? parseInt(message.data.version, 10) : undefined,
-        getProfileType(myIdentity)
-      )
+    const profile = await ProfileAsPromise(
+      myAddress,
+      message.data.version ? parseInt(message.data.version, 10) : undefined,
+      getProfileType(myIdentity)
+    )
 
-      if (context.currentPosition) {
-        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
-      }
+    if (context.currentPosition) {
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+    }
 
-      context.lastProfileResponseTime = Date.now()
-    })()
-      .finally(() => (context.sendingProfileResponse = false))
-      .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+    context.lastProfileResponseTime = Date.now()
+  })()
+    .finally(() => (context.sendingProfileResponse = false))
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
@@ -1011,20 +1015,14 @@ export async function connect(userId: string) {
     context = new Context(userInfo)
     context.worldInstanceConnection = connection
 
-    if (isRendererEnabled()) {
-      await startCommunications(context)
-    } else {
-      onNextRendererEnabled(async () => {
-        try {
-          await startCommunications(context!)
-        } catch (e) {
-          disconnect()
-          defaultLogger.error(`error while trying to establish communications `, e)
-          ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
-          BringDownClientAndShowError(ESTABLISHING_COMMS)
-        }
+    ensureRendererEnabled()
+      .then(() => startCommunications(context!))
+      .catch((e) => {
+        disconnect()
+        defaultLogger.error(`error while trying to establish communications `, e)
+        ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
+        BringDownClientAndShowError(ESTABLISHING_COMMS)
       })
-    }
 
     return context
   } catch (e) {
@@ -1130,8 +1128,8 @@ async function doStartCommunications(context: Context) {
       }, 60000) // Once per minute
     }
 
-    context.worldRunningObserver = renderStateObservable.add((isRunning) => {
-      onWorldRunning(isRunning)
+    context.worldRunningObserver = renderStateObservable.add(() => {
+      onWorldRunning(isRendererEnabled())
     })
 
     context.positionObserver = positionObservable.add((obj: Readonly<PositionReport>) => {
@@ -1187,7 +1185,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
-        ; (globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
+      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     throw new ConnectionEstablishmentError(e.message)
@@ -1303,8 +1301,8 @@ function stripSnapshots(profile: Profile): Profile {
 
 function observeIslandChange(
   store: Store<RootCommsState>,
-  onIslandChange: (previousIsland: string | undefined, currentIsland: string | undefined) => any) {
-
+  onIslandChange: (previousIsland: string | undefined, currentIsland: string | undefined) => any
+) {
   let currentIsland = getCommsIsland(store.getState())
 
   store.subscribe(() => {

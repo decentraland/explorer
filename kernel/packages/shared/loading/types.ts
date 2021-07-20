@@ -64,6 +64,18 @@ export const experienceStarted = () => action(EXPERIENCE_STARTED)
 export const TELEPORT_TRIGGERED = 'Loading scenes...  '
 export const teleportTriggered = (payload: string) => action(TELEPORT_TRIGGERED, payload)
 
+export const RENDERING_ACTIVATED = '[RENDERER] Camera activated'
+export const renderingActivated = () => action(RENDERING_ACTIVATED)
+
+export const RENDERING_DEACTIVATED = '[RENDERER] Camera deactivated'
+export const renderingDectivated = () => action(RENDERING_DEACTIVATED)
+
+export const RENDERING_FOREGROUND = '[RENDERER] Foreground'
+export const renderingInForeground = () => action(RENDERING_FOREGROUND)
+
+export const RENDERING_BACKGROUND = '[RENDERER] Background'
+export const renderingInBackground = () => action(RENDERING_BACKGROUND)
+
 export const SCENE_ENTERED = 'Entered into a new scene'
 export const sceneEntered = () => action(SCENE_ENTERED)
 export const UNEXPECTED_ERROR = 'Unexpected fatal error'
@@ -99,7 +111,7 @@ export const AVATAR_LOADING_ERROR = 'The avatar could not be loaded correctly'
 export const avatarLoadingError = () => action(AVATAR_LOADING_ERROR)
 
 export const SET_LOADING_SCREEN = 'setting loading screen'
-export const setLoadingScreen = (show: boolean) => action(SET_LOADING_SCREEN, { show })
+export const setLoadingScreen = (showLoadingScreen: boolean) => action(SET_LOADING_SCREEN, { showLoadingScreen })
 
 export const SET_LOADING_WAIT_TUTORIAL = '[LOADING] waiting tutorial'
 export const setLoadingWaitTutorial = (waiting: boolean) => action(SET_LOADING_WAIT_TUTORIAL, { waiting })

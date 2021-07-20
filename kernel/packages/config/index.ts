@@ -159,7 +159,8 @@ export namespace commConfigurations {
 
   export const maxVisiblePeers = typeof qs.MAX_VISIBLE_PEERS === 'string' ? parseInt(qs.MAX_VISIBLE_PEERS, 10) : 25
 
-  export const autoChangeRealmInterval = typeof qs.AUTO_CHANGE_INTERVAL === 'string' ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
+  export const autoChangeRealmInterval =
+    typeof qs.AUTO_CHANGE_INTERVAL === 'string' ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
   export const iceServers = [
     {
@@ -182,20 +183,6 @@ export namespace commConfigurations {
   ]
 
   export const voiceChatUseHRTF = location.search.includes('VOICE_CHAT_USE_HRTF')
-}
-export const loginConfig = {
-  org: {
-    domain: 'decentraland.auth0.com',
-    client_id: 'yqFiSmQsxk3LK46JOIB4NJ3wK4HzZVxG'
-  },
-  today: {
-    domain: 'dcl-stg.auth0.com',
-    client_id: '0UB0I7w6QA3AgSvbXh9rGvDuhKrJV1C0'
-  },
-  zone: {
-    domain: 'dcl-test.auth0.com',
-    client_id: 'lTUEMnFpYb0aiUKeIRPbh7pBxKM6sccx'
-  }
 }
 
 // take address from http://contracts.decentraland.org/addresses.json
@@ -252,7 +239,8 @@ export function getExclusiveServer() {
   return 'https://wearable-api.decentraland.org/v2/collections'
 }
 
-export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? ensureSingleString(qs.WITH_COLLECTIONS)! : undefined
+export const WITH_FIXED_COLLECTIONS =
+  qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? ensureSingleString(qs.WITH_COLLECTIONS)! : undefined
 export const WEARABLE_API_DOMAIN = ensureSingleString(qs.WEARABLE_API_DOMAIN) || 'wearable-api.decentraland.org'
 export const WEARABLE_API_PATH_PREFIX = ensureSingleString(qs.WEARABLE_API_PATH_PREFIX) || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())

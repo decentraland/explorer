@@ -12,7 +12,6 @@ import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { parcelObservable, teleportObservable } from './positionThings'
 import { SceneWorker } from './SceneWorker'
 import { SceneSystemWorker } from './SceneSystemWorker'
-import { renderStateObservable } from './worldState'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
 
 export type EnableParcelSceneLoadingOptions = {
@@ -150,7 +149,6 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     if (options.onPositionUnsettled) {
       options.onPositionUnsettled()
     }
-    renderStateObservable.notifyObservers(false)
   })
 
   ret.on('Event.track', (event: { name: string; data: any }) => {
