@@ -3,7 +3,6 @@ version: 2.0
 references:
   .workspace_root: &workspace_root /tmp/explorer
   .workspace_kernel: &workspace_kernel /tmp/explorer/kernel
-  .workspace_website: &workspace_website /tmp/explorer/website
 
   .attach_root: &attach_root
     attach_workspace:
@@ -19,11 +18,6 @@ references:
     docker:
       - <<: *image_kernel
     working_directory: *workspace_kernel
-
-  .base_website_env: &base_website_env
-    docker:
-      - <<: *image_kernel
-    working_directory: *workspace_website
 
   .all_branches_and_tags: &all_branches_and_tags
     filters:
@@ -78,7 +72,6 @@ jobs:
             - .git
             - .circleci
             - kernel
-            - website
 
   build-kernel:
     <<: *base_kernel_env
@@ -183,45 +176,6 @@ jobs:
             - kernel/static
             - kernel/dist
             - kernel/packages/decentraland-ecs/decentraland-ecs-1.0.0.tgz
-
-  build-website:
-    <<: *base_website_env
-    steps:
-      - <<: *attach_root
-      - run:
-          name: "installing"
-          command: npm ci
-      - run:
-          name: "remove decentraland-kernel"
-          command: rm -rf node_modules/decentraland-kernel || true
-      - run:
-          name: "copy fresh decentraland-kernel"
-          command: cp -r /tmp/explorer/kernel/static node_modules/decentraland-kernel
-      - run:
-          name: "post install script"
-          command: sh scripts/post-install.sh
-      - run:
-          name: "add PUBLIC_URL to .env (ignore master, staging, release)"
-          command: |
-            if [[ "$CIRCLE_BRANCH" =~ ^(master|staging|release)$ ]]; then
-              echo "skipped";
-            else
-              echo "PUBLIC_URL=\"https://play.decentraland.zone/branch/${CIRCLE_BRANCH}\"" >> .env;
-            fi
-      - run:
-          name: "show .env"
-          command: cat .env
-      - run:
-          name: "testing"
-          command: npm test -- --watchAll=false
-      - run:
-          name: "building"
-          command: npm run build
-      # persist to workspace to use in downstream jobs
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - website/build
 
   publish-ecs:
     <<: *base_kernel_env
