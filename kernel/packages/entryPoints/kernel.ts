@@ -5,7 +5,6 @@ declare const globalThis: StoreContainer & { DecentralandKernel: IDecentralandKe
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 globalThis.enableWeb3 = true
 
-import { initShared } from 'shared'
 import { createLogger } from 'shared/logger'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -72,9 +71,8 @@ globalThis.DecentralandKernel = {
 
     if (!container) throw new Error('cannot find element #gameContainer')
 
-    initShared()
-
-    initializeUnity(container)
+    Promise.resolve()
+      .then(() => initializeUnity(container))
       .then(() => loadWebsiteSystems())
       .catch((err) => {
         ReportFatalError(err, ErrorContext.WEBSITE_INIT)

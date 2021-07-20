@@ -1,7 +1,7 @@
 import { Store } from 'redux'
 import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
-import { call, throttle, put, select, takeEvery } from 'redux-saga/effects'
+import { call, throttle, put, select, takeEvery, take } from 'redux-saga/effects'
 
 import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
 
@@ -28,10 +28,12 @@ import {
   deployProfileSuccess,
   deployProfileFailure,
   profileSavedNotDeployed,
-  DeployProfile
+  DeployProfile,
+  localProfileSentToRenderer,
+  LOCAL_PROFILE_IN_RENDERER
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import { getProfile, hasConnectedWeb3 } from './selectors'
+import { getProfile, hasConnectedWeb3, isProfileUploadedToRenderer } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
@@ -154,6 +156,12 @@ function* initialProfileLoad() {
   }
 
   updateCommsUser({ version: profile.version })
+}
+
+export function* ensureLocalProfileInRenderer() {
+  while (!(yield select(isProfileUploadedToRenderer))) {
+    yield take(LOCAL_PROFILE_IN_RENDERER)
+  }
 }
 
 /**
@@ -328,6 +336,7 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   }
 
   yield call(ensureRenderer)
+
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(sendLoadProfile, profile)
   } else {
@@ -345,6 +354,7 @@ function* sendLoadProfile(profile: Profile) {
   const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
   unityInterface.LoadProfile(rendererFormat)
+  yield put(localProfileSentToRenderer())
 }
 
 function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {

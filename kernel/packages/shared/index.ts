@@ -54,8 +54,9 @@ export function initializeRendererVisibleObserver() {
     const { loading } = store.getState()
     const valueToSend = {
       loadingScreen: !!loading.showLoadingScreen,
+      renderingEnabled: isRendererEnabled(),
       // the renderer is visible in game_mode and loading_mode
-      visible: isRendererEnabled() || loading.showLoadingScreen
+      visible: isRendererEnabled() || !!loading.showLoadingScreen
     }
     const curValue = JSON.stringify(valueToSend)
 
@@ -72,4 +73,6 @@ export function initializeRendererVisibleObserver() {
   renderStateObservable.add(() => {
     sendRefreshedValues()
   })
+
+  sendRefreshedValues()
 }

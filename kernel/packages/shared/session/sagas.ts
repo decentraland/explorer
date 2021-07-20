@@ -13,6 +13,7 @@ import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'sha
 import {
   AUTH_ERROR_LOGGED_OUT,
   AWAITING_USER_SIGNATURE,
+  experienceStarted,
   setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
@@ -111,7 +112,7 @@ function* authenticate(action: AuthenticateAction) {
     yield take(SIGNUP)
   }
 
-  // yield put(experienceStarted())
+  yield put(experienceStarted())
 }
 
 function* startSignUp(identity: ExplorerIdentity) {
