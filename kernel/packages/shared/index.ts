@@ -3,9 +3,9 @@ import './events'
 
 import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED, NO_WEBGL_COULD_BE_CREATED } from './loading/types'
-import { buildStore, store } from './store/store'
+import { buildStore } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { RootState, StoreContainer } from './store/rootTypes'
+import { RootStore, StoreContainer } from './store/rootTypes'
 import { initSession } from './session/actions'
 import { initializeUrlIslandObserver } from './comms'
 import { initializeUrlRealmObserver } from './dao'
@@ -13,8 +13,7 @@ import { isMobile } from './comms/mobile'
 import { isWebGLCompatible } from './comms/browser'
 import { rendererVisibleObservable } from './observables'
 import { initializeSessionObserver } from './ethereum/provider'
-import { isRendererEnabled, observeLoadingStateChange, renderStateObservable } from './world/worldState'
-import { isLoadingScreenVisible, isRendererVisible } from './loading/selectors'
+import { isRendererVisible } from './loading/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -43,38 +42,32 @@ export function initShared() {
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()
   initializeUrlIslandObserver()
-  initializeRendererVisibleObserver()
+  initializeRendererVisibleObserver(store)
   initializeSessionObserver()
 
   store.dispatch(initSession())
 }
 
-export function initializeRendererVisibleObserver() {
-  let prevValue: string | null = null
-  function sendRefreshedValues() {
-    const state: RootState = store.getState()
+function observeIsRendererVisibleChanges(store: RootStore, cb: (visible: boolean) => void) {
+  let prevValue = isRendererVisible(store.getState())
 
-    const valueToSend = {
-      loadingScreen: isLoadingScreenVisible(state),
-      // the renderer is visible in game_mode and loading_mode
-      visible: isRendererVisible(state)
+  cb(prevValue)
+
+  store.subscribe(() => {
+    const newValue = isRendererVisible(store.getState())
+
+    if (newValue !== prevValue) {
+      prevValue = newValue
+      cb(newValue)
     }
-
-    const curValue = JSON.stringify(valueToSend)
-
-    if (prevValue != curValue) {
-      prevValue = curValue
-      rendererVisibleObservable.notifyObservers(valueToSend)
-    }
-  }
-
-  observeLoadingStateChange((prev, actual) => {
-    sendRefreshedValues()
   })
+}
 
-  renderStateObservable.add(() => {
-    sendRefreshedValues()
+export function initializeRendererVisibleObserver(store: RootStore) {
+  observeIsRendererVisibleChanges(store, (visible: boolean) => {
+    console.log('renderer visible', visible)
+    rendererVisibleObservable.notifyObservers({
+      visible
+    })
   })
-
-  sendRefreshedValues()
 }

@@ -25,7 +25,7 @@ class WebWorkerScene extends SceneRuntime {
       console.warn('🚨🚨🚨 Unhandled error in scene code. Disabling worker update loop 🚨🚨🚨')
       console.error(e)
       this.updateEnabled = false
-      debugger
+      eval('debu' + 'gger')
       e.preventDefault() // <-- "Hey browser, I handled it!"
       if (this.devToolsAdapter) this.devToolsAdapter.error(e.error)
     })

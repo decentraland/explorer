@@ -23,11 +23,10 @@ export const COMMS_ESTABLISHED = 'Communications established. Loading profile an
 export const commsEstablished = () => action(COMMS_ESTABLISHED)
 
 // ** TODO - trailing whitespace to workaround id -> label issue - moliva - 15/07/2020
-export const EXPERIENCE_STARTED = 'Loading scenes... '
+export const EXPERIENCE_STARTED = 'EXPERIENCE_STARTED'
 export const experienceStarted = () => action(EXPERIENCE_STARTED)
 
-// ** TODO - trailing whitespaces to workaround id -> label issue - moliva - 15/07/2020
-export const TELEPORT_TRIGGERED = 'Loading scenes...  '
+export const TELEPORT_TRIGGERED = 'TELEPORT_TRIGGERED'
 export const teleportTriggered = (payload: string) => action(TELEPORT_TRIGGERED, payload)
 
 export const RENDERING_ACTIVATED = '[RENDERER] Camera activated'

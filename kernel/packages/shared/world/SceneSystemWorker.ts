@@ -126,7 +126,7 @@ export class SceneSystemWorker extends SceneWorker {
       .then((userIdentity) => userIdentity.getUserData())
       .then((userData) => {
         if (!userData || !userData.userId) {
-          debugger
+          eval('debu' + 'gger')
         } else
           this.sceneChangeObserver = sceneObservable.add((report) => {
             if (report.newScene?.sceneId === this.getSceneId()) {

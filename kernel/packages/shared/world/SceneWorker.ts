@@ -106,7 +106,7 @@ export abstract class SceneWorker {
 
       // These errors should be handled in development time
       if (PREVIEW) {
-        debugger
+        eval('debu' + 'gger')
       }
 
       transport.close()

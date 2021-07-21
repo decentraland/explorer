@@ -36,7 +36,7 @@ import { generateRandomUserProfile } from './generateRandomUserProfile'
 import { getProfile, hasConnectedWeb3, isProfileUploadedToRenderer } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
-import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
+import { buildServerMetadata, ensureServerFormat, ServerFormatProfile } from './transformations/profileToServerFormat'
 import { Profile, ContentFile, Avatar, ProfileType } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
@@ -200,7 +200,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   const { userId, profileType } = action.payload
 
   const currentId = yield select(getCurrentUserId)
-  let profile: any
+  let profile: ServerFormatProfile | null = null
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
@@ -211,7 +211,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
           profile.hasClaimedName = false // for now, comms profiles can't have claimed names
         }
       } else {
-        const profiles: { avatars: object[] } = yield call(profileServerRequest, userId)
+        const profiles: { avatars: ServerFormatProfile[] } = yield call(profileServerRequest, userId)
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]
@@ -235,7 +235,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
       }
 
       const identity: ExplorerIdentity = yield select(getCurrentIdentity)
-      profile.ethAddress = identity.rawAddress
+      profile!.ethAddress = identity.rawAddress
     }
 
     if (!profile) {
@@ -247,7 +247,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
     profile = yield call(backupProfile, snapshotUrl, userId)
   }
 
-  if (currentId === userId) {
+  if (currentId === userId && profile) {
     profile.email = ''
   }
 
@@ -300,11 +300,12 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
   }
 }
 
-export function profileServerRequest(userId: string) {
+export async function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
-  return client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
+  const profiles = await client.fetchProfiles([userId])
+  return profiles[0] || { avatars: [] }
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {

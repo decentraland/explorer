@@ -6,16 +6,16 @@ import { ExplorerIdentity } from './types'
 import { Profile } from '../profiles/types'
 import { IEthereumProvider, LoginState } from '@dcl/kernel-interface'
 
-export const INIT_SESSION = '[Session] initializing'
+export const INIT_SESSION = '[SESSION] initializing'
 export const initSession = () => action(INIT_SESSION)
 export type InitSession = ReturnType<typeof initSession>
 
-export const AUTHENTICATE = '[Authenticate]'
+export const AUTHENTICATE = '[SESSION] Authenticate'
 export const authenticate = (provider: IEthereumProvider, isGuest: boolean) =>
   action(AUTHENTICATE, { provider, isGuest })
 export type AuthenticateAction = ReturnType<typeof authenticate>
 
-export const SIGNUP = '[SIGNUP]'
+export const SIGNUP = '[SESSION] SignUp'
 export const signUp = () => action(SIGNUP)
 
 export const USER_AUTHENTIFIED = '[Success] User authentified'

@@ -1,3 +1,5 @@
+import { LoginState } from '@dcl/kernel-interface'
+import { RootState } from 'shared/store/rootTypes'
 import { PREVIEW } from '../../config'
 import { RootLoadingState } from './reducer'
 
@@ -31,6 +33,23 @@ export function isLoadingScreenVisible(state: RootLoadingState) {
   return !state.loading.renderingActivated
 }
 
-export function isRendererVisible(state: RootLoadingState) {
+// the strategy with this function is to fail fast with "false" and then
+// cascade until find a "true"
+export function isRendererVisible(state: RootState) {
+  // of course, if the renderer is not initialized, it is not visible
+  if (!state.renderer.initialized) {
+    return false
+  }
+
+  // some login stages requires the renderer to be turned off
+  const { loginState } = state.session
+  if (
+    loginState == LoginState.SIGNATURE_FAILED ||
+    loginState == LoginState.SIGNATURE_PENDING ||
+    loginState == LoginState.WAITING_PROVIDER
+  ) {
+    return false
+  }
+
   return state.loading.renderingActivated || isLoadingScreenVisible(state)
 }

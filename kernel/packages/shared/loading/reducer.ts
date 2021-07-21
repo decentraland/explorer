@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { PENDING_SCENES, SignalPendingScenes, UPDATE_STATUS_MESSAGE } from './actions'
+import { PENDING_SCENES, InformPendingScenes, UPDATE_STATUS_MESSAGE } from './actions'
 import {
   FATAL_ERROR,
   ExecutionLifecycleEvent,
@@ -55,8 +55,8 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction): Loadin
   if (action.type === PENDING_SCENES) {
     return {
       ...state,
-      pendingScenes: (action as SignalPendingScenes).payload.pendingScenes,
-      totalScenes: (action as SignalPendingScenes).payload.totalScenes
+      pendingScenes: (action as InformPendingScenes).payload.pendingScenes,
+      totalScenes: (action as InformPendingScenes).payload.totalScenes
     }
   }
   if (action.type === RENDERING_ACTIVATED) {

@@ -1,5 +1,6 @@
-import { applyMiddleware, compose, createStore, Store } from 'redux'
+import { applyMiddleware, compose, createStore, Store, StoreEnhancer } from 'redux'
 import createSagaMiddleware from 'redux-saga'
+import { createLogger } from 'redux-logger'
 import { reducers } from './rootReducer'
 import { createRootSaga } from './rootSaga'
 import { RootState } from './rootTypes'
@@ -18,7 +19,21 @@ export const buildStore = () => {
     }
   })
   const composeEnhancers = (DEBUG_REDUX && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
-  store = createStore(reducers, composeEnhancers(applyMiddleware(sagaMiddleware)))
+
+  let middlewares: StoreEnhancer<any>[] = [applyMiddleware(sagaMiddleware)]
+
+  if (DEBUG_REDUX) {
+    middlewares.unshift(
+      applyMiddleware(
+        createLogger({
+          collapsed: true,
+          stateTransformer: () => null
+        })
+      )
+    )
+  }
+
+  store = createStore(reducers, composeEnhancers(...middlewares))
   const startSagas = () => sagaMiddleware.run(createRootSaga())
   return { store, startSagas }
 }

@@ -5,7 +5,7 @@ import {
   renderDistanceObservable
 } from '../../decentraland-loader/lifecycle/controllers/scene'
 import { trackEvent } from '../analytics'
-import { signalPendingScenes, signalSceneFail, signalSceneLoad, signalSceneStart } from '../loading/actions'
+import { informPendingScenes, signalSceneFail, signalSceneLoad, signalSceneStart } from '../loading/actions'
 import { EnvironmentData, ILand, InstancedSpawnPoint, LoadableParcelScene } from '../types'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { parcelObservable, teleportObservable } from './positionThings'
@@ -101,9 +101,12 @@ function globalSignalSceneFail(sceneId: string) {
 
 function reportPendingScenes() {
   const pendingScenes = new Set<string>()
+
   let countableScenes = 0
   for (let [sceneId, sceneWorker] of loadedSceneWorkers) {
+    // avatar scene should not be counted here
     const shouldBeCounted = !sceneWorker.isPersistent()
+
     const isPending = (sceneWorker.ready & SceneWorkerReadyState.STARTED) == 0
     const failedLoading = (sceneWorker.ready & SceneWorkerReadyState.LOADING_FAILED) != 0
     if (shouldBeCounted) {
@@ -113,8 +116,8 @@ function reportPendingScenes() {
       pendingScenes.add(sceneId)
     }
   }
-  console.log('loading pending scenes', pendingScenes)
-  globalThis['globalStore'].dispatch(signalPendingScenes(pendingScenes.size, countableScenes))
+
+  globalThis['globalStore'].dispatch(informPendingScenes(pendingScenes.size, countableScenes))
 }
 
 export async function enableParcelSceneLoading(options: EnableParcelSceneLoadingOptions) {

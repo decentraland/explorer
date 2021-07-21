@@ -5,7 +5,8 @@ import type {
   KernelTrackingEvent,
   KernelAccountState,
   KernelSignUpEvent,
-  KernelRendererVisibleEvent
+  KernelRendererVisibleEvent,
+  KernelOpenUrlEvent
 } from '@dcl/kernel-interface'
 
 export const errorObservable = new Observable<KernelError>()
@@ -14,3 +15,4 @@ export const trackingEventObservable = new Observable<KernelTrackingEvent>()
 export const accountStateObservable = new Observable<KernelAccountState>()
 export const signUpObservable = new Observable<KernelSignUpEvent>()
 export const rendererVisibleObservable = new Observable<KernelRendererVisibleEvent>()
+export const openUrlObservable = new Observable<KernelOpenUrlEvent>()

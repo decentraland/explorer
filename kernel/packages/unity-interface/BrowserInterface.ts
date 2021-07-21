@@ -73,7 +73,7 @@ import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
-import { signUpObservable } from 'shared/observables'
+import { openUrlObservable, signUpObservable } from 'shared/observables'
 import { renderStateObservable } from 'shared/world/worldState'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
@@ -103,12 +103,16 @@ type SystemInfoPayload = {
   systemMemorySize: number
 }
 
-const mensajes: any[] = ((globalThis as any).mensajes = [])
+function allScenesEvent(data: { eventType: string; payload: any }) {
+  for (const [_key, scene] of loadedSceneWorkers) {
+    scene.emit(data.eventType as IEventNames, data.payload)
+  }
+}
 
+// the BrowserInterface is a visitor for messages received from Unity
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
-  // visitor pattern? anyone?
   /**
    * This is the only method that should be called publically in this class.
    * It dispatches "renderer messages" to the correct handlers.
@@ -117,15 +121,16 @@ export class BrowserInterface {
    * and independant workflows for both teams.
    */
   public handleUnityMessage(type: string, message: any) {
-    if (type !== 'ReportPosition' && type !== 'SceneEvent') {
-      mensajes.push({ type, message })
-    }
     if (type in this) {
       // tslint:disable-next-line:semicolon
       ;(this as any)[type](message)
     } else {
       defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
     }
+  }
+
+  public AllScenesEvent(data: { eventType: string; payload: any }) {
+    allScenesEvent(data)
   }
 
   /** Triggered when the camera moves */
@@ -167,15 +172,8 @@ export class BrowserInterface {
     }
   }
 
-  public AllScenesEvent(data: { eventType: string; payload: any }) {
-    for (const [_key, scene] of loadedSceneWorkers) {
-      scene.emit(data.eventType as IEventNames, data.payload)
-    }
-  }
-
   public OpenWebURL(data: { url: string }) {
-    const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
-    if (newWindow != null) newWindow.opener = null
+    openUrlObservable.notifyObservers(data)
   }
 
   public PerformanceReport(data: {
@@ -220,7 +218,7 @@ export class BrowserInterface {
       timestamp: data.timestamp
     })
 
-    this.AllScenesEvent({
+    allScenesEvent({
       eventType: 'playerExpression',
       payload: {
         expressionId: data.id
@@ -233,7 +231,7 @@ export class BrowserInterface {
     sendPublicChatMessage(messageId, body)
   }
 
-  public TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
+  public TermsOfServiceResponse(data: { sceneId: string; accepted: boolean; dontShowAgain: boolean }) {
     // TODO
   }
 
@@ -241,7 +239,7 @@ export class BrowserInterface {
     if (hasWallet()) {
       TeleportController.goToNext()
     } else {
-      window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
+      openUrlObservable.notifyObservers({ url: 'https://docs.decentraland.org/get-a-wallet/' })
     }
   }
 

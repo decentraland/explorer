@@ -54,7 +54,7 @@ export function buildServerMetadata(profile: Profile) {
   return metadata
 }
 
-type ServerFormatProfile = Omit<Profile, 'avatar'> & {
+export type ServerFormatProfile = Omit<Profile, 'avatar'> & {
   avatar: ServerProfileAvatar
 }
 

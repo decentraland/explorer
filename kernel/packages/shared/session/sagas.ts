@@ -200,7 +200,6 @@ function* signUp() {
   const identity: ExplorerIdentity = yield select(getSignUpIdentity)
 
   if (!identity) {
-    debugger
     throw new Error('missing signup session')
   }
 

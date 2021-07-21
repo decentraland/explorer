@@ -43,7 +43,8 @@ import {
   trackingEventObservable,
   accountStateObservable,
   signUpObservable,
-  rendererVisibleObservable
+  rendererVisibleObservable,
+  openUrlObservable
 } from 'shared/observables'
 
 const logger = createLogger('kernel.ts: ')
@@ -93,6 +94,7 @@ globalThis.DecentralandKernel = {
       trackingEventObservable,
       signUpObservable,
       rendererVisibleObservable,
+      openUrlObservable,
       version: 'mockedversion'
     }
   }
