@@ -977,7 +977,7 @@ export async function connect(userId: string) {
               store.dispatch(setCommsIsland(island))
 
               if (!context) {
-                console.warn('no context was found to remove the peers')
+                logger.warn('no context was found to remove the peers')
                 return
               }
 
@@ -985,7 +985,7 @@ export async function connect(userId: string) {
             },
             onPeerLeftIsland: (peerId: string) => {
               if (!context) {
-                console.warn('no context was found to remove the peer')
+                logger.warn('no context was found to remove the peer')
                 return
               }
 
