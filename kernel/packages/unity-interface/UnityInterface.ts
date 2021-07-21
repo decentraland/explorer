@@ -68,10 +68,6 @@ export class UnityInterface {
       return
     }
 
-    if (this.currentHeight === height) {
-      return
-    }
-
     this.currentHeight = height
     resizeCanvas(height)
   }
