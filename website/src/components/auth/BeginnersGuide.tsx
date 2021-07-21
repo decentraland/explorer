@@ -50,7 +50,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (p
             LANDs) and in-world progress safe.
           </p>
           <p>
-            If you choose to experience Decentraland Explorer without a wallet, the information will be only be stored
+            If you choose to experience Decentraland Explorer without a wallet, the information will only be stored
             locally: you will be able to walk around, customize your Avatar and chat with others in-world, but you won’t
             have the chance to receive daily rewards, participate in events or log in with a different device using the
             same Guest ID and Avatar.
