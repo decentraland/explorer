@@ -1,54 +1,40 @@
 import { AnyAction } from 'redux'
-import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { fork, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
-import { LOGIN_COMPLETED, USER_AUTHENTIFIED } from 'shared/session/actions'
-import { web3initialized } from 'shared/dao/actions'
+import { ChangeLoginStateAction, CHANGE_LOGIN_STAGE } from 'shared/session/actions'
 import { trackEvent } from '../analytics'
 import { lastPlayerPosition } from '../world/positionThings'
 
-import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
-import {
-  setLoadingScreen,
-  EXPERIENCE_STARTED,
-  rotateHelpText,
-  TELEPORT_TRIGGERED,
-  unityClientLoaded,
-  authSuccessful
-} from './types'
+import { PENDING_SCENES, SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
+import { metricsUnityClientLoaded, metricsAuthSuccessful, experienceStarted } from './types'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { onLoginCompleted } from 'shared/ethereum/provider'
+import { LoginState } from '@dcl/kernel-interface'
+import { call } from 'redux-saga-test-plan/matchers'
 import { RootState } from 'shared/store/rootTypes'
-
-const SECONDS = 1000
-
-export const DELAY_BETWEEN_MESSAGES = 10 * SECONDS
+import { PREVIEW } from 'config'
 
 export function* loadingSaga() {
   yield fork(translateActions)
-
   yield fork(initialSceneLoading)
-  yield takeLatest(TELEPORT_TRIGGERED, teleportSceneLoading)
 
   yield takeEvery(SCENE_LOAD, trackLoadTime)
 }
 
 function* translateActions() {
   yield takeEvery(RENDERER_INITIALIZED, triggerUnityClientLoaded)
-  yield takeEvery(USER_AUTHENTIFIED, triggerWeb3Initialized)
-  yield takeEvery(LOGIN_COMPLETED, triggerAuthSuccessful)
+  yield takeEvery(CHANGE_LOGIN_STAGE, triggerAuthSuccessful)
 }
 
-function* triggerAuthSuccessful() {
-  yield put(authSuccessful())
-}
-
-function* triggerWeb3Initialized() {
-  yield put(web3initialized())
+function* triggerAuthSuccessful(action: ChangeLoginStateAction) {
+  if (action.payload.stage == LoginState.COMPLETED) {
+    yield put(metricsAuthSuccessful())
+  }
 }
 
 function* triggerUnityClientLoaded() {
-  yield put(unityClientLoaded())
+  yield put(metricsUnityClientLoaded())
 }
 
 export function* trackLoadTime(action: SceneLoad): any {
@@ -69,48 +55,26 @@ export function* trackLoadTime(action: SceneLoad): any {
   })
 }
 
-function* refreshTeleport() {
-  while (true) {
-    yield delay(DELAY_BETWEEN_MESSAGES)
-    yield put(rotateHelpText())
-  }
-}
-
-function* refreshTextInScreen() {
-  while (true) {
-    const status = yield select((state) => state.loading)
-    yield delay(600)
-  }
-}
-
-export function* waitForSceneLoads() {
-  while (true) {
-    if (yield select((state: RootState) => state.loading.pendingScenes === 0)) {
-      break
+function* waitForSceneLoads() {
+  function shouldWait(state: RootState) {
+    // in the initial load, we should wait until we have *some* scene to load
+    if (state.loading.initialLoad && !PREVIEW) {
+      if (state.loading.pendingScenes !== 0 || state.loading.totalScenes == 0) {
+        return true
+      }
     }
-    yield delay(600)
+
+    // otherwise only wait until pendingScenes == 0
+    return state.loading.pendingScenes !== 0
+  }
+
+  while (yield select(shouldWait)) {
+    yield take(PENDING_SCENES)
   }
 }
 
-export function* initialSceneLoading() {
-  yield race({
-    refresh: call(refreshTeleport),
-    textInScreen: call(refreshTextInScreen),
-    finish: call(function* () {
-      yield take(EXPERIENCE_STARTED)
-      yield onLoginCompleted()
-      yield put(setLoadingScreen(false))
-    })
-  })
-}
-
-export function* teleportSceneLoading() {
-  yield race({
-    refresh: call(refreshTeleport),
-    textInScreen: call(function* () {
-      yield delay(2000)
-      yield call(refreshTextInScreen)
-    }),
-    finish: call(waitForSceneLoads)
-  })
+function* initialSceneLoading() {
+  yield onLoginCompleted()
+  yield call(waitForSceneLoads)
+  yield put(experienceStarted())
 }

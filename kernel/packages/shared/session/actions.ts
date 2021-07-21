@@ -23,9 +23,6 @@ export const userAuthentified = (identity: ExplorerIdentity, network: ETHEREUM_N
   action(USER_AUTHENTIFIED, { identity, network })
 export type UserAuthentified = ReturnType<typeof userAuthentified>
 
-export const LOGIN_COMPLETED = '[Success] Login'
-export const loginCompleted = () => action(LOGIN_COMPLETED)
-
 export const LOGOUT = '[Request] Logout'
 export const logout = () => action(LOGOUT)
 export type Logout = ReturnType<typeof logout>

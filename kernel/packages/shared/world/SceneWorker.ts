@@ -9,10 +9,22 @@ import { IEventNames, IEvents } from 'decentraland-ecs/src'
 import { PREVIEW } from 'config'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
 
+export enum SceneWorkerReadyState {
+  LOADING = 1 << 0,
+  LOADED = 1 << 1,
+  STARTED = 1 << 2,
+  LOADING_FAILED = 1 << 4,
+  SYSTEM_FAILED = 1 << 5,
+  DISPOSING = 1 << 6,
+  SYSTEM_DISPOSED = 1 << 7,
+  DISPOSED = 1 << 8
+}
+
 export abstract class SceneWorker {
   protected engineAPI: EngineAPI | null = null
   private readonly system = future<ScriptingHost>()
-  private enabled = true
+
+  public ready: SceneWorkerReadyState = SceneWorkerReadyState.LOADING
 
   constructor(private readonly parcelScene: ParcelSceneAPI, transport: ScriptingTransport) {
     parcelScene.registerWorker(this)
@@ -47,9 +59,12 @@ export abstract class SceneWorker {
   }
 
   dispose() {
-    if (this.enabled) {
+    const disposingFlags =
+      SceneWorkerReadyState.DISPOSING | SceneWorkerReadyState.SYSTEM_DISPOSED | SceneWorkerReadyState.DISPOSED
+
+    if ((this.ready & disposingFlags) === 0) {
+      this.ready |= SceneWorkerReadyState.DISPOSING
       this.childDispose()
-      this.enabled = false
 
       // Unmount the system
       this.system
@@ -59,10 +74,15 @@ export abstract class SceneWorker {
           } catch (e) {
             defaultLogger.error('Error unmounting system', e)
           }
+          this.ready |= SceneWorkerReadyState.SYSTEM_DISPOSED
         })
-        .catch((e) => defaultLogger.error('Unable to unmount system', e))
+        .catch((e) => {
+          defaultLogger.error('Unable to unmount system', e)
+          this.ready |= SceneWorkerReadyState.SYSTEM_DISPOSED
+        })
 
       this.parcelScene.dispose()
+      this.ready |= SceneWorkerReadyState.DISPOSED
     }
   }
 
@@ -90,9 +110,13 @@ export abstract class SceneWorker {
       }
 
       transport.close()
+
+      this.ready |= SceneWorkerReadyState.SYSTEM_FAILED
     })
 
     system.enable()
+
+    this.ready |= SceneWorkerReadyState.LOADED
 
     return system
   }

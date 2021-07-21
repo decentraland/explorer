@@ -5,7 +5,7 @@ import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED, NO_WEBGL_COULD_BE_CREATED } from './loading/types'
 import { buildStore, store } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { StoreContainer } from './store/rootTypes'
+import { RootState, StoreContainer } from './store/rootTypes'
 import { initSession } from './session/actions'
 import { initializeUrlIslandObserver } from './comms'
 import { initializeUrlRealmObserver } from './dao'
@@ -14,6 +14,7 @@ import { isWebGLCompatible } from './comms/browser'
 import { rendererVisibleObservable } from './observables'
 import { initializeSessionObserver } from './ethereum/provider'
 import { isRendererEnabled, observeLoadingStateChange, renderStateObservable } from './world/worldState'
+import { isLoadingScreenVisible, isRendererVisible } from './loading/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -51,13 +52,14 @@ export function initShared() {
 export function initializeRendererVisibleObserver() {
   let prevValue: string | null = null
   function sendRefreshedValues() {
-    const { loading } = store.getState()
+    const state: RootState = store.getState()
+
     const valueToSend = {
-      loadingScreen: !!loading.showLoadingScreen,
-      renderingEnabled: isRendererEnabled(),
+      loadingScreen: isLoadingScreenVisible(state),
       // the renderer is visible in game_mode and loading_mode
-      visible: isRendererEnabled() || !!loading.showLoadingScreen
+      visible: isRendererVisible(state)
     }
+
     const curValue = JSON.stringify(valueToSend)
 
     if (prevValue != curValue) {

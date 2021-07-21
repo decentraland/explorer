@@ -1,5 +1,5 @@
 import { call, put, select, take } from 'redux-saga/effects'
-import { setLoadingScreen, waitingForRenderer } from 'shared/loading/types'
+import { waitingForRenderer } from 'shared/loading/types'
 import { createLogger } from 'shared/logger'
 import { browserInterface } from 'unity-interface/BrowserInterface'
 import { initializeEngine } from 'unity-interface/dcl'
@@ -24,8 +24,6 @@ export function* ensureRenderer() {
 
 function* initializeRenderer(action: InitializeRenderer) {
   const { delegate, container } = action.payload
-
-  yield put(setLoadingScreen(true))
 
   // will start loading
   yield put(waitingForRenderer())

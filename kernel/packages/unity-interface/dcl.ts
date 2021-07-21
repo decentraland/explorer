@@ -22,42 +22,45 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { store } from 'shared/store/store'
+import { isLoadingScreenVisible } from 'shared/loading/selectors'
+import type { UnityGame } from '@dcl/unity-renderer/src'
 
 declare const globalThis: { clientDebug: ClientDebug }
 
 globalThis.clientDebug = clientDebug
 
-type GameInstance = {
-  SendMessage(object: string, method: string, ...args: (number | string)[]): void
-}
-
-export let gameInstance!: GameInstance
-
 function setLoadingScreenBasedOnState() {
   let state = store.getState()
-  let loading = state?.loading
+
+  if (!state) return
+
+  let loading = state.loading
 
   unityInterface.SetLoadingScreen({
-    isVisible: !loading.renderingActivated || loading?.showLoadingScreen || false,
-    message: loading?.message || loading?.status || '',
+    isVisible: isLoadingScreenVisible(state),
+    message: loading.message || loading.status || '',
     showWalletPrompt: false,
-    showTips: loading?.initialLoad || false
+    showTips: loading.initialLoad || false
   })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function debuggingDecorator(_gameInstance: GameInstance) {
+function debuggingDecorator(gameInstance: UnityGame): UnityGame {
   const debug = false
-  const decorator = {
-    // @ts-ignore
-    SendMessage: (...args) => {
-      defaultLogger.info('gameInstance', ...args)
+
+  if (debug) {
+    return Object.assign(Object.create(gameInstance), {
       // @ts-ignore
-      _gameInstance.SendMessage(...args)
-    }
+      SendMessage: (...args) => {
+        defaultLogger.info('gameInstance', ...args)
+        // @ts-ignore
+        return gameInstance.SendMessage(...args)
+      }
+    })
   }
-  return debug ? decorator : _gameInstance
+
+  return gameInstance
 }
 
 /**
@@ -66,10 +69,10 @@ function debuggingDecorator(_gameInstance: GameInstance) {
  *
  * @param _gameInstance Unity game instance
  */
-export async function initializeEngine(_gameInstance: GameInstance): Promise<void> {
-  gameInstance = debuggingDecorator(_gameInstance)
+export async function initializeEngine(_gameInstance: UnityGame): Promise<void> {
+  const gameInstance = debuggingDecorator(_gameInstance)
 
-  unityInterface.Init(_gameInstance)
+  unityInterface.Init(gameInstance)
 
   unityInterface.DeactivateRendering()
 

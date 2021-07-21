@@ -10,12 +10,7 @@ import { initializeReferral, referUser } from 'shared/referral'
 import { getUserAccount, isSessionExpired, requestManager } from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
-import {
-  AUTH_ERROR_LOGGED_OUT,
-  AWAITING_USER_SIGNATURE,
-  setLoadingScreen,
-  setLoadingWaitTutorial
-} from 'shared/loading/types'
+import { AUTH_ERROR_LOGGED_OUT, AWAITING_USER_SIGNATURE, setLoadingWaitTutorial } from 'shared/loading/types'
 import { trackEvent } from 'shared/analytics'
 import { getAppNetwork } from 'shared/web3'
 import { connection } from 'decentraland-connect'
@@ -28,7 +23,6 @@ import {
   AUTHENTICATE,
   changeLoginState,
   INIT_SESSION,
-  loginCompleted as loginCompletedAction,
   LOGOUT,
   REDIRECT_TO_SIGN_UP,
   SIGNUP,
@@ -186,7 +180,6 @@ function* signIn(identity: ExplorerIdentity) {
 
   yield setUserAuthentified(identity)
 
-  yield put(loginCompletedAction())
   yield put(changeLoginState(LoginState.COMPLETED))
 }
 
@@ -204,7 +197,6 @@ function* setUserAuthentified(identity: ExplorerIdentity) {
 }
 
 function* signUp() {
-  yield put(setLoadingScreen(true))
   const identity: ExplorerIdentity = yield select(getSignUpIdentity)
 
   if (!identity) {
@@ -306,8 +298,6 @@ async function createAuthIdentity(requestManager: RequestManager, isGuest: boole
   const { address, signer, hasConnectedWeb3, ephemeralLifespanMinutes } = await getSigner(requestManager, isGuest)
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
-
-  put(changeLoginState(LoginState.COMPLETED))
 
   return { ...auth, rawAddress: address, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 }

@@ -133,7 +133,7 @@ export class TeleportController {
         x: x,
         y: y,
         text: tpMessage
-      } as any)
+      })
 
       return { message: tpMessage, success: true }
     } else {

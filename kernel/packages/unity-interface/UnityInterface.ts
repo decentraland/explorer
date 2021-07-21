@@ -30,6 +30,7 @@ import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
 import { Observable } from 'decentraland-ecs/src'
+import type { UnityGame } from '@dcl/unity-renderer/src'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -55,7 +56,7 @@ function resizeCanvas(targetHeight: number) {
 }
 
 export class UnityInterface {
-  public gameInstance: any
+  public gameInstance!: UnityGame
   public Module: any
   public currentHeight: number = 1080
   public crashPayloadResponseObservable: Observable<string> = new Observable<string>()
@@ -73,7 +74,7 @@ export class UnityInterface {
     resizeCanvas(height)
   }
 
-  public Init(gameInstance: any): void {
+  public Init(gameInstance: UnityGame): void {
     if (!WSS_ENABLED) {
       nativeMsgBridge.initNativeMessages(gameInstance)
     }
@@ -216,7 +217,6 @@ export class UnityInterface {
       return
     }
 
-    console.log(JSON.stringify(data))
     this.SendMessageToUnity('Bridges', 'SetLoadingScreen', JSON.stringify(data))
   }
 

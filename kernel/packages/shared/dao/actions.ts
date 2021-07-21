@@ -5,9 +5,6 @@ export const WEB3_INITIALIZED = 'Web3 initialized'
 
 export const UPDATE_CATALYST_REALM = 'Update Catalyst Realm'
 
-export const web3initialized = () => action(WEB3_INITIALIZED)
-export type Web3Initialized = ReturnType<typeof web3initialized>
-
 export const SET_CATALYST_CANDIDATES = 'Set Catalyst Candidates'
 export const setCatalystCandidates = (candidates: Candidate[]) => action(SET_CATALYST_CANDIDATES, candidates)
 export type SetCatalystCandidates = ReturnType<typeof setCatalystCandidates>

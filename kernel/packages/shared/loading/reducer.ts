@@ -1,14 +1,11 @@
 import { AnyAction } from 'redux'
-import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions'
+import { PENDING_SCENES, SignalPendingScenes, UPDATE_STATUS_MESSAGE } from './actions'
 import {
   FATAL_ERROR,
   ExecutionLifecycleEvent,
   EXPERIENCE_STARTED,
-  loadingTips,
   NOT_STARTED,
-  ROTATE_HELP_TEXT,
   SET_ERROR_TLD,
-  SET_LOADING_SCREEN,
   SET_LOADING_WAIT_TUTORIAL,
   TELEPORT_TRIGGERED,
   RENDERING_ACTIVATED,
@@ -19,14 +16,12 @@ import {
 
 export type LoadingState = {
   status: ExecutionLifecycleEvent
-  helpText: number
+  totalScenes: number
   pendingScenes: number
   message: string
-  loadPercentage: number
   renderingActivated: boolean
   isForeground: boolean
   initialLoad: boolean
-  showLoadingScreen: boolean
   waitingTutorial?: boolean
   error: string | null
   tldError: {
@@ -44,14 +39,12 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction): Loadin
   if (!state) {
     return {
       status: NOT_STARTED,
-      helpText: 0,
+      totalScenes: 0,
       pendingScenes: 0,
       message: '',
       renderingActivated: false,
       isForeground: true,
-      loadPercentage: 0,
       initialLoad: true,
-      showLoadingScreen: false,
       error: null,
       tldError: null
     }
@@ -59,14 +52,12 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction): Loadin
   if (!action) {
     return state
   }
-  if (action.type === SCENE_LOAD) {
-    return { ...state, pendingScenes: state.pendingScenes + 1 }
-  }
-  if (action.type === SCENE_FAIL) {
-    return { ...state, pendingScenes: state.pendingScenes - 1 }
-  }
-  if (action.type === SCENE_START) {
-    return { ...state, pendingScenes: state.pendingScenes - 1 }
+  if (action.type === PENDING_SCENES) {
+    return {
+      ...state,
+      pendingScenes: (action as SignalPendingScenes).payload.pendingScenes,
+      totalScenes: (action as SignalPendingScenes).payload.totalScenes
+    }
   }
   if (action.type === RENDERING_ACTIVATED) {
     return { ...state, renderingActivated: true }
@@ -84,17 +75,10 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction): Loadin
     return { ...state, status: action.type, initialLoad: false }
   }
   if (action.type === TELEPORT_TRIGGERED) {
-    return { ...state, helpText: 0, message: action.payload }
-  }
-  if (action.type === ROTATE_HELP_TEXT) {
-    const newValue = state.helpText + 1
-    return { ...state, helpText: newValue >= loadingTips.length ? 0 : newValue }
+    return { ...state, message: action.payload }
   }
   if (action.type === UPDATE_STATUS_MESSAGE) {
-    return { ...state, message: action.payload.message, loadPercentage: action.payload.loadPercentage }
-  }
-  if (action.type === SET_LOADING_SCREEN) {
-    return { ...state, showLoadingScreen: action.payload.showLoadingScreen }
+    return { ...state, message: action.payload.message }
   }
   if (action.type === SET_LOADING_WAIT_TUTORIAL) {
     return { ...state, waitingTutorial: action.payload.waiting }

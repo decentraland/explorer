@@ -29,6 +29,7 @@ export async function onLoginCompleted(): Promise<SessionState> {
   }
 
   const state = store.getState().session
+
   if (isLoginCompleted(state)) return state
 
   return new Promise<SessionState>((resolve) => {

@@ -68,7 +68,7 @@ import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { AVATAR_LOADING_ERROR, experienceStarted, renderingActivated, renderingDectivated } from 'shared/loading/types'
+import { AVATAR_LOADING_ERROR, renderingActivated, renderingDectivated } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
@@ -343,7 +343,6 @@ export class BrowserInterface {
         /**
          * This event is called everytime the renderer activates the main camera
          */
-        globalThis.globalStore.dispatch(experienceStarted())
         globalThis.globalStore.dispatch(renderingActivated())
         renderStateObservable.notifyObservers()
         break
