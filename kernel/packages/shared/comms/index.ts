@@ -58,7 +58,7 @@ import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { renderStateObservable, isRendererEnabled, ensureRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
-import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
+import { LighthouseConnectionConfig, LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 
 import { Authenticator, AuthIdentity } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
@@ -111,6 +111,7 @@ import { EncodedFrame } from 'voice-chat-codec/types'
 import Html from 'shared/Html'
 import { isFeatureToggleEnabled } from 'shared/selectors'
 import * as qs from 'query-string'
+import { MinPeerData, Position3D } from '@dcl/catalyst-peer'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -844,6 +845,14 @@ function checkAutochangeRealm(visiblePeers: ProcessingPeerInfo[], context: Conte
   }
 }
 
+function removeMissingPeers(context: Context, newPeers: MinPeerData[]) {
+  for (const alias of context.peerData.keys()) {
+    if (!newPeers.some((x) => x.id === alias)) {
+      removePeer(context, alias)
+    }
+  }
+}
+
 function removeAllPeers(context: Context) {
   for (const alias of context.peerData.keys()) {
     removePeer(context, alias)
@@ -937,7 +946,7 @@ export async function connect(userId: string) {
           delete realm.layer
         }
 
-        const peerConfig: any = {
+        const peerConfig: LighthouseConnectionConfig = {
           connectionConfig: {
             iceServers: commConfigurations.iceServers
           },
@@ -956,15 +965,32 @@ export async function connect(userId: string) {
           positionConfig: {
             selfPosition: () => {
               if (context && context.currentPosition) {
-                return context.currentPosition.slice(0, 3)
+                return context.currentPosition.slice(0, 3) as Position3D
               }
             },
             maxConnectionDistance: 4,
             nearbyPeersDistance: 5,
             disconnectDistance: 5
           },
-          onIslandChange: (island: string | undefined) => {
-            store.dispatch(setCommsIsland(island))
+          eventsHandler: {
+            onIslandChange: (island: string | undefined, peers: MinPeerData[]) => {
+              store.dispatch(setCommsIsland(island))
+
+              if (!context) {
+                logger.warn('no context was found to remove the peers')
+                return
+              }
+
+              removeMissingPeers(context, peers)
+            },
+            onPeerLeftIsland: (peerId: string) => {
+              if (!context) {
+                logger.warn('no context was found to remove the peer')
+                return
+              }
+
+              removePeer(context, peerId)
+            }
           },
           preferedIslandId: getPreferedIsland(store.getState())
         }

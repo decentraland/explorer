@@ -41,7 +41,7 @@
     "all": true
   },
   "devDependencies": {
-    "@dcl/unity-renderer": "^1.0.7227",
+    "@dcl/unity-renderer": "^1.0.7498",
     "@microsoft/api-documenter": "^7.2.2",
     "@microsoft/api-extractor": "^7.1.7",
     "@tweenjs/tween.js": "^17.2.0",
@@ -95,7 +95,7 @@
     "web3x-codegen": "^4.0.6"
   },
   "dependencies": {
-    "@dcl/catalyst-peer": "^1.0.2",
+    "@dcl/catalyst-peer": "^1.0.3",
     "@dcl/ecs-quests": "^1.2.3-20210422200033.commit-48c967e",
     "@dcl/kernel-interface": "^1.0.0-20210721184630.commit-ec3897d",
     "@dcl/schemas": "^1.2.0",
