@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../../static/dist",
+    "outDir": "../../static",
     "baseUrl": "..",
     "strict": true,
     "strictNullChecks": true

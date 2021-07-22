@@ -1,8 +1,0 @@
-[
-  {
-    "name": "Compile website kernel interface",
-    "kind": "Webpack",
-    "file": "./packages/entryPoints/kernel.ts",
-    "target": "web"
-  }
-]

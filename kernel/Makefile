@@ -117,12 +117,12 @@ test-scenes: $(TEST_SCENES_GAMEJS_FILES) $(HELLMAP_GAMEJS_FILES) $(TEST_ECS_SCEN
 
 # Entry points
 
-static/dist/%.js: build-essentials packages/entryPoints/%.ts
+static/%.js: build-essentials packages/entryPoints/%.ts
 	@$(COMPILER) $(word 2,$^)
 
 # Release
 
-DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/kernel.js
+DIST_ENTRYPOINTS := static/editor.js static/preview.js static/index.js
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
@@ -197,16 +197,15 @@ dcl-amd:
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
 
-npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
+npm-link: build-essentials static/preview.js static/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
 	rm -rf packages/decentraland-ecs/artifacts || true
 	mkdir packages/decentraland-ecs/artifacts
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
 	ln -sf $(CWD)/packages/build-ecs/index.js packages/decentraland-ecs/artifacts/build-ecs.js
-	ln -sf $(CWD)/static/dist/preview.js packages/decentraland-ecs/artifacts/preview.js
-	ln -sf $(CWD)/static/dist/unityPreview.js packages/decentraland-ecs/artifacts/unityPreview.js
-	ln -sf $(CWD)/static/dist/editor.js packages/decentraland-ecs/artifacts/editor.js
+	ln -sf $(CWD)/static/preview.js packages/decentraland-ecs/artifacts/preview.js
+	ln -sf $(CWD)/static/editor.js packages/decentraland-ecs/artifacts/editor.js
 	ln -sf $(CWD)/static/preview.html packages/decentraland-ecs/artifacts/preview.html
 	ln -sf $(CWD)/static/fonts packages/decentraland-ecs/artifacts/fonts
 	ln -sf $(CWD)/static/images packages/decentraland-ecs/artifacts/images
@@ -216,7 +215,7 @@ npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd 
 	cd packages/decentraland-ecs; npm link
 	cd static; npm link
 
-watch-builder: build-essentials static/dist/editor.js ## Watch the files required for hacking with the builder
+watch-builder: build-essentials static/editor.js ## Watch the files required for hacking with the builder
 	@node_modules/.bin/concurrently \
 		-n "ecs,scene-system,internal-scenes,loader,preview,unity,builder,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
@@ -234,13 +233,13 @@ watch-cli: build-essentials ## Watch the files required for building the CLI
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/entryPoints/preview.json --watch" \
-			"$(COMPILER) targets/entryPoints/kernel.json --watch" \
+			"$(COMPILER) targets/entryPoints/index.json --watch" \
 			"node ./scripts/runTestServer.js --keep-open"
 
 # Aesthetics
 
 lint: ## Validate correct formatting and circular dependencies
-	@node_modules/.bin/madge packages/entryPoints/kernel.ts --circular --warning
+	@node_modules/.bin/madge packages/entryPoints/index.ts --circular --warning
 	@node_modules/.bin/madge packages --orphans --extensions ts --exclude '.+\.d.ts|.+/dist\/.+'
 	@node_modules/.bin/tslint --project tsconfig.json
 
@@ -250,7 +249,7 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 
 # Development
 
-watch: $(SOME_MAPPINGS) build-essentials static/dist/kernel.js ## Watch the files required for hacking the explorer
+watch: $(SOME_MAPPINGS) build-essentials static/index.js ## Watch the files required for hacking the explorer
 	@NODE_ENV=development npx concurrently \
 		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,kernel,test,simulator,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
@@ -258,7 +257,7 @@ watch: $(SOME_MAPPINGS) build-essentials static/dist/kernel.js ## Watch the file
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/scenes/basic-scenes.json --watch" \
-			"$(COMPILER) targets/entryPoints/kernel.json --watch" \
+			"$(COMPILER) targets/entryPoints/index.json --watch" \
 			"$(COMPILER) targets/test.json --watch" \
 			"node ./scripts/runPathSimulator.js" \
 			"node ./scripts/runTestServer.js --keep-open"

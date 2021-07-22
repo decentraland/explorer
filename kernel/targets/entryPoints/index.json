@@ -1,6 +1,6 @@
 [
   {
-    "name": "Compile Babylon client",
+    "name": "Compile website kernel interface",
     "kind": "Webpack",
     "file": "./packages/entryPoints/index.ts",
     "target": "web"
