@@ -76,6 +76,7 @@ import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
+import { realmToString } from 'shared/dao/utils/realmToString'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -118,7 +119,7 @@ export class BrowserInterface {
   public handleUnityMessage(type: string, message: any) {
     if (type in this) {
       // tslint:disable-next-line:semicolon
-      ; (this as any)[type](message)
+      ;(this as any)[type](message)
     } else {
       defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
     }
@@ -289,7 +290,11 @@ export class BrowserInterface {
   }
 
   public SendAuthentication(data: { rendererAuthenticationType: string }) {
-    const providerType: ProviderType | null = Object.values(ProviderType).includes(data.rendererAuthenticationType as ProviderType) ? data.rendererAuthenticationType as ProviderType : null
+    const providerType: ProviderType | null = Object.values(ProviderType).includes(
+      data.rendererAuthenticationType as ProviderType
+    )
+      ? (data.rendererAuthenticationType as ProviderType)
+      : null
 
     authenticateWhenItsReady(providerType)
   }
@@ -483,7 +488,7 @@ export class BrowserInterface {
       realm: { serverName, layer }
     } = data
 
-    const realmString = serverName + '-' + layer
+    const realmString = realmToString({ serverName, layer })
 
     notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
 

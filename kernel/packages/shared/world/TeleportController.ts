@@ -174,6 +174,7 @@ async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
   const realm = getRealm(globalThis.globalStore.getState())
   const commsUrl = getCommsServer(globalThis.globalStore.getState())
 
+  // TODO! review this function usage
   if (realm && realm.layer && commsUrl) {
     const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
     if (layerUsersResponse.ok) {
