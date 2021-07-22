@@ -60,7 +60,7 @@ export class UnityInterface {
   public debug: boolean = false
   public gameInstance: any
   public Module: any
-  public currentHeight: number = 1080
+  public currentHeight: number = -1
   public crashPayloadResponseObservable: Observable<string> = new Observable<string>()
 
   public SetTargetHeight(height: number): void {
