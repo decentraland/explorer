@@ -197,8 +197,6 @@ function* initializeCatalystCandidates() {
 }
 
 async function checkValidRealm(realm: Realm) {
-  debugger
-  // TODO! review this function usage
   const realmHasValues = realm && realm.domain && realm.catalystName && realm.layer
   if (!realmHasValues) {
     return false
