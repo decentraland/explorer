@@ -39,7 +39,6 @@ function setLoadingScreenBasedOnState() {
   unityInterface.SetLoadingScreen({
     isVisible: isLoadingScreenVisible(state),
     message: loading.message || loading.status || '',
-    showWalletPrompt: false,
     showTips: loading.initialLoad || false
   })
 }

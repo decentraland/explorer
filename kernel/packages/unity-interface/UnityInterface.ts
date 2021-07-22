@@ -212,7 +212,7 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'ActivateRendering')
   }
 
-  public SetLoadingScreen(data: { isVisible: boolean; message: string; showWalletPrompt: boolean; showTips: boolean }) {
+  public SetLoadingScreen(data: { isVisible: boolean; message: string; showTips: boolean }) {
     if (!this.gameInstance) {
       return
     }
