@@ -214,7 +214,7 @@ export function fromBuildertoStateDefinitionFormat(
     for (let component of components) {
       if (component.componentId === CLASS_ID.NAME) {
         componentFound = true
-        component.data.values = component.data.value
+        component.data.value = component.data.value
         component.data.builderValue = entity.name
         break
       }
