@@ -37,7 +37,11 @@ import {
 import { getAllCatalystCandidates, isRealmInitialized } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
 import defaultLogger from '../logger'
-import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithCatalystPayload } from 'shared/loading/ReportFatalError'
+import {
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithCatalystPayload
+} from 'shared/loading/ReportFatalError'
 import { CATALYST_COULD_NOT_LOAD } from 'shared/loading/types'
 import { META_CONFIGURATION_INITIALIZED } from 'shared/meta/actions'
 import { checkTldVsWeb3Network, registerProviderNetChanges } from 'shared/web3'
