@@ -112,6 +112,7 @@ namespace webApp {
     })
     i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.LOADING_HUD, { active: true, visible: false})
+    i.ConfigureHUDElement(HUDElementID.AVATAR_NAMES, { active: true, visible: true})
     i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
