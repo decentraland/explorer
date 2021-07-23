@@ -23,7 +23,7 @@ declare var window: Window & {
 
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   const web3Network = await requestManager.net_version()
-  const web3net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
+  const web3net = parseInt(web3Network) === 1 ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
   return web3net
 }
 
@@ -42,12 +42,7 @@ export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
   const tld = getTLD()
   const tldNet = getNetworkFromTLD()
 
-  if (tld === 'localhost') {
-    // localhost => allow any network
-    return false
-  }
-
-  if (tldNet !== web3Net) {
+  if (tldNet !== web3Net && tld !== 'localhost') {
     globalThis.globalStore.dispatch(setTLDError({ tld, web3Net, tldNet }))
     BringDownClientAndShowError(NETWORK_MISMATCH)
     return true

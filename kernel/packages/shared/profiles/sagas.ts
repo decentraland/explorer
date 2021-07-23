@@ -304,8 +304,14 @@ export async function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
-  const profiles = await client.fetchProfiles([userId])
-  return profiles[0] || { avatars: [] }
+
+  try {
+    const profiles = await client.fetchProfiles([userId])
+    return profiles[0] || { avatars: [] }
+  } catch (e) {
+    defaultLogger.error(e)
+    return { avatars: [] }
+  }
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {

@@ -62,7 +62,7 @@ async function prepareDecentralandECS(folder: string) {
   )
 
   // release the editor entry point
-  copyFile(path.resolve(root, `static/dist/editor.js`), path.resolve(root, `${folder}/artifacts/editor.js`))
+  copyFile(path.resolve(root, `static/editor.js`), path.resolve(root, `${folder}/artifacts/editor.js`))
 
   // add scene systems needed to run the scenes with the preview
   copyFile(
@@ -73,7 +73,7 @@ async function prepareDecentralandECS(folder: string) {
     path.resolve(root, `static/systems/scene.system.js`),
     path.resolve(root, `${folder}/artifacts/scene.system.js`)
   )
-  copyFile(path.resolve(root, `static/dist/preview.js`), path.resolve(root, `${folder}/artifacts/preview.js`))
+  copyFile(path.resolve(root, `static/index.js`), path.resolve(root, `${folder}/artifacts/index.js`))
   copyFile(path.resolve(root, `static/preview.html`), path.resolve(root, `${folder}/artifacts/preview.html`))
 
   copyFile(path.resolve(root, `static/export.html`), path.resolve(root, `${folder}/artifacts/export.html`))
@@ -81,6 +81,7 @@ async function prepareDecentralandECS(folder: string) {
   // static resources
   copyFile(path.resolve(root, `static/fonts`), path.resolve(root, `${folder}/artifacts/fonts`))
   copyFile(path.resolve(root, `static/images`), path.resolve(root, `${folder}/artifacts/images`))
+  copyFile(path.resolve(root, `static/default-profile`), path.resolve(root, `${folder}/artifacts/default-profile`))
 
   // unity
   copyFile(
@@ -114,10 +115,10 @@ async function validatePackage(folder: string) {
     }
   }
 
-  console.log(`> ensure ${folder}/artifacts/preview.js exists`)
+  console.log(`> ensure ${folder}/artifacts/index.js exists`)
   {
-    if (!fs.existsSync(path.resolve(root, `${folder}/artifacts/preview.js`))) {
-      throw new Error(`${folder}/artifacts/preview.js does not exist`)
+    if (!fs.existsSync(path.resolve(root, `${folder}/artifacts/index.js`))) {
+      throw new Error(`${folder}/artifacts/index.js does not exist`)
     }
   }
 

@@ -1,9 +1,8 @@
 // tslint:disable:no-console
-declare var global: any & { isEditor: boolean; editor: any }
+declare var globalThis: any & { isEditor: boolean; editor: any }
 declare var window: Window & { isEditor: boolean }
 
-global.isEditor = window.isEditor = true
-;(window as any).reactVersion = true
+globalThis.isEditor = window.isEditor = true
 
 import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
@@ -164,7 +163,7 @@ namespace editor {
    */
   export async function initEngine(container: HTMLElement) {
     try {
-      await initializeUnity(container)
+      await initializeUnity({ container })
       defaultLogger.log('Engine initialized.')
       unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
       unityInterface.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
@@ -302,4 +301,4 @@ namespace editor {
   }
 }
 
-global.editor = editor
+globalThis.editor = editor

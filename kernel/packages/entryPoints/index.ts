@@ -1,11 +1,7 @@
+declare const globalThis: StoreContainer & { DecentralandKernel: IDecentralandKernel }
+
+import defaultLogger, { createLogger } from 'shared/logger'
 import type { IDecentralandKernel, KernelOptions, KernelResult } from '@dcl/kernel-interface'
-declare const globalThis: StoreContainer & { DecentralandKernel: IDecentralandKernel; enableWeb3: boolean }
-;(window as any).reactVersion = true
-
-// IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
-globalThis.enableWeb3 = true
-
-import { createLogger } from 'shared/logger'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
@@ -16,14 +12,13 @@ import {
   // setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
+import { DEBUG_WS_MESSAGES, HAS_INITIAL_POSITION_MARK, OPEN_AVATAR_EDITOR } from '../config/index'
 import { signalParcelLoadingStarted } from 'shared/renderer/actions'
-import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
+import { lastPlayerPosition, pickWorldSpawnpoint, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { trackEvent } from 'shared/analytics'
-import { startUnitySceneWorkers } from '../unity-interface/dcl'
+import { loadPreviewScene, startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
-import { HUDElementID, RenderProfile } from 'shared/types'
+import { HUDElementID, ILand, RenderProfile } from 'shared/types'
 import { foregroundChangeObservable, isForeground } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { authenticateWhenItsReady, userAuthentified } from 'shared/session'
@@ -46,10 +41,17 @@ import {
   rendererVisibleObservable,
   openUrlObservable
 } from 'shared/observables'
+import { initShared } from 'shared'
+import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
+import future, { IFuture } from 'fp-future'
+import { setResourcesURL } from 'shared/location'
+import { WebSocketProvider } from 'eth-connect'
 
-const logger = createLogger('kernel.ts: ')
+const logger = createLogger('kernel: ')
 
 function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean, builderInWorldEnabled: boolean) {
+  // The elements below, require the taskbar to be active before being activated.
+
   i.ConfigureHUDElement(
     HUDElementID.TASKBAR,
     { active: true, visible: true },
@@ -68,13 +70,20 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
 
 globalThis.DecentralandKernel = {
   async initKernel(options: KernelOptions): Promise<KernelResult> {
-    const { container } = options
+    const { container } = options.rendererOptions
+    const { baseUrl } = options.kernelOptions
+
+    if (baseUrl) {
+      setResourcesURL(baseUrl)
+    }
 
     if (!container) throw new Error('cannot find element #gameContainer')
 
+    initShared()
+
     Promise.resolve()
-      .then(() => initializeUnity(container))
-      .then(() => loadWebsiteSystems())
+      .then(() => initializeUnity(options.rendererOptions))
+      .then(() => loadWebsiteSystems(options.kernelOptions))
       .catch((err) => {
         ReportFatalError(err, ErrorContext.WEBSITE_INIT)
         if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
@@ -86,6 +95,16 @@ globalThis.DecentralandKernel = {
 
     return {
       authenticate(provider: any, isGuest: boolean) {
+        if (!provider) {
+          throw new Error('A provider must be provided')
+        }
+        if (typeof provider === 'string') {
+          if (provider.startsWith('ws:') || provider.startsWith('wss:')) {
+            provider = new WebSocketProvider(provider)
+          } else {
+            throw new Error('Text provider can only be WebSocket')
+          }
+        }
         authenticateWhenItsReady(provider, isGuest)
       },
       accountStateObservable,
@@ -100,59 +119,54 @@ globalThis.DecentralandKernel = {
   }
 }
 
-async function loadWebsiteSystems() {
+async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
   const i = (await ensureUnityInterface()).unityInterface
-  const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
-  const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
-  const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
-  const questEnabled = isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)
-
-  i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-  i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-  i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, {
-    active: true,
-    visible: OPEN_AVATAR_EDITOR
-  })
-  i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.LOADING_HUD, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
-  i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
-    active: true,
-    visible: true
-  })
-  i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
-  i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-
-  i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: questEnabled, visible: false })
-  i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: questEnabled, visible: true })
 
   // NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
   //              so ensuring meta configuration is initialized in this stage is a must
   // NOTE(Pablo): We also need meta configuration to know if we need to enable voice chat
   await ensureMetaConfigurationInitialized()
 
+  const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
+  const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
+  i.SetRenderProfile(renderProfile)
+  const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
+  const questEnabled = isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)
+
+  i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
+  i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
+  i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
+  i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.LOADING_HUD, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
+  i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
+  i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
+  i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
+  i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: questEnabled, visible: false })
+  i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: questEnabled, visible: true })
+
   userAuthentified()
     .then(() => {
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
-      const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
-      const builderInWorldEnabled =
+      const VOICE_CHAT_ENABLED = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+      const BUILDER_IN_WORLD_ENABLED =
         identity.hasConnectedWeb3 &&
         isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
 
       const configForRenderer = kernelConfigForRenderer()
-      configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
-      configForRenderer.features.enableBuilderInWorld = builderInWorldEnabled
+      configForRenderer.comms.voiceChatEnabled = VOICE_CHAT_ENABLED
+      configForRenderer.features.enableBuilderInWorld = BUILDER_IN_WORLD_ENABLED
       i.SetKernelConfiguration(configForRenderer)
 
-      configureTaskbarDependentHUD(i, voiceChatEnabled, builderInWorldEnabled)
+      configureTaskbarDependentHUD(i, VOICE_CHAT_ENABLED, BUILDER_IN_WORLD_ENABLED)
 
       i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
-      i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
+      i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: VOICE_CHAT_ENABLED, visible: false })
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
       const tutorialConfig = {
@@ -167,7 +181,9 @@ async function loadWebsiteSystems() {
 
           // NOTE: here we make sure that if signup (tutorial) just finished
           // the player is set to the correct spawn position plus we make sure that the proper scene is loaded
-          setUserPositionAfterTutorial()
+          if (isWaitingTutorial(globalThis.globalStore.getState())) {
+            teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+          }
         })
         .catch((e) => logger.error(`error getting profile ${e}`))
     })
@@ -179,11 +195,7 @@ async function loadWebsiteSystems() {
   await realmInitialized()
   startRealmsReportToRenderer()
 
-  await startUnitySceneWorkers()
-
   globalThis.globalStore.dispatch(signalParcelLoadingStarted())
-
-  i.SetRenderProfile(renderProfile)
 
   function reportForeground() {
     if (isForeground()) {
@@ -198,36 +210,94 @@ async function loadWebsiteSystems() {
   foregroundChangeObservable.add(reportForeground)
   reportForeground()
 
-  if (!NO_MOTD) {
-    waitForMessageOfTheDay()
-      .then((messageOfTheDay) => {
-        i.ConfigureHUDElement(
-          HUDElementID.MESSAGE_OF_THE_DAY,
-          { active: !!messageOfTheDay, visible: false },
-          messageOfTheDay
-        )
-      })
-      .catch(() => {
-        /*noop*/
-      })
-  }
+  waitForMessageOfTheDay()
+    .then((messageOfTheDay) => {
+      i.ConfigureHUDElement(
+        HUDElementID.MESSAGE_OF_THE_DAY,
+        { active: !!messageOfTheDay, visible: false },
+        messageOfTheDay
+      )
+    })
+    .catch(() => {
+      /*noop*/
+    })
 
-  teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+  if (options.previewMode) {
+    const scene = await startPreview()
+    const position = pickWorldSpawnpoint(scene)
+    i.Teleport(position)
+    teleportObservable.notifyObservers(position.position)
+  } else {
+    await startUnitySceneWorkers()
+    teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+  }
 
   document.body.classList.remove('dcl-loading')
 
   return true
 }
 
-// This is for shared functionality between kernel and website.
-// This is not very good because we can't type check it.
-// In the future, we should probably replace this with a library
-export const utils = {
-  trackEvent
-}
+async function startPreview() {
+  function sceneRenderable() {
+    const sceneRenderable = future<void>()
 
-function setUserPositionAfterTutorial() {
-  if (isWaitingTutorial(globalThis.globalStore.getState())) {
-    teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+    const observer = sceneLifeCycleObservable.add(async (sceneStatus) => {
+      if (sceneStatus.sceneId === (await defaultScene).sceneId) {
+        sceneLifeCycleObservable.remove(observer)
+        sceneRenderable.resolve()
+      }
+    })
+
+    return sceneRenderable
   }
+
+  const defaultScene: IFuture<ILand> = future()
+
+  let wsScene: string | undefined = undefined
+
+  if (location.search.indexOf('WS_SCENE') !== -1) {
+    wsScene = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${document.location.host}/?scene`
+  }
+
+  function startSceneLoading() {
+    // this is set to avoid double loading scenes due queued messages
+    let isSceneLoading: boolean = true
+
+    const loadScene = () => {
+      isSceneLoading = true
+      loadPreviewScene(wsScene)
+        .then((scene) => {
+          isSceneLoading = false
+          defaultScene.resolve(scene)
+        })
+        .catch((err) => {
+          isSceneLoading = false
+          defaultLogger.error('Error loading scene', err)
+          defaultScene.reject(err)
+        })
+    }
+
+    loadScene()
+    ;(globalThis as any).handleServerMessage = function (message: any) {
+      if (message.type === 'update') {
+        if (DEBUG_WS_MESSAGES) {
+          defaultLogger.info('Message received: ', message)
+        }
+        // if a scene is currently loading we do not trigger another load
+        if (isSceneLoading) {
+          if (DEBUG_WS_MESSAGES) {
+            defaultLogger.trace('Ignoring message, scene still loading...')
+          }
+          return
+        }
+
+        loadScene()
+      }
+    }
+  }
+
+  await sceneRenderable()
+  startSceneLoading()
+
+  return defaultScene
 }

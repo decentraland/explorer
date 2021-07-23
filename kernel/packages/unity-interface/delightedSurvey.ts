@@ -1,4 +1,3 @@
-import { setTimeout } from 'timers'
 import { defaultLogger } from 'shared/logger'
 import { getCurrentUserProfile } from 'shared/profiles/selectors'
 import { StoreContainer } from 'shared/store/rootTypes'
@@ -8,7 +7,7 @@ const TIMEOUT_MS = 10 * 60 * 1000
 
 declare const globalThis: StoreContainer & { analytics: any; delighted: any }
 
-let timer: NodeJS.Timeout | null = null
+let timer: ReturnType<typeof setTimeout> | null = null
 
 export function setDelightedSurveyEnabled(enabled: boolean) {
   if (enabled && !timer) {

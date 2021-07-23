@@ -89,7 +89,7 @@ function ProfileRequestResponseType(action: 'request' | 'response'): PeerMessage
   }
 }
 
-declare var global: any
+declare var globalThis: any
 
 export class LighthouseWorldInstanceConnection implements WorldInstanceConnection {
   stats: Stats | null = null
@@ -298,7 +298,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   private initializePeer() {
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
-    global.__DEBUG_PEER = this.peer
+    globalThis.__DEBUG_PEER = this.peer
 
     if (this.peerConfig.preferedIslandId && 'setPreferedIslandId' in this.peer) {
       this.peer.setPreferedIslandId(this.peerConfig.preferedIslandId)

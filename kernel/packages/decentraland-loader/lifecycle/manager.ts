@@ -110,7 +110,7 @@ export class LifecycleManager extends TransportBasedServer {
 }
 
 let server: LifecycleManager
-export const getServer = () => server
+export const getServer = (): LifecycleManager | void => server
 
 export async function initParcelSceneWorker() {
   await ensureMetaConfigurationInitialized()

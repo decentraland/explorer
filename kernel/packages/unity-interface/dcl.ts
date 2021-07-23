@@ -271,15 +271,18 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   store.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-document.addEventListener('pointerlockchange', pointerLockChange, false)
+{
+  // TODO: move to unity-renderer
+  let isPointerLocked: boolean = false
 
-let isPointerLocked: boolean = false
-
-function pointerLockChange() {
-  const doc: any = document
-  const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null
-  if (isPointerLocked !== isLocked) {
-    unityInterface.SetCursorState(isLocked)
+  function pointerLockChange() {
+    const doc: any = document
+    const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null
+    if (isPointerLocked !== isLocked && unityInterface) {
+      unityInterface.SetCursorState(isLocked)
+    }
+    isPointerLocked = isLocked
   }
-  isPointerLocked = isLocked
+
+  document.addEventListener('pointerlockchange', pointerLockChange, false)
 }

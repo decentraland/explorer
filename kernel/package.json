@@ -97,7 +97,7 @@
   "dependencies": {
     "@dcl/catalyst-peer": "^1.0.3",
     "@dcl/ecs-quests": "^1.2.3-20210422200033.commit-48c967e",
-    "@dcl/kernel-interface": "^1.0.0-20210721184630.commit-ec3897d",
+    "@dcl/kernel-interface": "^1.0.0-20210722175856.commit-173aa62",
     "@dcl/schemas": "^1.2.0",
     "@dcl/urn-resolver": "^1.1.0",
     "@types/redux-logger": "^3.0.9",

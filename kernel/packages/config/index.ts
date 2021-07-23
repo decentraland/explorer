@@ -76,16 +76,15 @@ export namespace visualConfigurations {
 }
 
 // Entry points
-export const PREVIEW: boolean = !!(global as any).preview
-export const EDITOR: boolean = !!(global as any).isEditor
+export const PREVIEW: boolean = !!(globalThis as any).preview
+export const EDITOR: boolean = !!(globalThis as any).isEditor
 export const WORLD_EXPLORER = !EDITOR && !PREVIEW
 
 export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR') && WORLD_EXPLORER
 
-export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(global as any).staticWorld || EDITOR
+export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(globalThis as any).staticWorld || EDITOR
 
 // Development
-export const ENABLE_WEB3 = location.search.includes('ENABLE_WEB3') || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.includes('ENV')
 export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
 
@@ -130,7 +129,6 @@ export const DEBUG_SCENE_LOG = DEBUG || location.search.includes('DEBUG_SCENE_LO
 
 export const INIT_PRE_LOAD = location.search.includes('INIT_PRE_LOAD')
 
-export const NO_MOTD = location.search.includes('NO_MOTD')
 export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
 
 export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
@@ -212,7 +210,7 @@ export function getDefaultTLD() {
   }
 
   // web3 is now disabled by default
-  if (!ENABLE_WEB3 && TLD === 'localhost') {
+  if (TLD === 'localhost') {
     return 'zone'
   }
 
@@ -241,13 +239,7 @@ export function getExclusiveServer() {
 
 export const WITH_FIXED_COLLECTIONS =
   qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? ensureSingleString(qs.WITH_COLLECTIONS)! : undefined
-export const WEARABLE_API_DOMAIN = ensureSingleString(qs.WEARABLE_API_DOMAIN) || 'wearable-api.decentraland.org'
-export const WEARABLE_API_PATH_PREFIX = ensureSingleString(qs.WEARABLE_API_PATH_PREFIX) || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
-
-export function getWearablesSafeURL() {
-  return 'https://content.decentraland.org'
-}
 
 export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
   if (tld === 'zone') {
@@ -285,16 +277,10 @@ export function getServerConfigurations() {
     ensureSingleString(qs.QUESTS_SERVER_URL) ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
-    wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
     questsUrl: QUESTS_SERVER_URL,
-    fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
-    avatar: {
-      snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // ** TODO - unused, remove - moliva - 03/07/2020
-      catalog: getExclusiveServer(),
-      presets: `https://avatars-storage.decentraland.org/mobile-avatars` // ** TODO - unused, remove - moliva - 03/07/2020
-    }
+    fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`
   }
 }
 

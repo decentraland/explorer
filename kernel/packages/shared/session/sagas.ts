@@ -3,7 +3,7 @@ import { createIdentity } from 'eth-crypto'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ETHEREUM_NETWORK, setNetwork, WORLD_EXPLORER } from 'config'
+import { ETHEREUM_NETWORK, setNetwork } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -46,6 +46,7 @@ import { Profile } from '../profiles/types'
 import { ensureUnityInterface } from '../renderer'
 import { LoginState } from '@dcl/kernel-interface'
 import { RequestManager } from 'eth-connect'
+import { ensureMetaConfigurationInitialized } from 'shared/meta'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -96,7 +97,7 @@ function* authenticate(action: AuthenticateAction) {
   const isGuestWithProfileLocal: boolean = isGuest && !!fetchProfileLocally(identity.address)
 
   yield ensureUnityInterface()
-
+  debugger
   if (profileExists || isGuestWithProfileLocal) {
     yield put(setLoadingWaitTutorial(false))
     yield signIn(identity)
@@ -184,14 +185,13 @@ function* signIn(identity: ExplorerIdentity) {
 }
 
 function* setUserAuthentified(identity: ExplorerIdentity) {
-  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
-  if (WORLD_EXPLORER) {
-    net = yield getAppNetwork()
+  let net: ETHEREUM_NETWORK = yield getAppNetwork()
 
-    // Load contracts from https://contracts.decentraland.org
-    yield setNetwork(net)
-    trackEvent('Use network', { net })
-  }
+  // Load contracts from https://contracts.decentraland.org
+  yield setNetwork(net)
+  trackEvent('Use network', { net })
+
+  yield ensureMetaConfigurationInitialized()
 
   yield put(userAuthentified(identity, net))
 }

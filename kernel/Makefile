@@ -122,7 +122,7 @@ static/%.js: build-essentials packages/entryPoints/%.ts
 
 # Release
 
-DIST_ENTRYPOINTS := static/editor.js static/preview.js static/index.js
+DIST_ENTRYPOINTS := static/editor.js static/index.js
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
@@ -197,14 +197,14 @@ dcl-amd:
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
 
-npm-link: build-essentials static/preview.js static/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
+npm-link: build-essentials static/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
 	rm -rf packages/decentraland-ecs/artifacts || true
 	mkdir packages/decentraland-ecs/artifacts
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
 	ln -sf $(CWD)/packages/build-ecs/index.js packages/decentraland-ecs/artifacts/build-ecs.js
-	ln -sf $(CWD)/static/preview.js packages/decentraland-ecs/artifacts/preview.js
+	ln -sf $(CWD)/static/index.js packages/decentraland-ecs/artifacts/index.js
 	ln -sf $(CWD)/static/editor.js packages/decentraland-ecs/artifacts/editor.js
 	ln -sf $(CWD)/static/preview.html packages/decentraland-ecs/artifacts/preview.html
 	ln -sf $(CWD)/static/fonts packages/decentraland-ecs/artifacts/fonts
@@ -217,7 +217,7 @@ npm-link: build-essentials static/preview.js static/editor.js dcl-amd ## Run `np
 
 watch-builder: build-essentials static/editor.js ## Watch the files required for hacking with the builder
 	@node_modules/.bin/concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,preview,unity,builder,server" \
+		-n "ecs,scene-system,internal-scenes,loader,builder,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
@@ -227,12 +227,11 @@ watch-builder: build-essentials static/editor.js ## Watch the files required for
 
 watch-cli: build-essentials ## Watch the files required for building the CLI
 	@node_modules/.bin/concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,preview,kernel,server" \
+		-n "ecs,scene-system,internal-scenes,loader,kernel,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
-			"$(COMPILER) targets/entryPoints/preview.json --watch" \
 			"$(COMPILER) targets/entryPoints/index.json --watch" \
 			"node ./scripts/runTestServer.js --keep-open"
 

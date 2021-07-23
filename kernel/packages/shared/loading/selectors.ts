@@ -1,4 +1,5 @@
 import { LoginState } from '@dcl/kernel-interface'
+import { RootSessionState } from 'shared/session/types'
 import { RootState } from 'shared/store/rootTypes'
 import { PREVIEW } from '../../config'
 import { RootLoadingState } from './reducer'
@@ -10,7 +11,15 @@ export function hasPendingScenes(state: RootLoadingState) {
   return state.loading.pendingScenes !== 0
 }
 
-export function isLoadingScreenVisible(state: RootLoadingState) {
+export function isLoadingScreenVisible(state: RootLoadingState & RootSessionState) {
+  const { session } = state
+
+  // in the case of signup, we show the avatars editor instead of the loading screen
+  // that is so, to enable the user to customize the avatar while loading the world
+  if (!session.identity && session.isSignUp && session.loginState == LoginState.WAITING_PROFILE) {
+    return false
+  }
+
   // if it is the initial load
   if (state.loading.initialLoad) {
     // if it has pending scenes in the initial load, then the loading

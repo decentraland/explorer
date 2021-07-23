@@ -164,9 +164,7 @@ jobs:
       - save_cache:
           name: Save the built files
           paths:
-            - static/dist
-            - static/loader
-            - static/systems
+            - static
           key: kernel-build-{{ checksum "../.kernelsources-checksum" }}
 
       # persist to workspace to use in downstream jobs

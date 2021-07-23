@@ -36,9 +36,7 @@ import {
 
 import { isVoiceChatRecording } from './selectors'
 import { unityInterface } from 'unity-interface/UnityInterface'
-import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { userAuthentified } from 'shared/session'
 import { sceneObservable } from 'shared/world/sceneState'
 import { SceneFeatureToggles } from 'shared/types'
 import { isFeatureToggleEnabled } from 'shared/selectors'
@@ -47,23 +45,8 @@ const DEBUG = false
 const logger = createLogger('comms: ')
 
 export function* commsSaga() {
-  yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
+  yield takeEvery(USER_AUTHENTIFIED, userAuthentified)
   yield takeLatest(CATALYST_REALMS_SCAN_SUCCESS, changeRealm)
-  yield ensureMetaConfigurationInitialized()
-  yield userAuthentified()
-
-  const identity = yield select(getCurrentIdentity)
-
-  if (yield select(isVoiceChatEnabledFor, identity.address)) {
-    yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
-    yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
-    yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
-    yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
-    yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
-    yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
-    yield listenToWhetherSceneSupportsVoiceChat()
-  }
-
   yield takeEvery(FATAL_ERROR, bringDownComms)
 }
 
@@ -89,7 +72,17 @@ function* listenToWhetherSceneSupportsVoiceChat() {
   })
 }
 
-function* establishCommunications() {
+function* initVoiceChat() {
+  yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+  yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+  yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
+  yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
+  yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
+  yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
+  yield listenToWhetherSceneSupportsVoiceChat()
+}
+
+function* userAuthentified() {
   if (STATIC_WORLD) {
     return
   }
@@ -97,6 +90,10 @@ function* establishCommunications() {
   yield call(ensureRealmInitialized)
 
   const identity = yield select(getCurrentIdentity)
+
+  if (yield select(isVoiceChatEnabledFor, identity.address)) {
+    initVoiceChat()
+  }
 
   yield put(establishingComms())
   const context = yield connect(identity.address)

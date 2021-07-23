@@ -1,12 +1,12 @@
 // This file decides and loads the renderer of choice
 
-import { initShared } from 'shared'
 import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
 import { initializeRenderer } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
 import { CommonRendererOptions, loadUnity } from './loader'
 import type { UnityGame } from '@dcl/unity-renderer/src/index'
+import type { KernelOptions } from '@dcl/kernel-interface'
 
 import { initializeUnityEditor } from './wsEditorAdapter'
 import {
@@ -24,13 +24,17 @@ export type InitializeUnityResult = {
   container: HTMLElement
 }
 
+const rendererOptions: Partial<KernelOptions['rendererOptions']> = {}
+
 async function loadInjectedUnityDelegate(container: HTMLElement, options: CommonRendererOptions): Promise<UnityGame> {
   const queryParams = new URLSearchParams(document.location.search)
 
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
   // inject unity loader
-  const { createWebRenderer } = await loadUnity(queryParams.get('renderer') || null, options)
+  const urn = queryParams.get('renderer') || rendererOptions.urn || null
+  const rootArtifactsUrl = rendererOptions.baseUrl || ''
+  const { createWebRenderer } = await loadUnity(urn, rootArtifactsUrl, options)
 
   preventUnityKeyboardLock()
 
@@ -69,10 +73,11 @@ async function loadWsEditorDelegate(container: HTMLElement, options: CommonRende
 }
 
 /** Initialize the injected engine in a container */
-export async function initializeUnity(container: HTMLElement): Promise<InitializeUnityResult> {
+export async function initializeUnity(options: KernelOptions['rendererOptions']): Promise<InitializeUnityResult> {
   const queryParams = new URLSearchParams(document.location.search)
 
-  initShared()
+  Object.assign(rendererOptions, options)
+  const { container } = rendererOptions
 
   if (queryParams.has('ws')) {
     // load unity renderer using WebSocket

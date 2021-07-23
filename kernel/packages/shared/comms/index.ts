@@ -1,4 +1,3 @@
-import { setInterval } from 'timers'
 import {
   commConfigurations,
   parcelLimits,
@@ -204,11 +203,11 @@ export class Context {
 
   public worldInstanceConnection: WorldInstanceConnection | null = null
 
-  profileInterval?: NodeJS.Timer
+  profileInterval?: ReturnType<typeof setInterval>
   positionObserver: any
   worldRunningObserver: any
-  infoCollecterInterval?: NodeJS.Timer
-  analyticsInterval?: NodeJS.Timer
+  infoCollecterInterval?: ReturnType<typeof setInterval>
+  analyticsInterval?: ReturnType<typeof setInterval>
 
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
 

@@ -56,7 +56,7 @@ export function* trackLoadTime(action: SceneLoad): any {
 }
 
 function* waitForSceneLoads() {
-  function shouldWait(state: RootState) {
+  function shouldWaitForScenes(state: RootState) {
     // in the initial load, we should wait until we have *some* scene to load
     if (state.loading.initialLoad && !PREVIEW) {
       if (state.loading.pendingScenes !== 0 || state.loading.totalScenes == 0) {
@@ -68,7 +68,7 @@ function* waitForSceneLoads() {
     return state.loading.pendingScenes !== 0
   }
 
-  while (yield select(shouldWait)) {
+  while (yield select(shouldWaitForScenes)) {
     yield take(PENDING_SCENES)
   }
 }
