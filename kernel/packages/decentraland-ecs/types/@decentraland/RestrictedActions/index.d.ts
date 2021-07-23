@@ -28,5 +28,14 @@ declare module '@decentraland/RestrictedActions' {
     CLAP = 'clap',
     MONEY = 'money',
     KISS = 'kiss',
+    TIK = 'tik',
+    HAMMER = 'hammer',
+    TEKTONIK = 'tektonik',
+    DONT_SEE = 'dontsee',
+    HANDS_AIR = 'handsair',
+    SHRUG = 'shrug',
+    DISCO = 'disco',
+    DAB = 'dab',
+    HEAD_EXPLODDE = 'headexplode'
   }
 }

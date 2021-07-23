@@ -15,7 +15,13 @@ import { Position, positionHash } from '../interface/utils'
 import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
 import { Peer as LayerBasedPeerType } from 'decentraland-katalyst-peer'
-import { Peer as IslandBasedPeer, buildCatalystPeerStatsData, PeerConfig, PacketCallback } from '@dcl/catalyst-peer'
+import {
+  Peer as IslandBasedPeer,
+  buildCatalystPeerStatsData,
+  PeerConfig,
+  PacketCallback,
+  PeerStatus
+} from '@dcl/catalyst-peer'
 import { Room } from 'decentraland-katalyst-peer/src/types'
 import {
   ChatData,
@@ -53,6 +59,10 @@ type MessageData =
   | VoiceData
   | ProfileRequestData
   | ProfileResponseData
+
+export type LighthouseConnectionConfig = PeerConfig & {
+  preferedIslandId?: string
+}
 
 const commsMessageType: PeerMessageType = {
   name: 'sceneComms',
@@ -104,7 +114,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     private peerId: string,
     private realm: Realm,
     private lighthouseUrl: string,
-    private peerConfig: PeerConfig & { onIslandChange: (island: string | undefined) => any, preferedIslandId?: string },
+    private peerConfig: LighthouseConnectionConfig,
     private statusHandler: (status: CommsStatus) => void
   ) {
     // This assignment is to "definetly initialize" peer
@@ -136,7 +146,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
     this.realm = realm
     this.lighthouseUrl = url
-    this.peerConfig.onIslandChange(undefined)
+    this.peerConfig.eventsHandler?.onIslandChange?.(undefined, [])
 
     this.initializePeer()
     await this.connectPeer()
@@ -290,7 +300,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     this.peer = this.createPeer()
     global.__DEBUG_PEER = this.peer
 
-    if (this.peerConfig.preferedIslandId && "setPreferedIslandId" in this.peer) {
+    if (this.peerConfig.preferedIslandId && 'setPreferedIslandId' in this.peer) {
       this.peer.setPreferedIslandId(this.peerConfig.preferedIslandId)
     }
 
@@ -302,12 +312,16 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private createPeer(): PeerType {
-    if (this.peerConfig.statusHandler) {
-      logger.warn(`Overriding peer config status handler from client!`)
-    }
-
-    this.peerConfig.statusHandler = (status) =>
+    const statusHandler = (status: PeerStatus): void =>
       this.statusHandler({ status, connectedPeers: this.connectedPeersCount() })
+
+    if (this.peerConfig.eventsHandler) {
+      this.peerConfig.eventsHandler.statusHandler = statusHandler
+    } else {
+      this.peerConfig.eventsHandler = {
+        statusHandler
+      }
+    }
 
     // We require a version greater than 0.1 to not send an ID
     const idToUse = compareVersions('0.1', this.realm.lighthouseVersion) === -1 ? undefined : this.peerId
