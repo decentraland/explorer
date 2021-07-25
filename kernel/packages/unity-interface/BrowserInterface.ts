@@ -75,6 +75,7 @@ import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
 import { openUrlObservable, signUpObservable } from 'shared/observables'
 import { renderStateObservable } from 'shared/world/worldState'
+import { realmToString } from 'shared/dao/utils/realmToString'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -489,7 +490,7 @@ export class BrowserInterface {
       realm: { serverName, layer }
     } = data
 
-    const realmString = serverName + '-' + layer
+    const realmString = realmToString({ serverName, layer })
 
     notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
 
