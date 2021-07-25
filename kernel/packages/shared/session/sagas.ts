@@ -87,6 +87,7 @@ function* authenticate(action: AuthenticateAction) {
   requestManager.setProvider(action.payload.provider)
 
   yield put(changeLoginState(LoginState.LOADING))
+  yield ensureUnityInterface()
 
   const identity: ExplorerIdentity = yield authorize(requestManager)
 
@@ -96,8 +97,6 @@ function* authenticate(action: AuthenticateAction) {
   const isGuest: boolean = yield select(getIsGuestLogin)
   const isGuestWithProfileLocal: boolean = isGuest && !!fetchProfileLocally(identity.address)
 
-  yield ensureUnityInterface()
-  debugger
   if (profileExists || isGuestWithProfileLocal) {
     yield put(setLoadingWaitTutorial(false))
     yield signIn(identity)

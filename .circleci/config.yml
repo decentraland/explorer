@@ -189,113 +189,113 @@ jobs:
             - v1-dependencies-{{ checksum "package-lock.json" }}
       - run:
           name: Publish a new version of decentraland-ecs
-          command: make publish
+          command: echo 'make publish is disabled' && exit 1
           when: on_success
 
-  deploy-on-pr:
-    <<: *base_kernel_env
-    steps:
-      - <<: *attach_root
-      - run: sudo apt-get -y -qq install awscli
-      - run:
-          name: Configure DEV/STG AWS Keys
-          command: |
-            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
-      - run:
-          name: pack decentraland-ecs npm package
-          working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
-          command: cp decentraland-ecs-1.0.0.tgz /tmp/explorer/website/build/decentraland-ecs.tgz
-      - run:
-          name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: |
-            AWS_DEFAULT_REGION="us-east-1" \
-            AWS_ACCESS_KEY_ID="${AWS_DEV_ACCESS_KEY_ID}" \
-            AWS_SECRET_ACCESS_KEY="${AWS_DEV_SECRET_ACCESS_KEY}" \
-              npx @dcl/cdn-uploader@next \
-                --bucket "explorer.decentraland.zone" \
-                --local-folder "/tmp/explorer/website/build" \
-                --bucket-folder "branch/${CIRCLE_BRANCH}"
+  # deploy-on-pr:
+  #   <<: *base_kernel_env
+  #   steps:
+  #     - <<: *attach_root
+  #     - run: sudo apt-get -y -qq install awscli
+  #     - run:
+  #         name: Configure DEV/STG AWS Keys
+  #         command: |
+  #           aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+  #     - run:
+  #         name: pack decentraland-ecs npm package
+  #         working_directory: /tmp/explorer/kernel/packages/decentraland-ecs
+  #         command: cp decentraland-ecs-1.0.0.tgz /tmp/explorer/website/build/decentraland-ecs.tgz
+  #     - run:
+  #         name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
+  #         command: |
+  #           AWS_DEFAULT_REGION="us-east-1" \
+  #           AWS_ACCESS_KEY_ID="${AWS_DEV_ACCESS_KEY_ID}" \
+  #           AWS_SECRET_ACCESS_KEY="${AWS_DEV_SECRET_ACCESS_KEY}" \
+  #             npx @dcl/cdn-uploader@next \
+  #               --bucket "explorer.decentraland.zone" \
+  #               --local-folder "/tmp/explorer/website/build" \
+  #               --bucket-folder "branch/${CIRCLE_BRANCH}"
 
-      - run:
-          name: Invalidate cloudfront cache .zone
-          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
-      - run:
-          name: Invalidate cloudflare cache .zone
-          command: curl "$PURGE_CACHE_ZONE"
+  #     - run:
+  #         name: Invalidate cloudfront cache .zone
+  #         command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
+  #     - run:
+  #         name: Invalidate cloudflare cache .zone
+  #         command: curl "$PURGE_CACHE_ZONE"
 
-  deploy-dev:
-    <<: *base_kernel_env
-    steps:
-      - <<: *attach_root
-      - run: sudo apt-get -y -qq install awscli
-      - run:
-          name: Configure DEV/STG AWS Keys
-          command: |
-            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
-      - run:
-          name: Deploy to S3 (.zone) if tests pass and branch is master
-          command: |
-            AWS_DEFAULT_REGION="us-east-1" \
-            AWS_ACCESS_KEY_ID="${AWS_DEV_ACCESS_KEY_ID}" \
-            AWS_SECRET_ACCESS_KEY="${AWS_DEV_SECRET_ACCESS_KEY}" \
-              npx @dcl/cdn-uploader@next \
-                --bucket "explorer.decentraland.zone" \
-                --local-folder "/tmp/explorer/website/build" \
-                --bucket-folder ""
-      - run:
-          name: Invalidate cloudfront cache .zone
-          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
-      - run:
-          name: Invalidate cloudflare cache .zone
-          command: curl "$PURGE_CACHE_ZONE"
+  # deploy-dev:
+  #   <<: *base_kernel_env
+  #   steps:
+  #     - <<: *attach_root
+  #     - run: sudo apt-get -y -qq install awscli
+  #     - run:
+  #         name: Configure DEV/STG AWS Keys
+  #         command: |
+  #           aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+  #     - run:
+  #         name: Deploy to S3 (.zone) if tests pass and branch is master
+  #         command: |
+  #           AWS_DEFAULT_REGION="us-east-1" \
+  #           AWS_ACCESS_KEY_ID="${AWS_DEV_ACCESS_KEY_ID}" \
+  #           AWS_SECRET_ACCESS_KEY="${AWS_DEV_SECRET_ACCESS_KEY}" \
+  #             npx @dcl/cdn-uploader@next \
+  #               --bucket "explorer.decentraland.zone" \
+  #               --local-folder "/tmp/explorer/website/build" \
+  #               --bucket-folder ""
+  #     - run:
+  #         name: Invalidate cloudfront cache .zone
+  #         command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
+  #     - run:
+  #         name: Invalidate cloudflare cache .zone
+  #         command: curl "$PURGE_CACHE_ZONE"
 
-  deploy-stg:
-    <<: *base_kernel_env
-    steps:
-      - <<: *attach_root
-      - run: sudo apt-get -y -qq install awscli
-      - run:
-          name: Configure DEV/STG AWS Keys
-          command: |
-            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
-      - run:
-          name: Deploy to .today
-          command: |
-            # aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
-            echo 'staging is disabled in this town'
-            exit 1
-      - run:
-          name: Invalidate cloudfront cache .today
-          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E315GYHDRD7XX6 --paths "/*"
-      - run:
-          name: Invalidate cloudflare cache .today
-          command: curl "$PURGE_CACHE_TODAY"
+  # deploy-stg:
+  #   <<: *base_kernel_env
+  #   steps:
+  #     - <<: *attach_root
+  #     - run: sudo apt-get -y -qq install awscli
+  #     - run:
+  #         name: Configure DEV/STG AWS Keys
+  #         command: |
+  #           aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+  #     - run:
+  #         name: Deploy to .today
+  #         command: |
+  #           # aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
+  #           echo 'staging is disabled in this town'
+  #           exit 1
+  #     - run:
+  #         name: Invalidate cloudfront cache .today
+  #         command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E315GYHDRD7XX6 --paths "/*"
+  #     - run:
+  #         name: Invalidate cloudflare cache .today
+  #         command: curl "$PURGE_CACHE_TODAY"
 
-  deploy-prd:
-    <<: *base_kernel_env
-    steps:
-      - <<: *attach_root
-      - run: sudo apt-get -y -qq install awscli
-      - run:
-          name: Configure PRD AWS Keys
-          command: |
-            aws configure set aws_access_key_id ${AWS_PRD_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_PRD_SECRET_ACCESS_KEY}
-      - run:
-          name: Deploy to .org
-          command: |
-            AWS_DEFAULT_REGION="us-east-1" \
-            AWS_ACCESS_KEY_ID="${AWS_PRD_ACCESS_KEY_ID}" \
-            AWS_SECRET_ACCESS_KEY="${AWS_PRD_SECRET_ACCESS_KEY}" \
-              npx @dcl/cdn-uploader@next \
-                --bucket "explorer.decentraland.org" \
-                --local-folder "/tmp/explorer/website/build" \
-                --bucket-folder ""
-      - run:
-          name: Invalidate cloudfront cache .org
-          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
-      - run:
-          name: Invalidate cloudflare cache .org
-          command: curl "$PURGE_CACHE_ORG"
+  # deploy-prd:
+  #   <<: *base_kernel_env
+  #   steps:
+  #     - <<: *attach_root
+  #     - run: sudo apt-get -y -qq install awscli
+  #     - run:
+  #         name: Configure PRD AWS Keys
+  #         command: |
+  #           aws configure set aws_access_key_id ${AWS_PRD_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_PRD_SECRET_ACCESS_KEY}
+  #     - run:
+  #         name: Deploy to .org
+  #         command: |
+  #           AWS_DEFAULT_REGION="us-east-1" \
+  #           AWS_ACCESS_KEY_ID="${AWS_PRD_ACCESS_KEY_ID}" \
+  #           AWS_SECRET_ACCESS_KEY="${AWS_PRD_SECRET_ACCESS_KEY}" \
+  #             npx @dcl/cdn-uploader@next \
+  #               --bucket "explorer.decentraland.org" \
+  #               --local-folder "/tmp/explorer/website/build" \
+  #               --bucket-folder ""
+  #     - run:
+  #         name: Invalidate cloudfront cache .org
+  #         command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
+  #     - run:
+  #         name: Invalidate cloudflare cache .org
+  #         command: curl "$PURGE_CACHE_ORG"
 
 workflows:
   version: 2
@@ -334,35 +334,36 @@ workflows:
             tags:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
+
       # deployments
-      - deploy-dev:
-          requires:
-            - build-kernel
-            - "build-website"
-          filters:
-            branches:
-              only: master
-      - deploy-stg:
-          requires:
-            - build-kernel
-            - "build-website"
-          filters:
-            branches:
-              only: staging
-      - deploy-prd:
-          requires:
-            - build-kernel
-            - "build-website"
-          filters:
-            branches:
-              only: release
-      - deploy-on-pr:
-          requires:
-            - build-kernel
-            - "build-website"
-          filters:
-            branches:
-              ignore:
-                - master
-                - staging
-                - release
+      # - deploy-dev:
+      #     requires:
+      #       - build-kernel
+      #       - "build-website"
+      #     filters:
+      #       branches:
+      #         only: master
+      # - deploy-stg:
+      #     requires:
+      #       - build-kernel
+      #       - "build-website"
+      #     filters:
+      #       branches:
+      #         only: staging
+      # - deploy-prd:
+      #     requires:
+      #       - build-kernel
+      #       - "build-website"
+      #     filters:
+      #       branches:
+      #         only: release
+      # - deploy-on-pr:
+      #     requires:
+      #       - build-kernel
+      #       - "build-website"
+      #     filters:
+      #       branches:
+      #         ignore:
+      #           - master
+      #           - staging
+      #           - release

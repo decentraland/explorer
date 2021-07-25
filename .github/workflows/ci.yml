@@ -17,17 +17,40 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
+
+      - name: set package.json version
+        uses: menduz/oddish-action@master
+        with:
+          deterministic-snapshot: true
+          only-update-versions: true
+          cwd: kernel/static
+
       - name: install
         working-directory: kernel
         run: npm ci
       - name: build
         working-directory: kernel
         run: make build-release build-deploy
-      # - name: Publish
-      #   uses: menduz/oddish-action@master
-      #   with:
-      #     registry-url: "https://registry.npmjs.org"
-      #     access: public
-      #     cwd: ./build
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: deploy preview
+        env:
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          CDN_BUCKET: ${{ secrets.CDN_BUCKET }}
+        run: |
+          npx @dcl/cdn-uploader@next \
+            --bucket $CDN_BUCKET \
+            --local-folder kernel/static \
+            --bucket-folder "@dcl/kernel/branch/${{ github.head_ref }}"
+
+      - name: publish package
+        uses: menduz/oddish-action@master
+        with:
+          registry-url: "https://registry.npmjs.org"
+          access: public
+          cwd: kernel/static
+          ## use action runId instead of current date to generate snapshot numbers
+          deterministic-snapshot: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
