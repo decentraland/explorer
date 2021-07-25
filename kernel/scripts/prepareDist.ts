@@ -79,8 +79,6 @@ async function prepareDecentralandECS(folder: string) {
   copyFile(path.resolve(root, `static/export.html`), path.resolve(root, `${folder}/artifacts/export.html`))
 
   // static resources
-  copyFile(path.resolve(root, `static/fonts`), path.resolve(root, `${folder}/artifacts/fonts`))
-  copyFile(path.resolve(root, `static/images`), path.resolve(root, `${folder}/artifacts/images`))
   copyFile(path.resolve(root, `static/default-profile`), path.resolve(root, `${folder}/artifacts/default-profile`))
 
   // unity

@@ -123,7 +123,7 @@ static/%.js: build-essentials packages/entryPoints/%.ts
 # Release
 
 DIST_ENTRYPOINTS := static/editor.js static/index.js
-DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/default-profile/contents
+DIST_STATIC_FILES := static/export.html static/preview.html static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
 build-deploy: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(SCENE_SYSTEM) $(INTERNAL_SCENES) ## Build all the entrypoints needed for a deployment
@@ -207,8 +207,6 @@ npm-link: build-essentials static/editor.js dcl-amd ## Run `npm link` to develop
 	ln -sf $(CWD)/static/index.js packages/decentraland-ecs/artifacts/index.js
 	ln -sf $(CWD)/static/editor.js packages/decentraland-ecs/artifacts/editor.js
 	ln -sf $(CWD)/static/preview.html packages/decentraland-ecs/artifacts/preview.html
-	ln -sf $(CWD)/static/fonts packages/decentraland-ecs/artifacts/fonts
-	ln -sf $(CWD)/static/images packages/decentraland-ecs/artifacts/images
 	ln -sf $(CWD)/node_modules/@dcl/unity-renderer packages/decentraland-ecs/artifacts/unity-renderer
 	ln -sf $(CWD)/static/default-profile packages/decentraland-ecs/artifacts/default-profile
 	ln -sf $(CWD)/static/unity-preview.html packages/decentraland-ecs/artifacts/unity-preview.html
