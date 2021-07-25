@@ -20,10 +20,10 @@ jobs:
 
       - name: set package.json version
         uses: menduz/oddish-action@master
+        working-directory: ./kernel/static
         with:
           deterministic-snapshot: true
           only-update-versions: true
-          cwd: ./kernel/static
 
       - name: install
         working-directory: kernel
