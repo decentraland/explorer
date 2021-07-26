@@ -33,3 +33,7 @@ jobs:
       - name: test-ci
         working-directory: kernel
         run: make test-ci
+
+      # - name: codecov
+      #   working-directory: kernel
+      #   run: npx codecov

@@ -47,12 +47,18 @@ jobs:
             --bucket-folder "@dcl/kernel/branch/${{ github.head_ref }}"
 
       - name: publish package
-        uses: menduz/oddish-action@master
+        uses: menduz/oddish-action@add-s3-support
         with:
           registry-url: "https://registry.npmjs.org"
           access: public
           cwd: ./kernel/static
           ## use action runId instead of current date to generate snapshot numbers
           deterministic-snapshot: true
+
+          ## publish every package to s3
+          s3-bucket: ${{ secrets.CDN_BUCKET }}
+          s3-bucket-key-prefix: "@dcl/kernel/branch/${{ github.head_ref }}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
