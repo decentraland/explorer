@@ -5,8 +5,7 @@
   "scripts": {
     "start": "make watch",
     "build": "make build-essentials",
-    "test": "make test-ci",
-    "postinstall": "make post-install"
+    "test": "make test-ci"
   },
   "prettier": {
     "semi": false,
