@@ -1,5 +1,4 @@
 import future from 'fp-future'
-import { parseUrn } from '@dcl/urn-resolver'
 import type * as _TheRenderer from '@dcl/unity-renderer/src/index'
 import { trackEvent } from 'shared/analytics'
 
@@ -105,32 +104,8 @@ async function loadDefaultRenderer(
   return injectRenderer(rootArtifactsUrl, rendererPackageJson.version, options)
 }
 
-async function loadRendererByBranch(branch: string, options: CommonRendererOptions): Promise<LoadRendererResult> {
-  const baseUrl = `https://renderer-artifacts.decentraland.org/branch/${branch}/`
-  return injectRenderer(baseUrl, performance.now().toString(), options)
-}
-
-export async function loadUnity(
-  urn: string | null,
-  rootArtifactsUrl: string,
-  options: CommonRendererOptions
-): Promise<LoadRendererResult> {
-  if (urn === null) {
-    return loadDefaultRenderer(rootArtifactsUrl, options)
-  } else {
-    const parsedUrn = await parseUrn(urn)
-
-    if (!parsedUrn) {
-      throw new Error('An invalid urn was provided for the renderer')
-    }
-
-    // urn:decentraland:off-chain:renderer-artifacts:${branch}
-    if (parsedUrn.type === 'off-chain' && parsedUrn.registry === 'renderer-artifacts') {
-      return loadRendererByBranch(parsedUrn.id, options)
-    }
-
-    throw new Error('It was impossible to resolve a renderer for the URN "' + urn + '"')
-  }
+export async function loadUnity(rootArtifactsUrl: string, options: CommonRendererOptions): Promise<LoadRendererResult> {
+  return loadDefaultRenderer(rootArtifactsUrl, options)
 }
 
 async function injectScript(url: string) {

@@ -2,7 +2,6 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <title>Decentraland Kernel Debugger</title>
     <style>
       html,
@@ -31,33 +30,10 @@
       }
 
       canvas {
-        position: relative;
+        position: absolute;
         z-index: 1000;
-        width: 100%;
-        height: 100%;
-      }
-
-      .dcl-loading .progress {
-        display: block;
-      }
-
-      #overlay {
-        display: block;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 2;
-
-        background: #74a4d5;
-        background-image: url(images/decentraland-connect/background.png);
-        background-size: 115%;
-        background-repeat: no-repeat;
-        background-position: center center;
-
-        opacity: 0.15;
+        width: 100vw;
+        height: 100vh;
       }
 
       /* Preview only style */
@@ -140,6 +116,20 @@
         containerElement.style.display = 'block'
       }
 
+      async function getRendererBaseUrl() {
+        const qs = new URLSearchParams(document.location.search)
+
+        if (qs.has('renderer')) {
+          return qs.get('renderer')
+        }
+
+        if (qs.has('renderer-branch')) {
+          return `https://renderer-artifacts.decentraland.org/branch/${qs.get('renderer-branch')}`
+        }
+
+        return new URL('@/artifacts/unity-renderer', location.toString()).toString()
+      }
+
       async function initKernel() {
         const container = document.getElementById('gameContainer')
 
@@ -153,7 +143,7 @@
           },
           rendererOptions: {
             container,
-            baseUrl: new URL(`unity-renderer/`, location.toString()).toString()
+            baseUrl: await getRendererBaseUrl()
           }
         })
 

@@ -46,6 +46,7 @@ import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controll
 import future, { IFuture } from 'fp-future'
 import { setResourcesURL } from 'shared/location'
 import { WebSocketProvider } from 'eth-connect'
+import { resolveUrlFromUrn } from '@dcl/urn-resolver'
 
 const logger = createLogger('kernel: ')
 
@@ -68,8 +69,30 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
   i.ConfigureHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL, { active: builderInWorldEnabled, visible: false })
 }
 
+async function resolveBaseUrl(urn: string): Promise<string> {
+  if (urn.startsWith('urn:')) {
+    const t = await resolveUrlFromUrn(urn)
+    if (t) {
+      return (t + '/').replace(/(\/)+$/, '/')
+    }
+    throw new Error('Cannot resolve content for URN ' + urn)
+  }
+  return (urn + '/').replace(/(\/)+$/, '/')
+}
+
+function orFail(withError: string): never {
+  throw new Error(withError)
+}
+
 globalThis.DecentralandKernel = {
   async initKernel(options: KernelOptions): Promise<KernelResult> {
+    options.kernelOptions.baseUrl = await resolveBaseUrl(
+      options.kernelOptions.baseUrl || orFail('MISSING kernelOptions.baseUrl')
+    )
+    options.rendererOptions.baseUrl = await resolveBaseUrl(
+      options.rendererOptions.baseUrl || orFail('MISSING rendererOptions.baseUrl')
+    )
+
     const { container } = options.rendererOptions
     const { baseUrl } = options.kernelOptions
 

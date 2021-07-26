@@ -27,14 +27,11 @@ export type InitializeUnityResult = {
 const rendererOptions: Partial<KernelOptions['rendererOptions']> = {}
 
 async function loadInjectedUnityDelegate(container: HTMLElement, options: CommonRendererOptions): Promise<UnityGame> {
-  const queryParams = new URLSearchParams(document.location.search)
-
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
   // inject unity loader
-  const urn = queryParams.get('renderer') || rendererOptions.urn || null
   const rootArtifactsUrl = rendererOptions.baseUrl || ''
-  const { createWebRenderer } = await loadUnity(urn, rootArtifactsUrl, options)
+  const { createWebRenderer } = await loadUnity(rootArtifactsUrl, options)
 
   preventUnityKeyboardLock()
 
