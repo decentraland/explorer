@@ -30,6 +30,7 @@ jobs:
       - name: install
         working-directory: kernel
         run: npm ci
+
       - name: build
         working-directory: kernel
         run: make build-release build-deploy
@@ -47,7 +48,7 @@ jobs:
             --bucket-folder "@dcl/kernel/branch/${{ github.head_ref }}"
 
       - name: publish package
-        uses: menduz/oddish-action@add-s3-support
+        uses: menduz/oddish-action@master
         with:
           registry-url: "https://registry.npmjs.org"
           access: public

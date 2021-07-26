@@ -26,13 +26,15 @@ jobs:
         working-directory: kernel
         run: npm ci
 
-      - name: lint
-        working-directory: kernel
-        run: make lint
-
       - name: test-ci
         working-directory: kernel
         run: make test-ci
+        if: ${{ always() }}
+
+      - name: lint
+        working-directory: kernel
+        run: make lint
+        if: ${{ always() }}
 
       # - name: codecov
       #   working-directory: kernel
