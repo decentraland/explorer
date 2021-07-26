@@ -18,7 +18,7 @@ import { connection } from 'decentraland-connect'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { getLastGuestSession, getStoredSession, Session, setStoredSession } from './index'
-import { ExplorerIdentity, StoredSession } from './types'
+import { ExplorerIdentity, RootSessionState, SessionState, StoredSession } from './types'
 import {
   AUTHENTICATE,
   changeLoginState,
@@ -36,10 +36,9 @@ import {
   userAuthentified,
   AuthenticateAction
 } from './actions'
-import { fetchProfileLocally, doesProfileExist } from '../profiles/sagas'
-import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
-import { unityInterface } from '../../unity-interface/UnityInterface'
-import { getIsGuestLogin, getSignUpIdentity, getSignUpProfile } from './selectors'
+import { fetchProfileLocally, doesProfileExist, generateRandomUserProfile } from '../profiles/sagas'
+import { getUnityInstance } from '../../unity-interface/IUnityInterface'
+import { getIsGuestLogin, getSignUpIdentity, getSignUpProfile, isLoginCompleted } from './selectors'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
@@ -47,6 +46,9 @@ import { ensureUnityInterface } from '../renderer'
 import { LoginState } from '@dcl/kernel-interface'
 import { RequestManager } from 'eth-connect'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
+import { Store } from 'redux'
+import { store } from 'shared/store/isolatedStore'
+import { accountStateObservable } from 'shared/observables'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -126,8 +128,8 @@ function* startSignUp(identity: ExplorerIdentity) {
     const profile: Partial<Profile> = yield select(getSignUpProfile)
 
     // TODO: Fix as any
-    unityInterface.LoadProfile(profile as any)
-    unityInterface.ShowAvatarEditorInSignIn()
+    getUnityInstance().LoadProfile(profile as any)
+    getUnityInstance().ShowAvatarEditorInSignIn()
   }
 }
 
@@ -150,7 +152,9 @@ function* authorize(requestManager: RequestManager) {
             userData.identity.rawAddress = address
           }
         }
-      } catch {}
+      } catch {
+        // do nothing
+      }
     }
 
     // check that user data is stored & key is not expired
@@ -307,4 +311,46 @@ function* logout() {
 
 function* redirectToSignUp() {
   Session.current.redirectToSignUp().catch((e) => logger.error('error while redirecting to sign up', e))
+}
+
+export function observeAccountStateChange(
+  store: Store<RootSessionState>,
+  accountStateChange: (previous: SessionState, current: SessionState) => any
+) {
+  let previousState = store.getState().session
+
+  store.subscribe(() => {
+    const currentState = store.getState().session
+    if (previousState !== currentState) {
+      previousState = currentState
+      accountStateChange(previousState, currentState)
+    }
+  })
+}
+
+export async function onLoginCompleted(): Promise<SessionState> {
+  const state = store.getState()
+
+  if (isLoginCompleted(state)) return state.session
+
+  return new Promise<SessionState>((resolve) => {
+    const unsubscribe = store.subscribe(() => {
+      const state = store.getState()
+      if (isLoginCompleted(state)) {
+        unsubscribe()
+        return resolve(state.session)
+      }
+    })
+  })
+}
+
+export function initializeSessionObserver() {
+  observeAccountStateChange(store, (_, session) => {
+    accountStateObservable.notifyObservers({
+      hasProvider: false,
+      loginStatus: session.loginState as LoginState,
+      identity: session.identity,
+      network: session.network
+    })
+  })
 }

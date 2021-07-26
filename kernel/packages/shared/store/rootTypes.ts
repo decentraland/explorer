@@ -27,5 +27,3 @@ export type RootState = RootAtlasState &
   RootQuestsState
 
 export type RootStore = Store<RootState>
-
-export type StoreContainer = { globalStore: RootStore }

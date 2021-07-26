@@ -43,10 +43,10 @@ import { getPois } from '../meta/selectors'
 import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
 import { retrieve, store as cacheStore } from 'shared/cache'
 import { getPOIService, getUpdateProfileServer } from 'shared/dao/selectors'
-import { store } from 'shared/store/store'
+import { store } from 'shared/store/isolatedStore'
 import { realmInitialized } from 'shared/dao'
-import { unityInterface } from 'unity-interface/UnityInterface'
 import { ensureRenderer } from 'shared/renderer/sagas'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 
 const tiles = {
   id: 'tiles',
@@ -241,7 +241,7 @@ function* reportScenes(sceneIds: string[]): any {
       })
     })
 
-  unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
+  getUnityInstance().UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }
 
 async function fetchPOIsFromDAO(): Promise<string[] | undefined> {

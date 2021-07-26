@@ -1,11 +1,8 @@
-import { RootState, StoreContainer } from '../store/rootTypes'
-import { Store } from 'redux'
 import { getProfile, getProfileStatusAndData } from './selectors'
 import { profileRequest } from './actions'
 import { Profile, ProfileType } from './types'
 import { COMMS_PROFILE_TIMEOUT } from 'config'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 // We resolve a profile with an older version after this time, if there is that info
 const PROFILE_SOFT_TIMEOUT_MS = 5000
@@ -17,8 +14,6 @@ export function ProfileAsPromise(userId: string, version?: number, profileType?:
   function isExpectedVersion(aProfile: Profile) {
     return !version || aProfile.version >= version || aProfile.version === -1 // We signal random profiles with -1
   }
-
-  const store: Store<RootState> = globalThis.globalStore
 
   const [status, existingProfile] = getProfileStatusAndData(store.getState(), userId)
   const existingProfileWithCorrectVersion = existingProfile && isExpectedVersion(existingProfile)
@@ -68,7 +63,6 @@ export function ProfileAsPromise(userId: string, version?: number, profileType?:
 }
 
 export function EnsureProfile(userId: string, version?: number): Promise<Profile> {
-  const store: Store<RootState> = globalThis.globalStore
   const existingProfile = getProfile(store.getState(), userId)
   const existingProfileWithCorrectVersion = existingProfile && (!version || existingProfile.version >= version)
   if (existingProfile && existingProfileWithCorrectVersion) {

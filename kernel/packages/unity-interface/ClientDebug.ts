@@ -1,11 +1,11 @@
 import { defaultLogger } from 'shared/logger'
 import { ErrorContextTypes, ReportFatalErrorWithUnityPayloadAsync } from 'shared/loading/ReportFatalError'
-import { unityInterface, UnityInterface } from './UnityInterface'
+import { getUnityInstance, IUnityInterface } from './IUnityInterface'
 
 export class ClientDebug {
-  private unityInterface: UnityInterface
+  private unityInterface: IUnityInterface
 
-  public constructor(unityInterface: UnityInterface) {
+  public constructor(unityInterface: IUnityInterface) {
     this.unityInterface = unityInterface
   }
 
@@ -41,7 +41,14 @@ export class ClientDebug {
       })
   }
 
-  public InstantiateBotsAtWorldPos(amount: number, xPos: number, yPos: number, zPos: number, areaWidth: number, areaDepth: number) {
+  public InstantiateBotsAtWorldPos(
+    amount: number,
+    xPos: number,
+    yPos: number,
+    zPos: number,
+    areaWidth: number,
+    areaDepth: number
+  ) {
     const payload = {
       amount: amount,
       xPos: xPos,
@@ -73,4 +80,4 @@ export class ClientDebug {
   }
 }
 
-export let clientDebug: ClientDebug = new ClientDebug(unityInterface)
+export let clientDebug: ClientDebug = new ClientDebug(getUnityInstance())

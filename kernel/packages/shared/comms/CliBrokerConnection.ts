@@ -4,7 +4,7 @@ import { MessageType, CoordinatorMessage, WelcomeMessage, ConnectMessage } from 
 import { Stats } from './debug'
 import { IBrokerConnection, BrokerMessage, SocketReadyState } from '../comms/v1/IBrokerConnection'
 import { ILogger, createLogger } from 'shared/logger'
-import { Observable } from '../../decentraland-ecs/src/ecs/Observable'
+import { Observable } from 'mz-observable'
 
 export class CliBrokerConnection implements IBrokerConnection {
   public alias: number | null = null
@@ -146,13 +146,13 @@ export class CliBrokerConnection implements IBrokerConnection {
     this.ws = new WebSocket(this.url, 'comms')
     this.ws.binaryType = 'arraybuffer'
 
-    this.ws.onerror = event => {
+    this.ws.onerror = (event) => {
       this.logger.error('socket error', event)
       this.ws = null
     }
 
-    this.ws.onmessage = event => {
-      this.onWsMessage(event).catch(err => {
+    this.ws.onmessage = (event) => {
+      this.onWsMessage(event).catch((err) => {
         this.logger.error(err)
       })
     }

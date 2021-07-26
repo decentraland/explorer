@@ -6,7 +6,7 @@ import {
   Vector2,
   ReadOnlyVector2
 } from 'decentraland-ecs/src/decentraland/math'
-import { Observable } from 'decentraland-ecs/src/ecs/Observable'
+import { Observable } from 'mz-observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
 import {

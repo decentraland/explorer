@@ -12,17 +12,15 @@ import {
   AVATAR_LOADING_ERROR,
   ExecutionLifecycleEventsList
 } from './types'
-import { StoreContainer } from 'shared/store/rootTypes'
 import { trackEvent } from '../analytics'
 import { action } from 'typesafe-actions'
-import { unityInterface } from 'unity-interface/UnityInterface'
 import { errorObservable } from '../observables'
-
-declare const globalThis: StoreContainer
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
 export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   if (ExecutionLifecycleEventsList.includes(event)) {
-    globalThis.globalStore.dispatch(action(event))
+    store.dispatch(action(event))
   }
 
   const targetError =
@@ -42,7 +40,7 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       ? 'avatarerror'
       : 'fatal'
 
-  globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
+  store.dispatch(fatalError(targetError))
 
   errorObservable.notifyObservers({
     error: new Error(event),
@@ -92,7 +90,7 @@ export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorCon
 
 export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, context: ErrorContextTypes) {
   try {
-    let payload = await unityInterface.CrashPayloadRequest()
+    let payload = await getUnityInstance().CrashPayloadRequest()
     ReportFatalError(error, context, { rendererPayload: payload })
   } catch (e) {
     ReportFatalError(error, context)

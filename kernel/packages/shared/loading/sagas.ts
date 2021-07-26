@@ -9,11 +9,11 @@ import { lastPlayerPosition } from '../world/positionThings'
 import { PENDING_SCENES, SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { metricsUnityClientLoaded, metricsAuthSuccessful, experienceStarted } from './types'
 import { getCurrentUserId } from 'shared/session/selectors'
-import { onLoginCompleted } from 'shared/ethereum/provider'
 import { LoginState } from '@dcl/kernel-interface'
 import { call } from 'redux-saga-test-plan/matchers'
 import { RootState } from 'shared/store/rootTypes'
 import { PREVIEW } from 'config'
+import { onLoginCompleted } from 'shared/session/sagas'
 
 export function* loadingSaga() {
   yield fork(translateActions)
@@ -28,7 +28,7 @@ function* translateActions() {
 }
 
 function* triggerAuthSuccessful(action: ChangeLoginStateAction) {
-  if (action.payload.stage == LoginState.COMPLETED) {
+  if (action.payload.stage === LoginState.COMPLETED) {
     yield put(metricsAuthSuccessful())
   }
 }
@@ -59,7 +59,7 @@ function* waitForSceneLoads() {
   function shouldWaitForScenes(state: RootState) {
     // in the initial load, we should wait until we have *some* scene to load
     if (state.loading.initialLoad && !PREVIEW) {
-      if (state.loading.pendingScenes !== 0 || state.loading.totalScenes == 0) {
+      if (state.loading.pendingScenes !== 0 || state.loading.totalScenes === 0) {
         return true
       }
     }

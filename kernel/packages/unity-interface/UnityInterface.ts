@@ -2,6 +2,7 @@ import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
+import { HotSceneInfo, IUnityInterface, setUnityInstance } from './IUnityInterface'
 import {
   HUDConfiguration,
   InstancedSpawnPoint,
@@ -22,14 +23,13 @@ import {
   WorldPosition
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
-import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
-import { Observable } from 'decentraland-ecs/src'
+import { Observable } from 'mz-observable'
 import type { UnityGame } from '@dcl/unity-renderer/src'
 
 const MINIMAP_CHUNK_SIZE = 100
@@ -55,7 +55,7 @@ function resizeCanvas(targetHeight: number) {
   }
 }
 
-export class UnityInterface {
+export class UnityInterface implements IUnityInterface {
   public gameInstance!: UnityGame
   public Module: any
   public currentHeight: number = -1
@@ -577,4 +577,4 @@ export class UnityInterface {
   }
 }
 
-export let unityInterface: UnityInterface = new UnityInterface()
+setUnityInstance(new UnityInterface())

@@ -3,9 +3,9 @@ import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 import { UserData } from 'shared/types'
 import { calculateDisplayName } from 'shared/profiles/transformations/processServerProfile'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
-import { onLoginCompleted } from 'shared/ethereum/provider'
 
 import { ExposableAPI } from './ExposableAPI'
+import { onLoginCompleted } from 'shared/session/sagas'
 
 export interface IUserIdentity {
   /**

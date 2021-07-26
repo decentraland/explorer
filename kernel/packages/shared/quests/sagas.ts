@@ -3,20 +3,18 @@ import { delay, put, select, takeEvery } from 'redux-saga/effects'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { questsInitialized, questsUpdated, QUESTS_INITIALIZED, QUESTS_UPDATED } from './actions'
 import { questsRequest } from './client'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { toRendererQuest } from '@dcl/ecs-quests/@dcl/mappings'
 import { ensureUnityInterface } from 'shared/renderer'
 import { getPreviousQuests, getQuests } from './selectors'
 import { deepEqual } from 'atomicHelpers/deepEqual'
 import { isFeatureEnabled } from '../meta/selectors'
 import { FeatureFlags } from '../meta/types'
-import { StoreContainer } from '../store/rootTypes'
 
-declare const globalThis: Window & StoreContainer
 const QUESTS_REFRESH_INTERVAL = 30000
 
 export function* questsSaga(): any {
-  if (isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)) {
+  if (yield select(isFeatureEnabled, FeatureFlags.QUESTS, false)) {
     yield takeEvery(USER_AUTHENTIFIED, initializeQuests)
     yield takeEvery(QUESTS_INITIALIZED, initUpdateQuestsInterval)
   }
@@ -61,7 +59,7 @@ function* updateQuestsLogData() {
 
   quests.forEach((it) => {
     if (hasChanged(it)) {
-      unityInterface.UpdateQuestProgress(toRendererQuest(it))
+      getUnityInstance().UpdateQuestProgress(toRendererQuest(it))
     }
   })
 }
@@ -69,5 +67,5 @@ function* updateQuestsLogData() {
 function initQuestsLogData(quests: PlayerQuestDetails[]) {
   const rendererQuests = quests.map((it) => toRendererQuest(it))
 
-  unityInterface.InitQuestsInfo(rendererQuests)
+  getUnityInstance().InitQuestsInfo(rendererQuests)
 }

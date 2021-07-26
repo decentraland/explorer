@@ -46,7 +46,6 @@ import { CATALYST_COULD_NOT_LOAD } from 'shared/loading/types'
 import { META_CONFIGURATION_INITIALIZED } from 'shared/meta/actions'
 import { checkTldVsWeb3Network, registerProviderNetChanges } from 'shared/web3'
 import { gte } from 'semver'
-import { store } from 'shared/store/store'
 
 const CACHE_KEY = 'realm'
 const CATALYST_CANDIDATES_KEY = CACHE_KEY + '-' + SET_CATALYST_CANDIDATES
@@ -95,7 +94,7 @@ function* loadCatalystRealms() {
         configuredRealm = cachedRealm
       }
 
-      if (configuredRealm && (yield checkValidRealm(configuredRealm))) {
+      if (configuredRealm && (yield call(checkValidRealm, configuredRealm))) {
         realm = configuredRealm
 
         yield fork(initializeCatalystCandidates)
@@ -142,7 +141,7 @@ function* initLocalCatalyst() {
 }
 
 function* waitForCandidates() {
-  while ((yield select(getAllCatalystCandidates)).length == 0) {
+  while ((yield select(getAllCatalystCandidates)).length === 0) {
     yield take(SET_ADDED_CATALYST_CANDIDATES)
   }
 }
@@ -204,13 +203,13 @@ function* initializeCatalystCandidates() {
   yield put(catalystRealmsScanSuccess())
 }
 
-async function checkValidRealm(realm: Realm) {
+function* checkValidRealm(realm: Realm) {
   const realmHasValues = realm && realm.domain && realm.catalystName && realm.layer
   if (!realmHasValues) {
     return false
   }
-  const minCatalystVersion = getMinCatalystVersion(store.getState())
-  const pingResult = await ping(commsStatusUrl(realm.domain))
+  const minCatalystVersion = yield select(getMinCatalystVersion)
+  const pingResult = yield ping(commsStatusUrl(realm.domain))
   const catalystVersion = pingResult.result?.env.catalystVersion ?? '0.0.0'
   return (
     pingResult.status === ServerConnectionStatus.OK && (!minCatalystVersion || gte(catalystVersion, minCatalystVersion))

@@ -9,11 +9,9 @@ import defaultLogger from 'shared/logger'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 
-import { StoreContainer } from '../store/rootTypes'
 import { getCommsServer, getRealm } from 'shared/dao/selectors'
 import { LayerUserInfo } from 'shared/dao/types'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 export const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -3, y: -33 },
@@ -144,8 +142,8 @@ export class TeleportController {
 }
 
 async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
-  const realm = getRealm(globalThis.globalStore.getState())
-  const commsUrl = getCommsServer(globalThis.globalStore.getState())
+  const realm = getRealm(store.getState())
+  const commsUrl = getCommsServer(store.getState())
 
   if (realm && commsUrl) {
     if (realm.layer) {

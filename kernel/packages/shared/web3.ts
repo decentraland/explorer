@@ -8,14 +8,12 @@ import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
 import { NETWORK_MISMATCH, setTLDError } from './loading/types'
 import { BringDownClientAndShowError } from './loading/ReportFatalError'
-import { StoreContainer } from './store/rootTypes'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
 import { Eth } from 'web3x/eth'
 import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
 import { requestManager } from './ethereum/provider'
-
-declare const globalThis: StoreContainer
+import { store } from './store/isolatedStore'
 
 declare var window: Window & {
   ethereum: any
@@ -23,7 +21,7 @@ declare var window: Window & {
 
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   const web3Network = await requestManager.net_version()
-  const web3net = parseInt(web3Network) === 1 ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
+  const web3net = parseInt(web3Network, 10) === 1 ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
   return web3net
 }
 
@@ -43,7 +41,7 @@ export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
   const tldNet = getNetworkFromTLD()
 
   if (tldNet !== web3Net && tld !== 'localhost') {
-    globalThis.globalStore.dispatch(setTLDError({ tld, web3Net, tldNet }))
+    store.dispatch(setTLDError({ tld, web3Net, tldNet }))
     BringDownClientAndShowError(NETWORK_MISMATCH)
     return true
   }

@@ -10,15 +10,12 @@ import { renderStateObservable, isRendererEnabled } from './worldState'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { CustomWebWorkerTransport } from './CustomWebWorkerTransport'
 import { sceneObservable } from 'shared/world/sceneState'
-import { UserIdentity } from 'shared/apis/UserIdentity'
+import { getCurrentUserId } from 'shared/session/selectors'
+import { store } from 'shared/store/isolatedStore'
 
 const gamekitWorkerRaw = require('raw-loader!../../../static/systems/scene.system.js')
 const gamekitWorkerBLOB = new Blob([gamekitWorkerRaw])
 const gamekitWorkerUrl = URL.createObjectURL(gamekitWorkerBLOB)
-
-const hudWorkerRaw = require('raw-loader!../../../static/systems/decentraland-ui.scene.js')
-const hudWorkerBLOB = new Blob([hudWorkerRaw])
-export const hudWorkerUrl = URL.createObjectURL(hudWorkerBLOB)
 
 export class SceneSystemWorker extends SceneWorker {
   private sceneStarted: boolean = false
@@ -122,24 +119,16 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   private subscribeToSceneChangeEvents() {
-    this.getAPIInstance(UserIdentity)
-      .then((userIdentity) => userIdentity.getUserData())
-      .then((userData) => {
-        if (!userData || !userData.userId) {
-          eval('debu' + 'gger')
-        } else
-          this.sceneChangeObserver = sceneObservable.add((report) => {
-            if (report.newScene?.sceneId === this.getSceneId()) {
-              this.engineAPI!.sendSubscriptionEvent('onEnterScene', { userId: userData.userId })
-            } else if (report.previousScene?.sceneId === this.getSceneId()) {
-              this.engineAPI!.sendSubscriptionEvent('onLeaveScene', { userId: userData.userId })
-            }
-          })
-      })
-      .catch((e) => {
-        // @ts-ignore
-        console['error'](e)
-      })
+    this.sceneChangeObserver = sceneObservable.add((report) => {
+      const userId = getCurrentUserId(store.getState())
+      if (userId) {
+        if (report.newScene?.sceneId === this.getSceneId()) {
+          this.engineAPI!.sendSubscriptionEvent('onEnterScene', { userId })
+        } else if (report.previousScene?.sceneId === this.getSceneId()) {
+          this.engineAPI!.sendSubscriptionEvent('onLeaveScene', { userId })
+        }
+      }
+    })
   }
 
   private subscribeToWorldRunningEvents() {

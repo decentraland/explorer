@@ -16,9 +16,9 @@ import { DEBUG, parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl }
 import { ILand } from 'shared/types'
 import { getFetchContentServer, getCatalystServer } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { store } from 'shared/store/isolatedStore'
 
-declare const globalThis: StoreContainer & { workerManager: LifecycleManager }
+declare const globalThis: { workerManager: LifecycleManager }
 
 /*
  * The worker is set up on the first require of this file
@@ -121,7 +121,7 @@ export async function initParcelSceneWorker() {
 
   server.enable()
 
-  const state = globalThis.globalStore.getState()
+  const state = store.getState()
   const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
 
   const fullRootUrl = getResourcesURL('.')

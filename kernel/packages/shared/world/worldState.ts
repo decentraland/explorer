@@ -1,5 +1,5 @@
-import { Observable } from '../../decentraland-ecs/src/ecs/Observable'
-import { store } from 'shared/store/store'
+import { Observable } from 'mz-observable'
+import { store } from 'shared/store/isolatedStore'
 import { LoadingState } from 'shared/loading/reducer'
 
 let hidden: 'hidden' | 'msHidden' | 'webkitHidden' = 'hidden'
@@ -17,16 +17,16 @@ if (typeof (document as any).hidden !== 'undefined') {
   visibilityChange = 'webkitvisibilitychange'
 }
 
-if (hidden && visibilityChange) {
-  document.addEventListener(visibilityChange, handleVisibilityChange, false)
-
-  function handleVisibilityChange() {
-    foregroundChangeObservable.notifyObservers()
-  }
-}
-
 export const renderStateObservable = new Observable<void>()
 export const foregroundChangeObservable = new Observable<void>()
+
+function handleVisibilityChange() {
+  foregroundChangeObservable.notifyObservers()
+}
+
+if (hidden && visibilityChange) {
+  document.addEventListener(visibilityChange, handleVisibilityChange, false)
+}
 
 export function observeLoadingStateChange(onLoadingChange: (previous: LoadingState, current: LoadingState) => any) {
   let previousState = store.getState().loading

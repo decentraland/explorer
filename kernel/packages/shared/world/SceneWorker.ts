@@ -21,10 +21,9 @@ export enum SceneWorkerReadyState {
 }
 
 export abstract class SceneWorker {
+  public ready: SceneWorkerReadyState = SceneWorkerReadyState.LOADING
   protected engineAPI: EngineAPI | null = null
   private readonly system = future<ScriptingHost>()
-
-  public ready: SceneWorkerReadyState = SceneWorkerReadyState.LOADING
 
   constructor(private readonly parcelScene: ParcelSceneAPI, transport: ScriptingTransport) {
     parcelScene.registerWorker(this)

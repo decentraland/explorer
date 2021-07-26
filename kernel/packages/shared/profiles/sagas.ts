@@ -1,4 +1,3 @@
-import { Store } from 'redux'
 import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, select, takeEvery, take } from 'redux-saga/effects'
@@ -32,7 +31,6 @@ import {
   localProfileSentToRenderer,
   LOCAL_PROFILE_IN_RENDERER
 } from './actions'
-import { generateRandomUserProfile } from './generateRandomUserProfile'
 import { getProfile, hasConnectedWeb3, isProfileUploadedToRenderer } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
@@ -40,17 +38,21 @@ import { buildServerMetadata, ensureServerFormat, ServerFormatProfile } from './
 import { Profile, ContentFile, Avatar, ProfileType } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
-import { getUpdateProfileServer, getResizeService, isResizeServiceUrl, getCatalystServer } from '../dao/selectors'
+import {
+  getUpdateProfileServer,
+  getResizeService,
+  isResizeServiceUrl,
+  getCatalystServer,
+  getFetchContentServer
+} from '../dao/selectors'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getResourcesURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
-import { StoreContainer } from '../store/rootTypes'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
-import { RootState } from 'shared/store/rootTypes'
 import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
@@ -61,11 +63,11 @@ import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'sha
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
+import { createFakeName } from './utils/fakeName'
 
 const toBuffer = require('blob-to-buffer')
-
-declare const globalThis: Window & StoreContainer
 
 const concatenatedActionTypeUserId = (action: { type: string; payload: { userId: string } }) =>
   action.type + action.payload.userId
@@ -171,8 +173,6 @@ export function* ensureLocalProfileInRenderer() {
  */
 function scheduleProfileUpdate(profile: Profile) {
   new Promise(() => {
-    const store: Store<RootState> = globalThis.globalStore
-
     const unsubscribe = store.subscribe(() => {
       const initialized = store.getState().comms.initialized
       if (initialized) {
@@ -301,7 +301,7 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
 }
 
 export async function profileServerRequest(userId: string) {
-  const state = globalThis.globalStore.getState()
+  const state = store.getState()
   const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
 
@@ -350,7 +350,7 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     const forRenderer = profileToRendererFormat(profile)
     forRenderer.hasConnectedWeb3 = action.payload.hasConnectedWeb3
 
-    unityInterface.AddUserProfileToCatalog(forRenderer)
+    getUnityInstance().AddUserProfileToCatalog(forRenderer)
 
     yield put(addedProfileToCatalog(action.payload.userId, forRenderer))
   }
@@ -360,7 +360,7 @@ function* sendLoadProfile(profile: Profile) {
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
   const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
-  unityInterface.LoadProfile(rendererFormat)
+  getUnityInstance().LoadProfile(rendererFormat)
   yield put(localProfileSentToRenderer())
 }
 
@@ -425,7 +425,7 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
 
   const name = `${selector}.png`
 
-  if (isResizeServiceUrl(globalThis.globalStore.getState(), value)) {
+  if (isResizeServiceUrl(store.getState(), value)) {
     // value is coming in a resize service url => generate image & upload content
     const blob = await fetch(value).then((r) => r.blob())
 
@@ -515,4 +515,33 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
       reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
     }
   })
+}
+
+function randomBetween(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+export async function generateRandomUserProfile(userId: string): Promise<Profile> {
+  const _number = randomBetween(1, 160)
+
+  let profile: any | undefined = undefined
+  try {
+    const profiles: { avatars: object[] } = await profileServerRequest(`default${_number}`)
+    if (profiles.avatars.length !== 0) {
+      profile = profiles.avatars[0]
+    }
+  } catch (e) {
+    // in case something fails keep going and use backup profile
+  }
+
+  if (!profile) {
+    profile = backupProfile(getFetchContentServer(store.getState()), userId)
+  }
+
+  profile.unclaimedName = createFakeName()
+  profile.hasClaimedName = false
+  profile.tutorialStep = 0
+  profile.version = -1 // We signal random user profiles with -1
+
+  return profile
 }

@@ -1,4 +1,4 @@
-import { Observable } from 'decentraland-ecs/src'
+import { Observable } from 'mz-observable'
 import { UUID, PeerInformation, AvatarMessage, UserInformation, AvatarMessageType, Pose } from './interface/types'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import defaultLogger from 'shared/logger'

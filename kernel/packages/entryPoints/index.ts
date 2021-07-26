@@ -1,7 +1,7 @@
-declare const globalThis: StoreContainer & { DecentralandKernel: IDecentralandKernel }
+declare const globalThis: { DecentralandKernel: IDecentralandKernel }
 
 import defaultLogger, { createLogger } from 'shared/logger'
-import type { IDecentralandKernel, KernelOptions, KernelResult } from '@dcl/kernel-interface'
+import { IDecentralandKernel, IEthereumProvider, KernelOptions, KernelResult, LoginState } from '@dcl/kernel-interface'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
@@ -15,19 +15,16 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { DEBUG_WS_MESSAGES, HAS_INITIAL_POSITION_MARK, OPEN_AVATAR_EDITOR } from '../config/index'
 import { signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, pickWorldSpawnpoint, teleportObservable } from 'shared/world/positionThings'
-import { StoreContainer } from 'shared/store/rootTypes'
 import { loadPreviewScene, startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, ILand, RenderProfile } from 'shared/types'
 import { foregroundChangeObservable, isForeground } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { authenticateWhenItsReady, userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { FeatureFlags, WorldConfig } from 'shared/meta/types'
 import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 import { isWaitingTutorial } from 'shared/loading/selectors'
@@ -47,10 +44,14 @@ import future, { IFuture } from 'fp-future'
 import { setResourcesURL } from 'shared/location'
 import { WebSocketProvider } from 'eth-connect'
 import { resolveUrlFromUrn } from '@dcl/urn-resolver'
+import { IUnityInterface } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
+import { onLoginCompleted } from 'shared/session/sagas'
+import { authenticate } from 'shared/session/actions'
 
 const logger = createLogger('kernel: ')
 
-function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean, builderInWorldEnabled: boolean) {
+function configureTaskbarDependentHUD(i: IUnityInterface, voiceChatEnabled: boolean, builderInWorldEnabled: boolean) {
   // The elements below, require the taskbar to be active before being activated.
 
   i.ConfigureHUDElement(
@@ -58,7 +59,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
     { active: true, visible: true },
     {
       enableVoiceChat: voiceChatEnabled,
-      enableQuestPanel: isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)
+      enableQuestPanel: isFeatureEnabled(store.getState(), FeatureFlags.QUESTS, false)
     }
   )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
@@ -82,6 +83,22 @@ async function resolveBaseUrl(urn: string): Promise<string> {
 
 function orFail(withError: string): never {
   throw new Error(withError)
+}
+
+function authenticateWhenItsReady(provider: IEthereumProvider, isGuest: boolean) {
+  const loginState = store.getState().session.loginState
+
+  if (loginState === LoginState.WAITING_PROVIDER) {
+    store.dispatch(authenticate(provider, isGuest))
+  } else {
+    const unsubscribe = store.subscribe(() => {
+      const loginState = store.getState().session.loginState
+      if (loginState === LoginState.WAITING_PROVIDER) {
+        unsubscribe()
+        store.dispatch(authenticate(provider, isGuest))
+      }
+    })
+  }
 }
 
 globalThis.DecentralandKernel = {
@@ -150,11 +167,11 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
   // NOTE(Pablo): We also need meta configuration to know if we need to enable voice chat
   await ensureMetaConfigurationInitialized()
 
-  const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
+  const worldConfig: WorldConfig | undefined = store.getState().meta.config.world
   const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
   i.SetRenderProfile(renderProfile)
   const enableNewTutorialCamera = worldConfig ? worldConfig.enableNewTutorialCamera ?? false : false
-  const questEnabled = isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.QUESTS, false)
+  const questEnabled = isFeatureEnabled(store.getState(), FeatureFlags.QUESTS, false)
 
   i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
   i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -172,14 +189,13 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
   i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: questEnabled, visible: false })
   i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: questEnabled, visible: true })
 
-  userAuthentified()
+  onLoginCompleted()
     .then(() => {
-      const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+      const identity = getCurrentIdentity(store.getState())!
 
-      const VOICE_CHAT_ENABLED = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+      const VOICE_CHAT_ENABLED = isVoiceChatEnabledFor(store.getState(), identity.address)
       const BUILDER_IN_WORLD_ENABLED =
-        identity.hasConnectedWeb3 &&
-        isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
+        identity.hasConnectedWeb3 && isFeatureEnabled(store.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
 
       const configForRenderer = kernelConfigForRenderer()
       configForRenderer.comms.voiceChatEnabled = VOICE_CHAT_ENABLED
@@ -204,7 +220,7 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
 
           // NOTE: here we make sure that if signup (tutorial) just finished
           // the player is set to the correct spawn position plus we make sure that the proper scene is loaded
-          if (isWaitingTutorial(globalThis.globalStore.getState())) {
+          if (isWaitingTutorial(store.getState())) {
             teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
           }
         })
@@ -218,14 +234,14 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
   await realmInitialized()
   startRealmsReportToRenderer()
 
-  globalThis.globalStore.dispatch(signalParcelLoadingStarted())
+  store.dispatch(signalParcelLoadingStarted())
 
   function reportForeground() {
     if (isForeground()) {
-      globalThis.globalStore.dispatch(renderingInForeground())
+      store.dispatch(renderingInForeground())
       i.ReportFocusOn()
     } else {
-      globalThis.globalStore.dispatch(renderingInBackground())
+      store.dispatch(renderingInBackground())
       i.ReportFocusOff()
     }
   }

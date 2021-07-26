@@ -2,7 +2,7 @@ import { SceneLifeCycleStatus, SceneLifeCycleStatusType } from '../lib/scene.sta
 import future, { IFuture } from 'fp-future'
 import { EventEmitter } from 'events'
 import { SceneDataDownloadManager } from './download'
-import { Observable } from 'decentraland-ecs/src/ecs/Observable'
+import { Observable } from 'mz-observable'
 import defaultLogger from 'shared/logger'
 
 export type SceneLifeCycleStatusReport = { sceneId: string; status: SceneLifeCycleStatusType }

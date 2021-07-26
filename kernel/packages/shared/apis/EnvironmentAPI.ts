@@ -1,10 +1,9 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
 import { EnvironmentData } from 'shared/types'
-import { Store } from 'redux'
-import { RootState } from 'shared/store/rootTypes'
 import { getRealm } from 'shared/dao/selectors'
 import { getServerConfigurations, PREVIEW } from 'config'
+import { store } from 'shared/store/isolatedStore'
 
 type EnvironmentRealm = {
   domain: string
@@ -17,8 +16,6 @@ type ExplorerConfiguration = {
   clientUri: string
   configurations: Record<string, string | number | boolean>
 }
-
-declare const window: any
 
 @registerAPI('EnvironmentAPI')
 export class EnvironmentAPI extends ExposableAPI {
@@ -44,7 +41,6 @@ export class EnvironmentAPI extends ExposableAPI {
    */
   @exposeMethod
   async getCurrentRealm(): Promise<EnvironmentRealm | undefined> {
-    const store: Store<RootState> = window['globalStore']
     const realm = getRealm(store.getState())
 
     if (!realm) {

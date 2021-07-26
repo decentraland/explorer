@@ -1,14 +1,12 @@
-import { StoreContainer } from '../shared/store/rootTypes'
 import { getExploreRealmsService, getFetchContentServer, getRealm } from '../shared/dao/selectors'
 import { CurrentRealmInfoForRenderer, RealmsInfoForRenderer } from '../shared/types'
 import { observeRealmChange } from '../shared/dao'
 import { Realm } from '../shared/dao/types'
-import { unityInterface } from './UnityInterface'
+import { getUnityInstance } from './IUnityInterface'
 import defaultLogger from '../shared/logger'
+import { store } from 'shared/store/isolatedStore'
 
 const REPORT_INTERVAL = 2 * 60 * 1000
-
-declare const globalThis: StoreContainer
 
 let isReporting = false
 
@@ -16,12 +14,12 @@ export function startRealmsReportToRenderer() {
   if (!isReporting) {
     isReporting = true
 
-    const realm = getRealm(globalThis.globalStore.getState())
+    const realm = getRealm(store.getState())
     if (realm) {
       reportToRenderer({ current: convertCurrentRealmType(realm) })
     }
 
-    observeRealmChange(globalThis.globalStore, (previous, current) => {
+    observeRealmChange(store, (previous, current) => {
       reportToRenderer({ current: convertCurrentRealmType(current) })
     })
 
@@ -34,7 +32,7 @@ export function startRealmsReportToRenderer() {
 }
 
 async function fetchAndReportRealmsInfo() {
-  const url = getExploreRealmsService(globalThis.globalStore.getState())
+  const url = getExploreRealmsService(store.getState())
   try {
     const response = await fetch(url)
     if (response.ok) {
@@ -47,11 +45,11 @@ async function fetchAndReportRealmsInfo() {
 }
 
 function reportToRenderer(info: Partial<RealmsInfoForRenderer>) {
-  unityInterface.UpdateRealmsInfo(info)
+  getUnityInstance().UpdateRealmsInfo(info)
 }
 
 function convertCurrentRealmType(realm: Realm): CurrentRealmInfoForRenderer {
-  const contentServerUrl = getFetchContentServer(globalThis.globalStore.getState())
+  const contentServerUrl = getFetchContentServer(store.getState())
   return {
     serverName: realm.catalystName,
     layer: realm.layer ?? '',

@@ -1,4 +1,3 @@
-import { StoreContainer } from 'shared/store/rootTypes'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { SceneJsonData } from 'shared/types'
@@ -10,38 +9,11 @@ import {
   getThumbnailUrlFromJsonDataAndContent,
   getSceneDescriptionFromJsonData
 } from 'shared/selectors'
-import { unityInterface } from 'unity-interface/UnityInterface'
-
-declare const globalThis: StoreContainer
-
-declare const window: {
-  unityInterface: {
-    UpdateHotScenesList: (info: HotSceneInfo[]) => void
-  }
-}
-
-type RealmInfo = {
-  serverName: string
-  layer?: string
-  usersCount: number
-  usersMax: number
-  userParcels: { x: number; y: number }[]
-}
-
-export type HotSceneInfo = {
-  id: string
-  name: string
-  creator: string
-  description: string
-  thumbnail: string
-  baseCoords: { x: number; y: number }
-  parcels: { x: number; y: number }[]
-  usersTotalCount: number
-  realms: RealmInfo[]
-}
+import { getUnityInstance, HotSceneInfo, RealmInfo } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
 export async function fetchHotScenes(): Promise<HotSceneInfo[]> {
-  const url = getHotScenesService(globalThis.globalStore.getState())
+  const url = getHotScenesService(store.getState())
   const response = await fetch(url)
   if (response.ok) {
     const info = await response.json()
@@ -74,21 +46,18 @@ export async function reportHotScenes() {
   const pois = await fetchPOIsAsHotSceneInfo()
   const report = hotScenes.concat(pois.filter((poi) => hotScenes.filter((scene) => scene.id === poi.id).length === 0))
 
-  globalThis.globalStore.dispatch(
-    reportScenesFromTiles(report.map((scene) => `${scene.baseCoords.x},${scene.baseCoords.y}`))
-  )
+  store.dispatch(reportScenesFromTiles(report.map((scene) => `${scene.baseCoords.x},${scene.baseCoords.y}`)))
 
-  unityInterface.UpdateHotScenesList(report)
+  getUnityInstance().UpdateHotScenesList(report)
 }
 
 function getSceneName(baseCoord: string, sceneJsonData: SceneJsonData | undefined): string {
-  const sceneName =
-    getSceneNameFromAtlasState(sceneJsonData) ?? globalThis.globalStore.getState().atlas.tileToScene[baseCoord]?.name
+  const sceneName = getSceneNameFromAtlasState(sceneJsonData) ?? store.getState().atlas.tileToScene[baseCoord]?.name
   return postProcessSceneName(sceneName)
 }
 
 async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
-  const tiles = getPoiTiles(globalThis.globalStore.getState())
+  const tiles = getPoiTiles(store.getState())
   const scenesId = (await fetchSceneIds(tiles)).filter((id) => id !== null) as string[]
   const scenesLand = (await fetchSceneJson(scenesId)).filter((land) => land.sceneJsonData)
 
@@ -102,7 +71,7 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
         getThumbnailUrlFromJsonDataAndContent(
           land.sceneJsonData,
           land.mappingsResponse.contents,
-          getUpdateProfileServer(globalThis.globalStore.getState())
+          getUpdateProfileServer(store.getState())
         ) ?? '',
       baseCoords: TileStringToVector2(land.sceneJsonData.scene.base),
       parcels: land.sceneJsonData

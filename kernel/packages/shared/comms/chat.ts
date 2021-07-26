@@ -1,11 +1,9 @@
 import { uuid } from 'atomicHelpers/math'
 
 import { MessageEntry, ChatMessageType, PresenceStatus, UpdateUserStatusMessage } from 'shared/types'
-import { StoreContainer } from '../store/rootTypes'
 import { messageReceived } from 'shared/chat/actions'
 import { getProfile } from 'shared/profiles/selectors'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 let friendStatus: Record<string, PresenceStatus> = {}
 
@@ -20,7 +18,7 @@ export type ChatEvent = {
 }
 
 export function notifyStatusThroughChat(status: string) {
-  globalThis.globalStore.dispatch(
+  store.dispatch(
     messageReceived({
       messageId: uuid(),
       messageType: ChatMessageType.SYSTEM,
@@ -31,7 +29,7 @@ export function notifyStatusThroughChat(status: string) {
 }
 
 export function notifyFriendOnlineStatusThroughChat(userStatus: UpdateUserStatusMessage) {
-  const friendName = getProfile(globalThis.globalStore.getState(), userStatus.userId)?.name
+  const friendName = getProfile(store.getState(), userStatus.userId)?.name
 
   if (friendName === undefined) {
     return

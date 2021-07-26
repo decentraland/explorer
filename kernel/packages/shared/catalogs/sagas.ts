@@ -37,8 +37,8 @@ import {
   BuilderServerAPIManager
 } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { userAuthentified } from 'shared/session'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { onLoginCompleted } from 'shared/session/sagas'
 
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
 export const WRONG_FILTERS_ERROR = `You must set one and only one filter for V1. Also, the only collection id allowed is '${BASE_AVATARS_COLLECTION_ID}'`
@@ -135,7 +135,7 @@ function* fetchWearablesFromCatalyst(filters: WearablesRequestFilters) {
       // Fetch unpublished collections from builder server
       const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
       if (uuidCollections.length > 0) {
-        yield userAuthentified()
+        yield onLoginCompleted()
         const identity = yield select(getCurrentIdentity)
         for (const collectionUuid of uuidCollections) {
           const path = `collections/${collectionUuid}/items`
@@ -295,11 +295,11 @@ function areFiltersValid(filters: WearablesRequestFilters) {
 }
 
 export function informRequestFailure(error: string, context: string | undefined) {
-  unityInterface.WearablesRequestFailed(error, context)
+  getUnityInstance().WearablesRequestFailed(error, context)
 }
 
 export function sendWearablesCatalog(wearables: WearableV2[], context: string | undefined) {
-  unityInterface.AddWearablesToCatalog(wearables, context)
+  getUnityInstance().AddWearablesToCatalog(wearables, context)
 }
 
 export function* ensureBaseCatalogs() {

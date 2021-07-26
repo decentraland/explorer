@@ -16,7 +16,7 @@ export function isLoadingScreenVisible(state: RootLoadingState & RootSessionStat
 
   // in the case of signup, we show the avatars editor instead of the loading screen
   // that is so, to enable the user to customize the avatar while loading the world
-  if (!session.identity && session.isSignUp && session.loginState == LoginState.WAITING_PROFILE) {
+  if (!session.identity && session.isSignUp && session.loginState === LoginState.WAITING_PROFILE) {
     return false
   }
 
@@ -28,7 +28,7 @@ export function isLoadingScreenVisible(state: RootLoadingState & RootSessionStat
       return true
     }
 
-    if (state.loading.totalScenes == 0 && !PREVIEW) {
+    if (state.loading.totalScenes === 0 && !PREVIEW) {
       // this may happen if we are loading for the first time and this saga
       // gets executed _before_ the initial load of scenes
       return true
@@ -53,9 +53,9 @@ export function isRendererVisible(state: RootState) {
   // some login stages requires the renderer to be turned off
   const { loginState } = state.session
   if (
-    loginState == LoginState.SIGNATURE_FAILED ||
-    loginState == LoginState.SIGNATURE_PENDING ||
-    loginState == LoginState.WAITING_PROVIDER
+    loginState === LoginState.SIGNATURE_FAILED ||
+    loginState === LoginState.SIGNATURE_PENDING ||
+    loginState === LoginState.WAITING_PROVIDER
   ) {
     return false
   }

@@ -1,5 +1,5 @@
 import { WORLD_EXPLORER } from 'config'
-import { Observable } from 'decentraland-ecs/src/ecs/Observable'
+import { Observable } from 'mz-observable'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { ILand } from 'shared/types'

@@ -11,7 +11,6 @@ import {
   LayerBasedCandidate,
   IslandsBasedCandidate
 } from './types'
-import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
 import {
   isRealmInitialized,
@@ -31,6 +30,7 @@ import { zip } from './utils/zip'
 import { realmToString } from './utils/realmToString'
 import { PIN_CATALYST } from 'config'
 import * as qs from 'query-string'
+import { store } from 'shared/store/isolatedStore'
 
 const DEFAULT_TIMEOUT = 5000
 
@@ -259,10 +259,10 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
       return Math.abs(elapsedDiff) > 1500
         ? elapsedDiff // If the latency difference is greater than 1500, we consider that as the main factor
         : scoreDiff !== 0
-          ? scoreDiff // If there's score difference, we consider that
-          : usersDiff !== 0
-            ? usersDiff // If the score is the same (as when they are empty)
-            : elapsedDiff // If the candidates have the same score by users, we consider the latency again
+        ? scoreDiff // If there's score difference, we consider that
+        : usersDiff !== 0
+        ? usersDiff // If the score is the same (as when they are empty)
+        : elapsedDiff // If the candidates have the same score by users, we consider the latency again
     })
 
   if (sorted.length === 0 && candidates.length > 0) {
@@ -273,8 +273,6 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
 }
 
 export async function candidatesFetched(): Promise<void> {
-  const store: Store<RootState> = (window as any)['globalStore']
-
   if (areCandidatesFetched(store.getState())) {
     return
   }
@@ -291,8 +289,6 @@ export async function candidatesFetched(): Promise<void> {
 }
 
 export async function realmInitialized(): Promise<void> {
-  const store: Store<RootState> = (window as any)['globalStore']
-
   if (isRealmInitialized(store.getState())) {
     return
   }
@@ -343,8 +339,6 @@ function realmFor(name: string, candidates: Candidate[]): Realm | undefined {
 }
 
 export function changeRealm(realmString: string) {
-  const store: Store<RootState> = (window as any)['globalStore']
-
   const candidates = getAllCatalystCandidates(store.getState())
 
   const realm = getRealmFromString(realmString, candidates)
@@ -358,8 +352,6 @@ export function changeRealm(realmString: string) {
 
 export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
   // TODO: Add support for changing to crowded realm in islands based candidates. Or remove this functionality
-
-  const store: Store<RootState> = (window as any)['globalStore']
 
   const candidates = await refreshCandidatesStatuses()
 
@@ -408,8 +400,6 @@ export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
 }
 
 export async function refreshCandidatesStatuses() {
-  const store: Store<RootState> = (window as any)['globalStore']
-
   const candidates = await fetchCatalystStatuses(Array.from(getCandidateDomains(store)).map((it) => ({ domain: it })))
 
   store.dispatch(setCatalystCandidates(candidates))
@@ -422,8 +412,6 @@ function getCandidateDomains(store: Store<RootDaoState>): Set<string> {
 }
 
 export async function catalystRealmConnected(): Promise<void> {
-  const store: Store<RootState> = (window as any)['globalStore']
-
   const status = getCatalystRealmCommsStatus(store.getState())
 
   if (status.status === 'connected') {
@@ -461,7 +449,6 @@ export function observeRealmChange(
 }
 
 export function initializeUrlRealmObserver() {
-  const store: Store<RootState> = (window as any)['globalStore']
   observeRealmChange(store, (previousRealm, currentRealm) => {
     const q = qs.parse(location.search)
     const realmString = realmToString(currentRealm)

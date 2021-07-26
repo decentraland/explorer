@@ -12,6 +12,7 @@ import { parcelObservable, teleportObservable } from './positionThings'
 import { SceneWorker, SceneWorkerReadyState } from './SceneWorker'
 import { SceneSystemWorker } from './SceneSystemWorker'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
+import { store } from 'shared/store/isolatedStore'
 
 export type EnableParcelSceneLoadingOptions = {
   parcelSceneClass: { new (x: EnvironmentData<LoadableParcelScene>): ParcelSceneAPI }
@@ -85,17 +86,17 @@ export function setNewParcelScene(sceneId: string, worker: SceneWorker) {
 }
 
 function globalSignalSceneLoad(sceneId: string) {
-  globalThis['globalStore'].dispatch(signalSceneLoad(sceneId))
+  store.dispatch(signalSceneLoad(sceneId))
   reportPendingScenes()
 }
 
 function globalSignalSceneStart(sceneId: string) {
-  globalThis['globalStore'].dispatch(signalSceneStart(sceneId))
+  store.dispatch(signalSceneStart(sceneId))
   reportPendingScenes()
 }
 
 function globalSignalSceneFail(sceneId: string) {
-  globalThis['globalStore'].dispatch(signalSceneFail(sceneId))
+  store.dispatch(signalSceneFail(sceneId))
   reportPendingScenes()
 }
 
@@ -107,8 +108,8 @@ function reportPendingScenes() {
     // avatar scene should not be counted here
     const shouldBeCounted = !sceneWorker.isPersistent()
 
-    const isPending = (sceneWorker.ready & SceneWorkerReadyState.STARTED) == 0
-    const failedLoading = (sceneWorker.ready & SceneWorkerReadyState.LOADING_FAILED) != 0
+    const isPending = (sceneWorker.ready & SceneWorkerReadyState.STARTED) === 0
+    const failedLoading = (sceneWorker.ready & SceneWorkerReadyState.LOADING_FAILED) !== 0
     if (shouldBeCounted) {
       countableScenes++
     }
@@ -117,7 +118,7 @@ function reportPendingScenes() {
     }
   }
 
-  globalThis['globalStore'].dispatch(informPendingScenes(pendingScenes.size, countableScenes))
+  store.dispatch(informPendingScenes(pendingScenes.size, countableScenes))
 }
 
 export async function enableParcelSceneLoading(options: EnableParcelSceneLoadingOptions) {

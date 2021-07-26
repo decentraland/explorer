@@ -1,9 +1,7 @@
 import { contracts as contractInfo } from './contracts'
 import * as queryString from 'query-string'
 import { getWorld } from '@dcl/schemas'
-import { StoreContainer } from 'shared/store/rootTypes'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 export const NETWORK_HZ = 10
 
@@ -255,7 +253,7 @@ export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | nu
 }
 
 export function getAssetBundlesBaseUrl(): string {
-  const state = globalThis.globalStore.getState()
+  const state = store.getState()
   const result =
     ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
   return result

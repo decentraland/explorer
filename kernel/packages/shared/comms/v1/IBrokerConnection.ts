@@ -1,4 +1,4 @@
-import { Observable } from 'decentraland-ecs/src/ecs/Observable'
+import { Observable } from 'mz-observable'
 import { Stats } from '../../comms/debug'
 
 export type BrokerMessage = {

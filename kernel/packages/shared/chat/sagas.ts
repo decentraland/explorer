@@ -21,7 +21,6 @@ import { notifyStatusThroughChat } from 'shared/comms/chat'
 import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
 import { isValidExpression, validExpressions } from 'shared/apis/expressionExplainer'
-import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { findProfileByName, getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
@@ -30,9 +29,8 @@ import { fetchHotScenes } from 'shared/social/hotScenes'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { realmToString } from 'shared/dao/utils/realmToString'
-import { unityInterface } from 'unity-interface/UnityInterface'
-
-declare const globalThis: StoreContainer
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
 interface IChatCommand {
   name: string
@@ -99,7 +97,7 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
 }
 
 function* handleReceivedMessage(action: MessageReceived) {
-  unityInterface.AddMessageToChatWindow(action.payload)
+  getUnityInstance().AddMessageToChatWindow(action.payload)
 }
 
 function* handleSendMessage(action: SendMessage) {
@@ -142,7 +140,7 @@ function* handleSendMessage(action: SendMessage) {
     sendPublicChatMessage(entry.messageId, entry.body)
   }
 
-  unityInterface.AddMessageToChatWindow(entry)
+  getUnityInstance().AddMessageToChatWindow(entry)
 }
 
 function handleChatCommand(message: string) {
@@ -272,7 +270,7 @@ function initChatCommands() {
       .filter(([_, value]) => !!(value && value.user && value.user.userId))
       .filter(([uuid]) => userPose[uuid])
       .map(function ([uuid, value]) {
-        const name = getProfile(getGlobalState(), value.user?.userId!)?.name ?? 'unknown'
+        const name = getProfile(store.getState(), value.user?.userId!)?.name ?? 'unknown'
         const pos = { x: 0, y: 0 }
         worldToGrid(userPose[uuid], pos)
         return `  ${name}: ${pos.x}, ${pos.y}`
@@ -290,7 +288,7 @@ function initChatCommands() {
 
   addChatCommand('showfps', 'Show FPS counter', (message) => {
     fpsConfiguration.visible = !fpsConfiguration.visible
-    fpsConfiguration.visible ? unityInterface.ShowFPSPanel() : unityInterface.HideFPSPanel()
+    fpsConfiguration.visible ? getUnityInstance().ShowFPSPanel() : getUnityInstance().HideFPSPanel()
 
     return {
       messageId: uuid(),
@@ -302,7 +300,7 @@ function initChatCommands() {
   })
 
   addChatCommand('getname', 'Gets your username', (message) => {
-    const currentUserProfile = getCurrentUserProfile(getGlobalState())
+    const currentUserProfile = getCurrentUserProfile(store.getState())
     if (!currentUserProfile) throw new Error('profileNotInitialized')
     return {
       messageId: uuid(),
@@ -331,7 +329,7 @@ function initChatCommands() {
 
       sendPublicChatMessage(uuid(), `␐${expression} ${time}`)
 
-      unityInterface.TriggerSelfUserExpression(expression)
+      getUnityInstance().TriggerSelfUserExpression(expression)
 
       return {
         messageId: uuid(),
@@ -346,10 +344,10 @@ function initChatCommands() {
   let whisperFn = (expression: string) => {
     const [userName, message] = parseWhisperExpression(expression)
 
-    const currentUserId = getCurrentUserId(getGlobalState())
+    const currentUserId = getCurrentUserId(store.getState())
     if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(getGlobalState(), userName)
+    const user = findProfileByName(store.getState(), userName)
 
     if (!user || !user.userId) {
       return {
@@ -361,7 +359,7 @@ function initChatCommands() {
       }
     }
 
-    const _isFriend: ReturnType<typeof isFriend> = isFriend(globalThis.globalStore.getState(), user.userId)
+    const _isFriend: ReturnType<typeof isFriend> = isFriend(store.getState(), user.userId)
     if (!_isFriend) {
       return {
         messageId: uuid(),
@@ -372,7 +370,7 @@ function initChatCommands() {
       }
     }
 
-    globalThis.globalStore.dispatch(sendPrivateMessage(user.userId, message))
+    store.dispatch(sendPrivateMessage(user.userId, message))
 
     return {
       messageId: uuid(),
@@ -388,28 +386,16 @@ function initChatCommands() {
 
   addChatCommand('w', 'Send a private message to a friend', whisperFn)
 
-  // TODO: Types are not working
-  // addChatCommand('airdrop', 'fake an airdrop', () => {
-  //   unityInterface.TriggerAirdropDisplay(sampleDropData)
-  //   return {
-  //     messageId: uuid(),
-  //     messageType: ChatMessageType.SYSTEM,
-  //     sender: 'Decentraland',
-  //     timestamp: Date.now(),
-  //     body: 'Faking airdrop...'
-  //   }
-  // })
-
   function performSocialActionOnPlayer(
     username: string,
     actionBuilder: (usersId: string[]) => { type: string; payload: { playersId: string[] } },
     actionName: 'mute' | 'block' | 'unmute' | 'unblock'
   ) {
     let pastTense: string = actionName === 'mute' || actionName === 'unmute' ? actionName + 'd' : actionName + 'ed'
-    const currentUserId = getCurrentUserId(getGlobalState())
+    const currentUserId = getCurrentUserId(store.getState())
     if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(getGlobalState(), username)
+    const user = findProfileByName(store.getState(), username)
     if (user && user.userId) {
       // Cannot mute yourself
       if (username === currentUserId) {
@@ -422,7 +408,7 @@ function initChatCommands() {
         }
       }
 
-      globalThis.globalStore.dispatch(actionBuilder([user.userId]))
+      store.dispatch(actionBuilder([user.userId]))
 
       return {
         messageId: uuid(),
@@ -504,10 +490,6 @@ function initChatCommands() {
       body: 'Looking for other players...'
     }
   })
-}
-
-function getGlobalState(): RootState {
-  return globalThis.globalStore.getState()
 }
 
 function parseWhisperExpression(expression: string) {

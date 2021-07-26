@@ -1,23 +1,24 @@
-import { store } from 'shared/store/store'
+import 'unity-interface/UnityInterface'
+import { store } from 'shared/store/isolatedStore'
 import { BrowserInterface, browserInterface } from 'unity-interface/BrowserInterface'
-import { UnityInterface, unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance, IUnityInterface } from 'unity-interface/IUnityInterface'
 import { isInitialized } from './selectors'
 
 export type RendererInterfaces = {
-  unityInterface: UnityInterface
+  unityInterface: IUnityInterface
   browserInterface: BrowserInterface
 }
 
 export async function ensureUnityInterface(): Promise<RendererInterfaces> {
   if (isInitialized(store.getState())) {
-    return { unityInterface, browserInterface }
+    return { unityInterface: getUnityInstance(), browserInterface }
   }
 
   return new Promise<RendererInterfaces>((resolve) => {
     const unsubscribe = store.subscribe(() => {
       if (isInitialized(store.getState())) {
         unsubscribe()
-        return resolve({ unityInterface, browserInterface })
+        return resolve({ unityInterface: getUnityInstance(), browserInterface })
       }
     })
   })

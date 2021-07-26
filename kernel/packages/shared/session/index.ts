@@ -1,8 +1,5 @@
 import { disconnect, sendToMordor } from 'shared/comms'
-import { RootState, StoreContainer } from 'shared/store/rootTypes'
-
 import { getCurrentIdentity, hasWallet as hasWalletSelector } from './selectors'
-import { Store } from 'redux'
 import {
   getFromLocalStorage,
   getKeysFromLocalStorage,
@@ -10,10 +7,7 @@ import {
   saveToLocalStorage
 } from 'atomicHelpers/localStorage'
 import { StoredSession } from './types'
-import { authenticate } from './actions'
-import { IEthereumProvider, LoginState } from '@dcl/kernel-interface'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 const SESSION_KEY_PREFIX = 'dcl-session'
 const LAST_SESSION_KEY = 'dcl-last-session-id'
@@ -82,9 +76,9 @@ export const getLastGuestSession = (): StoredSession | null => {
   return sessions.length > 0 ? sessions[0] : null
 }
 
-export const getIdentity = () => getCurrentIdentity(globalThis.globalStore.getState())
+export const getIdentity = () => getCurrentIdentity(store.getState())
 
-export const hasWallet = () => hasWalletSelector(globalThis.globalStore.getState())
+export const hasWallet = () => hasWalletSelector(store.getState())
 
 export class Session {
   private static _instance: Session = new Session()
@@ -104,42 +98,6 @@ export class Session {
 
   async redirectToSignUp() {
     window.location.search += '&show_wallet=1'
-  }
-}
-
-export async function userAuthentified(): Promise<void> {
-  const store: Store<RootState> = globalThis.globalStore
-
-  const hasIdentity = !!store.getState().session.identity
-  if (hasIdentity) {
-    return Promise.resolve()
-  }
-
-  return new Promise((resolve) => {
-    const unsubscribe = store.subscribe(() => {
-      const hasIdentity = !!store.getState().session.identity
-      if (hasIdentity) {
-        unsubscribe()
-        return resolve()
-      }
-    })
-  })
-}
-
-export function authenticateWhenItsReady(provider: IEthereumProvider, isGuest: boolean) {
-  const store: Store<RootState> = globalThis.globalStore
-  const loginState = store.getState().session.loginState
-
-  if (loginState === LoginState.WAITING_PROVIDER) {
-    globalThis.globalStore.dispatch(authenticate(provider, isGuest))
-  } else {
-    const unsubscribe = store.subscribe(() => {
-      const loginState = store.getState().session.loginState
-      if (loginState === LoginState.WAITING_PROVIDER) {
-        unsubscribe()
-        globalThis.globalStore.dispatch(authenticate(provider, isGuest))
-      }
-    })
   }
 }
 

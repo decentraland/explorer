@@ -35,7 +35,7 @@ import {
 } from './actions'
 
 import { isVoiceChatRecording } from './selectors'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { sceneObservable } from 'shared/world/sceneState'
 import { SceneFeatureToggles } from 'shared/types'
@@ -63,7 +63,7 @@ function* listenToWhetherSceneSupportsVoiceChat() {
       ? isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
       : undefined
     if (previouslyEnabled !== nowEnabled && nowEnabled !== undefined) {
-      unityInterface.SetVoiceChatEnabledByScene(nowEnabled)
+      getUnityInstance().SetVoiceChatEnabledByScene(nowEnabled)
       if (!nowEnabled) {
         // We want to stop any potential recordings when a user enters a new scene
         updateVoiceRecordingStatus(false)
@@ -120,7 +120,7 @@ function* updateVoiceChatMute(action: SetVoiceMute) {
 }
 
 function* updatePlayerVoiceRecording(action: VoiceRecordingUpdate) {
-  unityInterface.SetPlayerTalking(action.payload.recording)
+  getUnityInstance().SetPlayerTalking(action.payload.recording)
 }
 
 function* changeRealm() {

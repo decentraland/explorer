@@ -13,7 +13,7 @@ import {
   UNMUTE_PLAYERS
 } from './actions'
 import { Profile } from 'shared/profiles/types'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 
 type ProfileSetKey = 'muted' | 'blocked'
 
@@ -53,7 +53,7 @@ function* addPlayerToProfileSet(playersId: string[], setKey: ProfileSetKey) {
 
     yield put(saveProfileRequest({ [setKey]: set }))
     if (setKey === 'muted') {
-      unityInterface.SetUsersMuted(idsToAdd, true)
+      getUnityInstance().SetUsersMuted(idsToAdd, true)
     }
   }
 }
@@ -65,7 +65,7 @@ function* removePlayerFromProfileSet(playersId: string[], setKey: ProfileSetKey)
     const set = profile[setKey] ? profile[setKey]!.filter((id) => !playersId.includes(id)) : []
     yield put(saveProfileRequest({ ...profile, [setKey]: set }))
     if (setKey === 'muted') {
-      unityInterface.SetUsersMuted(playersId, false)
+      getUnityInstance().SetUsersMuted(playersId, false)
     }
   }
 }

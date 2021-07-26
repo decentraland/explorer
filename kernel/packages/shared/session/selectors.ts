@@ -12,3 +12,7 @@ export const getIsGuestLogin = (state: RootSessionState): boolean => !!state.ses
 export const getProvider = (state: RootSessionState): IEthereumProvider | undefined => state.session.provider
 export const isSignUp = (state: RootSessionState) => state.session.isSignUp
 export const isLoginStageCompleted = (state: RootSessionState) => state.session.loginState === LoginState.COMPLETED
+
+export function isLoginCompleted(state: RootSessionState) {
+  return state.session.identity && state.session.provider && state.session.loginState === LoginState.COMPLETED
+}

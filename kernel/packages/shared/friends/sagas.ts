@@ -28,7 +28,6 @@ import {
   PresenceStatus,
   HUDElementID
 } from 'shared/types'
-import { StoreContainer } from 'shared/store/rootTypes'
 import { getRealm, getUpdateProfileServer } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
 import { lastPlayerPosition, positionObservable } from 'shared/world/positionThings'
@@ -52,11 +51,10 @@ import {
 } from 'shared/friends/actions'
 import { ensureRendererEnabled } from 'shared/world/worldState'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { ensureFriendProfile } from './ensureFriendProfile'
 import { getSynapseUrl } from 'shared/meta/selectors'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 const DEBUG = DEBUG_PM
 
@@ -98,11 +96,11 @@ function* initializeSaga() {
 
       yield call(ensureRenderer)
 
-      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+      getUnityInstance().ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
 
       yield ensureRendererEnabled()
 
-      unityInterface.ShowNotification({
+      getUnityInstance().ShowNotification({
         type: NotificationType.GENERIC,
         message: 'There was an error initializing friends and private messages',
         buttonMessage: 'OK',
@@ -182,7 +180,7 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
       receivedMessages[message.id] = Date.now()
     }
 
-    const { socialInfo } = globalThis.globalStore.getState().friends
+    const { socialInfo } = store.getState().friends
     const friend = Object.values(socialInfo).find((friend) => friend.conversationId === conversation.id)
 
     if (!friend) {
@@ -190,7 +188,7 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
       return
     }
 
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const profile = getProfile(store.getState(), identity.address)
     const blocked = profile?.blocked ?? []
     if (blocked.includes(friend.userId)) {
       DEBUG && logger.warn(`got a message from blocked user`, friend.userId)
@@ -219,13 +217,13 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
       return null
     }
 
-    globalThis.globalStore.dispatch(updateUserData(userId, socialId))
+    store.dispatch(updateUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
     await ensureFriendProfile(userId)
 
     // add to friendRequests & update renderer
-    globalThis.globalStore.dispatch(updateFriendship(action, userId, true))
+    store.dispatch(updateFriendship(action, userId, true))
   }
 
   client.onFriendshipRequest((socialId) =>
@@ -325,8 +323,8 @@ function* initializeFriends(client: SocialAPI) {
     requestedTo: requestedToIds,
     requestedFrom: requestedFromIds
   }
-  DEBUG && logger.info(`unityInterface.InitializeFriends`, initMessage)
-  unityInterface.InitializeFriends(initMessage)
+  DEBUG && logger.info(`getUnityInstance().InitializeFriends`, initMessage)
+  getUnityInstance().InitializeFriends(initMessage)
 
   return { friendsSocial, ownId }
 }
@@ -347,7 +345,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   const presence: PresenceStatus =
     status.presence === PresenceType.OFFLINE ? PresenceStatus.OFFLINE : PresenceStatus.ONLINE
 
-  const domain = globalThis.globalStore.getState().friends.client?.getDomain()
+  const domain = store.getState().friends.client?.getDomain()
   let matches = id.match(new RegExp(`@(\\w.+):${domain}`, 'i'))
 
   const userId = matches !== null ? matches[1] : id
@@ -371,8 +369,8 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
     presence
   }
 
-  DEBUG && logger.info(`unityInterface.UpdateUserPresence`, updateMessage)
-  unityInterface.UpdateUserPresence(updateMessage)
+  DEBUG && logger.info(`getUnityInstance().UpdateUserPresence`, updateMessage)
+  getUnityInstance().UpdateUserPresence(updateMessage)
   notifyFriendOnlineStatusThroughChat(updateMessage)
 }
 
@@ -388,7 +386,7 @@ function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
 function* initializeStatusUpdateInterval(client: SocialAPI) {
   const domain = client.getDomain()
 
-  const friends = globalThis.globalStore.getState().friends.friends.map((x) => {
+  const friends = store.getState().friends.friends.map((x) => {
     return `@${x}:${domain}`
   })
 
@@ -396,7 +394,7 @@ function* initializeStatusUpdateInterval(client: SocialAPI) {
 
   client.onStatusChange((socialId, status) => {
     DEBUG && logger.info(`client.onStatusChange`, socialId, status)
-    const user: SocialData | undefined = globalThis.globalStore.getState().friends.socialInfo[socialId]
+    const user: SocialData | undefined = store.getState().friends.socialInfo[socialId]
 
     if (!user) {
       logger.error(`user not found for status change with social id`, socialId)
@@ -448,7 +446,7 @@ function* initializeStatusUpdateInterval(client: SocialAPI) {
   }
 
   positionObservable.add(({ position: { x, y, z } }) => {
-    const realm = getRealm(globalThis.globalStore.getState())
+    const realm = getRealm(store.getState())
 
     sendOwnStatusIfNecessary({ worldPosition: { x, y, z }, realm, timestamp: Date.now() })
   })
@@ -477,8 +475,8 @@ function parseUserId(socialId: string) {
 }
 
 function addNewChatMessage(chatMessage: ChatMessage) {
-  DEBUG && logger.info(`unityInterface.AddMessageToChatWindow`, chatMessage)
-  unityInterface.AddMessageToChatWindow(chatMessage)
+  DEBUG && logger.info(`getUnityInstance().AddMessageToChatWindow`, chatMessage)
+  getUnityInstance().AddMessageToChatWindow(chatMessage)
 }
 
 function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = false) {
@@ -617,8 +615,8 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
       yield put(updatePrivateMessagingState(newState))
 
       if (incoming) {
-        DEBUG && logger.info(`unityInterface.UpdateFriendshipStatus`, payload)
-        unityInterface.UpdateFriendshipStatus(payload)
+        DEBUG && logger.info(`getUnityInstance().UpdateFriendshipStatus`, payload)
+        getUnityInstance().UpdateFriendshipStatus(payload)
       } else {
         yield call(handleOutgoingUpdateFriendshipStatus, payload)
       }
@@ -641,7 +639,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 }
 
 function showErrorNotification(message: string) {
-  unityInterface.ShowNotification({
+  getUnityInstance().ShowNotification({
     type: NotificationType.GENERIC,
     message,
     buttonMessage: 'OK',
@@ -709,7 +707,7 @@ function toSocialData(socialIds: string[]) {
 
 function* fetchTimeFromCatalystServer() {
   try {
-    const contentServer = getUpdateProfileServer(globalThis.globalStore.getState())
+    const contentServer = getUpdateProfileServer(store.getState())
     const response = yield fetch(`${contentServer}/status`)
     if (response.ok) {
       const { currentTime } = yield response.json()

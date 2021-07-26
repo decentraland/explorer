@@ -64,7 +64,7 @@ import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selec
 import { Realm } from 'shared/dao/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
-import { store } from 'shared/store/store'
+import { store } from 'shared/store/isolatedStore'
 import {
   setCatalystRealmCommsStatus,
   setCatalystRealm,
@@ -102,7 +102,7 @@ import future, { IFuture } from 'fp-future'
 import { getProfileType } from 'shared/profiles/getProfileType'
 import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { isURL } from 'atomicHelpers/isURL'
 import { RootCommsState, VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
@@ -306,7 +306,7 @@ export function updatePeerVoicePlaying(userId: string, playing: boolean) {
       }
     }
   }
-  unityInterface.SetUserTalking(userId, playing)
+  getUnityInstance().SetUserTalking(userId, playing)
 }
 
 export function updateVoiceCommunicatorVolume(volume: number) {

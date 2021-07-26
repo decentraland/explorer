@@ -4,12 +4,18 @@ import { IEventNames, IEvents } from '../decentraland-ecs/src/decentraland/Types
 import { createLogger, ILogger, createDummyLogger } from 'shared/logger'
 import { EntityAction, EnvironmentData } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
-import { getParcelSceneID } from 'shared/world/parcelSceneManager'
 import { SceneWorker } from 'shared/world/SceneWorker'
-import { unityInterface } from './UnityInterface'
+import { getUnityInstance } from './IUnityInterface'
 import { protobufMsgBridge } from './protobufMessagesBridge'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { trackEvent } from 'shared/analytics'
+
+/**
+ * Returns the id of the scene, usually the RootCID
+ */
+export function getParcelSceneID(parcelScene: ParcelSceneAPI) {
+  return parcelScene.data.sceneId
+}
 
 let sendBatchTime: Array<number> = []
 let sendBatchMsgs: Array<number> = []
@@ -39,7 +45,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
   sendBatch(actions: EntityAction[]): void {
     let time = Date.now()
     if (WSS_ENABLED || FORCE_SEND_MESSAGE) {
-      this.sendBatchWss(unityInterface, actions)
+      this.sendBatchWss(actions)
     } else {
       this.sendBatchNative(actions)
     }
@@ -64,7 +70,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
     }
   }
 
-  sendBatchWss(unityInterface: any, actions: EntityAction[]): void {
+  sendBatchWss(actions: EntityAction[]): void {
     const sceneId = getParcelSceneID(this)
     let messages = ''
     for (let i = 0; i < actions.length; i++) {
@@ -82,7 +88,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
       messages += '\n'
     }
 
-    unityInterface.SendSceneMessage(messages)
+    getUnityInstance().SendSceneMessage(messages)
   }
 
   sendBatchNative(actions: EntityAction[]): void {

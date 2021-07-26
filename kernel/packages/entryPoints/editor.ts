@@ -18,7 +18,7 @@ import { uuid } from '../decentraland-ecs/src/ecs/helpers'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { UnityParcelScene } from 'unity-interface/UnityParcelScene'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { futures } from 'unity-interface/BrowserInterface'
 
 const evtEmitter = new EventEmitter()
@@ -47,13 +47,13 @@ async function createBuilderScene(scene: SceneJsonData, baseUrl: string, mapping
   await engineReady
 
   if (isFirstRun) {
-    unityInterface.SetBuilderReady()
+    getUnityInstance().SetBuilderReady()
   } else {
-    unityInterface.ResetBuilderScene()
+    getUnityInstance().ResetBuilderScene()
   }
   await builderSceneLoaded
 
-  unityInterface.ActivateRendering()
+  getUnityInstance().ActivateRendering()
   evtEmitter.emit('ready', {})
 }
 
@@ -165,9 +165,9 @@ namespace editor {
     try {
       await initializeUnity({ container })
       defaultLogger.log('Engine initialized.')
-      unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
-      unityInterface.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
-      unityInterface.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+      getUnityInstance().ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+      getUnityInstance().ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
+      getUnityInstance().ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
 
       initializedEngine.resolve()
     } catch (err) {
@@ -185,11 +185,11 @@ namespace editor {
   }
 
   export function setGridResolution(position: number, rotation: number, scale: number) {
-    unityInterface.SetBuilderGridResolution(position, rotation, scale)
+    getUnityInstance().SetBuilderGridResolution(position, rotation, scale)
   }
 
   export function setSelectedEntities(entities: string[]) {
-    unityInterface.SetBuilderSelectedEntities(entities)
+    getUnityInstance().SetBuilderSelectedEntities(entities)
   }
 
   export function getDCLCanvas() {
@@ -203,7 +203,7 @@ namespace editor {
   export async function sendExternalAction(action: { type: string; payload: { [key: string]: any } }) {
     if (action.type === 'Close editor') {
       unloadCurrentBuilderScene()
-      unityInterface.DeactivateRendering()
+      getUnityInstance().DeactivateRendering()
     } else if (unityScene) {
       const { worker } = unityScene
       if (action.payload.mappings) {
@@ -215,12 +215,12 @@ namespace editor {
   }
 
   export function selectGizmo(type: string) {
-    unityInterface.SelectGizmoBuilder(type)
+    getUnityInstance().SelectGizmoBuilder(type)
   }
 
   export async function setPlayMode(on: boolean) {
     const onString: string = on ? 'true' : 'false'
-    unityInterface.SetPlayModeBuilder(onString)
+    getUnityInstance().SetPlayModeBuilder(onString)
   }
 
   export function on(evt: string, listener: (...args: any[]) => void) {
@@ -232,24 +232,24 @@ namespace editor {
   }
 
   export function setCameraZoomDelta(delta: number) {
-    unityInterface.SetCameraZoomDeltaBuilder(delta)
+    getUnityInstance().SetCameraZoomDeltaBuilder(delta)
   }
 
   export function getCameraTarget() {
     const id = uuid()
     futures[id] = future()
-    unityInterface.GetCameraTargetBuilder(id)
+    getUnityInstance().GetCameraTargetBuilder(id)
     return futures[id]
   }
 
   export function resetCameraZoom() {
-    unityInterface.ResetCameraZoomBuilder()
+    getUnityInstance().ResetCameraZoomBuilder()
   }
 
   export function getMouseWorldPosition(x: number, y: number): IFuture<Vector3> {
     const id = uuid()
     futures[id] = future()
-    unityInterface.GetMousePositionBuilder(x.toString(), y.toString(), id)
+    getUnityInstance().GetMousePositionBuilder(x.toString(), y.toString(), id)
     return futures[id]
   }
 
@@ -258,11 +258,11 @@ namespace editor {
   }
 
   export function preloadFile(url: string) {
-    unityInterface.PreloadFileBuilder(url)
+    getUnityInstance().PreloadFileBuilder(url)
   }
 
   export function setCameraRotation(alpha: number, beta: number) {
-    unityInterface.SetCameraRotationBuilder(alpha, beta)
+    getUnityInstance().SetCameraRotationBuilder(alpha, beta)
   }
 
   export function getLoadingEntities() {
@@ -274,30 +274,30 @@ namespace editor {
   }
 
   export function addWearablesToCatalog(wearables: WearableV2[]) {
-    unityInterface.AddWearablesToCatalog(wearables)
+    getUnityInstance().AddWearablesToCatalog(wearables)
   }
 
   export function removeWearablesFromCatalog(wearableIds: string[]) {
-    unityInterface.RemoveWearablesFromCatalog(wearableIds)
+    getUnityInstance().RemoveWearablesFromCatalog(wearableIds)
   }
 
   export function takeScreenshot(mime?: string): IFuture<string> {
     const id = uuid()
     futures[id] = future()
-    unityInterface.TakeScreenshotBuilder(id)
+    getUnityInstance().TakeScreenshotBuilder(id)
     return futures[id]
   }
 
   export function setCameraPosition(position: Vector3) {
-    unityInterface.SetCameraPositionBuilder(position)
+    getUnityInstance().SetCameraPositionBuilder(position)
   }
 
   export function onKeyDown(key: string) {
-    unityInterface.OnBuilderKeyDown(key)
+    getUnityInstance().OnBuilderKeyDown(key)
   }
 
   export function setBuilderConfiguration(config: BuilderConfiguration) {
-    unityInterface.SetBuilderConfiguration(config)
+    getUnityInstance().SetBuilderConfiguration(config)
   }
 }
 
