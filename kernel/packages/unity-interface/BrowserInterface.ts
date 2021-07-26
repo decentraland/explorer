@@ -76,6 +76,7 @@ import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { Store } from 'redux'
 import { areCandidatesFetched } from 'shared/dao/selectors'
+import { realmToString } from 'shared/dao/utils/realmToString'
 
 declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
@@ -118,7 +119,7 @@ export class BrowserInterface {
   public handleUnityMessage(type: string, message: any) {
     if (type in this) {
       // tslint:disable-next-line:semicolon
-      ; (this as any)[type](message)
+      ;(this as any)[type](message)
     } else {
       defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
     }
@@ -242,6 +243,7 @@ export class BrowserInterface {
   }
 
   public GoTo(data: { x: number; y: number }) {
+    notifyStatusThroughChat(`Jumped to ${data.x},${data.y}!`)
     TeleportController.goTo(data.x, data.y)
   }
 
@@ -288,7 +290,11 @@ export class BrowserInterface {
   }
 
   public SendAuthentication(data: { rendererAuthenticationType: string }) {
-    const providerType: ProviderType | null = Object.values(ProviderType).includes(data.rendererAuthenticationType as ProviderType) ? data.rendererAuthenticationType as ProviderType : null
+    const providerType: ProviderType | null = Object.values(ProviderType).includes(
+      data.rendererAuthenticationType as ProviderType
+    )
+      ? (data.rendererAuthenticationType as ProviderType)
+      : null
 
     authenticateWhenItsReady(providerType)
   }
@@ -482,7 +488,7 @@ export class BrowserInterface {
       realm: { serverName, layer }
     } = data
 
-    const realmString = serverName + '-' + layer
+    const realmString = realmToString({ serverName, layer })
 
     notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
 
@@ -500,17 +506,21 @@ export class BrowserInterface {
     if (realm) {
       catalystRealmConnected().then(
         () => {
-          TeleportController.goTo(x, y, `Jumped to ${x},${y} in realm ${realmString}!`)
+          const successMessage = `Jumped to ${x},${y} in realm ${realmString}!`
+          notifyStatusThroughChat(successMessage)
+          unityInterface.ConnectionToRealmSuccess(data)
+          TeleportController.goTo(x, y, successMessage)
         },
         (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           notifyStatusThroughChat('Could not join realm.' + cause)
-
+          unityInterface.ConnectionToRealmFailed(data)
           defaultLogger.error('Error joining realm', e)
         }
       )
     } else {
-      notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
+      unityInterface.ConnectionToRealmFailed(data)
     }
   }
 
@@ -614,6 +624,10 @@ export class BrowserInterface {
 
   public UnpublishScene(data: { coordinates: string }) {
     unpublishSceneByCoords(data.coordinates).catch((error) => defaultLogger.log(error))
+  }
+
+  public async NotifyStatusThroughChat(data: { value: string }) {
+    notifyStatusThroughChat(data.value)
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {

@@ -5,7 +5,8 @@ import {
   COMMS,
   AUTO_CHANGE_REALM,
   genericAvatarSnapshots,
-  COMMS_PROFILE_TIMEOUT
+  COMMS_PROFILE_TIMEOUT,
+  COMMS_SERVICE
 } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
@@ -57,7 +58,7 @@ import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
-import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
+import { LighthouseConnectionConfig, LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 
 import { Authenticator, AuthIdentity } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
@@ -80,7 +81,11 @@ import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
-import { BringDownClientAndShowError, ErrorContext, ReportFatalErrorWithCommsPayload } from 'shared/loading/ReportFatalError'
+import {
+  BringDownClientAndShowError,
+  ErrorContext,
+  ReportFatalErrorWithCommsPayload
+} from 'shared/loading/ReportFatalError'
 import {
   NEW_LOGIN,
   commsEstablished,
@@ -91,8 +96,8 @@ import {
 import { getIdentity, getStoredSession } from 'shared/session'
 import { createLogger } from '../logger'
 import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
-import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
-import { getVoicePolicy, isVoiceChatRecording } from './selectors'
+import { setCommsIsland, voicePlayingUpdate, voiceRecordingUpdate } from './actions'
+import { getCommsIsland, getPreferedIsland, getVoicePolicy, isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
 import future, { IFuture } from 'fp-future'
 import { getProfileType } from 'shared/profiles/getProfileType'
@@ -100,11 +105,13 @@ import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { isURL } from 'atomicHelpers/isURL'
-import { VoicePolicy } from './types'
+import { RootCommsState, VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
 import { EncodedFrame } from 'voice-chat-codec/types'
 import Html from 'shared/Html'
 import { isFeatureToggleEnabled } from 'shared/selectors'
+import * as qs from 'query-string'
+import { MinPeerData, Position3D } from '@dcl/catalyst-peer'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -133,6 +140,11 @@ declare const globalThis: CommsContainer
 
 const logger = createLogger('comms: ')
 
+type ProfilePromiseState = {
+  promise: Promise<ProfileForRenderer | void>
+  version: number | null
+  status: 'ok' | 'loading' | 'error'
+}
 export class PeerTrackingInfo {
   public position: Position | null = null
   public identity: string | null = null
@@ -143,11 +155,7 @@ export class PeerTrackingInfo {
   public receivedPublicChatMessages = new Set<string>()
   public talking = false
 
-  profilePromise: {
-    promise: Promise<ProfileForRenderer | void>
-    version: number | null
-    status: 'ok' | 'loading' | 'error'
-  } = {
+  profilePromise: ProfilePromiseState = {
     promise: Promise.resolve(),
     version: null,
     status: 'loading'
@@ -523,28 +531,28 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (context.sendingProfileResponse) return
 
   context.sendingProfileResponse = true
-    ; (async () => {
-      const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+  ;(async () => {
+    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
-      // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
-      if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
-        await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
-      }
+    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+    }
 
-      const profile = await ProfileAsPromise(
-        myAddress,
-        message.data.version ? parseInt(message.data.version, 10) : undefined,
-        getProfileType(myIdentity)
-      )
+    const profile = await ProfileAsPromise(
+      myAddress,
+      message.data.version ? parseInt(message.data.version, 10) : undefined,
+      getProfileType(myIdentity)
+    )
 
-      if (context.currentPosition) {
-        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
-      }
+    if (context.currentPosition) {
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+    }
 
-      context.lastProfileResponseTime = Date.now()
-    })()
-      .finally(() => (context.sendingProfileResponse = false))
-      .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+    context.lastProfileResponseTime = Date.now()
+  })()
+    .finally(() => (context.sendingProfileResponse = false))
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
@@ -837,6 +845,14 @@ function checkAutochangeRealm(visiblePeers: ProcessingPeerInfo[], context: Conte
   }
 }
 
+function removeMissingPeers(context: Context, newPeers: MinPeerData[]) {
+  for (const alias of context.peerData.keys()) {
+    if (!newPeers.some((x) => x.id === alias)) {
+      removePeer(context, alias)
+    }
+  }
+}
+
 function removeAllPeers(context: Context) {
   for (const alias of context.peerData.keys()) {
     removePeer(context, alias)
@@ -921,10 +937,16 @@ export async function connect(userId: string) {
       case 'v2': {
         await ensureMetaConfigurationInitialized()
         const lighthouseUrl = getCommsServer(store.getState())
-        const realm = getRealm(store.getState())
+        let realm = getRealm(store.getState())
         const commsConfig = getCommsConfig(store.getState())
 
-        const peerConfig: any = {
+        if (COMMS_SERVICE) {
+          // For now, we assume that if we provided a hardcoded url for comms it will be island based
+          realm = { ...realm!, lighthouseVersion: '1.0.0' }
+          delete realm.layer
+        }
+
+        const peerConfig: LighthouseConnectionConfig = {
           connectionConfig: {
             iceServers: commConfigurations.iceServers
           },
@@ -943,13 +965,34 @@ export async function connect(userId: string) {
           positionConfig: {
             selfPosition: () => {
               if (context && context.currentPosition) {
-                return context.currentPosition.slice(0, 3)
+                return context.currentPosition.slice(0, 3) as Position3D
               }
             },
             maxConnectionDistance: 4,
             nearbyPeersDistance: 5,
             disconnectDistance: 5
-          }
+          },
+          eventsHandler: {
+            onIslandChange: (island: string | undefined, peers: MinPeerData[]) => {
+              store.dispatch(setCommsIsland(island))
+
+              if (!context) {
+                logger.warn('no context was found to remove the peers')
+                return
+              }
+
+              removeMissingPeers(context, peers)
+            },
+            onPeerLeftIsland: (peerId: string) => {
+              if (!context) {
+                logger.warn('no context was found to remove the peer')
+                return
+              }
+
+              removePeer(context, peerId)
+            }
+          },
+          preferedIslandId: getPreferedIsland(store.getState())
         }
 
         if (!commsConfig.relaySuspensionDisabled) {
@@ -1133,7 +1176,7 @@ async function doStartCommunications(context: Context) {
         obj.immediate
       ] as Position
 
-      if (context && isRendererEnabled) {
+      if (context && isRendererEnabled()) {
         onPositionUpdate(context, p)
       }
     })
@@ -1174,7 +1217,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
-        ; (globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
+      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     throw new ConnectionEstablishmentError(e.message)
@@ -1286,4 +1329,33 @@ function stripSnapshots(profile: Profile): Profile {
     ...profile,
     avatar: { ...profile.avatar, snapshots: newSnapshots as Snapshots }
   }
+}
+
+function observeIslandChange(
+  store: Store<RootCommsState>,
+  onIslandChange: (previousIsland: string | undefined, currentIsland: string | undefined) => any
+) {
+  let currentIsland = getCommsIsland(store.getState())
+
+  store.subscribe(() => {
+    const previousIsland = currentIsland
+    currentIsland = getCommsIsland(store.getState())
+    if (currentIsland !== previousIsland) {
+      onIslandChange(previousIsland, currentIsland)
+    }
+  })
+}
+
+export function initializeUrlIslandObserver() {
+  observeIslandChange(store, (_previousIsland, currentIsland) => {
+    const q = qs.parse(location.search)
+
+    if (currentIsland) {
+      q.island = currentIsland
+    } else {
+      delete q.island
+    }
+
+    history.replaceState({ island: currentIsland }, '', `?${qs.stringify(q)}`)
+  })
 }

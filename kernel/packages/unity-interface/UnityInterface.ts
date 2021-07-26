@@ -19,7 +19,8 @@ import {
   RealmsInfoForRenderer,
   ContentMapping,
   Profile,
-  TutorialInitializationMessage
+  TutorialInitializationMessage,
+  WorldPosition
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -59,7 +60,7 @@ export class UnityInterface {
   public debug: boolean = false
   public gameInstance: any
   public Module: any
-  public currentHeight: number = 1080
+  public currentHeight: number = -1
   public crashPayloadResponseObservable: Observable<string> = new Observable<string>()
 
   public SetTargetHeight(height: number): void {
@@ -358,6 +359,14 @@ export class UnityInterface {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       this.SendMessageToUnity('Main', 'UpdateHotScenesList', JSON.stringify(payload))
     }
+  }
+
+  public ConnectionToRealmSuccess(successData: WorldPosition) {
+    this.SendMessageToUnity('Main', 'ConnectionToRealmSuccess', JSON.stringify(successData))
+  }
+
+  public ConnectionToRealmFailed(failedData: WorldPosition) {
+    this.SendMessageToUnity('Main', 'ConnectionToRealmFailed', JSON.stringify(failedData))
   }
 
   public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
