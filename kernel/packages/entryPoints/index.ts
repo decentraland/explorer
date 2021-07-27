@@ -178,6 +178,7 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
   i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
   i.ConfigureHUDElement(HUDElementID.SIGNUP, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.LOADING_HUD, { active: true, visible: false })
+  i.ConfigureHUDElement(HUDElementID.AVATAR_NAMES, { active: true, visible: true })
   i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
   i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
