@@ -123,7 +123,8 @@ export const contracts = {
     'RACBasics': '0x68e139552c4077ce5c9ab929c7e18ca721ffff00',
     'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a',
     'DGAtariDillonFrancis': '0x51e0b1afe5da0c038fc93a3fc8e11cf7a238b40b',
-    'DAOVotingPower': '0xcf9b305b4cd210079f5648f17ede69e666c0c8d4'
+    'DAOVotingPower': '0xcf9b305b4cd210079f5648f17ede69e666c0c8d4',
+    'TheGraphMultisig': '0x89FDdaB2F93417182CdCdb0B8B3322B93AB3A192'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',
