@@ -1,7 +1,6 @@
 import { Script, inject, EventSubscriber } from 'decentraland-rpc'
 
 import { Vector2 } from 'decentraland-ecs/src'
-import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { sleep } from 'atomicHelpers/sleep'
 import future, { IFuture } from 'fp-future'
 
@@ -577,7 +576,13 @@ export abstract class SceneRuntime extends Script {
       }
 
       const e = event.data as IEvents['positionChanged']
-      const playerPosition = worldToGrid(e.cameraPosition)
+
+      //NOTE: calling worldToGrid from parcelScenePositions.ts here crashes kernel when there are 80+ workers since chrome 92.
+      const PARCEL_SIZE = 16
+      const playerPosition = new Vector2(
+        Math.floor(e.cameraPosition.x / PARCEL_SIZE),
+        Math.floor(e.cameraPosition.z / PARCEL_SIZE)
+      )
 
       // @ts-ignore
       if (playerPosition === undefined || this.scenePosition === undefined) {
