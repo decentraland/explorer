@@ -485,5 +485,5 @@ async function getJWT(realm: Realm): Promise<void> {
     nonce: generateNonceForChallenge(challenge, complexity)
   }
 
-  await fetch('/challenge', { method: 'POST', credentials: 'include', body: JSON.stringify(validChallenge) })
+  await fetch(url, { method: 'POST', credentials: 'include', body: JSON.stringify(validChallenge) })
 }
