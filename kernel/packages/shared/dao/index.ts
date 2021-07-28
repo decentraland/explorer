@@ -477,7 +477,6 @@ export function initializeUrlRealmObserver() {
 
 async function getJWT(realm: Realm): Promise<void> {
   const url: string = realm.domain + '/pow-auth/challenge'
-  console.log('Getting Challenge from ', url)
   const challengeResponse = await (await fetch(url, { credentials: 'include' })).json()
   const challenge = challengeResponse.challenge
   const complexity = challengeResponse.complexity
@@ -487,6 +486,5 @@ async function getJWT(realm: Realm): Promise<void> {
     nonce: generateNonceForChallenge(challenge, complexity)
   }
 
-  console.log('Sending solved challenge: ', validChallenge)
   await fetch('/challenge', { method: 'POST', credentials: 'include', body: JSON.stringify(validChallenge) })
 }
