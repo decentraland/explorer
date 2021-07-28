@@ -382,7 +382,7 @@ export class BrowserInterface {
   }
 
   public SetScenesLoadRadius(data: { newRadius: number }) {
-    parcelLimits.visibleRadius = Math.min(Math.round(data.newRadius), 3)
+    parcelLimits.visibleRadius = Math.round(data.newRadius)
 
     renderDistanceObservable.notifyObservers({
       distanceInParcels: parcelLimits.visibleRadius
