@@ -5,7 +5,7 @@ export function generateNonceForChallenge(challenge: string, complexity: number)
     const nonce = crypto.randomBytes(256).toString('hex')
     const hash = crypto
       .createHash('sha256')
-      .update(challenge + nonce)
+      .update(challenge + nonce, 'utf8')
       .digest('hex')
     const isValid = hash.startsWith('0'.repeat(complexity))
 
