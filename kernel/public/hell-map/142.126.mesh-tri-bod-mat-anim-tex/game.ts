@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs'
 
 CreateMesh(new Vector3(1.2, 0, 0.5))
 CreateMesh(new Vector3(4.2, 0, 0.5))

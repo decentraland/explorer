@@ -16,7 +16,7 @@ import {
   Color3,
   Gizmos,
   ActionButton
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const g = new Gizmos()
 
@@ -87,7 +87,7 @@ fruit1.addComponent(g)
 fruit1.addComponent(new AlternatingNotes([sourceAHigh, sourceALow]))
 fruit1.addComponent(shape)
 fruit1.addComponent(
-  new OnPointerDown(e => {
+  new OnPointerDown((e) => {
     log('fuit1 ', e)
     playNote(fruit1)
   })
@@ -106,7 +106,7 @@ fruit2.addComponent(g)
 fruit2.addComponent(new AlternatingNotes([sourceEHigh, sourceGLow]))
 fruit2.addComponent(shape)
 fruit2.addComponent(
-  new OnPointerDown(e => {
+  new OnPointerDown((e) => {
     log('fuit2', e)
     playNote(fruit2)
   })
@@ -125,7 +125,7 @@ fruit3.addComponent(g)
 fruit3.addComponent(new AlternatingNotes([sourceCHigh, sourceCLow]))
 fruit3.addComponent(shape)
 fruit3.addComponent(
-  new OnPointerDown(e => {
+  new OnPointerDown((e) => {
     log('fuit3', e)
     playNote(fruit3)
   })
@@ -144,7 +144,7 @@ function playNote(fruit: Entity) {
   }
 }
 
-Input.instance.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, evt => {
+Input.instance.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, (evt) => {
   log(evt)
 
   if (evt.hit) {

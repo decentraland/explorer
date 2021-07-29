@@ -1,4 +1,4 @@
-import { CLASS_ID } from 'decentraland-ecs/src'
+import { CLASS_ID } from 'decentraland-ecs'
 import { SceneSourcePlacement } from 'shared/types'
 
 /**

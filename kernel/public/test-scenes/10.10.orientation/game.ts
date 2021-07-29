@@ -11,7 +11,7 @@ import {
   OBJShape,
   Quaternion,
   TextShape
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 function makeThing(Shape: any, position: Vector3, scale?: Vector3) {
   const ent = new Entity()

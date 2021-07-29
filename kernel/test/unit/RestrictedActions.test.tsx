@@ -1,5 +1,5 @@
 import * as sinon from 'sinon'
-import { Vector3 } from 'decentraland-ecs/src'
+import { Vector3 } from 'decentraland-ecs'
 import { getUnityInstance } from '../../packages/unity-interface/IUnityInterface'
 import defaultLogger from '../../packages/shared/logger'
 import { Permission, RestrictedActions } from '../../packages/shared/apis/RestrictedActions'

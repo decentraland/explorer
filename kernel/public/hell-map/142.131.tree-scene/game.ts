@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform } from 'decentraland-ecs'
 
 const entity = new Entity()
 entity.addComponent(new GLTFShape('models/Tree_Scene.glb'))

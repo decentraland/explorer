@@ -6,7 +6,7 @@ import {
   UIStackOrientation,
   UIImage,
   Texture
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const ui = new UICanvas()
 

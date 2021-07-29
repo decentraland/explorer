@@ -1,4 +1,4 @@
-import { Entity, Vector3, Transform, BoxShape } from 'decentraland-ecs/src'
+import { Entity, Vector3, Transform, BoxShape } from 'decentraland-ecs'
 
 export class Cube extends Entity {
   constructor(position: Vector3, scale: Vector3) {

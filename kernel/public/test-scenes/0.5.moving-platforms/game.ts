@@ -9,7 +9,7 @@ import {
   Shape,
   OnClick,
   Scalar
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 @Component('Movement')
 export class PingPongMovement {
@@ -144,8 +144,8 @@ let movingPlatformEntity = configureShapeEntityPositions(
 movingPlatformEntity.getComponent(Transform).scale = new Vector3(2, 0.25, 2)
 movingPlatformEntity.addComponentOrReplace(new ObjectRotation(10, new Vector3(0, 1, 0)))
 movingPlatformEntity.addComponentOrReplace(
-  new OnClick(e => {
-    movingPlatformEntity.getComponent(PingPongMovement).speed *= 1.25;
+  new OnClick((e) => {
+    movingPlatformEntity.getComponent(PingPongMovement).speed *= 1.25
   })
 )
 
@@ -171,7 +171,7 @@ pendulumPlatformtentity.addComponentOrReplace(
   })
 )
 pendulumPlatformtentity.addComponentOrReplace(
-  new OnClick(e => {
+  new OnClick((e) => {
     pendulumPivotentity.addComponentOrReplace(new ObjectRotation(5, new Vector3(0, 0, 1)))
   })
 )

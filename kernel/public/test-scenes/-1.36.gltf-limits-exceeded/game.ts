@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, log } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform, log } from 'decentraland-ecs'
 
 let totalTime = 0
 

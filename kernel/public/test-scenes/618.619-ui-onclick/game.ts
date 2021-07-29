@@ -1,6 +1,4 @@
-import { UICanvas, Color4, UIContainerRect, UIImage, Texture, Color3, UIText } from 'decentraland-ecs/src'
-
-import { OnClick } from 'decentraland-ecs/src/decentraland/UIEvents'
+import { UICanvas, Color4, UIContainerRect, UIImage, Texture, Color3, UIText, OnClick } from 'decentraland-ecs'
 
 const ui = new UICanvas()
 

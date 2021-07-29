@@ -14,7 +14,7 @@ import {
   UpdateEntityComponentPayload,
   EntityActionType
 } from 'shared/types'
-import { QueryType } from 'decentraland-ecs/src'
+import { QueryType } from 'decentraland-ecs'
 import type { UnityGame } from '@dcl/unity-renderer/src'
 
 enum RaycastQueryType {

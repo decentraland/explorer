@@ -14,8 +14,8 @@ import { SceneWorker } from '../shared/world/SceneWorker'
 import { initializeUnity } from '../unity-interface/initializer'
 import { loadBuilderScene, updateBuilderScene, unloadCurrentBuilderScene } from '../unity-interface/dcl'
 import defaultLogger from '../shared/logger'
-import { uuid } from '../decentraland-ecs/src/ecs/helpers'
-import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
+import { uuid } from 'atomicHelpers/math'
+import { Vector3 } from 'decentraland-ecs'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { UnityParcelScene } from 'unity-interface/UnityParcelScene'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
@@ -210,7 +210,7 @@ namespace editor {
         const scene = { ...action.payload.scene }
         await renewBuilderScene(scene, action.payload.mappings)
       }
-      worker.sendSubscriptionEvent('externalAction', action)
+      worker.sendSubscriptionEvent('externalAction' as any, action)
     }
   }
 

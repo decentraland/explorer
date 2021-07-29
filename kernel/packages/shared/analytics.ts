@@ -1,7 +1,7 @@
 import { DEBUG_ANALYTICS } from 'config'
 
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { Vector2 } from 'decentraland-ecs/src'
+import { Vector2 } from 'decentraland-ecs'
 import { defaultLogger } from 'shared/logger'
 
 import { avatarMessageObservable } from './comms/peers'

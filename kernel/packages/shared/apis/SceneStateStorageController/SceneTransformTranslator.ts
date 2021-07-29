@@ -1,5 +1,5 @@
 import { Component } from 'scene-system/stateful-scene/types'
-import { CLASS_ID, Matrix, Quaternion, Vector3 } from 'decentraland-ecs/src'
+import { CLASS_ID, Matrix, Quaternion, Vector3 } from 'decentraland-ecs'
 import { SceneSource, SceneSourcePlacement } from 'shared/types'
 import { BuilderComponent } from './types'
 import { toHumanReadableType } from './utils'

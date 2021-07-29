@@ -1,4 +1,4 @@
-import { engine, PlaneShape, Entity, Transform, BasicMaterial, Texture } from 'decentraland-ecs/src'
+import { engine, PlaneShape, Entity, Transform, BasicMaterial, Texture } from 'decentraland-ecs'
 
 const plane = new PlaneShape()
 const niceMaterial = new BasicMaterial()

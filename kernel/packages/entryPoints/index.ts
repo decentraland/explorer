@@ -272,8 +272,6 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
   }
 
-  document.body.classList.remove('dcl-loading')
-
   return true
 }
 

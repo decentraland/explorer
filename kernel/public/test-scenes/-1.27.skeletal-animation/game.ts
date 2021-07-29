@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs'
 
 function makeGLTF(src: string, position: Vector3) {
   const ent = new Entity()

@@ -1,6 +1,6 @@
 import { Fetcher } from 'dcl-catalyst-commons'
 import { decentralandConfigurations, getDefaultTLD } from 'config'
-import { LandRole, ParcelsWithAccess } from 'decentraland-ecs/src'
+import { LandRole, ParcelsWithAccess } from 'decentraland-ecs'
 import defaultLogger from 'shared/logger'
 
 const getLandQuery = () => `

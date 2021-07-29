@@ -1,5 +1,5 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
+import { MinimapSceneInfo } from 'decentraland-ecs'
 import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redux-saga/effects'
 import { parcelLimits } from 'config'
 import { fetchSceneJson } from '../../decentraland-loader/lifecycle/utils/fetchSceneJson'

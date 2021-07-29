@@ -1,12 +1,24 @@
 {
-  "extends": ["dcl-tslint-config-standard"],
+  "extends": [
+    "dcl-tslint-config-standard"
+  ],
   "rules": {
     "quotemark": false,
     "no-console": true,
-    "ban-types": [true, "Number", "Boolean", "String", "Object"],
+    "ban-types": [
+      true,
+      "Number",
+      "Boolean",
+      "String",
+      "Object"
+    ],
     "no-parameter-reassignment": true
   },
   "linterOptions": {
-    "exclude": ["packages/engine/vendor/**", "test/**", "packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts", "packages/shared/dao/contracts/*"]
+    "exclude": [
+      "packages/engine/vendor/**",
+      "test/**",
+      "packages/shared/dao/contracts/*"
+    ]
   }
 }

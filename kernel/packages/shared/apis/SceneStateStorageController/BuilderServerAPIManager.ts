@@ -1,6 +1,6 @@
 import { Authenticator } from 'dcl-crypto'
 import { ExplorerIdentity } from 'shared/session/types'
-import { uuid } from 'decentraland-ecs/src/ecs/helpers'
+import { uuid } from 'atomicHelpers/math'
 import {
   BuilderAsset,
   BuilderManifest,
@@ -17,7 +17,7 @@ import {
 import { getDefaultTLD } from 'config'
 import { defaultLogger } from '../../logger'
 import { getParcelSceneLimits } from 'atomicHelpers/landHelpers'
-import { CLASS_ID } from 'decentraland-ecs/src'
+import { CLASS_ID } from 'decentraland-ecs'
 import { toHumanReadableType, fromHumanReadableType, getLayoutFromParcels } from './utils'
 import { SceneSourcePlacement } from 'shared/types'
 
@@ -267,7 +267,6 @@ export class BuilderServerAPIManager {
   }
 
   private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
-
     const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 

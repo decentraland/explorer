@@ -1,7 +1,7 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import future, { IFuture } from 'fp-future'
 import { RenderProfile } from 'shared/types'
-import { Color4 } from 'decentraland-ecs/src'
+import { Color4 } from 'decentraland-ecs'
 
 export let USE_UNITY_INDEXED_DB_CACHE: IFuture<boolean> = future()
 

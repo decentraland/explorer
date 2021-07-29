@@ -2,7 +2,7 @@
 
 Before implementing a component on unity's side, it's recommended to check Kernel for the same component and verify whether it is a Disposable/Shared component or not, as their implementation pipeline differs.
 
-Every component declaration should be under the `/packages/decentraland-ecs/src/decentraland/**` directory. Be aware that your IDE may find the component also in a ".ts" script, dismiss those declarations as they correspond to interfaces for the components in typescript.
+Every component declaration should be under the `/packages/decentraland-ecs/dist/decentraland/**` directory. Be aware that your IDE may find the component also in a ".ts" script, dismiss those declarations as they correspond to interfaces for the components in typescript.
 
 #### Entity component:
 

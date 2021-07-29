@@ -1,5 +1,5 @@
-import { engine, DisposableComponent, Entity, log, DisposableComponentRemoved } from 'decentraland-ecs/src'
-import { DecentralandInterface } from 'decentraland-ecs/src/decentraland/Types'
+import { engine, DisposableComponent, Entity, log, DisposableComponentRemoved } from 'decentraland-ecs'
+import { DecentralandInterface } from 'decentraland-ecs'
 
 declare var dcl: DecentralandInterface
 
@@ -22,11 +22,11 @@ ent.addComponentOrReplace(model)
 
 log('start')
 
-engine.eventManager.addListener(DisposableComponentRemoved, {}, function() {
+engine.eventManager.addListener(DisposableComponentRemoved, {}, function () {
   log('DisposableComponentRemoved')
 })
 
-dcl.onUpdate(x => {
+dcl.onUpdate((x) => {
   if (x === 0) {
     log('addEntity')
     engine.addEntity(ent)

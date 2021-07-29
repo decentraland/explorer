@@ -8,9 +8,9 @@ import {
   AnimationState,
   Animator,
   log
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
-onerror = function() {
+onerror = function () {
   debugger
 }
 
@@ -61,6 +61,6 @@ engine.addEntity(shark2)
 
 declare var dcl: any
 
-dcl.onEvent(function(event: any) {
+dcl.onEvent(function (event: any) {
   log('event', event)
 })

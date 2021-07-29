@@ -53,7 +53,7 @@ import {
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs'
 import { renderStateObservable, isRendererEnabled, ensureRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 

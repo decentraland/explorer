@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { Quaternion, Vector3 } from 'decentraland-ecs/src'
+import { Quaternion, Vector3 } from 'decentraland-ecs'
 
 const results = {
   rotatedWithQuat01: '(0.7, 0.0, 1.6)',

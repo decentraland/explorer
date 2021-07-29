@@ -10,11 +10,11 @@ import {
   Color3,
   Camera,
   OnClick
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 class FaceCameraSystem implements ISystem {
   update() {
-    onclickObjects.forEach(element => {
+    onclickObjects.forEach((element) => {
       element.update()
     })
   }

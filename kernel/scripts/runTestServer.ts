@@ -216,7 +216,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
   app.use('/@/artifacts/unity-renderer', express.static(path.dirname(require.resolve('@dcl/unity-renderer'))))
 
   app.use('/default-profile', express.static(resolve(__dirname, '../static/default-profile')))
-  app.use('/@', express.static(resolve(__dirname, '../packages/decentraland-ecs')))
+  app.use('/@', express.static(path.dirname(require.resolve('decentraland-ecs'))))
 
   app.use(
     '/preview.html',

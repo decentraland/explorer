@@ -1,4 +1,4 @@
-import { Entity, engine, Vector3, Transform, OBJShape } from 'decentraland-ecs/src'
+import { Entity, engine, Vector3, Transform, OBJShape } from 'decentraland-ecs'
 
 function makeOBJ(src: string, position: Vector3, scale: Vector3) {
   const ent = new Entity()

@@ -12,7 +12,7 @@ import {
   ReadOnlyVector3,
   Input,
   ActionButton
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const G = 6.674e-11
 const boxShape = new BoxShape()
@@ -139,7 +139,7 @@ messageBus.on('spawn', (evt: SpawnEvent) => {
   engine.addEntity(cube)
 })
 
-Input.instance.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, event => {
+Input.instance.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, (event) => {
   const spawn: SpawnEvent = {
     pos: event.origin,
     vel: event.direction.scale(0.015),

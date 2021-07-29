@@ -1,7 +1,7 @@
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
 import { Component } from 'scene-system/stateful-scene/types'
-import { uuid } from 'decentraland-ecs/src/ecs/helpers'
-import { CLASS_ID } from 'decentraland-ecs/src'
+import { uuid } from 'atomicHelpers/math'
+import { CLASS_ID } from 'decentraland-ecs'
 import {
   BuilderAsset,
   BuilderComponent,

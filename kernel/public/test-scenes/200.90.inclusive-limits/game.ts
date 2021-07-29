@@ -1,4 +1,4 @@
-import { Entity, BoxShape, engine, Vector3, Transform } from 'decentraland-ecs/src'
+import { Entity, BoxShape, engine, Vector3, Transform } from 'decentraland-ecs'
 
 export function makeBox(position: Vector3) {
   const ent = new Entity()

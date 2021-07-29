@@ -1,4 +1,4 @@
-import { Entity, engine, GLTFShape, Transform } from 'decentraland-ecs/src'
+import { Entity, engine, GLTFShape, Transform } from 'decentraland-ecs'
 
 const floor = new GLTFShape('floor.glb')
 

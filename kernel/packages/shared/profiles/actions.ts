@@ -1,6 +1,6 @@
 import { action } from 'typesafe-actions'
 import { Profile, ProfileType } from './types'
-import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
+import { ProfileForRenderer } from 'decentraland-ecs'
 
 // Profile fetching
 

@@ -1,13 +1,4 @@
-import {
-  NFTShape,
-  Entity,
-  engine,
-  Transform,
-  Vector3,
-  Color3,
-  TextShape,
-  PictureFrameStyle
-} from 'decentraland-ecs/src'
+import { NFTShape, Entity, engine, Transform, Vector3, Color3, TextShape, PictureFrameStyle } from 'decentraland-ecs'
 
 let x = 1
 let z = 1

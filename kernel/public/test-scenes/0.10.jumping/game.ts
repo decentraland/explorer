@@ -1,4 +1,4 @@
-import { Entity, engine, Vector3, Transform, GLTFShape } from 'decentraland-ecs/src'
+import { Entity, engine, Vector3, Transform, GLTFShape } from 'decentraland-ecs'
 
 let jump = new Entity()
 

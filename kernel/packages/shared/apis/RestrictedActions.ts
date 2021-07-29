@@ -2,7 +2,7 @@ import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
 import defaultLogger from '../logger'
 import { ParcelIdentity } from './ParcelIdentity'
-import { Quaternion, Vector3 } from 'decentraland-ecs/src'
+import { Quaternion, Vector3 } from 'decentraland-ecs'
 import {
   gridToWorld,
   isWorldPositionInsideParcels,

@@ -1,4 +1,4 @@
-import { engine, Vector3 } from 'decentraland-ecs/src'
+import { engine, Vector3 } from 'decentraland-ecs'
 import { Cube } from './cube'
 import { RotationComponent } from './rotationComponent'
 import { RotationSystem } from './rotationSystem'

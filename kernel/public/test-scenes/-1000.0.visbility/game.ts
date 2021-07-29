@@ -10,13 +10,13 @@ import {
   PlaneShape,
   SphereShape,
   CircleShape
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 function makeEntity(shape: any, position: Vector3, visible: boolean) {
   const ent = new Entity()
   const s = new shape()
   s.visible = visible
-  ent.addComponentOrReplace(s)  
+  ent.addComponentOrReplace(s)
   ent.addComponentOrReplace(
     new Transform({
       position
@@ -27,7 +27,7 @@ function makeEntity(shape: any, position: Vector3, visible: boolean) {
 }
 
 const entity = new Entity()
-var gltfShape = new GLTFShape('models/Tree_Scene.glb');
+var gltfShape = new GLTFShape('models/Tree_Scene.glb')
 gltfShape.visible = true
 entity.addComponent(gltfShape)
 entity.addComponent(new Transform({ position: new Vector3(8, 0, 8) }))
@@ -50,7 +50,7 @@ class AWaiterSystem {
 
     if (totalTime > 8) {
       sphereEnt.getComponent(SphereShape).visible = false
-	  gltfShape.visible = false
+      gltfShape.visible = false
     }
   }
 }

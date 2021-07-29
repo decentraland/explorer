@@ -1,22 +1,19 @@
-import { engine, Component, ISystem, IEntity,  Vector3, Transform, Entity, log, Camera } from 'decentraland-ecs/src'
+import { engine, Component, ISystem, IEntity, Vector3, Transform, Entity, log, Camera } from 'decentraland-ecs'
 
-import { environments, Environment } from "./Environment";
-import { Creature } from "./Creature";
-import { grabbedObject, SetGrabbedObject } from './Params';
+import { environments, Environment } from './Environment'
+import { Creature } from './Creature'
+import { grabbedObject, SetGrabbedObject } from './Params'
 
 @Component('grabableObjectComponent')
 export class GrabableObjectComponent {
   grabbed: boolean = false
-  constructor(
-    grabbed: boolean = false,
-  ) {
+  constructor(grabbed: boolean = false) {
     this.grabbed = grabbed
   }
 }
 
 @Component('objectGrabberComponent')
-export class ObjectGrabberComponent {
-}
+export class ObjectGrabberComponent {}
 
 let grabbedOffset = new Vector3(0.5, 1, 0)
 
@@ -38,68 +35,62 @@ objectGrabber.addComponent(
 objectGrabber.addComponent(new ObjectGrabberComponent())
 engine.addEntity(objectGrabber)
 
-export const grabbableObjects = engine.getComponentGroup(
-  GrabableObjectComponent
-)
+export const grabbableObjects = engine.getComponentGroup(GrabableObjectComponent)
 
 export class ObjectGrabberSystem implements ISystem {
   update(deltaTime: number) {
-	  if (grabbedObject == null) {
-		  //log("no children")
-		  return
-		}
+    if (grabbedObject == null) {
+      //log("no children")
+      return
+    }
 
-	  let transform = objectGrabber.getComponent(Transform)
-	  transform.position = camera.position.clone()
-	  transform.rotation = camera.rotation.clone()
-
+    let transform = objectGrabber.getComponent(Transform)
+    transform.position = camera.position.clone()
+    transform.rotation = camera.rotation.clone()
   }
 }
 
 export function grabObject(newGrabbedObject: IEntity) {
+  if (!objectGrabber.children[0]) {
+    log('grabbed object')
 
-    if (!objectGrabber.children[0]) {
-      log('grabbed object')
+    newGrabbedObject.getComponent(GrabableObjectComponent).grabbed = true
+    newGrabbedObject.setParent(objectGrabber)
+    newGrabbedObject.getComponent(Transform).position = grabbedOffset.clone()
+    newGrabbedObject.getComponent(Creature).SetEnvironment(null)
 
-      newGrabbedObject.getComponent(GrabableObjectComponent).grabbed = true
-      newGrabbedObject.setParent(objectGrabber)
-      newGrabbedObject.getComponent(Transform).position = grabbedOffset.clone()
-      newGrabbedObject.getComponent(Creature).SetEnvironment(null)
-
-	    SetGrabbedObject(newGrabbedObject)
-    } else {
-      log('already holding')
-    }
+    SetGrabbedObject(newGrabbedObject)
+  } else {
+    log('already holding')
   }
+}
 
 export function dropObject(environment: Environment | null = null) {
-    if(!grabbedObject) return
+  if (!grabbedObject) return
 
-    environment = environment? environment : getClosestArea(Camera.instance.position)!.getComponent(Environment)
+  environment = environment ? environment : getClosestArea(Camera.instance.position)!.getComponent(Environment)
 
-    if (environment) {
-		// workaround ... parent should be null
-		grabbedObject.setParent(dummyPosParent)
+  if (environment) {
+    // workaround ... parent should be null
+    grabbedObject.setParent(dummyPosParent)
 
-		grabbedObject.getComponent(Transform).position = environment.position
-		grabbedObject.getComponent(GrabableObjectComponent).grabbed = false
+    grabbedObject.getComponent(Transform).position = environment.position
+    grabbedObject.getComponent(GrabableObjectComponent).grabbed = false
     grabbedObject.getComponent(Creature).SetEnvironment(environment)
     grabbedObject.getComponent(Creature).TargetRandomPosition()
 
-		SetGrabbedObject(null)
+    SetGrabbedObject(null)
+  } else {
+    log('not possible to drop here')
+  }
+}
 
-	} else {
-      log('not possible to drop here')
+export function getClosestArea(playerPos: Vector3) {
+  for (let environment of environments.entities) {
+    let dist = Vector3.DistanceSquared(environment.getComponent(Transform).position, playerPos)
+    if (dist < 25) {
+      return environment
     }
   }
-
-
-export function getClosestArea(playerPos: Vector3){
-	for (let environment of environments.entities) {
-		let dist = Vector3.DistanceSquared(environment.getComponent(Transform).position, playerPos)
-		if (dist < 25){
-			return environment
-		}
-	}
-	return null
-  }
+  return null
+}

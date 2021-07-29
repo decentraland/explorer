@@ -1,10 +1,5 @@
 [
   {
-    "name": "Delete compiled ECS",
-    "kind": "RM",
-    "path": "./packages/decentraland-ecs/dist"
-  },
-  {
     "name": "Delete dist folder",
     "kind": "RM",
     "path": "./static/dist"

@@ -11,7 +11,7 @@ import {
   OnPointerDown,
   BoxShape,
   ActionButton
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 /*
 Plane with video live streaming

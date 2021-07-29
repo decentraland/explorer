@@ -35,5 +35,4 @@ Thumbs.db
 unity-client/debug.log
 kernel/static/gif-processor
 kernel/static/voice-chat-codec
-kernel/packages/decentraland-ecs/decentraland-ecs*.tgz
 kernel/static/*.js

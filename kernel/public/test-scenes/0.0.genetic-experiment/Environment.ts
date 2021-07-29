@@ -1,8 +1,8 @@
-import { Component, engine, Vector3 } from 'decentraland-ecs/src'
+import { Component, engine, Vector3 } from 'decentraland-ecs'
 
-import { Creature } from "./Creature";
+import { Creature } from './Creature'
 
-@Component("environment")
+@Component('environment')
 export class Environment {
   temperature: number
   position: Vector3
@@ -22,17 +22,14 @@ export class Environment {
   addCreature(newCreature: Creature) {
     const newCreaturesCount = this.creatures.push(newCreature)
 
-    if(this.onCreaturesCountUpdated)
-      this.onCreaturesCountUpdated(newCreaturesCount)
+    if (this.onCreaturesCountUpdated) this.onCreaturesCountUpdated(newCreaturesCount)
   }
 
   removeCreature(newCreature: Creature) {
-
     // removes the creature from the array. This probably leads to memory leaks T_T, but needed right now XD
-    this.creatures = this.creatures.filter(x => x != newCreature)
+    this.creatures = this.creatures.filter((x) => x != newCreature)
 
-    if(this.onCreaturesCountUpdated)
-      this.onCreaturesCountUpdated(this.creatures.length)
+    if (this.onCreaturesCountUpdated) this.onCreaturesCountUpdated(this.creatures.length)
   }
 }
 

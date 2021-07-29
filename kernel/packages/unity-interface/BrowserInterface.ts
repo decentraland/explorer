@@ -1,4 +1,4 @@
-import { uuid } from 'decentraland-ecs/src'
+import { uuid } from 'atomicHelpers/math'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
@@ -13,8 +13,8 @@ import {
   playerConfigurations,
   WORLD_EXPLORER
 } from 'config'
-import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs'
+import { IEventNames } from 'decentraland-ecs'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { trackEvent } from 'shared/analytics'
 import {
