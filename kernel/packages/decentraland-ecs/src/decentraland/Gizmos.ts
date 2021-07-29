@@ -3,7 +3,7 @@ import { CLASS_ID, OnUUIDEvent } from './Components'
 
 /**
  * Gizmo identifiers
- * @beta
+ * @public
  */
 export enum Gizmo {
   MOVE = 'MOVE',
@@ -14,7 +14,7 @@ export enum Gizmo {
 
 /**
  * This event is triggered after the user finalizes dragging a gizmo.
- * @beta
+ * @public
  */
 @Component('engine.gizmoEvent', CLASS_ID.UUID_CALLBACK)
 export class OnGizmoEvent extends OnUUIDEvent<'gizmoEvent'> {
@@ -24,7 +24,7 @@ export class OnGizmoEvent extends OnUUIDEvent<'gizmoEvent'> {
 
 /**
  * Enables gizmos in the entity. Gizmos only work in EDITOR, PREVIEW or DEBUG modes.
- * @beta
+ * @public
  */
 @Component('engine.gizmos', CLASS_ID.GIZMOS)
 export class Gizmos extends ObservableComponent {
