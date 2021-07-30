@@ -9,4 +9,5 @@ export interface ISceneStateStorageController {
   createProjectWithCoords(coordinates: string): Promise<boolean>
   createProjectFromStateDefinition(): Promise<SerializedSceneState | undefined>
   saveProjectInfo(sceneState: SerializedSceneState, projectName: string, projectDescription: string, projectScreenshot: string): Promise<boolean>
+  sendAssetsToRenderer(state: SerializedSceneState): Promise<string>
 }
