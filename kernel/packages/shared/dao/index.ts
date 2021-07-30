@@ -452,25 +452,26 @@ export function observeRealmChange(
   onRealmChange: (previousRealm: Realm | undefined, currentRealm: Realm) => any
 ) {
   let currentRealm: Realm | undefined = getRealm(store.getState())
-  store.subscribe(async () => {
+  store.subscribe(() => {
     const previousRealm = currentRealm
     currentRealm = getRealm(store.getState())
     if (currentRealm && !deepEqual(previousRealm, currentRealm)) {
       onRealmChange(previousRealm, currentRealm)
-      await getJWT(currentRealm)
     }
   })
 }
 
 export function initializeUrlRealmObserver() {
   const store: Store<RootState> = (window as any)['globalStore']
-  observeRealmChange(store, (previousRealm, currentRealm) => {
+  observeRealmChange(store, async (previousRealm, currentRealm) => {
     const q = qs.parse(location.search)
     const realmString = realmToString(currentRealm)
 
     q.realm = realmString
 
     history.replaceState({ realm: realmString }, '', `?${qs.stringify(q)}`)
+
+    await getJWT(currentRealm)
   })
 }
 
