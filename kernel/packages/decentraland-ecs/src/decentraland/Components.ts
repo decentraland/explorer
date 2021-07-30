@@ -16,7 +16,7 @@ export type TransformConstructorArgs = {
 }
 
 /**
- * @internal
+ * @public
  */
 export enum CLASS_ID {
   TRANSFORM = 1,
