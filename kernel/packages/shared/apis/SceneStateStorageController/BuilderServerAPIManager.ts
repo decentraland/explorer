@@ -45,10 +45,9 @@ export class BuilderServerAPIManager {
 
   public addBuilderAssets(assets: BuilderAsset[]) {
     if (assets) {
-      try{
-      assets.forEach((asset) => this.assets.set(asset.id, asset))
-      }
-      catch(e){
+      try {
+        assets.forEach((asset) => this.assets.set(asset.id, asset))
+      } catch (e) {
         defaultLogger.error(e)
       }
     }
@@ -77,7 +76,7 @@ export class BuilderServerAPIManager {
     return assets
   }
 
-  async getBuilderAssets(assetIds: AssetId[]): Promise< BuilderAsset[]> {
+  async getBuilderAssets(assetIds: AssetId[]): Promise<BuilderAsset[]> {
     await this.getAssets(assetIds)
     const builderAssets: BuilderAsset[] = []
     assetIds.forEach((assetId) => builderAssets.push(this.assets.get(assetId)!))
