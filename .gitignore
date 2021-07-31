@@ -36,3 +36,4 @@ unity-client/debug.log
 kernel/static/gif-processor
 kernel/static/voice-chat-codec
 kernel/static/*.js
+!kernel/packages/voice-chat-codec/libopus.wasm.js

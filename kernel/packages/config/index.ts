@@ -1,4 +1,4 @@
-import { contracts as contractInfo } from './contracts'
+import * as contractInfo from '@dcl/urn-resolver/dist/contracts'
 import * as queryString from 'query-string'
 import { getWorld } from '@dcl/schemas'
 import { store } from 'shared/store/isolatedStore'
@@ -189,7 +189,7 @@ export enum ETHEREUM_NETWORK {
 }
 
 export let decentralandConfigurations: any = {}
-let contracts: any = null
+let contracts: Record<string, string> = {}
 let network: ETHEREUM_NETWORK | null = null
 
 export function getTLD() {
@@ -284,10 +284,8 @@ export function getServerConfigurations() {
 
 export async function setNetwork(net: ETHEREUM_NETWORK) {
   try {
-    const json = contractInfo
-
     network = net
-    contracts = json[net]
+    contracts = contractInfo[net]
 
     contracts['CatalystProxy'] =
       net === ETHEREUM_NETWORK.MAINNET

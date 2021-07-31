@@ -1,0 +1,124 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types:
+      - created
+
+name: test-build-deploy
+jobs:
+  validations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: browser-actions/setup-chrome@latest
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          cache: "npm"
+
+      - name: install
+        working-directory: kernel
+        run: npm ci
+
+      - name: test-ci
+        working-directory: kernel
+        run: make test-ci
+        if: ${{ always() }}
+
+      - name: lint
+        working-directory: kernel
+        run: make lint
+        if: ${{ always() }}
+
+      # - name: codecov
+      #   working-directory: kernel
+      #   run: npx codecov
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Get the current branch name
+        shell: bash
+        run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
+        id: myref
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          cache: "npm"
+
+      - name: set package.json version
+        uses: menduz/oddish-action@master
+        with:
+          deterministic-snapshot: true
+          only-update-versions: true
+          cwd: ./kernel/static
+
+      - name: install
+        working-directory: kernel
+        run: npm ci
+
+      - name: build
+        working-directory: kernel
+        run: make build-essentials build-release build-deploy
+
+      - name: publish packages
+        uses: menduz/oddish-action@staging
+        with:
+          registry-url: "https://registry.npmjs.org"
+          access: public
+          cwd: ./kernel/static
+          ## use action runId instead of current date to generate snapshot numbers
+          deterministic-snapshot: true
+
+          ## publish every package to s3
+          s3-bucket: ${{ secrets.SDK_TEAM_S3_BUCKET }}
+          s3-bucket-key-prefix: "@dcl/kernel/branch/${{ steps.myref.outputs.branch }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.SDK_TEAM_AWS_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SDK_TEAM_AWS_SECRET }}
+
+      - name: deploy preview
+        env:
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.SDK_TEAM_AWS_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SDK_TEAM_AWS_SECRET }}
+          CDN_BUCKET: ${{ secrets.SDK_TEAM_S3_BUCKET }}
+        run: |
+          npx @dcl/cdn-uploader@next \
+            --bucket $CDN_BUCKET \
+            --local-folder kernel/static \
+            --bucket-folder "@dcl/kernel/branch/${{ steps.myref.outputs.branch }}"
+
+  notify_deployment:
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: Deployment Notification
+    steps:
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: Test this pull request
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            # Test this pull request
+            This branch can be previewed at https://${{ github.head_ref }}
+          edit-mode: replace
