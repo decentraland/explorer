@@ -9,6 +9,7 @@ import { DEBUG } from '../../../config'
 import {
   Asset,
   AssetId,
+  BuilderAsset,
   BuilderManifest,
   CONTENT_PATH,
   DeploymentResult,
@@ -152,6 +153,8 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         // Fetch all asset metadata
         const assets = await this.getAllAssets(sceneState)
 
+        const assetsArray = await this.getAllBuilderAssets(sceneState)
+
         // Download asset files
         const models = await this.downloadAssetFiles(assets)
 
@@ -172,6 +175,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           [CONTENT_PATH.BUNDLED_GAME_FILE, Buffer.from(gameFile)],
           [CONTENT_PATH.SCENE_FILE, Buffer.from(JSON.stringify(sceneJson))],
           [CONTENT_PATH.SCENE_THUMBNAIL, await blobToBuffer(thumbnailBlob)],
+          [CONTENT_PATH.ASSETS, Buffer.from(JSON.stringify(assetsArray))],
           ...models
         ])
 
@@ -270,6 +274,19 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
       const serializedScene = await this.getStoredState(sceneId)
       if (serializedScene) {
         const identity = this.getIdentity()
+        const contentClient = this.getContentClient()
+
+        const assetsFileHash: string | undefined = this.parcelIdentity.land.mappingsResponse.contents.find(
+          (pair) => pair.file === CONTENT_PATH.ASSETS
+        )?.hash
+        if (assetsFileHash) {
+          const assetJson = await contentClient.downloadContent(assetsFileHash, { attempts: 3 })
+
+          if (assetJson) {
+            const assets: BuilderAsset[] = JSON.parse(assetJson.toString())
+            this.builderApiManager.addBuilderAssets(assets)
+          }
+        }
 
         // Create builder manifest from serialized scene
         let builderManifest = await this.builderApiManager.builderManifestFromSerializedState(
@@ -312,7 +329,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           )?.hash
           let thumbnail: string = ''
           if (thumbnailHash) {
-            const contentClient = this.getContentClient()
             const thumbnailBuffer = await contentClient.downloadContent(thumbnailHash, { attempts: 3 })
             thumbnail = thumbnailBuffer.toString('base64')
           }
@@ -332,6 +348,23 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
     } catch (error) {
       defaultLogger.error(`Failed creating project from state definition at coords ${baseParcel}`, error)
     }
+  }
+
+  @exposeMethod
+  async sendAssetsToRenderer(state: SerializedSceneState): Promise<string> {
+    const assets = await this.getAllBuilderAssets(state)
+    getUnityInstance().SendSceneAssets(assets)
+    return 'OK'
+  }
+
+  private async getAllBuilderAssets(state: SerializedSceneState): Promise<BuilderAsset[]> {
+    const assetIds: Set<AssetId> = new Set()
+    for (const entity of state.entities) {
+      entity.components
+        .filter(({ type, value }) => type === CLASS_ID.GLTF_SHAPE && value.assetId)
+        .forEach(({ value }) => assetIds.add(value.assetId))
+    }
+    return this.builderApiManager.getBuilderAssets([...assetIds])
   }
 
   private getIdentity(): ExplorerIdentity {

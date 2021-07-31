@@ -43,6 +43,16 @@ export class BuilderServerAPIManager {
     return headers
   }
 
+  public addBuilderAssets(assets: BuilderAsset[]) {
+    if (assets) {
+      try {
+        assets.forEach((asset) => this.assets.set(asset.id, asset))
+      } catch (e) {
+        defaultLogger.error(e)
+      }
+    }
+  }
+
   async getAssets(assetIds: AssetId[]): Promise<Record<string, BuilderAsset>> {
     const unknownAssets = assetIds.filter((assetId) => !this.assets.has(assetId))
     // TODO: If there are too many assets, we might end up over the url limit, so we might need to send multiple requests
@@ -64,6 +74,13 @@ export class BuilderServerAPIManager {
       assets[assetId] = this.assets.get(assetId)!
     })
     return assets
+  }
+
+  async getBuilderAssets(assetIds: AssetId[]): Promise<BuilderAsset[]> {
+    await this.getAssets(assetIds)
+    const builderAssets: BuilderAsset[] = []
+    assetIds.forEach((assetId) => builderAssets.push(this.assets.get(assetId)!))
+    return builderAssets
   }
 
   async getConvertedAssets(assetIds: AssetId[]): Promise<Map<AssetId, Asset>> {

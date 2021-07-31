@@ -1,6 +1,6 @@
 ﻿import { SceneStateDefinition } from './SceneStateDefinition'
 import { ILand } from 'shared/types'
-import { deserializeSceneState } from './SceneStateDefinitionSerializer'
+import { deserializeSceneState, serializeSceneState } from './SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from 'shared/apis/SceneStateStorageController/ISceneStateStorageController'
 import { CONTENT_PATH } from 'shared/apis/SceneStateStorageController/types'
 
@@ -10,6 +10,11 @@ export class BuilderStatefulActor {
   async getInititalSceneState(): Promise<SceneStateDefinition> {
     const sceneState = await this.getContentLandDefinition()
     return sceneState ? sceneState : new SceneStateDefinition()
+  }
+
+  async sendAssetsFromScene(scene: SceneStateDefinition ): Promise<string | undefined > {
+    const result = await this.sceneStorage.sendAssetsToRenderer(serializeSceneState(scene))
+    return result;
   }
 
   private async getContentLandDefinition(): Promise<SceneStateDefinition | undefined> {

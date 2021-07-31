@@ -4,7 +4,7 @@ import { Observable } from 'mz-observable'
 import { Vector3 } from 'decentraland-ecs'
 import { MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs'
 import { AirdropInfo } from '../shared/airdrops/interface'
-import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
+import { BuilderAsset, DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import {
   RenderProfile,
   ContentMapping,
@@ -142,6 +142,7 @@ export interface IUnityInterface {
   SendPublishSceneResult(result: DeploymentResult): void
   SendBuilderProjectInfo(projectName: string, projectDescription: string, isNewEmptyProject: boolean): void
   SendBuilderCatalogHeaders(headers: Record<string, string>): void
+  SendSceneAssets(assets: BuilderAsset[]): void
   SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined): void
   SendUnpublishSceneResult(result: DeploymentResult): void
 

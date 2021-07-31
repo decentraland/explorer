@@ -25,7 +25,7 @@ import {
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
-import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
+import { BuilderAsset, DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
@@ -428,6 +428,10 @@ export class UnityInterface implements IUnityInterface {
 
   public SendBuilderCatalogHeaders(headers: Record<string, string>) {
     this.SendMessageToUnity('Main', 'BuilderInWorldCatalogHeaders', JSON.stringify(headers))
+  }
+
+  public SendSceneAssets(assets: BuilderAsset[]) {
+    this.SendMessageToUnity('Main', 'AddAssets', JSON.stringify(assets))
   }
 
   public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
