@@ -17,11 +17,19 @@ export type MetaConfiguration = {
     contentWhitelist: string[]
     catalystsNodesEndpoint?: string
   }
+  bannedUsers: BannedUsers
   synapseUrl: string
   world: WorldConfig
   comms: CommsConfig
   minCatalystVersion?: string
   featureFlags?: Record<string, boolean>
+}
+
+export type BannedUsers = Record<string, Ban[]>
+
+export type Ban = {
+  type: "VOICE_CHAT_AND_CHAT" // For now we only handle one ban type
+  expiration: number // Timestamp
 }
 
 export type WorldConfig = {
