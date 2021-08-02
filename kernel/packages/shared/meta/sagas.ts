@@ -3,7 +3,7 @@ import { FORCE_RENDERING_STYLE, getDefaultAssetBundlesBaseUrl, getServerConfigur
 import { META_CONFIGURATION_INITIALIZED, metaConfigurationInitialized, metaUpdateMessageOfTheDay } from './actions'
 import defaultLogger from '../logger'
 import { buildNumber } from './env'
-import { MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE, WorldConfig } from './types'
+import { BannedUsers, MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE, WorldConfig } from './types'
 import { isMetaConfigurationInitiazed } from './selectors'
 import { USER_AUTHENTIFIED } from '../session/actions'
 import { getUserId } from '../session/selectors'
@@ -19,6 +19,7 @@ const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
     denied: [],
     contentWhitelist: []
   },
+  bannedUsers: {},
   synapseUrl: 'https://chat.decentraland.zone',
   world: {
     pois: []
@@ -29,12 +30,24 @@ const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
   }
 }
 
+function bannedUsersFromVariants(variants: Record<string, any> | undefined): BannedUsers | undefined {
+  const variant = variants?.["explorer-banned_users"]
+  if (variant && variant.enabled) {
+    try {
+      return JSON.parse(variant.payload.value)
+    } catch (e) {
+      defaultLogger.warn("Couldn't parse banned users from variants. The variants response was: ", variants)
+    }
+  }
+}
+
 export function* metaSaga(): any {
   const config: Partial<MetaConfiguration> = yield call(fetchMetaConfiguration)
-  const featureFlags: Record<string, boolean> | undefined = yield call(fetchFeatureFlags)
+  const flagsAndVariants: { flags: Record<string, boolean>, variants: Record<string, any> } | undefined = yield call(fetchFeatureFlagsAndVariants)
   const merge: Partial<MetaConfiguration> = {
     ...config,
-    featureFlags
+    featureFlags: flagsAndVariants?.flags,
+    bannedUsers: bannedUsersFromVariants(flagsAndVariants?.variants)
   }
 
   if (FORCE_RENDERING_STYLE) {
@@ -107,15 +120,14 @@ function checkExplorerVersion(config: Partial<MetaConfiguration>) {
   }
 }
 
-async function fetchFeatureFlags(): Promise<Record<string, boolean> | undefined> {
+async function fetchFeatureFlagsAndVariants(): Promise<Record<string, boolean> | undefined> {
   const featureFlagsEndpoint = getServerConfigurations().explorerFeatureFlags
   try {
     const response = await fetch(featureFlagsEndpoint, {
       credentials: 'include'
     })
     if (response.ok) {
-      const { flags } = await response.json()
-      return flags
+      return response.json()
     }
   } catch (e) {
     defaultLogger.warn(`Error while fetching feature flags from '${featureFlagsEndpoint}'. Using default config`)
