@@ -43,6 +43,16 @@ export class BuilderServerAPIManager {
     return headers
   }
 
+  public addBuilderAssets(assets: BuilderAsset[]) {
+    if (assets) {
+      try {
+        assets.forEach((asset) => this.assets.set(asset.id, asset))
+      } catch (e) {
+        defaultLogger.error(e)
+      }
+    }
+  }
+
   async getAssets(assetIds: AssetId[]): Promise<Record<string, BuilderAsset>> {
     const unknownAssets = assetIds.filter((assetId) => !this.assets.has(assetId))
     // TODO: If there are too many assets, we might end up over the url limit, so we might need to send multiple requests
@@ -64,6 +74,13 @@ export class BuilderServerAPIManager {
       assets[assetId] = this.assets.get(assetId)!
     })
     return assets
+  }
+
+  async getBuilderAssets(assetIds: AssetId[]): Promise<BuilderAsset[]> {
+    await this.getAssets(assetIds)
+    const builderAssets: BuilderAsset[] = []
+    assetIds.forEach((assetId) => builderAssets.push(this.assets.get(assetId)!))
+    return builderAssets
   }
 
   async getConvertedAssets(assetIds: AssetId[]): Promise<Map<AssetId, Asset>> {
@@ -267,7 +284,6 @@ export class BuilderServerAPIManager {
   }
 
   private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
-
     const queryParams = 'projects/' + builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
@@ -339,7 +355,7 @@ export class BuilderServerAPIManager {
           id: '14708436-ffd4-44d6-8a28-48d8fcb65917',
           type: 'GLTFShape',
           data: {
-            assetId: 'da1fed3c954172146414a66adfa134f7a5e1cb49c902713481bf2fe94180c2cf'
+            assetId: 'c9b17021-765c-4d9a-9966-ce93a9c323d1'
           }
         },
         '47924b6e-27ba-41a3-8bd9-c025cd092a48': {
@@ -383,7 +399,7 @@ export class BuilderServerAPIManager {
         entities: 200
       },
       ground: {
-        assetId: 'da1fed3c954172146414a66adfa134f7a5e1cb49c902713481bf2fe94180c2cf',
+        assetId: 'c9b17021-765c-4d9a-9966-ce93a9c323d1',
         componentId: 'b5edf28e-b4e4-4a27-b0ac-84b3d77eff8e'
       }
     }

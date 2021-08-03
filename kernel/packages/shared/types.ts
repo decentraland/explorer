@@ -462,7 +462,8 @@ export enum HUDElementID {
   QUESTS_TRACKER = 27,
   BUILDER_PROJECTS_PANEL = 28,
   SIGNUP = 29,
-  LOADING_HUD = 30
+  LOADING_HUD = 30,
+  AVATAR_NAMES = 31
 }
 
 export type HUDConfiguration = {

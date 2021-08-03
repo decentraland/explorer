@@ -51,6 +51,8 @@ class StatefulWebWorkerScene extends Script {
     // Listen to the renderer and update the local scene state
     this.rendererActor.forwardChangesTo(this.sceneDefinition)
 
+    await this.builderActor.sendAssetsFromScene(this.sceneDefinition)
+
     // Send the initial state ot the renderer
     this.sceneDefinition.sendStateTo(this.rendererActor)
 
