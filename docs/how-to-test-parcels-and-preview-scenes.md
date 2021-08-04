@@ -37,8 +37,8 @@ NOTE(optional): If you don't need to modify the test-scenes and just build them 
 
 1. Go to the scene folder.
 2. Compile the scene dependencies (run only one of the following options):
-  - *OPTION A*: For working with the @latest Kernel version, run `decentraland-ecs@latest`.
-  - *OPTION B*: For working with the @next Kernel version, run `decentraland-ecs@next`.
+  - **OPTION A**: For working with the @latest Kernel version, run `decentraland-ecs@latest`.
+  - **OPTION B**: For working with the @next Kernel version, run `decentraland-ecs@next`.
 3. Run `dcl start`. A new tab in your browser will be open with the scene in preview mode.
 
 #### Play a scene in Preview Mode using the local Kernel version
