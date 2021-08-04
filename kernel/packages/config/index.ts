@@ -294,7 +294,7 @@ export function getServerConfigurations() {
   const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
 
   const QUESTS_SERVER_URL =
-    ensureSingleString(qs.QUESTS_SERVER_URL) ?? `https://quests-api.decentraland.${notToday === 'org' ? 'co' : 'io'}`
+    ensureSingleString(qs.QUESTS_SERVER_URL) ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
 
   return {
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
