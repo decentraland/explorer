@@ -27,18 +27,28 @@ try {
   fs.mkdirSync(contentPath)
 } catch (e) {}
 
-const hashes = catalog.reduce(
-  (hashes, wearable) =>
-    hashes.concat(
-      wearable.data.representations.reduce(
-        (hashes, representation) =>
-          hashes.concat(representation.contents.reduce((hashes, content) => hashes.concat([content.hash]), [])),
-        []
-      )
-    ),
-  []
-)
+const hashes = new Set()
 
-hashes.forEach(async (url) => {
-  await downloadFile(contentServerUrl + url, path.join(contentPath, url))
+for (let wearable of catalog) {
+  hashes.add(wearable.thumbnail)
+  for (let representation of wearable.data.representations) {
+    for (let contentItem of representation.contents) {
+      hashes.add(contentItem.hash)
+    }
+  }
+}
+
+async function main() {
+  for (let url of hashes) {
+    const finalPath = path.join(contentPath, url)
+    if (!fs.existsSync(finalPath)) {
+      console.log(`Downloading ${finalPath}`)
+      await downloadFile(contentServerUrl + url, finalPath)
+    }
+  }
+}
+
+main().catch((e) => {
+  console.error(e)
+  process.exit(1)
 })

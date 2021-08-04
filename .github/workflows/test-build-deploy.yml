@@ -71,7 +71,7 @@ jobs:
         run: make build-essentials build-release build-deploy
 
       - name: publish packages
-        uses: menduz/oddish-action@staging
+        uses: menduz/oddish-action@master
         with:
           registry-url: "https://registry.npmjs.org"
           access: public
@@ -106,6 +106,7 @@ jobs:
 
   notify_deployment:
     needs: [build]
+    if: ${{ github.event.pull_request.number }}
     runs-on: ubuntu-latest
     name: Deployment Notification
     steps:
