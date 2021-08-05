@@ -14,7 +14,7 @@ import * as fs from 'fs'
 
 const sceneId = process.env.SCENE_ID
 const parcel = process.env.PARCEL
-const contentServerUrl = process.env.CONTENT_SERVER_URL ?? 'https://peer.decentraland.org'
+const contentServerUrl = process.env.CONTENT_SERVER_URL ?? 'https://peer-lb.decentraland.org'
 const outputRoot = process.env.OUTPUT_DIR ?? 'public/downloaded-scenes'
 
 const maxDownloads = parseInt(process.env.MAX_DOWNLOADS ?? '50')
