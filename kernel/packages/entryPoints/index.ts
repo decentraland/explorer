@@ -14,10 +14,10 @@ import {
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { DEBUG_WS_MESSAGES, HAS_INITIAL_POSITION_MARK, OPEN_AVATAR_EDITOR } from '../config/index'
 import { signalParcelLoadingStarted } from 'shared/renderer/actions'
-import { lastPlayerPosition, pickWorldSpawnpoint, teleportObservable } from 'shared/world/positionThings'
+import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { loadPreviewScene, startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
-import { HUDElementID, ILand, RenderProfile } from 'shared/types'
+import { HUDElementID, RenderProfile } from 'shared/types'
 import { foregroundChangeObservable, isForeground } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { realmInitialized } from 'shared/dao'
@@ -39,8 +39,6 @@ import {
   openUrlObservable
 } from 'shared/observables'
 import { initShared } from 'shared'
-import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
-import future, { IFuture } from 'fp-future'
 import { setResourcesURL } from 'shared/location'
 import { WebSocketProvider } from 'eth-connect'
 import { resolveUrlFromUrn } from '@dcl/urn-resolver'
@@ -262,80 +260,42 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
       /*noop*/
     })
 
+  await startUnitySceneWorkers()
+  teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+
   if (options.previewMode) {
-    const scene = await startPreview()
-    const position = pickWorldSpawnpoint(scene)
-    i.Teleport(position)
-    teleportObservable.notifyObservers(position.position)
-  } else {
-    await startUnitySceneWorkers()
-    teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
+    await startPreview()
+    // const position = pickWorldSpawnpoint(scene)
+    // i.Teleport(position)
+    // teleportObservable.notifyObservers(position.position)
   }
 
   return true
 }
 
-async function startPreview() {
-  function sceneRenderable() {
-    const sceneRenderable = future<void>()
-
-    const observer = sceneLifeCycleObservable.add(async (sceneStatus) => {
-      if (sceneStatus.sceneId === (await defaultScene).sceneId) {
-        sceneLifeCycleObservable.remove(observer)
-        sceneRenderable.resolve()
-      }
-    })
-
-    return sceneRenderable
-  }
-
-  const defaultScene: IFuture<ILand> = future()
-
+export async function startPreview() {
   let wsScene: string | undefined = undefined
 
   if (location.search.indexOf('WS_SCENE') !== -1) {
     wsScene = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${document.location.host}/?scene`
   }
 
-  function startSceneLoading() {
-    // this is set to avoid double loading scenes due queued messages
-    let isSceneLoading: boolean = true
-
-    const loadScene = () => {
-      isSceneLoading = true
-      loadPreviewScene(wsScene)
-        .then((scene) => {
-          isSceneLoading = false
-          defaultScene.resolve(scene)
-        })
-        .catch((err) => {
-          isSceneLoading = false
-          defaultLogger.error('Error loading scene', err)
-          defaultScene.reject(err)
-        })
-    }
-
-    loadScene()
-    ;(globalThis as any).handleServerMessage = function (message: any) {
-      if (message.type === 'update') {
-        if (DEBUG_WS_MESSAGES) {
-          defaultLogger.info('Message received: ', message)
-        }
-        // if a scene is currently loading we do not trigger another load
-        if (isSceneLoading) {
-          if (DEBUG_WS_MESSAGES) {
-            defaultLogger.trace('Ignoring message, scene still loading...')
-          }
-          return
-        }
-
-        loadScene()
+  function handleServerMessage(message: any) {
+    if (message.type === 'update') {
+      if (DEBUG_WS_MESSAGES) {
+        defaultLogger.info('Message received: ', message)
       }
+
+      loadPreviewScene(wsScene)
     }
   }
 
-  await sceneRenderable()
-  startSceneLoading()
+  const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${document.location.host}`)
 
-  return defaultScene
+  ws.addEventListener('message', (msg) => {
+    if (msg.data.startsWith('{')) {
+      console.log('Update message from CLI', msg.data)
+      handleServerMessage(JSON.parse(msg.data))
+    }
+  })
 }

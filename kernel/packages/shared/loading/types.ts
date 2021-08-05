@@ -67,7 +67,6 @@ export const mobileNotSupported = () => action(MOBILE_NOT_SUPPORTED)
 export const NEW_LOGIN = 'New login'
 export const newLogin = () => action(NEW_LOGIN)
 export const NETWORK_MISMATCH = 'Network mismatch'
-export const networkMismatch = () => action(NETWORK_MISMATCH)
 export const FATAL_ERROR = 'fatal error'
 export const fatalError = (type: string) => action(FATAL_ERROR, { type })
 export const SET_ERROR_TLD = 'TLD network error'

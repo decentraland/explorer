@@ -2,7 +2,7 @@ import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, select, takeEvery, take } from 'redux-saga/effects'
 
-import { getServerConfigurations, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
+import { getServerConfigurations, ethereumConfigurations, RESET_TUTORIAL } from 'config'
 
 import defaultLogger from 'shared/logger'
 import {
@@ -123,38 +123,36 @@ function* initialProfileLoad() {
     throw e
   }
 
-  if (!PREVIEW) {
-    let profileDirty: boolean = false
+  let profileDirty: boolean = false
 
-    if (!profile.hasClaimedName) {
-      const net: keyof typeof ethereumConfigurations = yield select(getCurrentNetwork)
-      const names = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
+  if (!profile.hasClaimedName) {
+    const net: keyof typeof ethereumConfigurations = yield select(getCurrentNetwork)
+    const names = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
-      // patch profile to re-add missing name
-      profile = { ...profile, name: names[0], hasClaimedName: true }
+    // patch profile to re-add missing name
+    profile = { ...profile, name: names[0], hasClaimedName: true }
 
-      if (names && names.length > 0) {
-        defaultLogger.info(`Found missing claimed name '${names[0]}' for profile ${userId}, consolidating profile... `)
-        profileDirty = true
-      }
-    }
-
-    const isFace128Resized = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face128)
-    const isFace256Resized = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face256)
-
-    if (isFace128Resized || isFace256Resized) {
-      // setting dirty profile, as at least one of the face images are taken from a local blob
+    if (names && names.length > 0) {
+      defaultLogger.info(`Found missing claimed name '${names[0]}' for profile ${userId}, consolidating profile... `)
       profileDirty = true
     }
+  }
 
-    if (RESET_TUTORIAL) {
-      profile = { ...profile, tutorialStep: 0 }
-      profileDirty = true
-    }
+  const isFace128Resized = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face128)
+  const isFace256Resized = yield select(isResizeServiceUrl, profile.avatar.snapshots?.face256)
 
-    if (profileDirty) {
-      scheduleProfileUpdate(profile)
-    }
+  if (isFace128Resized || isFace256Resized) {
+    // setting dirty profile, as at least one of the face images are taken from a local blob
+    profileDirty = true
+  }
+
+  if (RESET_TUTORIAL) {
+    profile = { ...profile, tutorialStep: 0 }
+    profileDirty = true
+  }
+
+  if (profileDirty) {
+    scheduleProfileUpdate(profile)
   }
 
   updateCommsUser({ version: profile.version })

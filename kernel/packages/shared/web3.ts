@@ -1,4 +1,4 @@
-import { ethereumConfigurations, getNetworkFromTLD, getTLD, setNetwork } from 'config'
+import { ethereumConfigurations, setNetwork } from 'config'
 import { Address } from 'web3x/address'
 import { ETHEREUM_NETWORK } from '../config'
 import { decentralandConfigurations } from '../config/index'
@@ -6,14 +6,11 @@ import { Catalyst } from './dao/contracts/Catalyst'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
-import { NETWORK_MISMATCH, setTLDError } from './loading/types'
-import { BringDownClientAndShowError } from './loading/ReportFatalError'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
 import { Eth } from 'web3x/eth'
 import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
 import { requestManager } from './ethereum/provider'
-import { store } from './store/isolatedStore'
 
 declare var window: Window & {
   ethereum: any
@@ -25,50 +22,26 @@ export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   return web3net
 }
 
-export async function checkTldVsWeb3Network(): Promise<boolean> {
-  try {
-    const web3Net = await getAppNetwork()
-
-    return checkTldVsNetwork(web3Net)
-  } catch (e) {
-    // If we have an exception here, most likely it is that we didn't have a provider configured for request manager. Not critical.
-    return false
-  }
-}
-
-export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
-  const tld = getTLD()
-  const tldNet = getNetworkFromTLD()
-
-  if (tldNet !== web3Net && tld !== 'localhost') {
-    store.dispatch(setTLDError({ tld, web3Net, tldNet }))
-    BringDownClientAndShowError(NETWORK_MISMATCH)
-    return true
-  }
-
-  return false
-}
-
 // This function creates a Web3x eth object without the need of having initiated sign in / sign up. Used when requesting the catalysts
-export function createEthWhenNotConnectedToWeb3(): Eth {
+export async function createEthWhenNotConnectedToWeb3(): Promise<Eth> {
   const ethereum = (window as any).ethereum
   if (ethereum) {
     // If we have a web3 enabled browser, we can use that
     return new Eth(new LegacyProviderAdapter((window as any).ethereum))
   } else {
     // If not, we use infura
-    const network = getNetworkFromTLDOrWeb3()
+    const network = await getNetworkFromTLDOrWeb3()
     return new Eth(new WebsocketProvider(ethereumConfigurations[network].wss))
   }
 }
 
 export async function fetchCatalystNodesFromDAO(): Promise<CatalystNode[]> {
   if (!decentralandConfigurations.dao) {
-    await setNetwork(getNetworkFromTLDOrWeb3())
+    await setNetwork(await getNetworkFromTLDOrWeb3())
   }
 
   const contractAddress = Address.fromString(decentralandConfigurations.dao)
-  const eth = createEthWhenNotConnectedToWeb3()
+  const eth = await createEthWhenNotConnectedToWeb3()
 
   const contract = new Catalyst(eth, contractAddress)
 

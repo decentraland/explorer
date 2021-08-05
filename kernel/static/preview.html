@@ -588,7 +588,8 @@
 
         const kernel = await DecentralandKernel.initKernel({
           kernelOptions: {
-            baseUrl: new URL(`@/artifacts`, location.toString()).toString()
+            baseUrl: new URL(`@/artifacts`, location.toString()).toString(),
+            previewMode: true
           },
           rendererOptions: {
             container,
@@ -633,21 +634,6 @@
       }
 
       async function initPreview(kernel) {
-        const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${document.location.host}`)
-
-        ws.addEventListener('message', (msg) => {
-          if (typeof handleServerMessage !== 'undefined') {
-            console.log('Sending new message to engine.', msg.data)
-            if (msg.data === 'update') {
-              handleServerMessage({
-                type: 'update'
-              })
-            } else if (msg.data.startsWith('{')) {
-              handleServerMessage(JSON.parse(msg.data))
-            }
-          }
-        })
-
         const url = new URLSearchParams(location.search)
 
         if (url.has('ENABLE_WEB3')) {

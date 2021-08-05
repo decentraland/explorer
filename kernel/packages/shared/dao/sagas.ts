@@ -44,7 +44,7 @@ import {
 } from 'shared/loading/ReportFatalError'
 import { CATALYST_COULD_NOT_LOAD } from 'shared/loading/types'
 import { META_CONFIGURATION_INITIALIZED } from 'shared/meta/actions'
-import { checkTldVsWeb3Network, registerProviderNetChanges } from 'shared/web3'
+import { registerProviderNetChanges } from 'shared/web3'
 import { gte } from 'semver'
 
 const CACHE_KEY = 'realm'
@@ -69,9 +69,6 @@ export function* daoSaga(): any {
  */
 function* loadCatalystRealms() {
   yield call(waitForMetaConfigurationInitialization)
-  if (WORLD_EXPLORER && (yield checkTldVsWeb3Network())) {
-    return
-  }
 
   registerProviderNetChanges()
 

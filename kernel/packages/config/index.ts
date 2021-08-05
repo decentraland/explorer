@@ -139,7 +139,11 @@ export const FORCE_SEND_MESSAGE = location.search.includes('FORCE_SEND_MESSAGE')
 export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
 export const ASSET_BUNDLES_DOMAIN = ensureSingleString(qs.ASSET_BUNDLES_DOMAIN)
 
-export const PIN_CATALYST = typeof qs.CATALYST === 'string' ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
+export const PIN_CATALYST = PREVIEW
+  ? location.origin
+  : typeof qs.CATALYST === 'string'
+  ? addHttpsIfNoProtocolIsSet(qs.CATALYST)
+  : undefined
 
 export const FORCE_RENDERING_STYLE = ensureSingleString(qs.FORCE_RENDERING_STYLE) as any
 
