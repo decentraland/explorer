@@ -45,9 +45,7 @@ import {
   getCatalystServer,
   getFetchContentServer
 } from '../dao/selectors'
-import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
-import { getResourcesURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
@@ -200,49 +198,44 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   const currentId = yield select(getCurrentUserId)
   let profile: ServerFormatProfile | null = null
   let hasConnectedWeb3 = false
-  if (WORLD_EXPLORER) {
-    try {
-      if (profileType === ProfileType.LOCAL && currentId !== userId) {
-        const peerProfile: Profile = yield requestLocalProfileToPeers(userId)
-        if (peerProfile) {
-          profile = ensureServerFormat(peerProfile)
-          profile.hasClaimedName = false // for now, comms profiles can't have claimed names
-        }
-      } else {
-        const profiles: { avatars: ServerFormatProfile[] } = yield call(profileServerRequest, userId)
-
-        if (profiles.avatars.length !== 0) {
-          profile = profiles.avatars[0]
-          profile.hasClaimedName = !!profile.name && profile.hasClaimedName // old lambdas profiles don't have claimed names if they don't have the "name" property
-          hasConnectedWeb3 = true
-        }
+  try {
+    if (profileType === ProfileType.LOCAL && currentId !== userId) {
+      const peerProfile: Profile = yield requestLocalProfileToPeers(userId)
+      if (peerProfile) {
+        profile = ensureServerFormat(peerProfile)
+        profile.hasClaimedName = false // for now, comms profiles can't have claimed names
       }
-    } catch (error) {
-      // we throw here because it seems this is an unrecoverable error
-      throw new Error(`Error requesting profile for ${userId}: ${error}`)
+    } else {
+      const profiles: { avatars: ServerFormatProfile[] } = yield call(profileServerRequest, userId)
+
+      if (profiles.avatars.length !== 0) {
+        profile = profiles.avatars[0]
+        profile.hasClaimedName = !!profile.name && profile.hasClaimedName // old lambdas profiles don't have claimed names if they don't have the "name" property
+        hasConnectedWeb3 = true
+      }
+    }
+  } catch (error) {
+    // we throw here because it seems this is an unrecoverable error
+    throw new Error(`Error requesting profile for ${userId}: ${error}`)
+  }
+
+  if (currentId === userId) {
+    const localProfile = fetchProfileLocally(userId)
+    // checks if profile name was changed on builder
+    if (profile && localProfile && localProfile.name !== profile.name) {
+      localProfile.name = profile.name
+    }
+    if (!profile || (localProfile && profile.version < localProfile.version)) {
+      profile = localProfile
     }
 
-    if (currentId === userId) {
-      const localProfile = fetchProfileLocally(userId)
-      // checks if profile name was changed on builder
-      if (profile && localProfile && localProfile.name !== profile.name) {
-        localProfile.name = profile.name
-      }
-      if (!profile || (localProfile && profile.version < localProfile.version)) {
-        profile = localProfile
-      }
+    const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+    profile!.ethAddress = identity.rawAddress
+  }
 
-      const identity: ExplorerIdentity = yield select(getCurrentIdentity)
-      profile!.ethAddress = identity.rawAddress
-    }
-
-    if (!profile) {
-      defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
-      profile = yield call(generateRandomUserProfile, userId)
-    }
-  } else {
-    const snapshotUrl = getResourcesURL('default-profile/snapshots')
-    profile = yield call(backupProfile, snapshotUrl, userId)
+  if (!profile) {
+    defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
+    profile = yield call(generateRandomUserProfile, userId)
   }
 
   if (currentId === userId && profile) {

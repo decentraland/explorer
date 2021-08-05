@@ -13,7 +13,7 @@ import {
   Realm as SocialRealm
 } from 'dcl-social-client'
 
-import { DEBUG_PM, INIT_PRE_LOAD, WORLD_EXPLORER } from 'config'
+import { DEBUG_PM, WORLD_EXPLORER } from 'config'
 
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
@@ -82,10 +82,8 @@ function* initializeSaga() {
   if (identity.hasConnectedWeb3) {
     yield call(ensureRealmInitialized)
 
-    if (!INIT_PRE_LOAD) {
-      // wait until initial load finishes and world is running
-      yield ensureRendererEnabled()
-    }
+    // wait until initial load finishes and world is running
+    yield ensureRendererEnabled()
 
     const identity = yield select(getCurrentIdentity)
     try {

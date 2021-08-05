@@ -1,4 +1,4 @@
-import { getNetworkFromTLD, ETHEREUM_NETWORK } from 'config'
+import { ETHEREUM_NETWORK, getTLD } from 'config'
 
 declare var window: Window & {
   ethereum: any
@@ -11,6 +11,19 @@ function getWeb3Network(): ETHEREUM_NETWORK | undefined {
   }
 }
 
+export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
+  if (tld === 'zone') {
+    return ETHEREUM_NETWORK.ROPSTEN
+  }
+
+  if (tld === 'today' || tld === 'org') {
+    return ETHEREUM_NETWORK.MAINNET
+  }
+
+  // if localhost
+  return null
+}
+
 export async function getNetworkFromTLDOrWeb3(): Promise<ETHEREUM_NETWORK> {
   const web3Network = getWeb3Network()
 
@@ -18,11 +31,5 @@ export async function getNetworkFromTLDOrWeb3(): Promise<ETHEREUM_NETWORK> {
     return web3Network
   }
 
-  const tldNetwork = getNetworkFromTLD()
-
-  if (tldNetwork) {
-    return tldNetwork
-  }
-
-  return ETHEREUM_NETWORK.ROPSTEN
+  return getNetworkFromTLD() || ETHEREUM_NETWORK.ROPSTEN
 }

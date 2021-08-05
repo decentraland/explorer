@@ -1,12 +1,10 @@
-import { call, put, select, take, takeEvery } from 'redux-saga/effects'
+import { call, put, select, takeEvery } from 'redux-saga/effects'
 
-import { WSS_ENABLED, WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl } from 'config'
+import { WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl } from 'config'
 
 import defaultLogger from 'shared/logger'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
-  catalogLoaded,
-  CATALOG_LOADED,
   WearablesFailure,
   wearablesFailure,
   WearablesRequest,
@@ -16,7 +14,6 @@ import {
   WEARABLES_REQUEST,
   WEARABLES_SUCCESS
 } from './actions'
-import { baseCatalogsLoaded, getPlatformCatalog } from './selectors'
 import {
   WearablesRequestFilters,
   WearableV2,
@@ -24,8 +21,6 @@ import {
   PartialWearableV2,
   UnpublishedWearable
 } from './types'
-import { WORLD_EXPLORER } from '../../config/index'
-import { getResourcesURL } from '../location'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
@@ -61,25 +56,6 @@ export function* catalogsSaga(): any {
 
 function* initialLoad() {
   yield call(ensureRealmInitialized)
-
-  if (!WORLD_EXPLORER) {
-    let baseCatalog = []
-    try {
-      const catalogPath = '/default-profile/basecatalog.json'
-      const response = yield fetch(getResourcesURL(catalogPath))
-      baseCatalog = yield response.json()
-
-      if (WSS_ENABLED) {
-        for (let item of baseCatalog) {
-          item.baseUrl = `http://localhost:8000${item.baseUrl}`
-        }
-      }
-    } catch (e) {
-      defaultLogger.warn(`Could not load base catalog`)
-    }
-    yield put(catalogLoaded('base-avatars', baseCatalog))
-    yield put(catalogLoaded('base-exclusive', []))
-  }
 }
 
 export function* handleWearablesRequest(action: WearablesRequest) {
@@ -88,12 +64,9 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   const valid = areFiltersValid(filters)
   if (valid) {
     try {
-      const shouldUseLocalCatalog = WORLD_EXPLORER
       const downloadUrl = yield select(getFetchContentServer)
 
-      const response: PartialWearableV2[] = shouldUseLocalCatalog
-        ? yield call(fetchWearablesFromCatalyst, filters)
-        : yield call(fetchWearablesFromLocalCatalog, filters)
+      const response: PartialWearableV2[] = yield call(fetchWearablesFromCatalyst, filters)
 
       const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl() + '/'
 
@@ -239,24 +212,6 @@ function mapCatalystWearableIntoV2(v2Wearable: any): PartialWearableV2 {
   }
 }
 
-function* fetchWearablesFromLocalCatalog(filters: WearablesRequestFilters) {
-  yield call(ensureBaseCatalogs)
-
-  const platformCatalog = yield select(getPlatformCatalog)
-
-  let response: PartialWearableV2[]
-  if (filters.wearableIds) {
-    // Filtering by ids
-    response = filters.wearableIds.map((wearableId) => platformCatalog[wearableId]).filter((wearable) => !!wearable)
-  } else if (filters.collectionIds) {
-    // We assume that the only collection id used is base-avatars
-    response = Object.values(platformCatalog)
-  } else {
-    throw new Error('Unknown filter')
-  }
-  return response
-}
-
 export function* handleWearablesSuccess(action: WearablesSuccess) {
   const { wearables, context } = action.payload
 
@@ -300,10 +255,4 @@ export function informRequestFailure(error: string, context: string | undefined)
 
 export function sendWearablesCatalog(wearables: WearableV2[], context: string | undefined) {
   getUnityInstance().AddWearablesToCatalog(wearables, context)
-}
-
-export function* ensureBaseCatalogs() {
-  while (!WORLD_EXPLORER && !(yield select(baseCatalogsLoaded))) {
-    yield take(CATALOG_LOADED)
-  }
 }

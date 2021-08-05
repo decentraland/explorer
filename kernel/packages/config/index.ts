@@ -125,8 +125,6 @@ export const DEBUG_LOGIN = location.search.includes('DEBUG_LOGIN')
 export const DEBUG_PM = location.search.includes('DEBUG_PM')
 export const DEBUG_SCENE_LOG = DEBUG || location.search.includes('DEBUG_SCENE_LOG')
 
-export const INIT_PRE_LOAD = location.search.includes('INIT_PRE_LOAD')
-
 export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
 
 export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
@@ -207,12 +205,13 @@ export const knownTLDs = ['zone', 'org', 'today']
 
 export function getDefaultTLD() {
   const TLD = getTLD()
+
   if (ENV_OVERRIDE) {
     return TLD
   }
 
   // web3 is now disabled by default
-  if (TLD === 'localhost') {
+  if (PREVIEW) {
     return 'zone'
   }
 
@@ -223,38 +222,9 @@ export function getDefaultTLD() {
   return TLD
 }
 
-export function getExclusiveServer() {
-  const url = new URL(location.toString())
-  if (url.searchParams.has('TEST_WEARABLES')) {
-    const value = url.searchParams.get('TEST_WEARABLES')
-    if (value) {
-      try {
-        return new URL(value).toString()
-      } catch (e) {
-        return `https://${value}/index.json`
-      }
-    }
-    return 'https://dcl-wearables-dev.now.sh/index.json'
-  }
-  return 'https://wearable-api.decentraland.org/v2/collections'
-}
-
 export const WITH_FIXED_COLLECTIONS =
   qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? ensureSingleString(qs.WITH_COLLECTIONS)! : undefined
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
-
-export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
-  if (tld === 'zone') {
-    return ETHEREUM_NETWORK.ROPSTEN
-  }
-
-  if (tld === 'today' || tld === 'org') {
-    return ETHEREUM_NETWORK.MAINNET
-  }
-
-  // if localhost
-  return null
-}
 
 export function getAssetBundlesBaseUrl(): string {
   const state = store.getState()
@@ -343,12 +313,6 @@ export namespace ethereumConfigurations {
 }
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
-
-// @todo replace before merge
-export const WALLET_API_KEYS = new Map<ETHEREUM_NETWORK, Map<string, string>>([
-  [ETHEREUM_NETWORK.ROPSTEN, new Map([['Fortmatic', 'pk_test_198DDD3CA646DE2F']])],
-  [ETHEREUM_NETWORK.MAINNET, new Map([['Fortmatic', 'pk_live_D7297F51E9776DD2']])]
-])
 
 export const genericAvatarSnapshots: Record<string, string> = {
   face: '/images/avatar_snapshot_default.png',

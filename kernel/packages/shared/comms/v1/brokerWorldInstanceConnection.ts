@@ -318,6 +318,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
         const aliasNum = dataMessage.getFromAlias()
         const alias = aliasNum.toString()
         const category = dataHeader.getCategory()
+
         switch (category) {
           case Category.POSITION: {
             const positionData = PositionData.deserializeBinary(body)
