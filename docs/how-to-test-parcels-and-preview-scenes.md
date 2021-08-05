@@ -20,28 +20,57 @@ Note that the test-scenes building may take a while (10 mins or more).
 
 4. To spawn at the specific coordinates of a test scene append the position query paramter:
 
-    http://localhost:3000/?DEBUG_MODE&position=-100,100
+    http://localhost:3000/?DEBUG_MODE&position=-1,27
 
 NOTE(optional): If you don't need to modify the test-scenes and just build them once, you may only run once `make test-scenes` (it takes a while) and that'd be it.
 
 ### Creating New Test Scenes
-It is possible to define new scenes inside this repo for testing purposes. To do so, create a new folder in `kernel/public/test-scenes`. There are several conventions to be followed regarding the name of these folders and the positions of the parcels, these can be found in the [README](https://github.com/decentraland/client/blob/master/public/test-scenes/README.md) file.
 
-To be able to see the changes made on a test scene (by reloading the browser), without needing to rebuild all the scenes, you should have another terminal running `make watch-only-test-scenes` and that'll keep watching for changes in the test scenes.
+1. Create a new folder in `kernel/public/test-scenes`.
+2. Go to the new created folder.
+3. Run `dcl init`. This will create the basic files structure with an example scene.
+4. Run `dcl start`. A new tab in your browser will be open with your new scene in preview mode.
 
 ### Preview Mode Scenes
 
-#### Unity Editor debugging with dcl scene in "preview mode"
+#### Play a scene in Preview Mode
 
-1. Run 'dcl start' to open the scene in preview mode. Leave the server running and close the newly-opened browser tab
-2. In Unity Editor, in the "InitialScene" scene, select the WSSController gameobject and untoggle the "Open Browser When Start", and toggle the "Use client debug mode". (Make sure the SceneController has the "Debug Scenes" toggle OFF)
-3. In Unity Editor hit PLAY
-4. In a new browser tab go to http://localhost:8000/?UNITY_ENABLED=true&DEBUG_MODE&LOCAL_COMMS&position=0%2C-1&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl
-5. Go back to unity and the scene should start loading in there almost immediately
+1. Go to the scene folder.
+2. Compile the scene dependencies (run only one of the following options):
+  - **OPTION A**: For working with the @latest Kernel version, run `decentraland-ecs@latest`.
+  - **OPTION B**: For working with the @next Kernel version, run `decentraland-ecs@next`.
+3. Run `dcl start`. A new tab in your browser will be open with the scene in preview mode.
 
-#### DCL scene in preview mode using a local Kernel version
+#### Play a scene in Preview Mode using the local Kernel version
 
-1. In the explorer repo directory, run a `make watch` once
-2. Kill the server and run `make npm-link`
-3. In the scene directory run `npm link decentraland-ecs`
-4. In the scene directory run `dcl start` and it should already be using the local version of the client
+1. Go to the kernel folder. 
+2. Run `make watch` and wait for the process ends.
+3. Kill the server, run `make npm-link` and wait for the process ends.
+4. Go to the scene folder.
+5. Run `npm link decentraland-ecs`.
+6. Run `dcl start`. A new tab in your browser will be open with the scene in preview mode.
+
+#### Debugging a scene in Preview Mode from Unity Editor
+
+1. Go to the scene folder.
+2. Compile the scene dependencies:
+   a. For working with the @latest Kernel version, run `decentraland-ecs@latest`.
+   b. For working with the @next Kernel version, run `decentraland-ecs@next`.
+3. Run `dcl start`. A new tab in your browser will be open with the scene in preview mode.
+4. In Unity, deactivate the "Open Browser When Start" flag (`WSSController` game object in the `InitialScene` scene).
+5. Click on PLAY button.
+6. Go to the browser tab that was opened by the previous `dcl start` command and append the following query parameter to the url: `&ws=ws://localhost:4999/dcl`.
+7. Notice that the Unity editor starts loading the scene.
+
+#### Debugging a scene in Preview Mode from Unity Editor and using the local Kernel version
+
+1. Go to the kernel folder. 
+2. Run `make watch` and wait for the process ends.
+3. Kill the server, run `make npm-link` and wait for the process ends.
+4. Go to the scene folder.
+5. Run `npm link decentraland-ecs`.
+6. Run `dcl start`. A new tab in your browser will be open with the scene in preview mode.
+7. In Unity, deactivate the "Open Browser When Start" flag (`WSSController` game object in the `InitialScene` scene).
+8. Click on PLAY button.
+9. Go to the browser tab that was opened by the previous `dcl start` command and append the following query parameter to the url: `&ws=ws://localhost:4999/dcl`.
+10. Notice that the Unity editor starts loading the scene.
