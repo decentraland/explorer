@@ -28,7 +28,7 @@ import {
 import { uuid } from 'atomicHelpers/math'
 import { CLASS_ID } from 'decentraland-ecs'
 import { ParcelIdentity } from '../ParcelIdentity'
-import { getUpdateProfileServer } from 'shared/dao/selectors'
+import { getSelectedNetwork, getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
 import { ExplorerIdentity } from 'shared/session/types'
@@ -41,10 +41,19 @@ import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { store } from 'shared/store/isolatedStore'
 
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
-  private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest
   private transformTranslator!: SceneTransformTranslator
+
+  // lazy loading the BuilderServerAPIManager
+  private _builderApiManager?: BuilderServerAPIManager
+  private get builderApiManager(): BuilderServerAPIManager {
+    if (!this._builderApiManager) {
+      const net = getSelectedNetwork(store.getState())
+      this._builderApiManager = new BuilderServerAPIManager(net)
+    }
+    return this._builderApiManager
+  }
 
   @exposeMethod
   async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {

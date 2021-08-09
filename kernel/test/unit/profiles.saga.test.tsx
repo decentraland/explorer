@@ -10,7 +10,7 @@ import { dynamic } from 'redux-saga-test-plan/providers'
 import { expect } from 'chai'
 import { PROFILE_SUCCESS } from '../../packages/shared/profiles/actions'
 import { isRealmInitialized, getResizeService } from '../../packages/shared/dao/selectors'
-import { getServerConfigurations } from 'config'
+import { ETHEREUM_NETWORK, getServerConfigurations } from 'config'
 import { sleep } from 'atomicHelpers/sleep'
 
 const profile = { data: 'profile' }
@@ -56,7 +56,7 @@ describe('fetchProfile behavior', () => {
         [select(getCurrentUserId), 'myid'],
         [call(processServerProfile, 'user|1', profile), 'passport1'],
         [call(profileServerRequest, 'user|2'), delayedProfile],
-        [call(processServerProfile, 'user|2', profile), 'passport2'],
+        [call(processServerProfile, 'user|2', profile), 'passport2']
       ])
       .run()
   })
@@ -132,8 +132,12 @@ describe('fetchProfile behavior', () => {
 
         const { face, face128, face256 } = lastPut.payload.profile.avatar.snapshots
         expect(face).to.eq('http://fake.url/contents/facehash')
-        expect(face128).to.eq(`${getServerConfigurations().fallbackResizeServiceUrl}/facehash/128`)
-        expect(face256).to.eq(`${getServerConfigurations().fallbackResizeServiceUrl}/facehash/256`)
+        expect(face128).to.eq(
+          `${getServerConfigurations(ETHEREUM_NETWORK.MAINNET).fallbackResizeServiceUrl}/facehash/128`
+        )
+        expect(face256).to.eq(
+          `${getServerConfigurations(ETHEREUM_NETWORK.MAINNET).fallbackResizeServiceUrl}/facehash/256`
+        )
       })
   })
 })

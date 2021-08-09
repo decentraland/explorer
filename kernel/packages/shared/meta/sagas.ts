@@ -1,5 +1,5 @@
 import { call, put, select, take, takeLatest } from 'redux-saga/effects'
-import { FORCE_RENDERING_STYLE, getDefaultAssetBundlesBaseUrl, getServerConfigurations } from 'config'
+import { ETHEREUM_NETWORK, FORCE_RENDERING_STYLE, getAssetBundlesBaseUrl, getServerConfigurations } from 'config'
 import { META_CONFIGURATION_INITIALIZED, metaConfigurationInitialized, metaUpdateMessageOfTheDay } from './actions'
 import defaultLogger from '../logger'
 import { buildNumber } from './env'
@@ -7,31 +7,11 @@ import { BannedUsers, MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE, WorldConfig
 import { isMetaConfigurationInitiazed } from './selectors'
 import { USER_AUTHENTIFIED } from '../session/actions'
 import { getCurrentUserId } from '../session/selectors'
-
-const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
-  explorer: {
-    minBuildNumber: 0,
-    useUnityIndexedDbCache: false,
-    assetBundlesFetchUrl: getDefaultAssetBundlesBaseUrl()
-  },
-  servers: {
-    added: [],
-    denied: [],
-    contentWhitelist: []
-  },
-  bannedUsers: {},
-  synapseUrl: 'https://chat.decentraland.zone',
-  world: {
-    pois: []
-  },
-  comms: {
-    targetConnections: 4,
-    maxConnections: 6
-  }
-}
+import { getSelectedNetwork } from 'shared/dao/selectors'
+import { SELECT_NETWORK } from 'shared/dao/actions'
 
 function bannedUsersFromVariants(variants: Record<string, any> | undefined): BannedUsers | undefined {
-  const variant = variants?.["explorer-banned_users"]
+  const variant = variants?.['explorer-banned_users']
   if (variant && variant.enabled) {
     try {
       return JSON.parse(variant.payload.value)
@@ -42,8 +22,14 @@ function bannedUsersFromVariants(variants: Record<string, any> | undefined): Ban
 }
 
 export function* metaSaga(): any {
-  const config: Partial<MetaConfiguration> = yield call(fetchMetaConfiguration)
-  const flagsAndVariants: { flags: Record<string, boolean>, variants: Record<string, any> } | undefined = yield call(fetchFeatureFlagsAndVariants)
+  yield take(SELECT_NETWORK)
+
+  const net: ETHEREUM_NETWORK = yield select(getSelectedNetwork)
+  const config: Partial<MetaConfiguration> = yield call(fetchMetaConfiguration, net)
+  const flagsAndVariants: { flags: Record<string, boolean>; variants: Record<string, any> } | undefined = yield call(
+    fetchFeatureFlagsAndVariants,
+    net
+  )
   const merge: Partial<MetaConfiguration> = {
     ...config,
     featureFlags: flagsAndVariants?.flags,
@@ -114,8 +100,8 @@ function checkExplorerVersion(config: Partial<MetaConfiguration>) {
   }
 }
 
-async function fetchFeatureFlagsAndVariants(): Promise<Record<string, boolean> | undefined> {
-  const featureFlagsEndpoint = getServerConfigurations().explorerFeatureFlags
+async function fetchFeatureFlagsAndVariants(network: ETHEREUM_NETWORK): Promise<Record<string, boolean> | undefined> {
+  const featureFlagsEndpoint = getServerConfigurations(network).explorerFeatureFlags
   try {
     const response = await fetch(featureFlagsEndpoint, {
       credentials: 'include'
@@ -128,16 +114,39 @@ async function fetchFeatureFlagsAndVariants(): Promise<Record<string, boolean> |
   }
 }
 
-async function fetchMetaConfiguration() {
-  const explorerConfigurationEndpoint = getServerConfigurations().explorerConfiguration
+async function fetchMetaConfiguration(network: ETHEREUM_NETWORK) {
+  const explorerConfigurationEndpoint = getServerConfigurations(network).explorerConfiguration
   try {
     const response = await fetch(explorerConfigurationEndpoint)
-    return response.ok ? response.json() : DEFAULT_META_CONFIGURATION
+    if (response.ok) {
+      return response.json()
+    }
+    throw new Error('Meta Response Not Ok')
   } catch (e) {
     defaultLogger.warn(
       `Error while fetching meta configuration from '${explorerConfigurationEndpoint}' using default config`
     )
-    return DEFAULT_META_CONFIGURATION
+    return {
+      explorer: {
+        minBuildNumber: 0,
+        useUnityIndexedDbCache: false,
+        assetBundlesFetchUrl: getAssetBundlesBaseUrl(network)
+      },
+      servers: {
+        added: [],
+        denied: [],
+        contentWhitelist: []
+      },
+      bannedUsers: {},
+      synapseUrl: 'https://synapse.decentraland.org',
+      world: {
+        pois: []
+      },
+      comms: {
+        targetConnections: 4,
+        maxConnections: 6
+      }
+    }
   }
 }
 

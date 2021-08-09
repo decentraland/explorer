@@ -1,7 +1,7 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
 import { EnvironmentData } from 'shared/types'
-import { getRealm } from 'shared/dao/selectors'
+import { getRealm, getSelectedNetwork } from 'shared/dao/selectors'
 import { getServerConfigurations, PREVIEW } from 'config'
 import { store } from 'shared/store/isolatedStore'
 
@@ -63,7 +63,7 @@ export class EnvironmentAPI extends ExposableAPI {
     return {
       clientUri: location.href,
       configurations: {
-        questsServerUrl: getServerConfigurations().questsUrl
+        questsServerUrl: getServerConfigurations(getSelectedNetwork(store.getState())).questsUrl
       }
     }
   }

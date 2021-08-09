@@ -1,8 +1,7 @@
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import type { UnityGame } from '@dcl/unity-renderer/src'
 import { Observable } from 'mz-observable'
-import { Vector3 } from 'decentraland-ecs'
-import { MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs'
+import { Vector3, MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs'
 import { AirdropInfo } from '../shared/airdrops/interface'
 import { BuilderAsset, DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import {

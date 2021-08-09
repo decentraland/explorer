@@ -6,13 +6,7 @@ import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { getCurrentIdentity, getCurrentUserId, getIsGuestLogin } from 'shared/session/selectors'
-import {
-  decentralandConfigurations,
-  ethereumConfigurations,
-  parcelLimits,
-  playerConfigurations,
-  WORLD_EXPLORER
-} from 'config'
+import { ethereumConfigurations, parcelLimits, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs'
 import { IEventNames } from 'decentraland-ecs'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -44,7 +38,7 @@ import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { fetchENSOwner, getAppNetwork } from 'shared/web3'
+import { fetchENSOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
@@ -69,7 +63,7 @@ import { profileToRendererFormat } from 'shared/profiles/transformations/profile
 import { AVATAR_LOADING_ERROR, renderingActivated, renderingDectivated } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
-import { areCandidatesFetched } from 'shared/dao/selectors'
+import { areCandidatesFetched, getSelectedNetwork } from 'shared/dao/selectors'
 import { openUrlObservable, signUpObservable } from 'shared/observables'
 import { renderStateObservable } from 'shared/world/worldState'
 import { realmToString } from 'shared/dao/utils/realmToString'
@@ -446,7 +440,7 @@ export class BrowserInterface {
 
     if (!found) {
       // if user profile was not found on server -> no connected web3, check if it's a claimed name
-      const net = await getAppNetwork()
+      const net = getSelectedNetwork(store.getState())
       const address = await fetchENSOwner(ethereumConfigurations[net].names, userId)
       if (address) {
         // if an address was found for the name -> set as user id & add that instead
@@ -551,18 +545,20 @@ export class BrowserInterface {
     }
   }
 
-  public async FetchBalanceOfMANA() {
-    const identity = getIdentity()
+  public FetchBalanceOfMANA() {
+    ;(async () => {
+      const identity = getIdentity()
 
-    if (!identity?.hasConnectedWeb3) {
-      return
-    }
-
-    const balance = (await getERC20Balance(identity.address, decentralandConfigurations.paymentTokens.MANA)).toNumber()
-    if (this.lastBalanceOfMana !== balance) {
-      this.lastBalanceOfMana = balance
-      getUnityInstance().UpdateBalanceOfMANA(`${balance}`)
-    }
+      if (!identity?.hasConnectedWeb3) {
+        return
+      }
+      const net = getSelectedNetwork(store.getState())
+      const balance = (await getERC20Balance(identity.address, ethereumConfigurations[net].MANAToken)).toNumber()
+      if (this.lastBalanceOfMana !== balance) {
+        this.lastBalanceOfMana = balance
+        getUnityInstance().UpdateBalanceOfMANA(`${balance}`)
+      }
+    })().catch((err) => console.error(err))
   }
 
   public SetMuteUsers(data: { usersId: string[]; mute: boolean }) {

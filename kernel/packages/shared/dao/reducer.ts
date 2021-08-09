@@ -7,7 +7,9 @@ import {
   MARK_CATALYST_REALM_FULL,
   SET_ADDED_CATALYST_CANDIDATES,
   SET_CONTENT_WHITELIST,
-  MARK_CATALYST_REALM_CONNECTION_ERROR
+  MARK_CATALYST_REALM_CONNECTION_ERROR,
+  SELECT_NETWORK,
+  SelectNetworkAction
 } from './actions'
 import { DaoState, Candidate, Realm, ServerConnectionStatus } from './types'
 import {
@@ -23,6 +25,7 @@ import {
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
   if (!state) {
     return {
+      network: null,
       initialized: false,
       candidatesFetched: false,
       fetchContentServer: '',
@@ -44,6 +47,11 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
     return state
   }
   switch (action.type) {
+    case SELECT_NETWORK:
+      return {
+        ...state,
+        network: (action as SelectNetworkAction).payload
+      }
     case SET_CATALYST_CANDIDATES:
       return {
         ...state,

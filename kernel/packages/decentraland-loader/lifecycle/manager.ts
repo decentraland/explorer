@@ -12,7 +12,7 @@ import { getResourcesURL } from 'shared/location'
 import { parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
 
 import { ILand } from 'shared/types'
-import { getFetchContentServer, getCatalystServer } from 'shared/dao/selectors'
+import { getFetchContentServer, getCatalystServer, getSelectedNetwork } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
 import { store } from 'shared/store/isolatedStore'
 
@@ -126,7 +126,7 @@ export async function initParcelSceneWorker() {
   server.notify('Lifecycle.initialize', {
     contentServer: getFetchContentServer(state),
     catalystServer: getCatalystServer(state),
-    contentServerBundles: getAssetBundlesBaseUrl() + '/',
+    contentServerBundles: getAssetBundlesBaseUrl(getSelectedNetwork(state)) + '/',
     rootUrl: fullRootUrl,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],

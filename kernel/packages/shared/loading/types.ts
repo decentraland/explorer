@@ -12,7 +12,7 @@ export const NOT_INVITED = 'Auth error: not invited'
 export const notInvited = () => action(NOT_INVITED)
 export const METRICS_UNITY_CLIENT_LOADED = 'Rendering engine finished loading! Setting up scene system...'
 export const metricsUnityClientLoaded = () => action(METRICS_UNITY_CLIENT_LOADED)
-export const LOADING_SCENES = 'Loading scenes...'
+export const LOADING_SCENES = '[SCENE_LOADER] Loading scenes...'
 export const loadingScenes = () => action(LOADING_SCENES)
 export const WAITING_FOR_RENDERER = 'Uploading world information to the rendering engine...'
 export const waitingForRenderer = () => action(WAITING_FOR_RENDERER)

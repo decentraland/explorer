@@ -2,7 +2,7 @@ import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, select, takeEvery, take } from 'redux-saga/effects'
 
-import { getServerConfigurations, ethereumConfigurations, RESET_TUTORIAL } from 'config'
+import { getServerConfigurations, ethereumConfigurations, RESET_TUTORIAL, ETHEREUM_NETWORK } from 'config'
 
 import defaultLogger from 'shared/logger'
 import {
@@ -43,7 +43,8 @@ import {
   getResizeService,
   isResizeServiceUrl,
   getCatalystServer,
-  getFetchContentServer
+  getFetchContentServer,
+  getSelectedNetwork
 } from '../dao/selectors'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { takeLatestById } from './utils/takeLatestById'
@@ -273,7 +274,8 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
       let response = yield call(fetch, faceUrl, { method: 'HEAD' })
       if (!response.ok) {
         // if resize service is not available for this image, try with fallback server
-        const fallbackServiceUrl = getServerConfigurations().fallbackResizeServiceUrl
+        const net: ETHEREUM_NETWORK = yield select(getSelectedNetwork)
+        const fallbackServiceUrl = getServerConfigurations(net).fallbackResizeServiceUrl
         if (fallbackServiceUrl !== resizeServiceUrl) {
           faceUrl = `${fallbackServiceUrl}/${path}`
 

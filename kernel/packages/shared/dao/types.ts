@@ -1,3 +1,5 @@
+import type { ETHEREUM_NETWORK } from 'config'
+
 export type Layer = {
   name: string
   usersCount: number
@@ -58,6 +60,7 @@ export type Realm = {
 
 export type DaoState = {
   initialized: boolean
+  network: ETHEREUM_NETWORK | null
   candidatesFetched: boolean
   fetchContentServer: string
   catalystServer: string

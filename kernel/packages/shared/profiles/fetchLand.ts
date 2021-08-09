@@ -1,7 +1,8 @@
 import { Fetcher } from 'dcl-catalyst-commons'
-import { decentralandConfigurations, getDefaultTLD } from 'config'
+import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
 import { LandRole, ParcelsWithAccess } from 'decentraland-ecs'
 import defaultLogger from 'shared/logger'
+import { getAppNetwork } from 'shared/web3'
 
 const getLandQuery = () => `
   query Land($address: Bytes) {
@@ -192,8 +193,10 @@ async function fetchLand(_address: string): Promise<Land[]> {
   const address = _address.toLowerCase()
   const fetcher = new Fetcher()
 
+  const net = await getAppNetwork()
+
   const landManagerUrl =
-    getDefaultTLD() === 'org'
+    net === ETHEREUM_NETWORK.MAINNET
       ? 'https://api.thegraph.com/subgraphs/name/decentraland/land-manager'
       : 'https://api.thegraph.com/subgraphs/name/decentraland/land-manager-ropsten'
 
@@ -223,7 +226,7 @@ async function fetchLand(_address: string): Promise<Land[]> {
   for (const authorization of data.ownerAuthorizations) {
     const { operator, isApproved, tokenAddress } = authorization
     switch (tokenAddress) {
-      case decentralandConfigurations.LANDProxy: {
+      case ethereumConfigurations[net].LANDProxy: {
         if (isApproved) {
           landUpdateManagers.add(operator)
         } else {
@@ -231,7 +234,7 @@ async function fetchLand(_address: string): Promise<Land[]> {
         }
         break
       }
-      case decentralandConfigurations.EstateProxy: {
+      case ethereumConfigurations[net].EstateProxy: {
         if (isApproved) {
           estateUpdateManagers.add(operator)
         } else {

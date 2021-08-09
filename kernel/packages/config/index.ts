@@ -190,111 +190,53 @@ export enum ETHEREUM_NETWORK {
   ROPSTEN = 'ropsten'
 }
 
-export let decentralandConfigurations: any = {}
-let contracts: Record<string, string> = {}
-let network: ETHEREUM_NETWORK | null = null
+export const knownTLDs = ['zone', 'org', 'today']
 
+// return one of org zone today
 export function getTLD() {
   if (ENV_OVERRIDE) {
     return location.search.match(/ENV=(\w+)/)![1]
   }
-  return location.hostname.match(/(\w+)$/)![0]
+  const previsionalTld = location.hostname.match(/(\w+)$/)![0]
+  if (knownTLDs.includes(previsionalTld)) return previsionalTld
+  return 'org'
 }
 
-export const knownTLDs = ['zone', 'org', 'today']
-
-export function getDefaultTLD() {
-  const TLD = getTLD()
-
-  if (ENV_OVERRIDE) {
-    return TLD
-  }
-
-  // web3 is now disabled by default
-  if (PREVIEW) {
-    return 'zone'
-  }
-
-  if (!TLD || !knownTLDs.includes(TLD)) {
-    return network === ETHEREUM_NETWORK.ROPSTEN ? 'zone' : 'org'
-  }
-
-  return TLD
-}
-
-export const WITH_FIXED_COLLECTIONS =
-  qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? ensureSingleString(qs.WITH_COLLECTIONS)! : undefined
+export const WITH_FIXED_COLLECTIONS = (qs.WITH_COLLECTIONS && ensureSingleString(qs.WITH_COLLECTIONS)) || ''
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
-export function getAssetBundlesBaseUrl(): string {
+export function getAssetBundlesBaseUrl(network: ETHEREUM_NETWORK): string {
   const state = store.getState()
-  const result =
-    ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl()
-  return result
+  return (
+    ASSET_BUNDLES_DOMAIN || state.meta.config.explorer?.assetBundlesFetchUrl || getDefaultAssetBundlesBaseUrl(network)
+  )
 }
 
-export function getDefaultAssetBundlesBaseUrl(): string {
-  const TLDDefault = getDefaultTLD()
-  return `https://content-assets-as-bundle.decentraland.${TLDDefault}`
+function getDefaultAssetBundlesBaseUrl(network: ETHEREUM_NETWORK): string {
+  const tld = network == ETHEREUM_NETWORK.MAINNET ? 'org' : 'zone'
+  return `https://content-assets-as-bundle.decentraland.${tld}`
 }
 
-export function getServerConfigurations() {
-  const TLDDefault = getDefaultTLD()
-  const notToday = TLDDefault === 'today' ? 'org' : TLDDefault
+export function getServerConfigurations(network: ETHEREUM_NETWORK) {
+  const tld = network == ETHEREUM_NETWORK.MAINNET ? 'org' : 'zone'
 
-  const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
-  const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
+  const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${tld}/explorer.json`
+  const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${tld}/explorer.json`
 
-  const QUESTS_SERVER_URL =
-    ensureSingleString(qs.QUESTS_SERVER_URL) ?? `https://quests-api.decentraland.${notToday === 'org' ? 'org' : 'io'}`
+  const questsUrl =
+    ensureSingleString(qs.QUESTS_SERVER_URL) ?? `https://quests-api.decentraland.${network ? 'org' : 'io'}`
 
   return {
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
-    questsUrl: QUESTS_SERVER_URL,
-    fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`
+    questsUrl,
+    fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + tld}/lambdas/images`
   }
 }
 
-export async function setNetwork(net: ETHEREUM_NETWORK) {
-  try {
-    network = net
-    contracts = contractInfo[net]
-
-    contracts['CatalystProxy'] =
-      net === ETHEREUM_NETWORK.MAINNET
-        ? '0x4a2f10076101650f40342885b99b6b101d83c486'
-        : '0xadd085f2318e9678bbb18b3e0711328f902b374b'
-
-    decentralandConfigurations = {
-      ...contracts,
-      contractAddress: contracts.LANDProxy,
-      dao: contracts.CatalystProxy,
-      ens: contracts.CatalystProxy,
-      contracts: {
-        serviceLocator: contracts.ServiceLocator
-      },
-      paymentTokens: {
-        MANA: contracts.MANAToken
-      }
-    }
-  } catch (e) {
-    // Could not fetch addresses. You might be offline. Setting sensitive defaults for contract addresses...
-
-    network = net
-    contracts = {}
-
-    decentralandConfigurations = {
-      contractAddress: '',
-      dao: '',
-      contracts: {
-        serviceLocator: ''
-      },
-      paymentTokens: {
-        MANA: ''
-      }
-    }
-  }
+function assertValue<T>(val: T | undefined | null): T {
+  if (!val) throw new Error('Value is missing')
+  return val
 }
 
 export namespace ethereumConfigurations {
@@ -302,13 +244,25 @@ export namespace ethereumConfigurations {
     wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://etherscan.io',
-    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace'
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace',
+
+    // contracts
+    LANDProxy: assertValue(contractInfo.mainnet.LANDProxy),
+    EstateProxy: assertValue(contractInfo.mainnet.EstateProxy),
+    CatalystProxy: assertValue(contractInfo.mainnet.CatalystProxy),
+    MANAToken: assertValue(contractInfo.mainnet.MANAToken)
   }
   export const ropsten = {
     wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://ropsten.etherscan.io',
-    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace-ropsten'
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace-ropsten',
+
+    // contracts
+    LANDProxy: assertValue(contractInfo.ropsten.LANDProxy),
+    EstateProxy: assertValue(contractInfo.ropsten.EstateProxy),
+    CatalystProxy: assertValue(contractInfo.ropsten.CatalystProxy || contractInfo.ropsten.Catalyst),
+    MANAToken: assertValue(contractInfo.ropsten.MANAToken)
   }
 }
 
@@ -322,7 +276,7 @@ export const genericAvatarSnapshots: Record<string, string> = {
 }
 
 export function getCatalystNodesDefaultURL() {
-  return `https://peer.decentraland.${getDefaultTLD()}/lambdas/contracts/servers`
+  return `https://peer-lb.decentraland.${getTLD()}/lambdas/contracts/servers`
 }
 
 function addHttpsIfNoProtocolIsSet(domain: string): string {

@@ -1,4 +1,4 @@
-import { getDefaultTLD } from 'config'
+import { getTLD } from 'config'
 import { trackEvent } from 'shared/analytics'
 import { ExplorerIdentity } from 'shared/session/types'
 import { defaultLogger } from 'shared/logger'
@@ -10,7 +10,7 @@ declare var location: any
 declare var history: any
 
 export function getReferralEndpoint() {
-  switch (getDefaultTLD()) {
+  switch (getTLD()) {
     case 'org':
       return `https://referral.decentraland.org`
 
@@ -44,7 +44,7 @@ export function referUser(identity: ExplorerIdentity) {
     const options: RequestInit = {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + btoa(JSON.stringify(identity.authChain)),
+        Authorization: 'Bearer ' + btoa(JSON.stringify(identity.authChain)),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ code })

@@ -1,15 +1,11 @@
-import { ethereumConfigurations, setNetwork } from 'config'
+import { ETHEREUM_NETWORK, ethereumConfigurations } from 'config'
 import { Address } from 'web3x/address'
-import { ETHEREUM_NETWORK } from '../config'
-import { decentralandConfigurations } from '../config/index'
 import { Catalyst } from './dao/contracts/Catalyst'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
-import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
 import { Eth } from 'web3x/eth'
-import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
 import { requestManager } from './ethereum/provider'
 
 declare var window: Window & {
@@ -22,28 +18,19 @@ export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   return web3net
 }
 
-// This function creates a Web3x eth object without the need of having initiated sign in / sign up. Used when requesting the catalysts
-export async function createEthWhenNotConnectedToWeb3(): Promise<Eth> {
-  const ethereum = (window as any).ethereum
-  if (ethereum) {
-    // If we have a web3 enabled browser, we can use that
-    return new Eth(new LegacyProviderAdapter((window as any).ethereum))
-  } else {
-    // If not, we use infura
-    const network = await getNetworkFromTLDOrWeb3()
-    return new Eth(new WebsocketProvider(ethereumConfigurations[network].wss))
-  }
-}
-
 export async function fetchCatalystNodesFromDAO(): Promise<CatalystNode[]> {
-  if (!decentralandConfigurations.dao) {
-    await setNetwork(await getNetworkFromTLDOrWeb3())
+  if (!requestManager.provider) {
+    debugger
+    throw new Error('requestManager.provider not set')
   }
 
-  const contractAddress = Address.fromString(decentralandConfigurations.dao)
-  const eth = await createEthWhenNotConnectedToWeb3()
+  const net = await getAppNetwork()
 
-  const contract = new Catalyst(eth, contractAddress)
+  debugger
+  const catalystContractAddress = Address.fromString(ethereumConfigurations[net].CatalystProxy)
+  const eth = new Eth(requestManager.provider)
+
+  const contract = new Catalyst(eth, catalystContractAddress)
 
   const count = Number.parseInt(await retry(() => contract.methods.catalystCount().call()), 10)
 
@@ -122,7 +109,7 @@ export async function fetchENSOwner(url: string, name: string) {
  * @param name string to query
  * @param maxResults max results expected (The Graph support up to 1000)
  */
-export async function fetchENSOwnersContains(url: string, name: string, maxResults: number) {
+export async function fetchENSOwnersContains(url: string, name: string, maxResults: number): Promise<string[]> {
   const query = `
     query GetOwner($name: String!, $maxResults: Int!) {
       nfts(first: $maxResults, where: { searchText_contains: $name, category: ens }) {

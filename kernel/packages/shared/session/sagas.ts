@@ -3,7 +3,7 @@ import { createIdentity } from 'eth-crypto'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ETHEREUM_NETWORK, setNetwork } from 'config'
+import { ETHEREUM_NETWORK } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -11,8 +11,7 @@ import { getUserAccount, isSessionExpired, requestManager } from 'shared/ethereu
 import { setLocalInformationForComms } from 'shared/comms/peers'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { AUTH_ERROR_LOGGED_OUT, AWAITING_USER_SIGNATURE, setLoadingWaitTutorial } from 'shared/loading/types'
-import { trackEvent } from 'shared/analytics'
-import { getAppNetwork } from 'shared/web3'
+import { getAppNetwork, registerProviderNetChanges } from 'shared/web3'
 import { connection } from 'decentraland-connect'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
@@ -49,6 +48,8 @@ import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { Store } from 'redux'
 import { store } from 'shared/store/isolatedStore'
 import { accountStateObservable } from 'shared/observables'
+import { selectNetwork } from 'shared/dao/actions'
+import { getSelectedNetwork } from 'shared/dao/selectors'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -81,11 +82,11 @@ function* signaturePrompt() {
 }
 
 function* initSession() {
-  yield ensureRealmInitialized()
   yield put(changeLoginState(LoginState.WAITING_PROVIDER))
 }
 
 function* authenticate(action: AuthenticateAction) {
+  // setup provider
   requestManager.setProvider(action.payload.provider)
 
   yield put(changeLoginState(LoginState.LOADING))
@@ -94,6 +95,12 @@ function* authenticate(action: AuthenticateAction) {
   const identity: ExplorerIdentity = yield authorize(requestManager)
 
   yield put(changeLoginState(LoginState.WAITING_PROFILE))
+
+  // set the etherum network to start loading profiles
+  const net: ETHEREUM_NETWORK = yield call(getAppNetwork)
+  yield put(selectNetwork(net))
+  registerProviderNetChanges()
+  yield call(ensureRealmInitialized)
 
   const profileExists: boolean = yield doesProfileExist(identity.address)
   const isGuest: boolean = yield select(getIsGuestLogin)
@@ -182,21 +189,13 @@ function* signIn(identity: ExplorerIdentity) {
     referUser(identity)
   }
 
-  yield setUserAuthentified(identity)
-
-  yield put(changeLoginState(LoginState.COMPLETED))
-}
-
-function* setUserAuthentified(identity: ExplorerIdentity) {
-  let net: ETHEREUM_NETWORK = yield getAppNetwork()
-
-  // Load contracts from https://contracts.decentraland.org
-  yield setNetwork(net)
-  trackEvent('Use network', { net })
+  let net: ETHEREUM_NETWORK = yield select(getSelectedNetwork)
 
   yield ensureMetaConfigurationInitialized()
 
   yield put(userAuthentified(identity, net))
+
+  yield put(changeLoginState(LoginState.COMPLETED))
 }
 
 function* signUp() {

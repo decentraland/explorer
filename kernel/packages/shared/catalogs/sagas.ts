@@ -1,6 +1,6 @@
 import { call, put, select, takeEvery } from 'redux-saga/effects'
 
-import { WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl } from 'config'
+import { WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl, getTLD, PREVIEW, DEBUG, ETHEREUM_NETWORK } from 'config'
 
 import defaultLogger from 'shared/logger'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
@@ -25,7 +25,7 @@ import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
 import { fetchJson } from 'dcl-catalyst-commons'
-import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
+import { getCatalystServer, getFetchContentServer, getSelectedNetwork } from 'shared/dao/selectors'
 import {
   BASE_BUILDER_SERVER_URL,
   BASE_DOWNLOAD_URL,
@@ -64,11 +64,11 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   const valid = areFiltersValid(filters)
   if (valid) {
     try {
-      const downloadUrl = yield select(getFetchContentServer)
+      const downloadUrl: string = yield select(getFetchContentServer)
 
       const response: PartialWearableV2[] = yield call(fetchWearablesFromCatalyst, filters)
-
-      const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl() + '/'
+      const net: ETHEREUM_NETWORK = yield select(getSelectedNetwork)
+      const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl(net) + '/'
 
       const v2Wearables: WearableV2[] = response.map((wearable) => ({
         ...wearable,
@@ -91,7 +91,8 @@ function* fetchWearablesFromCatalyst(filters: WearablesRequestFilters) {
 
   const result: any[] = []
   if (filters.ownedByUser) {
-    if (WITH_FIXED_COLLECTIONS) {
+    const COLLECTIONS_ALLOWED = PREVIEW || DEBUG || getTLD() !== 'org'
+    if (WITH_FIXED_COLLECTIONS && COLLECTIONS_ALLOWED) {
       // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
       // That's why we are also querying a prod catalyst for the given collections
       const collectionIds: string[] = WITH_FIXED_COLLECTIONS.split(',')

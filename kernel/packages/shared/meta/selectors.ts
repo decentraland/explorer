@@ -1,6 +1,6 @@
 import { BannedUsers, CommsConfig, FeatureFlags, MessageOfTheDayConfig, RootMetaState } from './types'
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { getCatalystNodesDefaultURL, VOICE_CHAT_DISABLED_FLAG } from 'config'
+import { VOICE_CHAT_DISABLED_FLAG } from 'config'
 
 export const getAddedServers = (store: RootMetaState): string[] => {
   const { config } = store.meta
@@ -56,7 +56,7 @@ export const isFeatureEnabled = (store: RootMetaState, featureName: FeatureFlags
 }
 
 export const getSynapseUrl = (store: RootMetaState): string =>
-  store.meta.config.synapseUrl ?? 'https://chat.decentraland.zone'
+  store.meta.config.synapseUrl ?? 'https://synapse.decentraland.io'
 
 /** Convert camel case to upper snake case */
 function toUrlFlag(key: string) {
@@ -64,5 +64,5 @@ function toUrlFlag(key: string) {
   return result.split(' ').join('_').toUpperCase()
 }
 
-export const getCatalystNodesEndpoint = (store: RootMetaState): string =>
-  store.meta.config.servers?.catalystsNodesEndpoint ?? getCatalystNodesDefaultURL()
+export const getCatalystNodesEndpoint = (store: RootMetaState): string | undefined =>
+  store.meta.config.servers?.catalystsNodesEndpoint
