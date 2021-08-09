@@ -29,15 +29,7 @@ import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRende
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 import { isWaitingTutorial } from 'shared/loading/selectors'
 import { ensureUnityInterface } from 'shared/renderer'
-import {
-  errorObservable,
-  loadingProgressObservable,
-  trackingEventObservable,
-  accountStateObservable,
-  signUpObservable,
-  rendererVisibleObservable,
-  openUrlObservable
-} from 'shared/observables'
+import { globalObservable } from 'shared/observables'
 import { initShared } from 'shared'
 import { setResourcesURL } from 'shared/location'
 import { WebSocketProvider } from 'eth-connect'
@@ -145,13 +137,7 @@ globalThis.DecentralandKernel = {
         }
         authenticateWhenItsReady(provider, isGuest)
       },
-      accountStateObservable,
-      errorObservable,
-      loadingProgressObservable,
-      trackingEventObservable,
-      signUpObservable,
-      rendererVisibleObservable,
-      openUrlObservable,
+      on: globalObservable.on.bind(globalObservable),
       version: 'mockedversion'
     }
   }

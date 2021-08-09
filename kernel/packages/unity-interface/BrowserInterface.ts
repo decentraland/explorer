@@ -64,7 +64,7 @@ import { AVATAR_LOADING_ERROR, renderingActivated, renderingDectivated } from 's
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { areCandidatesFetched, getSelectedNetwork } from 'shared/dao/selectors'
-import { openUrlObservable, signUpObservable } from 'shared/observables'
+import { globalObservable } from 'shared/observables'
 import { renderStateObservable } from 'shared/world/worldState'
 import { realmToString } from 'shared/dao/utils/realmToString'
 import { store } from 'shared/store/isolatedStore'
@@ -166,7 +166,7 @@ export class BrowserInterface {
   }
 
   public OpenWebURL(data: { url: string }) {
-    openUrlObservable.notifyObservers(data)
+    globalObservable.emit('openUrl', data)
   }
 
   public PerformanceReport(data: {
@@ -232,7 +232,7 @@ export class BrowserInterface {
     if (hasWallet()) {
       TeleportController.goToNext()
     } else {
-      openUrlObservable.notifyObservers({ url: 'https://docs.decentraland.org/get-a-wallet/' })
+      globalObservable.emit('openUrl', { url: 'https://docs.decentraland.org/get-a-wallet/' })
     }
   }
 
@@ -400,7 +400,7 @@ export class BrowserInterface {
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
-    signUpObservable.notifyObservers({ email: data.userEmail })
+    globalObservable.emit('signUp', { email: data.userEmail })
   }
 
   public RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {

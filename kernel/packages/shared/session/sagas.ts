@@ -47,7 +47,7 @@ import { RequestManager } from 'eth-connect'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { Store } from 'redux'
 import { store } from 'shared/store/isolatedStore'
-import { accountStateObservable } from 'shared/observables'
+import { globalObservable } from 'shared/observables'
 import { selectNetwork } from 'shared/dao/actions'
 import { getSelectedNetwork } from 'shared/dao/selectors'
 
@@ -345,7 +345,7 @@ export async function onLoginCompleted(): Promise<SessionState> {
 
 export function initializeSessionObserver() {
   observeAccountStateChange(store, (_, session) => {
-    accountStateObservable.notifyObservers({
+    globalObservable.emit('accountState', {
       hasProvider: false,
       loginStatus: session.loginState as LoginState,
       identity: session.identity,

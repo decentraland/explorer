@@ -7,7 +7,7 @@ import { defaultLogger } from 'shared/logger'
 import { avatarMessageObservable } from './comms/peers'
 import { AvatarMessageType } from './comms/interface/types'
 import { positionObservable } from './world/positionThings'
-import { trackingEventObservable } from './observables'
+import { globalObservable } from './observables'
 
 export type SegmentEvent = {
   name: string
@@ -19,7 +19,7 @@ export function trackEvent(eventName: string, eventData: Record<string, any>) {
     defaultLogger.info(`Tracking event "${eventName}": `, eventData)
   }
 
-  trackingEventObservable.notifyObservers({
+  globalObservable.emit('trackingEvent', {
     eventName,
     eventData
   })

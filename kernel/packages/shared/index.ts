@@ -10,7 +10,7 @@ import { initializeUrlIslandObserver } from './comms'
 import { initializeUrlRealmObserver } from './dao'
 import { isMobile } from './comms/mobile'
 import { isWebGLCompatible } from './comms/browser'
-import { rendererVisibleObservable } from './observables'
+import { globalObservable } from './observables'
 import { isRendererVisible } from './loading/selectors'
 import { RootStore } from './store/rootTypes'
 import { initializeSessionObserver } from './session/sagas'
@@ -66,7 +66,7 @@ function observeIsRendererVisibleChanges(store: RootStore, cb: (visible: boolean
 export function initializeRendererVisibleObserver(store: RootStore) {
   observeIsRendererVisibleChanges(store, (visible: boolean) => {
     console.log('renderer visible', visible)
-    rendererVisibleObservable.notifyObservers({
+    globalObservable.emit('rendererVisible', {
       visible
     })
   })

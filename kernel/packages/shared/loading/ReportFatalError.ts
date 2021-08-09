@@ -14,7 +14,7 @@ import {
 } from './types'
 import { trackEvent } from '../analytics'
 import { action } from 'typesafe-actions'
-import { errorObservable } from '../observables'
+import { globalObservable } from '../observables'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { store } from 'shared/store/isolatedStore'
 
@@ -42,7 +42,7 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
 
   store.dispatch(fatalError(targetError))
 
-  errorObservable.notifyObservers({
+  globalObservable.emit('error', {
     error: new Error(event),
     code: targetError,
     level: 'fatal'
@@ -117,7 +117,7 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
     saga_stack: sagaStack
   })
 
-  errorObservable.notifyObservers({
+  globalObservable.emit('error', {
     error,
     level: 'fatal',
     extra: { context, ...payload }
