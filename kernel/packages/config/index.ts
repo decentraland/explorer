@@ -38,14 +38,15 @@ export namespace parcelLimits {
 
   export let visibleRadius = 4
 
-  export const maxX = 3000
-  export const maxZ = 3000
-  export const minX = -3000
-  export const minZ = -3000
-
+  /**
+   * @deprecated. This is still used to calculate a position hash, but shouln't be used for anything else.
+   */
   export const maxParcelX = 150
+  /** @deprecated */
   export const maxParcelZ = 150
+  /** @deprecated */
   export const minParcelX = -150
+  /** @deprecated */
   export const minParcelZ = -150
 
   export const descriptiveValidWorldRanges = getWorld()
