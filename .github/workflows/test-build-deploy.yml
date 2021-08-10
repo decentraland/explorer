@@ -69,7 +69,7 @@ jobs:
       - name: build
         working-directory: kernel
         run: make build-essentials build-release build-deploy
-
+      - uses: hmarr/debug-action@v2
       - name: publish packages
         uses: menduz/oddish-action@master
         with:
