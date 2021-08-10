@@ -48,12 +48,12 @@ export class CommunicationArea {
 
   constructor(center: Parcel, radius: number) {
     this.vMin = new V2(
-      Math.max(parcelLimits.minParcelX, center.x - radius),
-      Math.max(parcelLimits.minParcelZ, center.z - radius)
+      center.x - radius,
+      center.z - radius
     )
     this.vMax = new V2(
-      Math.min(parcelLimits.maxParcelX, center.x + radius),
-      Math.min(parcelLimits.maxParcelZ, center.z + radius)
+      center.x + radius,
+      center.z + radius
     )
   }
 
