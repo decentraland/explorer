@@ -40,7 +40,7 @@ export namespace parcelLimits {
 
   /**
    * @deprecated. This is still used to calculate a position hash, but shouln't be used for anything else.
-   * */
+   */
   export const maxParcelX = 150
   /** @deprecated */
   export const maxParcelZ = 150
