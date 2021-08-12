@@ -12,7 +12,6 @@ import { setLocalInformationForComms } from 'shared/comms/peers'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
 import { AUTH_ERROR_LOGGED_OUT, AWAITING_USER_SIGNATURE, setLoadingWaitTutorial } from 'shared/loading/types'
 import { getAppNetwork, registerProviderNetChanges } from 'shared/web3'
-import { connection } from 'decentraland-connect'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
@@ -104,7 +103,7 @@ function* authenticate(action: AuthenticateAction) {
 
   const profileExists: boolean = yield doesProfileExist(identity.address)
   const isGuest: boolean = yield select(getIsGuestLogin)
-  const isGuestWithProfileLocal: boolean = isGuest && !!fetchProfileLocally(identity.address)
+  const isGuestWithProfileLocal: boolean = isGuest && !!fetchProfileLocally(identity.address, net)
 
   if (profileExists || isGuestWithProfileLocal) {
     yield put(setLoadingWaitTutorial(false))
@@ -118,7 +117,8 @@ function* authenticate(action: AuthenticateAction) {
 function* startSignUp(identity: ExplorerIdentity) {
   yield put(signUpSetIsSignUp(true))
 
-  let cachedProfile = fetchProfileLocally(identity.address)
+  const net: ETHEREUM_NETWORK = yield call(getAppNetwork)
+  let cachedProfile = fetchProfileLocally(identity.address, net)
   let profile: Profile = cachedProfile ? cachedProfile : yield generateRandomUserProfile(identity.address)
   profile.userId = identity.address
   profile.ethAddress = identity.rawAddress
@@ -304,7 +304,6 @@ async function createAuthIdentity(requestManager: RequestManager, isGuest: boole
 }
 
 function* logout() {
-  connection.disconnect()
   Session.current.logout().catch((e) => logger.error('error while logging out', e))
 }
 

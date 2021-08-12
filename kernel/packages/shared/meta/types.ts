@@ -1,14 +1,10 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import future, { IFuture } from 'fp-future'
 import { RenderProfile } from 'shared/types'
 import { Color4 } from 'decentraland-ecs'
-
-export let USE_UNITY_INDEXED_DB_CACHE: IFuture<boolean> = future()
 
 export type MetaConfiguration = {
   explorer: {
     minBuildNumber: number
-    useUnityIndexedDbCache: boolean
     assetBundlesFetchUrl: string
   }
   servers: {
@@ -28,7 +24,7 @@ export type MetaConfiguration = {
 export type BannedUsers = Record<string, Ban[]>
 
 export type Ban = {
-  type: "VOICE_CHAT_AND_CHAT" // For now we only handle one ban type
+  type: 'VOICE_CHAT_AND_CHAT' // For now we only handle one ban type
   expiration: number // Timestamp
 }
 

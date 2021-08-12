@@ -1,6 +1,5 @@
 // This file decides and loads the renderer of choice
 
-import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
 import { initializeRenderer } from 'shared/renderer/actions'
 import { ensureUnityInterface } from 'shared/renderer'
 import { CommonRendererOptions, loadUnity } from './loader'
@@ -17,10 +16,6 @@ import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { store } from 'shared/store/isolatedStore'
 import defaultLogger from 'shared/logger'
 import { browserInterface } from './BrowserInterface'
-
-declare const globalThis: { Hls: any }
-// HLS is required to make video texture and streaming work in Unity
-globalThis.Hls = require('hls.js')
 
 export type InitializeUnityResult = {
   container: HTMLElement
@@ -45,7 +40,8 @@ const defaultOptions: CommonRendererOptions = {
 }
 
 async function loadInjectedUnityDelegate(container: HTMLElement): Promise<UnityGame> {
-  ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
+  // Remove the following line after https://github.com/decentraland/unity-renderer/pull/974 gets merged
+  ;(globalThis as any).USE_UNITY_INDEXED_DB_CACHE = Promise.resolve(false)
 
   // inject unity loader
   const rootArtifactsUrl = rendererOptions.baseUrl || ''

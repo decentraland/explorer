@@ -12,7 +12,6 @@ import { getCurrentUserId } from 'shared/session/selectors'
 import { LoginState } from '@dcl/kernel-interface'
 import { call } from 'redux-saga-test-plan/matchers'
 import { RootState } from 'shared/store/rootTypes'
-import { PREVIEW } from 'config'
 import { onLoginCompleted } from 'shared/session/sagas'
 
 export function* loadingSaga() {
@@ -57,8 +56,12 @@ export function* trackLoadTime(action: SceneLoad): any {
 
 function* waitForSceneLoads() {
   function shouldWaitForScenes(state: RootState) {
+    if (!state.renderer.parcelLoadingStarted) {
+      return true
+    }
+
     // in the initial load, we should wait until we have *some* scene to load
-    if (state.loading.initialLoad && !PREVIEW) {
+    if (state.loading.initialLoad) {
       if (state.loading.pendingScenes !== 0 || state.loading.totalScenes === 0) {
         return true
       }

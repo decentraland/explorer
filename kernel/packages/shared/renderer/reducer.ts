@@ -1,8 +1,9 @@
 import { AnyAction } from 'redux'
-import { RendererState, RENDERER_INITIALIZED } from './types'
+import { PARCEL_LOADING_STARTED, RendererState, RENDERER_INITIALIZED } from './types'
 
 const INITIAL_STATE: RendererState = {
-  initialized: false
+  initialized: false,
+  parcelLoadingStarted: false
 }
 
 export function rendererReducer(state?: RendererState, action?: AnyAction): RendererState {
@@ -17,6 +18,11 @@ export function rendererReducer(state?: RendererState, action?: AnyAction): Rend
       return {
         ...state,
         initialized: true
+      }
+    case PARCEL_LOADING_STARTED:
+      return {
+        ...state,
+        parcelLoadingStarted: true
       }
     default:
       return state

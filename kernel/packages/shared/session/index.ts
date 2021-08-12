@@ -8,12 +8,15 @@ import {
 } from 'atomicHelpers/localStorage'
 import { StoredSession } from './types'
 import { store } from 'shared/store/isolatedStore'
+import { localProfilesRepo } from 'shared/profiles/sagas'
+import { getSelectedNetwork } from 'shared/dao/selectors'
+import { globalObservable } from 'shared/observables'
 
 const SESSION_KEY_PREFIX = 'dcl-session'
 const LAST_SESSION_KEY = 'dcl-last-session-id'
 
 function sessionKey(userId: string) {
-  return `${SESSION_KEY_PREFIX}-${userId}`
+  return `${SESSION_KEY_PREFIX}-${userId.toLocaleLowerCase()}`
 }
 
 export const setStoredSession: (session: StoredSession) => void = (session) => {
@@ -88,12 +91,19 @@ export class Session {
   }
 
   async logout() {
-    sendToMordor()
-    disconnect()
-    removeStoredSession(getIdentity()?.address)
-    removeUrlParam('position')
-    removeUrlParam('show_wallet')
-    window.location.reload()
+    const address = getIdentity()?.address
+    const network = getSelectedNetwork(store.getState())
+    sendToMordor().then(() => {
+      disconnect()
+      removeStoredSession(getIdentity()?.address)
+      removeUrlParam('position')
+      removeUrlParam('show_wallet')
+      if (address && network) {
+        localProfilesRepo.remove(address, network)
+      }
+      globalObservable.emit('logout', { address, network })
+      window.location.reload()
+    })
   }
 
   async redirectToSignUp() {

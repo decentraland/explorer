@@ -75,7 +75,7 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
   takeLatestById(patternOrChannel, concatenatedActionTypeUserId, saga, ...args)
 
 // This repository is for local profiles owned by this browser (without wallet)
-const localProfilesRepo = new LocalProfilesRepository()
+export const localProfilesRepo = new LocalProfilesRepository()
 
 /**
  * This saga handles both passports and assets required for the renderer to show the
@@ -169,15 +169,13 @@ export function* ensureLocalProfileInRenderer() {
  * @param profile Updated profile
  */
 function scheduleProfileUpdate(profile: Profile) {
-  new Promise(() => {
-    const unsubscribe = store.subscribe(() => {
-      const initialized = store.getState().comms.initialized
-      if (initialized) {
-        unsubscribe()
-        store.dispatch(saveProfileRequest(profile))
-      }
-    })
-  }).catch((e) => defaultLogger.error(`error while updating profile`, e))
+  const unsubscribe = store.subscribe(() => {
+    const initialized = store.getState().comms.initialized
+    if (initialized) {
+      unsubscribe()
+      store.dispatch(saveProfileRequest(profile))
+    }
+  })
 }
 
 export function* doesProfileExist(userId: string): any {
@@ -221,7 +219,8 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   if (currentId === userId) {
-    const localProfile = fetchProfileLocally(userId)
+    const net: ETHEREUM_NETWORK = yield select(getCurrentNetwork)
+    const localProfile = fetchProfileLocally(userId, net)
     // checks if profile name was changed on builder
     if (profile && localProfile && localProfile.name !== profile.name) {
       localProfile.name = profile.name
@@ -366,8 +365,9 @@ function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
     const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } } as Profile
 
     const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+    const network: ETHEREUM_NETWORK = yield select(getCurrentNetwork)
 
-    localProfilesRepo.persist(identity.address, profile)
+    localProfilesRepo.persist(identity.address, network, profile)
 
     yield put(saveProfileSuccess(userId, profile.version, profile))
 
@@ -403,8 +403,8 @@ function* handleDeployProfile(deployProfileAction: DeployProfile) {
   }
 }
 
-export function fetchProfileLocally(address: string) {
-  const profile: Profile | null = localProfilesRepo.get(address)
+export function fetchProfileLocally(address: string, network: ETHEREUM_NETWORK) {
+  const profile: Profile | null = localProfilesRepo.get(address, network)
   if (profile?.userId === address) {
     return ensureServerFormat(profile)
   } else {

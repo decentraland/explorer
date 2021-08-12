@@ -3,7 +3,7 @@ import { ETHEREUM_NETWORK, FORCE_RENDERING_STYLE, getAssetBundlesBaseUrl, getSer
 import { META_CONFIGURATION_INITIALIZED, metaConfigurationInitialized, metaUpdateMessageOfTheDay } from './actions'
 import defaultLogger from '../logger'
 import { buildNumber } from './env'
-import { BannedUsers, MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE, WorldConfig } from './types'
+import { BannedUsers, MetaConfiguration, WorldConfig } from './types'
 import { isMetaConfigurationInitiazed } from './selectors'
 import { USER_AUTHENTIFIED } from '../session/actions'
 import { getCurrentUserId } from '../session/selectors'
@@ -46,7 +46,6 @@ export function* metaSaga(): any {
 
   yield put(metaConfigurationInitialized(merge))
   yield call(checkExplorerVersion, merge)
-  yield call(checkIndexedDB, merge)
   yield takeLatest(USER_AUTHENTIFIED, fetchMessageOfTheDay)
 }
 
@@ -66,24 +65,6 @@ function* fetchMessageOfTheDay() {
     })
     yield put(metaUpdateMessageOfTheDay(result))
   }
-}
-
-function checkIndexedDB(config: Partial<MetaConfiguration>) {
-  if (!config || !config.explorer) {
-    return
-  }
-
-  if (!config.explorer.useUnityIndexedDbCache) {
-    defaultLogger.info(`Unity IndexedDB meta config is undefined. Defaulting as false (only for chrome)`)
-    USE_UNITY_INDEXED_DB_CACHE.resolve(false)
-    return
-  }
-
-  defaultLogger.info(
-    `Unity IndexedDB meta config loaded. Configured remotely as: `,
-    config.explorer.useUnityIndexedDbCache
-  )
-  USE_UNITY_INDEXED_DB_CACHE.resolve(config.explorer.useUnityIndexedDbCache)
 }
 
 function checkExplorerVersion(config: Partial<MetaConfiguration>) {
@@ -129,7 +110,6 @@ async function fetchMetaConfiguration(network: ETHEREUM_NETWORK) {
     return {
       explorer: {
         minBuildNumber: 0,
-        useUnityIndexedDbCache: false,
         assetBundlesFetchUrl: getAssetBundlesBaseUrl(network)
       },
       servers: {

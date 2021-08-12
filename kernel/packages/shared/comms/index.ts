@@ -531,28 +531,28 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (context.sendingProfileResponse) return
 
   context.sendingProfileResponse = true
-    ; (async () => {
-      const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+  ;(async () => {
+    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
-      // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
-      if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
-        await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
-      }
+    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+    }
 
-      const profile = await ProfileAsPromise(
-        myAddress,
-        message.data.version ? parseInt(message.data.version, 10) : undefined,
-        getProfileType(myIdentity)
-      )
+    const profile = await ProfileAsPromise(
+      myAddress,
+      message.data.version ? parseInt(message.data.version, 10) : undefined,
+      getProfileType(myIdentity)
+    )
 
-      if (context.currentPosition) {
-        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
-      }
+    if (context.currentPosition) {
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+    }
 
-      context.lastProfileResponseTime = Date.now()
-    })()
-      .finally(() => (context.sendingProfileResponse = false))
-      .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+    context.lastProfileResponseTime = Date.now()
+  })()
+    .finally(() => (context.sendingProfileResponse = false))
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
@@ -577,7 +577,7 @@ function isBlockedOrBanned(profile: Profile, bannedUsers: BannedUsers, userId: s
 
 function isBannedFromChat(bannedUsers: BannedUsers, userId: string): boolean {
   const bannedUser = bannedUsers[userId]
-  return bannedUser && bannedUser.some(it => it.type === 'VOICE_CHAT_AND_CHAT' && it.expiration > Date.now())
+  return bannedUser && bannedUser.some((it) => it.type === 'VOICE_CHAT_AND_CHAT' && it.expiration > Date.now())
 }
 
 function isBlocked(profile: Profile, userId: string): boolean {
@@ -1220,7 +1220,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
-        ; (globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
+      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     throw new ConnectionEstablishmentError(e.message)
@@ -1277,8 +1277,8 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
   }
 }
 
-export function sendToMordor(_context: Context | null = context) {
-  sendToMordorAsync().catch((e) => defaultLogger.warn(`error while sending message `, e))
+export async function sendToMordor(_context: Context | null = context) {
+  await sendToMordorAsync().catch((e) => defaultLogger.warn(`error while sending message `, e))
 }
 
 async function sendToMordorAsync(_context: Context | null = context) {

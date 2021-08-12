@@ -12,7 +12,7 @@ import {
   // setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_WS_MESSAGES, HAS_INITIAL_POSITION_MARK, OPEN_AVATAR_EDITOR } from '../config/index'
+import { DEBUG_WS_MESSAGES, ETHEREUM_NETWORK, HAS_INITIAL_POSITION_MARK, OPEN_AVATAR_EDITOR } from '../config/index'
 import { signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { loadPreviewScene, startUnitySceneWorkers } from '../unity-interface/dcl'
@@ -38,6 +38,8 @@ import { IUnityInterface } from 'unity-interface/IUnityInterface'
 import { store } from 'shared/store/isolatedStore'
 import { onLoginCompleted } from 'shared/session/sagas'
 import { authenticate } from 'shared/session/actions'
+import { localProfilesRepo } from 'shared/profiles/sagas'
+import { getStoredSession } from 'shared/session'
 
 const logger = createLogger('kernel: ')
 
@@ -138,7 +140,19 @@ globalThis.DecentralandKernel = {
         authenticateWhenItsReady(provider, isGuest)
       },
       on: globalObservable.on.bind(globalObservable),
-      version: 'mockedversion'
+      version: 'mockedversion',
+
+      // this method is used for auto-login
+      async hasStoredSession(address: string, networkId: number) {
+        if (!getStoredSession(address)) return { result: false }
+
+        const profile = localProfilesRepo.get(
+          address,
+          networkId == 1 ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
+        )
+
+        return { result: !!profile, profile }
+      }
     }
   }
 }

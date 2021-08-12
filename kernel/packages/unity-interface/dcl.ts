@@ -5,7 +5,12 @@ import { defaultLogger } from 'shared/logger'
 import { ILand, SceneJsonData } from 'shared/types'
 import { enableParcelSceneLoading, loadParcelScene } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { observeLoadingStateChange, renderStateObservable } from 'shared/world/worldState'
+import {
+  observeLoadingStateChange,
+  observeRendererStateChange,
+  observeSessionStateChange,
+  renderStateObservable
+} from 'shared/world/worldState'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
 import { getUnityInstance } from './IUnityInterface'
@@ -27,17 +32,24 @@ declare const globalThis: { clientDebug: ClientDebug }
 
 globalThis.clientDebug = clientDebug
 
-function setLoadingScreenBasedOnState() {
+export function setLoadingScreenBasedOnState() {
   let state = store.getState()
 
-  if (!state) return
+  if (!state) {
+    getUnityInstance().SetLoadingScreen({
+      isVisible: true,
+      message: 'Loading...',
+      showTips: true
+    })
+    return
+  }
 
   let loading = state.loading
 
   getUnityInstance().SetLoadingScreen({
     isVisible: isLoadingScreenVisible(state),
     message: loading.message || loading.status || '',
-    showTips: loading.initialLoad || false
+    showTips: loading.initialLoad || !state.renderer.parcelLoadingStarted
   })
 }
 
@@ -98,11 +110,15 @@ export async function initializeEngine(_gameInstance: UnityGame): Promise<void> 
   observeLoadingStateChange(() => {
     setLoadingScreenBasedOnState()
   })
-
+  observeSessionStateChange(() => {
+    setLoadingScreenBasedOnState()
+  })
+  observeRendererStateChange(() => {
+    setLoadingScreenBasedOnState()
+  })
   renderStateObservable.add(() => {
     setLoadingScreenBasedOnState()
   })
-
   setLoadingScreenBasedOnState()
 
   if (!EDITOR) {
