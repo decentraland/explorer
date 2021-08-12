@@ -30,6 +30,7 @@ import { CatalystNode } from '../types'
 import { zip } from './utils/zip'
 import { realmToString } from './utils/realmToString'
 import { PIN_CATALYST } from 'config'
+import { generateNonceForChallenge } from './pow-challenge'
 import * as qs from 'query-string'
 
 const DEFAULT_TIMEOUT = 5000
@@ -259,10 +260,10 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
       return Math.abs(elapsedDiff) > 1500
         ? elapsedDiff // If the latency difference is greater than 1500, we consider that as the main factor
         : scoreDiff !== 0
-          ? scoreDiff // If there's score difference, we consider that
-          : usersDiff !== 0
-            ? usersDiff // If the score is the same (as when they are empty)
-            : elapsedDiff // If the candidates have the same score by users, we consider the latency again
+        ? scoreDiff // If there's score difference, we consider that
+        : usersDiff !== 0
+        ? usersDiff // If the score is the same (as when they are empty)
+        : elapsedDiff // If the candidates have the same score by users, we consider the latency again
     })
 
   if (sorted.length === 0 && candidates.length > 0) {
@@ -462,12 +463,28 @@ export function observeRealmChange(
 
 export function initializeUrlRealmObserver() {
   const store: Store<RootState> = (window as any)['globalStore']
-  observeRealmChange(store, (previousRealm, currentRealm) => {
+  observeRealmChange(store, async (previousRealm, currentRealm) => {
     const q = qs.parse(location.search)
     const realmString = realmToString(currentRealm)
 
     q.realm = realmString
 
     history.replaceState({ realm: realmString }, '', `?${qs.stringify(q)}`)
+
+    await getJWT(currentRealm)
   })
+}
+
+async function getJWT(realm: Realm): Promise<void> {
+  const url: string = realm.domain + '/pow-auth/challenge'
+  const challengeResponse = await (await fetch(url, { credentials: 'include' })).json()
+  const challenge = challengeResponse.challenge
+  const complexity = challengeResponse.complexity
+  const validChallenge = {
+    challenge,
+    complexity,
+    nonce: generateNonceForChallenge(challenge, complexity)
+  }
+
+  await fetch(url, { method: 'POST', credentials: 'include', body: JSON.stringify(validChallenge) })
 }
