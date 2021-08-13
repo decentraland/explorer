@@ -140,7 +140,6 @@ globalThis.DecentralandKernel = {
       },
       on: globalObservable.on.bind(globalObservable),
       version: 'mockedversion',
-
       // this method is used for auto-login
       async hasStoredSession(address: string, networkId: number) {
         if (!getStoredSession(address)) return { result: false }

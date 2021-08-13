@@ -229,6 +229,7 @@ function* signUp() {
     profile.tutorialStep = profile.tutorialStep || 0
     profile.tutorialStep |= 128 // We use binary 256 for tutorial and 128 for email promp
   }
+  globalObservable.emit('signUp', { email: profile.email || '' })
   delete profile.email // We don't deploy the email because it is public
 
   yield put(setLoadingWaitTutorial(true))

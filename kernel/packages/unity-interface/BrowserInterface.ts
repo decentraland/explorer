@@ -399,10 +399,6 @@ export class BrowserInterface {
     store.dispatch(unblockPlayers([data.userId]))
   }
 
-  public ReportUserEmail(data: { userEmail: string }) {
-    globalObservable.emit('signUp', { email: data.userEmail })
-  }
-
   public RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {
     store.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
   }
