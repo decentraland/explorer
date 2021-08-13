@@ -45,6 +45,7 @@ export function initShared() {
   initializeRendererVisibleObserver(store)
   initializeSessionObserver()
 
+  // Initializes the Session Saga
   store.dispatch(initSession())
 }
 

@@ -1,3 +1,4 @@
+import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 import { action } from 'typesafe-actions'
 
 export const NOT_STARTED = 'Getting things ready...'
@@ -12,8 +13,6 @@ export const NOT_INVITED = 'Auth error: not invited'
 export const notInvited = () => action(NOT_INVITED)
 export const METRICS_UNITY_CLIENT_LOADED = 'Rendering engine finished loading! Setting up scene system...'
 export const metricsUnityClientLoaded = () => action(METRICS_UNITY_CLIENT_LOADED)
-export const LOADING_SCENES = '[SCENE_LOADER] Loading scenes...'
-export const loadingScenes = () => action(LOADING_SCENES)
 export const WAITING_FOR_RENDERER = 'Uploading world information to the rendering engine...'
 export const waitingForRenderer = () => action(WAITING_FOR_RENDERER)
 
@@ -86,7 +85,7 @@ export type ExecutionLifecycleEvent =
   | typeof COMMS_ESTABLISHED
   | typeof NO_WEBGL_COULD_BE_CREATED
   | typeof METRICS_UNITY_CLIENT_LOADED
-  | typeof LOADING_SCENES
+  | typeof PARCEL_LOADING_STARTED
   | typeof WAITING_FOR_RENDERER
   | typeof EXPERIENCE_STARTED
   | typeof TELEPORT_TRIGGERED
@@ -115,7 +114,7 @@ export const ExecutionLifecycleEventsList: ExecutionLifecycleEvent[] = [
   ESTABLISHING_COMMS,
   COMMS_ESTABLISHED,
   NO_WEBGL_COULD_BE_CREATED,
-  LOADING_SCENES,
+  PARCEL_LOADING_STARTED,
   WAITING_FOR_RENDERER,
   EXPERIENCE_STARTED,
   TELEPORT_TRIGGERED,

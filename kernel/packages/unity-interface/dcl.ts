@@ -1,6 +1,6 @@
 import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, NO_ASSET_BUNDLES, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from 'config'
 import './UnityInterface'
-import { loadingScenes, teleportTriggered } from 'shared/loading/types'
+import { teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
 import { ILand, SceneJsonData } from 'shared/types'
 import { enableParcelSceneLoading, loadParcelScene } from 'shared/world/parcelSceneManager'
@@ -23,6 +23,7 @@ import { isLoadingScreenVisible } from 'shared/loading/selectors'
 import type { UnityGame } from '@dcl/unity-renderer/src'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
+import { signalParcelLoadingStarted } from 'shared/renderer/actions'
 
 const hudWorkerRaw = require('raw-loader!../../static/systems/decentraland-ui.scene.js')
 const hudWorkerBLOB = new Blob([hudWorkerRaw])
@@ -151,8 +152,6 @@ export async function startGlobalScene(cid: string, title: string, fileContentUr
 }
 
 export async function startUnitySceneWorkers() {
-  store.dispatch(loadingScenes())
-
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
     preloadScene: async (_land) => {
@@ -183,6 +182,7 @@ export async function startUnitySceneWorkers() {
       getUnityInstance().DeactivateRendering()
     }
   })
+  store.dispatch(signalParcelLoadingStarted())
 }
 
 export async function loadPreviewScene(ws?: string) {

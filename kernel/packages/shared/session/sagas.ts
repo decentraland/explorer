@@ -9,8 +9,7 @@ import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
 import { getUserAccount, isSessionExpired, requestManager } from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
-import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from 'shared/loading/ReportFatalError'
-import { AUTH_ERROR_LOGGED_OUT, AWAITING_USER_SIGNATURE, setLoadingWaitTutorial } from 'shared/loading/types'
+import { awaitingUserSignature, AWAITING_USER_SIGNATURE, setLoadingWaitTutorial } from 'shared/loading/types'
 import { getAppNetwork, registerProviderNetChanges } from 'shared/web3'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
@@ -32,7 +31,8 @@ import {
   UPDATE_TOS,
   updateTOS,
   userAuthentified,
-  AuthenticateAction
+  AuthenticateAction,
+  signUpCancel
 } from './actions'
 import { fetchProfileLocally, doesProfileExist, generateRandomUserProfile } from '../profiles/sagas'
 import { getUnityInstance } from '../../unity-interface/IUnityInterface'
@@ -88,10 +88,22 @@ function* authenticate(action: AuthenticateAction) {
   // setup provider
   requestManager.setProvider(action.payload.provider)
 
-  yield put(changeLoginState(LoginState.LOADING))
-  yield ensureUnityInterface()
+  yield put(changeLoginState(LoginState.SIGNATURE_PENDING))
 
-  const identity: ExplorerIdentity = yield authorize(requestManager)
+  let identity: ExplorerIdentity
+
+  try {
+    identity = yield authorize(requestManager)
+  } catch (e) {
+    if (('' + (e.message || e.toString())).includes('User denied message signature')) {
+      yield put(signUpCancel())
+      return
+    } else {
+      throw e
+    }
+  }
+
+  yield ensureUnityInterface()
 
   yield put(changeLoginState(LoginState.WAITING_PROFILE))
 
@@ -141,42 +153,43 @@ function* startSignUp(identity: ExplorerIdentity) {
 }
 
 function* authorize(requestManager: RequestManager) {
-  try {
-    let userData: StoredSession | null = null
+  let userData: StoredSession | null = null
 
-    const isGuest: boolean = yield select(getIsGuestLogin)
+  const isGuest: boolean = yield select(getIsGuestLogin)
 
-    if (isGuest) {
-      userData = getLastGuestSession()
-    } else {
-      try {
-        const address: string = yield getUserAccount(requestManager, false)
-        if (address) {
-          userData = getStoredSession(address)
+  if (isGuest) {
+    userData = getLastGuestSession()
+  } else {
+    try {
+      const address: string = yield getUserAccount(requestManager, false)
+      if (address) {
+        userData = getStoredSession(address)
 
-          if (userData) {
-            // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
-            userData.identity.rawAddress = address
-          }
+        if (userData) {
+          // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
+          userData.identity.rawAddress = address
         }
-      } catch {
-        // do nothing
       }
+    } catch (e) {
+      logger.error(e)
+      // do nothing
     }
-
-    // check that user data is stored & key is not expired
-    if (!userData || isSessionExpired(userData)) {
-      const identity: ExplorerIdentity = yield createAuthIdentity(requestManager, isGuest)
-      return identity
-    }
-
-    return userData.identity
-  } catch (e) {
-    logger.error(e)
-    ReportFatalError(e, ErrorContext.KERNEL_INIT)
-    BringDownClientAndShowError(AUTH_ERROR_LOGGED_OUT)
-    throw e
   }
+
+  // check that user data is stored & key is not expired
+  if (!userData || isSessionExpired(userData)) {
+    yield put(awaitingUserSignature())
+    const identity: ExplorerIdentity = yield createAuthIdentity(requestManager, isGuest)
+    return identity
+  }
+
+  return userData.identity
+  // } catch (e) {
+  // logger.error(e)
+  // ReportFatalError(e, ErrorContext.KERNEL_INIT)
+  // BringDownClientAndShowError(AUTH_ERROR_LOGGED_OUT)
+  // throw e
+  // }
 }
 
 function* signIn(identity: ExplorerIdentity) {
@@ -262,16 +275,9 @@ async function getSigner(
       address,
       async signer(message: string) {
         while (true) {
-          try {
-            let result = await requestManager.personal_sign(message, address, '')
-            if (!result) continue
-            return result
-          } catch (e) {
-            if (e.message && e.message.includes('User denied message signature')) {
-              put(changeLoginState(LoginState.SIGNATURE_FAILED))
-            }
-            throw e
-          }
+          let result = await requestManager.personal_sign(message, address, '')
+          if (!result) continue
+          return result
         }
       },
       hasConnectedWeb3: true,
@@ -345,10 +351,11 @@ export async function onLoginCompleted(): Promise<SessionState> {
 export function initializeSessionObserver() {
   observeAccountStateChange(store, (_, session) => {
     globalObservable.emit('accountState', {
-      hasProvider: false,
+      hasProvider: !!session.provider,
       loginStatus: session.loginState as LoginState,
       identity: session.identity,
-      network: session.network
+      network: session.network,
+      isGuest: !!session.isGuestLogin
     })
   })
 }

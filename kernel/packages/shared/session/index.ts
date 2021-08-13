@@ -32,7 +32,7 @@ export const getStoredSession: (userId: string) => StoredSession | null = (userI
   } else {
     // If not existing session was found, we check the old session storage
     const oldSession: StoredSession | null = getFromLocalStorage('dcl-profile') || {}
-    if (oldSession && oldSession.identity.address === userId) {
+    if (oldSession && oldSession.identity && oldSession.identity.address === userId) {
       setStoredSession(oldSession)
       return oldSession
     }

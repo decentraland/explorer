@@ -7,6 +7,7 @@ import { DEBUG_REDUX } from '../../config'
 import { BringDownClientAndShowError, ErrorContext, ReportFatalError } from '../loading/ReportFatalError'
 import defaultLogger from '../logger'
 import { setStore } from './isolatedStore'
+import { composeWithDevTools } from 'redux-devtools-extension'
 
 export const buildStore = () => {
   const sagaMiddleware = createSagaMiddleware({
@@ -16,7 +17,10 @@ export const buildStore = () => {
       BringDownClientAndShowError(error.message as any)
     }
   })
-  const composeEnhancers = (DEBUG_REDUX && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
+  const composeEnhancers =
+    (DEBUG_REDUX &&
+      ((window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || composeWithDevTools({ trace: true, traceLimit: 25 }))) ||
+    compose
 
   let middlewares: StoreEnhancer<any>[] = [applyMiddleware(sagaMiddleware)]
 

@@ -11,7 +11,6 @@ import {
   NOT_STARTED,
   WAITING_FOR_RENDERER,
   METRICS_UNITY_CLIENT_LOADED,
-  LOADING_SCENES,
   EXPERIENCE_STARTED,
   TELEPORT_TRIGGERED,
   SCENE_ENTERED,
@@ -31,6 +30,7 @@ import {
   AWAITING_USER_SIGNATURE,
   AVATAR_LOADING_ERROR
 } from '../loading/types'
+import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 
 const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   // lifecycle events
@@ -42,7 +42,7 @@ const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   [COMMS_ESTABLISHED]: 'loading_4_comms_established',
   [WAITING_FOR_RENDERER]: 'loading_5_wait_renderer',
   [METRICS_UNITY_CLIENT_LOADED]: 'loading_6_unity_ok',
-  [LOADING_SCENES]: 'loading_7_load_scenes',
+  [PARCEL_LOADING_STARTED]: 'loading_7_load_scenes',
   [EXPERIENCE_STARTED]: 'loading_8_finished',
   [TELEPORT_TRIGGERED]: 'teleport_triggered',
   [SCENE_ENTERED]: 'scene_entered',

@@ -55,6 +55,11 @@ export function isRendererVisible(state: RootState) {
     return false
   }
 
+  // if it is not yet loading scenes, renderer should not be visible either
+  if (!state.renderer.parcelLoadingStarted) {
+    return false
+  }
+
   // some login stages requires the renderer to be turned off
   const { loginState } = state.session
   if (

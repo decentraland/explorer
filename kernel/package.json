@@ -92,7 +92,7 @@
   "dependencies": {
     "@dcl/catalyst-peer": "^1.0.4",
     "@dcl/ecs-quests": "^1.2.3-20210422200033.commit-48c967e",
-    "@dcl/kernel-interface": "^2.0.0-20210812123806.commit-e77a313",
+    "@dcl/kernel-interface": "^2.0.0-20210813150845.commit-f74b173",
     "@dcl/schemas": "^1.2.0",
     "@dcl/urn-resolver": "^1.2.1",
     "@types/redux-logger": "^3.0.9",
@@ -125,6 +125,7 @@
     "mz-observable": "^1.0.1",
     "oimo": "^1.0.9",
     "redux": "^4.1.0",
+    "redux-devtools-extension": "^2.13.9",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.0.5",
     "reselect": "^4.0.0",

@@ -1,7 +1,7 @@
 import { AnyAction } from 'redux'
 import { fork, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
-import { RENDERER_INITIALIZED } from 'shared/renderer/types'
+import { PARCEL_LOADING_STARTED, RENDERER_INITIALIZED } from 'shared/renderer/types'
 import { ChangeLoginStateAction, CHANGE_LOGIN_STAGE } from 'shared/session/actions'
 import { trackEvent } from '../analytics'
 import { lastPlayerPosition } from '../world/positionThings'
@@ -72,7 +72,10 @@ function* waitForSceneLoads() {
   }
 
   while (yield select(shouldWaitForScenes)) {
-    yield take(PENDING_SCENES)
+    yield race({
+      pendingScenes: take(PENDING_SCENES),
+      sceneLoading: take(PARCEL_LOADING_STARTED)
+    })
   }
 }
 

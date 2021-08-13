@@ -45,7 +45,7 @@ export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   globalObservable.emit('error', {
     error: new Error(event),
     code: targetError,
-    level: 'fatal'
+    level: targetError as any
   })
 }
 
