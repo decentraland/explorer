@@ -14,6 +14,7 @@ import { globalObservable } from './observables'
 import { isRendererVisible } from './loading/selectors'
 import { RootStore } from './store/rootTypes'
 import { initializeSessionObserver } from './session/sagas'
+import { hookAnalyticsObservables } from './analytics'
 
 declare const globalThis: { globalStore: RootStore }
 
@@ -44,6 +45,7 @@ export function initShared() {
   initializeUrlIslandObserver()
   initializeRendererVisibleObserver(store)
   initializeSessionObserver()
+  hookAnalyticsObservables()
 
   // Initializes the Session Saga
   store.dispatch(initSession())
