@@ -1,4 +1,4 @@
-import { takeEvery, put, select } from 'redux-saga/effects'
+import { takeEvery, put, select, call } from 'redux-saga/effects'
 import { PayloadAction } from 'typesafe-actions'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import {
@@ -31,6 +31,7 @@ import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared
 import { realmToString } from 'shared/dao/utils/realmToString'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { store } from 'shared/store/isolatedStore'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 interface IChatCommand {
   name: string
@@ -97,6 +98,7 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
 }
 
 function* handleReceivedMessage(action: MessageReceived) {
+  yield call(waitForRendererInstance)
   getUnityInstance().AddMessageToChatWindow(action.payload)
 }
 
@@ -140,6 +142,7 @@ function* handleSendMessage(action: SendMessage) {
     sendPublicChatMessage(entry.messageId, entry.body)
   }
 
+  yield call(waitForRendererInstance)
   getUnityInstance().AddMessageToChatWindow(entry)
 }
 

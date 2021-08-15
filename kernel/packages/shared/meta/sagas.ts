@@ -9,6 +9,7 @@ import { USER_AUTHENTIFIED } from '../session/actions'
 import { getCurrentUserId } from '../session/selectors'
 import { getSelectedNetwork } from 'shared/dao/selectors'
 import { SELECT_NETWORK } from 'shared/dao/actions'
+import { RootState } from 'shared/store/rootTypes'
 
 function bannedUsersFromVariants(variants: Record<string, any> | undefined): BannedUsers | undefined {
   const variant = variants?.['explorer-banned_users']
@@ -21,10 +22,23 @@ function bannedUsersFromVariants(variants: Record<string, any> | undefined): Ban
   }
 }
 
-export function* metaSaga(): any {
-  yield take(SELECT_NETWORK)
+export function* waitForMetaConfigurationInitialization() {
+  if (!(yield select(isMetaConfigurationInitiazed))) {
+    yield take(META_CONFIGURATION_INITIALIZED)
+  }
+}
 
+function* waitForNetworkSelected() {
+  while (!(yield select((state: RootState) => !!state.dao.network))) {
+    yield take(SELECT_NETWORK)
+  }
   const net: ETHEREUM_NETWORK = yield select(getSelectedNetwork)
+  return net
+}
+
+function* initMeta() {
+  const net: ETHEREUM_NETWORK = yield call(waitForNetworkSelected)
+
   const config: Partial<MetaConfiguration> = yield call(fetchMetaConfiguration, net)
   const flagsAndVariants: { flags: Record<string, boolean>; variants: Record<string, any> } | undefined = yield call(
     fetchFeatureFlagsAndVariants,
@@ -46,7 +60,11 @@ export function* metaSaga(): any {
 
   yield put(metaConfigurationInitialized(merge))
   yield call(checkExplorerVersion, merge)
+}
+
+export function* metaSaga(): any {
   yield takeLatest(USER_AUTHENTIFIED, fetchMessageOfTheDay)
+  yield call(initMeta)
 }
 
 function* fetchMessageOfTheDay() {
@@ -127,11 +145,5 @@ async function fetchMetaConfiguration(network: ETHEREUM_NETWORK) {
         maxConnections: 6
       }
     }
-  }
-}
-
-export function* waitForMetaConfigurationInitialization() {
-  if (!(yield select(isMetaConfigurationInitiazed))) {
-    yield take(META_CONFIGURATION_INITIALIZED)
   }
 }

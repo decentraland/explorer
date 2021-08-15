@@ -1,4 +1,4 @@
-import { put, select, takeEvery } from 'redux-saga/effects'
+import { call, put, select, takeEvery } from 'redux-saga/effects'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { getProfile } from 'shared/profiles/selectors'
 import { saveProfileRequest } from 'shared/profiles/actions'
@@ -14,6 +14,7 @@ import {
 } from './actions'
 import { Profile } from 'shared/profiles/types'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 type ProfileSetKey = 'muted' | 'blocked'
 
@@ -53,6 +54,7 @@ function* addPlayerToProfileSet(playersId: string[], setKey: ProfileSetKey) {
 
     yield put(saveProfileRequest({ [setKey]: set }))
     if (setKey === 'muted') {
+      yield call(waitForRendererInstance)
       getUnityInstance().SetUsersMuted(idsToAdd, true)
     }
   }
@@ -65,6 +67,7 @@ function* removePlayerFromProfileSet(playersId: string[], setKey: ProfileSetKey)
     const set = profile[setKey] ? profile[setKey]!.filter((id) => !playersId.includes(id)) : []
     yield put(saveProfileRequest({ ...profile, [setKey]: set }))
     if (setKey === 'muted') {
+      yield call(waitForRendererInstance)
       getUnityInstance().SetUsersMuted(playersId, false)
     }
   }

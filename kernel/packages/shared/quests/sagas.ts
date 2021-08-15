@@ -1,43 +1,52 @@
 import { ClientResponse, PlayerQuestDetails } from 'dcl-quests-client'
-import { delay, put, select, takeEvery } from 'redux-saga/effects'
+import { call, delay, put, select, takeEvery } from 'redux-saga/effects'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { questsInitialized, questsUpdated, QUESTS_INITIALIZED, QUESTS_UPDATED } from './actions'
 import { questsRequest } from './client'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { toRendererQuest } from '@dcl/ecs-quests/@dcl/mappings'
-import { ensureUnityInterface } from 'shared/renderer'
 import { getPreviousQuests, getQuests } from './selectors'
 import { deepEqual } from 'atomicHelpers/deepEqual'
 import { isFeatureEnabled } from '../meta/selectors'
 import { FeatureFlags } from '../meta/types'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
+import { waitForMetaConfigurationInitialization } from 'shared/meta/sagas'
 
 const QUESTS_REFRESH_INTERVAL = 30000
 
 export function* questsSaga(): any {
-  if (yield select(isFeatureEnabled, FeatureFlags.QUESTS, false)) {
-    yield takeEvery(USER_AUTHENTIFIED, initializeQuests)
-    yield takeEvery(QUESTS_INITIALIZED, initUpdateQuestsInterval)
-  }
+  yield takeEvery(USER_AUTHENTIFIED, initializeQuests)
+  yield takeEvery(QUESTS_INITIALIZED, initUpdateQuestsInterval)
+}
+
+function* areQuestsEnabled() {
+  yield call(waitForMetaConfigurationInitialization)
+  const ret: boolean = yield select(isFeatureEnabled, FeatureFlags.QUESTS, false)
+  return ret
 }
 
 function* initUpdateQuestsInterval() {
   yield takeEvery(QUESTS_UPDATED, updateQuestsLogData)
 
-  while (true) {
-    yield delay(QUESTS_REFRESH_INTERVAL)
-    yield updateQuests()
+  if (yield call(areQuestsEnabled)) {
+    while (true) {
+      yield delay(QUESTS_REFRESH_INTERVAL)
+      yield updateQuests()
+    }
   }
 }
 
 function* initializeQuests(): any {
-  const questsResponse: ClientResponse<PlayerQuestDetails[]> = yield questsRequest((c) => c.getQuests())
-  if (questsResponse.ok) {
-    yield ensureUnityInterface()
-    initQuestsLogData(questsResponse.body)
-    yield put(questsInitialized(questsResponse.body))
-  } else {
-    yield delay(QUESTS_REFRESH_INTERVAL)
-    yield initializeQuests()
+  if (yield call(areQuestsEnabled)) {
+    const questsResponse: ClientResponse<PlayerQuestDetails[]> = yield questsRequest((c) => c.getQuests())
+    if (questsResponse.ok) {
+      yield call(waitForRendererInstance)
+      initQuestsLogData(questsResponse.body)
+      yield put(questsInitialized(questsResponse.body))
+    } else {
+      yield delay(QUESTS_REFRESH_INTERVAL)
+      yield initializeQuests()
+    }
   }
 }
 
@@ -56,6 +65,8 @@ function* updateQuestsLogData() {
     const previousQuest = previousQuests?.find((it) => it.id === quest.id)
     return !previousQuest || !deepEqual(previousQuest, quest)
   }
+
+  yield call(waitForRendererInstance)
 
   quests.forEach((it) => {
     if (hasChanged(it)) {

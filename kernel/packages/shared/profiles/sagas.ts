@@ -1,6 +1,6 @@
 import { EntityType, Hashing } from 'dcl-catalyst-commons'
 import { CatalystClient, ContentClient, DeploymentData } from 'dcl-catalyst-client'
-import { call, throttle, put, select, takeEvery, take } from 'redux-saga/effects'
+import { call, throttle, put, select, takeEvery } from 'redux-saga/effects'
 
 import { getServerConfigurations, ethereumConfigurations, RESET_TUTORIAL, ETHEREUM_NETWORK } from 'config'
 
@@ -28,10 +28,9 @@ import {
   deployProfileFailure,
   profileSavedNotDeployed,
   DeployProfile,
-  localProfileSentToRenderer,
-  LOCAL_PROFILE_IN_RENDERER
+  localProfileSentToRenderer
 } from './actions'
-import { getProfile, hasConnectedWeb3, isProfileUploadedToRenderer } from './selectors'
+import { getProfile, hasConnectedWeb3 } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { buildServerMetadata, ensureServerFormat, ServerFormatProfile } from './transformations/profileToServerFormat'
@@ -53,8 +52,8 @@ import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
 import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
-import { ensureRealmInitialized } from 'shared/dao/sagas'
-import { ensureRenderer } from 'shared/renderer/sagas'
+import { waitForRealmInitialized } from 'shared/dao/sagas'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
 import { getProfileType } from './getProfileType'
@@ -106,7 +105,7 @@ export function* profileSaga(): any {
 }
 
 function* initialProfileLoad() {
-  yield call(ensureRealmInitialized)
+  yield call(waitForRealmInitialized)
 
   // initialize profile
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
@@ -155,12 +154,6 @@ function* initialProfileLoad() {
   }
 
   updateCommsUser({ version: profile.version })
-}
-
-export function* ensureLocalProfileInRenderer() {
-  while (!(yield select(isProfileUploadedToRenderer))) {
-    yield take(LOCAL_PROFILE_IN_RENDERER)
-  }
 }
 
 /**
@@ -334,14 +327,13 @@ function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     }
   }
 
-  yield call(ensureRenderer)
-
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(sendLoadProfile, profile)
   } else {
     const forRenderer = profileToRendererFormat(profile)
     forRenderer.hasConnectedWeb3 = action.payload.hasConnectedWeb3
 
+    yield call(waitForRendererInstance)
     getUnityInstance().AddUserProfileToCatalog(forRenderer)
 
     yield put(addedProfileToCatalog(action.payload.userId, forRenderer))
@@ -352,6 +344,7 @@ function* sendLoadProfile(profile: Profile) {
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
   const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
+  yield call(waitForRendererInstance)
   getUnityInstance().LoadProfile(rendererFormat)
   yield put(localProfileSentToRenderer())
 }

@@ -78,7 +78,7 @@ import { realmToString } from '../dao/utils/realmToString'
 import { trackEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getBannedUsers, getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { getBannedUsers, getCommsConfig } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import {
   BringDownClientAndShowError,
@@ -1195,7 +1195,7 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && isVoiceChatEnabledFor(store.getState(), context.userInfo.userId!)) {
+    if (!voiceCommunicator) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {

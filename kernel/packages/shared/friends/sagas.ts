@@ -31,7 +31,7 @@ import {
 import { getRealm, getUpdateProfileServer } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
 import { lastPlayerPosition, positionObservable } from 'shared/world/positionThings'
-import { ensureRenderer } from 'shared/renderer/sagas'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 import { ADDED_PROFILE_TO_CATALOG } from 'shared/profiles/actions'
 import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
 import { INIT_CATALYST_REALM, SET_CATALYST_REALM, SetCatalystRealm, InitCatalystRealm } from 'shared/dao/actions'
@@ -49,8 +49,7 @@ import {
   updatePrivateMessagingState,
   updateUserData
 } from 'shared/friends/actions'
-import { ensureRendererEnabled } from 'shared/world/worldState'
-import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { waitForRealmInitialized } from 'shared/dao/sagas'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { ensureFriendProfile } from './ensureFriendProfile'
 import { getSynapseUrl } from 'shared/meta/selectors'
@@ -72,32 +71,25 @@ const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 export function* friendsSaga() {
   if (WORLD_EXPLORER) {
     // We don't want to initialize the friends & chat feature if we are on preview or builder mode
-    yield takeEvery(USER_AUTHENTIFIED, initializeSaga)
+    yield takeEvery(USER_AUTHENTIFIED, initializeFriendsSaga)
   }
 }
 
-function* initializeSaga() {
+function* initializeFriendsSaga() {
   const identity = yield select(getCurrentIdentity)
 
   if (identity.hasConnectedWeb3) {
-    yield call(ensureRealmInitialized)
+    yield call(waitForRealmInitialized)
 
-    // wait until initial load finishes and world is running
-    yield ensureRendererEnabled()
-
-    const identity = yield select(getCurrentIdentity)
     try {
-      const synapseUrl = yield select(getSynapseUrl)
+      const synapseUrl: string = yield select(getSynapseUrl)
       yield call(initializePrivateMessaging, synapseUrl, identity)
     } catch (e) {
       logger.error(`error initializing private messaging`, e)
 
-      yield call(ensureRenderer)
+      yield call(waitForRendererInstance)
 
       getUnityInstance().ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
-
-      yield ensureRendererEnabled()
-
       getUnityInstance().ShowNotification({
         type: NotificationType.GENERIC,
         message: 'There was an error initializing friends and private messages',
@@ -303,8 +295,6 @@ function* initializeFriends(client: SocialAPI) {
 
   // ensure friend profiles are sent to renderer
 
-  yield call(ensureRenderer)
-
   const profileIds = Object.values(socialInfo).map((socialData) => socialData.userId)
 
   const profiles = yield Promise.all(profileIds.map((userId) => ensureFriendProfile(userId)))
@@ -321,6 +311,7 @@ function* initializeFriends(client: SocialAPI) {
     requestedTo: requestedToIds,
     requestedFrom: requestedFromIds
   }
+  yield call(waitForRendererInstance)
   DEBUG && logger.info(`getUnityInstance().InitializeFriends`, initMessage)
   getUnityInstance().InitializeFriends(initMessage)
 
@@ -613,6 +604,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
       yield put(updatePrivateMessagingState(newState))
 
       if (incoming) {
+        yield call(waitForRendererInstance)
         DEBUG && logger.info(`getUnityInstance().UpdateFriendshipStatus`, payload)
         getUnityInstance().UpdateFriendshipStatus(payload)
       } else {

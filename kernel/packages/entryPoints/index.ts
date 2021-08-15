@@ -23,7 +23,7 @@ import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { FeatureFlags, WorldConfig } from 'shared/meta/types'
-import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { isFeatureEnabled } from 'shared/meta/selectors'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 import { isWaitingTutorial } from 'shared/loading/selectors'
@@ -190,7 +190,7 @@ async function loadWebsiteSystems(options: KernelOptions['kernelOptions']) {
     .then(() => {
       const identity = getCurrentIdentity(store.getState())!
 
-      const VOICE_CHAT_ENABLED = isVoiceChatEnabledFor(store.getState(), identity.address)
+      const VOICE_CHAT_ENABLED = true
       const BUILDER_IN_WORLD_ENABLED =
         identity.hasConnectedWeb3 && isFeatureEnabled(store.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
 

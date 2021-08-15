@@ -26,11 +26,11 @@ export function createRootSaga() {
     yield fork(chatSaga)
     yield fork(atlasSaga)
     yield fork(daoSaga)
-    yield fork(rendererSaga)
     yield fork(rootProtocolSaga)
     yield fork(metricSaga)
     yield fork(loadingSaga)
     yield fork(socialSaga)
     yield fork(questsSaga)
+    yield fork(rendererSaga)
   }
 }

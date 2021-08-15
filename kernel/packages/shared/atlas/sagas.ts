@@ -45,8 +45,8 @@ import { retrieve, store as cacheStore } from 'shared/cache'
 import { getPOIService, getUpdateProfileServer } from 'shared/dao/selectors'
 import { store } from 'shared/store/isolatedStore'
 import { realmInitialized } from 'shared/dao'
-import { ensureRenderer } from 'shared/renderer/sagas'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 const tiles = {
   id: 'tiles',
@@ -59,10 +59,6 @@ type MarketplaceConfig = typeof tiles
 type CachedMarketplaceTiles = { version: string; data: string }
 
 export function* atlasSaga(): any {
-  yield fork(loadMarketplace, tiles)
-
-  yield call(ensureRenderer)
-
   yield takeEvery(SCENE_LOAD, checkAndReportAround)
 
   yield takeLatest(META_CONFIGURATION_INITIALIZED, initializePois)
@@ -71,6 +67,8 @@ export function* atlasSaga(): any {
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
   yield takeLatest(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcelAction)
   yield takeEvery(REPORT_SCENES_FROM_TILES, reportScenesFromTilesAction)
+
+  yield fork(loadMarketplace, tiles)
 }
 
 function* loadMarketplace(config: MarketplaceConfig) {
@@ -172,10 +170,14 @@ function* initializePois() {
 
 type stringOrNull = string | null
 
-function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
+function* waitForMarketInitialized() {
   while (!(yield select(isMarketDataInitialized))) {
     yield take(MARKET_DATA)
   }
+}
+
+function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
+  yield call(waitForMarketInitialized)
 
   const tiles = action.payload.tiles
   const result: stringOrNull[] = yield call(fetchSceneIds, tiles)
@@ -241,6 +243,7 @@ function* reportScenes(sceneIds: string[]): any {
       })
     })
 
+  yield call(waitForRendererInstance)
   getUnityInstance().UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }
 

@@ -15,10 +15,10 @@ import { RootState } from 'shared/store/rootTypes'
 import { onLoginCompleted } from 'shared/session/sagas'
 
 export function* loadingSaga() {
+  yield takeEvery(SCENE_LOAD, trackLoadTime)
+
   yield fork(translateActions)
   yield fork(initialSceneLoading)
-
-  yield takeEvery(SCENE_LOAD, trackLoadTime)
 }
 
 function* translateActions() {
@@ -72,6 +72,8 @@ function* waitForSceneLoads() {
   }
 
   while (yield select(shouldWaitForScenes)) {
+    // these are the events that _may_ change the result of shouldWaitForScenes
+    // we are taking any of them, with the race function
     yield race({
       pendingScenes: take(PENDING_SCENES),
       sceneLoading: take(PARCEL_LOADING_STARTED)

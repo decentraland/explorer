@@ -220,7 +220,7 @@ function* cacheCatalystCandidates(action: SetCatalystCandidates | SetAddedCataly
   saveToLocalStorage(getLastRealmCandidatesCacheKey(network), allCandidates)
 }
 
-export function* ensureRealmInitialized() {
+export function* waitForRealmInitialized() {
   while (!(yield select(isRealmInitialized))) {
     yield take(INIT_CATALYST_REALM)
   }

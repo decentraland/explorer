@@ -1,12 +1,12 @@
 import { put, takeEvery, select, call, takeLatest } from 'redux-saga/effects'
 
-import { STATIC_WORLD } from 'config'
+import { EDITOR } from 'config'
 
 import { establishingComms, FATAL_ERROR } from 'shared/loading/types'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { setWorldContext } from 'shared/protocol/actions'
-import { ensureRealmInitialized, selectRealm } from 'shared/dao/sagas'
+import { waitForRealmInitialized, selectRealm } from 'shared/dao/sagas'
 import { getRealm } from 'shared/dao/selectors'
 import { CATALYST_REALMS_SCAN_SUCCESS, setCatalystRealm } from 'shared/dao/actions'
 import { Realm } from 'shared/dao/types'
@@ -15,6 +15,7 @@ import { createLogger } from 'shared/logger'
 
 import {
   connect,
+  Context,
   disconnect,
   updatePeerVoicePlaying,
   updateVoiceCommunicatorMute,
@@ -36,10 +37,10 @@ import {
 
 import { isVoiceChatRecording } from './selectors'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
-import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { sceneObservable } from 'shared/world/sceneState'
 import { SceneFeatureToggles } from 'shared/types'
 import { isFeatureToggleEnabled } from 'shared/selectors'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -72,7 +73,15 @@ function* listenToWhetherSceneSupportsVoiceChat() {
   })
 }
 
-function* initVoiceChat() {
+function* userAuthentified() {
+  if (EDITOR) {
+    return
+  }
+
+  yield call(waitForRealmInitialized)
+
+  const identity = yield select(getCurrentIdentity)
+
   yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
   yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
   yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
@@ -80,23 +89,9 @@ function* initVoiceChat() {
   yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
   yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
   yield listenToWhetherSceneSupportsVoiceChat()
-}
-
-function* userAuthentified() {
-  if (STATIC_WORLD) {
-    return
-  }
-
-  yield call(ensureRealmInitialized)
-
-  const identity = yield select(getCurrentIdentity)
-
-  if (yield select(isVoiceChatEnabledFor, identity.address)) {
-    initVoiceChat()
-  }
 
   yield put(establishingComms())
-  const context = yield connect(identity.address)
+  const context: Context | undefined = yield call(connect, identity.address)
   if (context !== undefined) {
     yield put(setWorldContext(context))
   }
@@ -120,6 +115,7 @@ function* updateVoiceChatMute(action: SetVoiceMute) {
 }
 
 function* updatePlayerVoiceRecording(action: VoiceRecordingUpdate) {
+  yield call(waitForRendererInstance)
   getUnityInstance().SetPlayerTalking(action.payload.recording)
 }
 

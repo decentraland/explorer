@@ -37,7 +37,7 @@ import {
 import { fetchProfileLocally, doesProfileExist, generateRandomUserProfile } from '../profiles/sagas'
 import { getUnityInstance } from '../../unity-interface/IUnityInterface'
 import { getIsGuestLogin, getSignUpIdentity, getSignUpProfile, isLoginCompleted } from './selectors'
-import { ensureRealmInitialized } from '../dao/sagas'
+import { waitForRealmInitialized } from '../dao/sagas'
 import { saveProfileRequest } from '../profiles/actions'
 import { Profile } from '../profiles/types'
 import { ensureUnityInterface } from '../renderer'
@@ -49,14 +49,12 @@ import { store } from 'shared/store/isolatedStore'
 import { globalObservable } from 'shared/observables'
 import { selectNetwork } from 'shared/dao/actions'
 import { getSelectedNetwork } from 'shared/dao/selectors'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
-  yield call(initialize)
-  yield call(initializeReferral)
-
   yield takeEvery(UPDATE_TOS, updateTermOfService)
   yield takeLatest(INIT_SESSION, initSession)
   yield takeLatest(LOGOUT, logout)
@@ -65,6 +63,9 @@ export function* sessionSaga(): any {
   yield takeLatest(SIGNUP_CANCEL, cancelSignUp)
   yield takeLatest(AUTHENTICATE, authenticate)
   yield takeLatest(AWAITING_USER_SIGNATURE, signaturePrompt)
+
+  yield call(initialize)
+  yield call(initializeReferral)
 }
 
 function* initialize() {
@@ -111,7 +112,7 @@ function* authenticate(action: AuthenticateAction) {
   const net: ETHEREUM_NETWORK = yield call(getAppNetwork)
   yield put(selectNetwork(net))
   registerProviderNetChanges()
-  yield call(ensureRealmInitialized)
+  yield call(waitForRealmInitialized)
 
   const profileExists: boolean = yield doesProfileExist(identity.address)
   const isGuest: boolean = yield select(getIsGuestLogin)
@@ -146,6 +147,7 @@ function* startSignUp(identity: ExplorerIdentity) {
   } else {
     const profile: Partial<Profile> = yield select(getSignUpProfile)
 
+    yield call(waitForRendererInstance)
     // TODO: Fix as any
     getUnityInstance().LoadProfile(profile as any)
     getUnityInstance().ShowAvatarEditorInSignIn()

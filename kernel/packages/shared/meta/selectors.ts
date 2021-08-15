@@ -1,6 +1,5 @@
 import { BannedUsers, CommsConfig, FeatureFlags, MessageOfTheDayConfig, RootMetaState } from './types'
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { VOICE_CHAT_DISABLED_FLAG } from 'config'
 
 export const getAddedServers = (store: RootMetaState): string[] => {
   const { config } = store.meta
@@ -40,8 +39,6 @@ export const isMOTDInitialized = (store: RootMetaState): boolean =>
   store.meta.config.world ? store.meta.config.world?.messageOfTheDayInit || false : false
 export const getMessageOfTheDay = (store: RootMetaState): MessageOfTheDayConfig | null =>
   store.meta.config.world ? store.meta.config.world.messageOfTheDay || null : null
-
-export const isVoiceChatEnabledFor = (store: RootMetaState, userId: string): boolean => !VOICE_CHAT_DISABLED_FLAG
 
 export const isFeatureEnabled = (store: RootMetaState, featureName: FeatureFlags, ifNotSet: boolean): boolean => {
   const queryParamFlag = toUrlFlag(featureName)

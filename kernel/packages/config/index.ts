@@ -81,8 +81,6 @@ export const WORLD_EXPLORER = !EDITOR && !PREVIEW
 
 export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR') && WORLD_EXPLORER
 
-export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(globalThis as any).staticWorld || EDITOR
-
 // Development
 export const ENV_OVERRIDE = location.search.includes('ENV')
 export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
@@ -108,8 +106,6 @@ export const HOTSCENES_SERVICE = ensureSingleString(qs.HOTSCENES_SERVICE)
 export const POI_SERVICE = ensureSingleString(qs.POI_SERVICE)
 export const REALM = ensureSingleString(qs.realm)
 export const PREFERED_ISLAND = ensureSingleString(qs.island)
-
-export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
 
 export const AUTO_CHANGE_REALM = location.search.includes('AUTO_CHANGE_REALM')
 
@@ -162,17 +158,10 @@ export namespace commConfigurations {
     typeof qs.AUTO_CHANGE_INTERVAL === 'string' ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
   export const iceServers = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
     {
-      urls: 'stun:stun.l.google.com:19302'
-    },
-    {
-      urls: 'stun:stun2.l.google.com:19302'
-    },
-    {
-      urls: 'stun:stun3.l.google.com:19302'
-    },
-    {
-      urls: 'stun:stun4.l.google.com:19302'
+      urls: ['stun:stun2.l.google.com:19302', 'stun:stun3.l.google.com:19302', 'stun:stun4.l.google.com:19302']
     },
     {
       urls: 'turn:stun.decentraland.org:3478',

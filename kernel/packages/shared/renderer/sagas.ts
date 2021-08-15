@@ -11,7 +11,7 @@ export function* rendererSaga() {
   yield call(initializeRenderer, action)
 }
 
-export function* ensureRenderer() {
+export function* waitForRendererInstance() {
   while (!(yield select(isInitialized))) {
     yield take(RENDERER_INITIALIZED)
   }
@@ -33,7 +33,7 @@ function* initializeRenderer(action: InitializeRenderer) {
   const renderer: UnityGame = yield delegate(container)
 
   // wire the kernel to the renderer
-  yield initializeEngine(renderer)
+  yield call(initializeEngine, renderer)
 
   // send an "engineStarted" notification
   yield put(signalRendererInitialized())
