@@ -1,12 +1,10 @@
 import { KernelConfigForRenderer } from 'shared/types'
-import { commConfigurations, getDefaultTLD, WSS_ENABLED } from 'config'
+import { commConfigurations, getTLD, WSS_ENABLED } from 'config'
 import { nameValidCharacterRegex, nameValidRegex } from 'shared/profiles/utils/names'
 import { getWorld } from '@dcl/schemas'
-import { isFeatureEnabled } from "shared/meta/selectors"
-import { FeatureFlags } from "shared/meta/types"
-import { StoreContainer } from "shared/store/rootTypes"
-
-declare const globalThis: { UnityLoader: any } & StoreContainer
+import { isFeatureEnabled } from 'shared/meta/selectors'
+import { FeatureFlags } from 'shared/meta/types'
+import { store } from 'shared/store/isolatedStore'
 
 export function kernelConfigForRenderer(): KernelConfigForRenderer {
   return {
@@ -20,12 +18,12 @@ export function kernelConfigForRenderer(): KernelConfigForRenderer {
     },
     features: {
       enableBuilderInWorld: false,
-      enableAvatarLODs: isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.AVATAR_LODS, false)
+      enableAvatarLODs: isFeatureEnabled(store.getState(), FeatureFlags.AVATAR_LODS, false)
     },
     gifSupported:
       // tslint:disable-next-line
       typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function' && !WSS_ENABLED,
-    tld: getDefaultTLD(),
+    tld: getTLD(),
     validWorldRanges: getWorld().validWorldRanges
   }
 }

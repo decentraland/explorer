@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { Quaternion, Vector3 } from 'decentraland-ecs/src'
+import { Quaternion, Vector3 } from 'decentraland-ecs'
 
 const results = {
   staticAngle01: '90.00',
@@ -70,28 +70,23 @@ function vector3ToString(vec: Vector3) {
 
 describe('ECS Quaternion tests', () => {
   it('Quaternion.Angle', () => {
-    expect(
-      Quaternion.Angle(Quaternion.Euler(0, 0, 0), Quaternion.Euler(90, 90, 90))
-        .toString()
-        .substr(0, 5)
-    ).to.eq(results.staticAngle01.substr(0, 5), 'staticAngle01')
+    expect(Quaternion.Angle(Quaternion.Euler(0, 0, 0), Quaternion.Euler(90, 90, 90)).toString().substr(0, 5)).to.eq(
+      results.staticAngle01.substr(0, 5),
+      'staticAngle01'
+    )
+
+    expect(Quaternion.Angle(Quaternion.Euler(10, 0, 10), Quaternion.Euler(360, 0, -1)).toString().substr(0, 5)).to.eq(
+      results.staticAngle02.substr(0, 5),
+      'staticAngle02'
+    )
+
+    expect(Quaternion.Angle(Quaternion.Euler(0, 5, 0), Quaternion.Euler(0, 0, 0)).toString().substr(0, 5)).to.eq(
+      results.staticAngle03.substr(0, 5),
+      'staticAngle03'
+    )
 
     expect(
-      Quaternion.Angle(Quaternion.Euler(10, 0, 10), Quaternion.Euler(360, 0, -1))
-        .toString()
-        .substr(0, 5)
-    ).to.eq(results.staticAngle02.substr(0, 5), 'staticAngle02')
-
-    expect(
-      Quaternion.Angle(Quaternion.Euler(0, 5, 0), Quaternion.Euler(0, 0, 0))
-        .toString()
-        .substr(0, 5)
-    ).to.eq(results.staticAngle03.substr(0, 5), 'staticAngle03')
-
-    expect(
-      Quaternion.Angle(Quaternion.Euler(360, -360, 0), Quaternion.Euler(180, 90, 0))
-        .toString()
-        .substr(0, 5)
+      Quaternion.Angle(Quaternion.Euler(360, -360, 0), Quaternion.Euler(180, 90, 0)).toString().substr(0, 5)
     ).to.eq(results.staticAngle04.substr(0, 5), 'staticAngle04')
   })
 
@@ -149,40 +144,33 @@ describe('ECS Quaternion tests', () => {
 
   // These tests check against euler angles since we get a different quaternion result in Unity, but represent the same euler angles rotation.
   it('Quaternion.FromToRotation', () => {
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100)).eulerAngles)).to.eq(
-      results.staticFromToRotation01,
-      'staticFromToRotation01'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100)).eulerAngles)
+    ).to.eq(results.staticFromToRotation01, 'staticFromToRotation01')
 
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(-10, -0, 110), new Vector3(4452, 0, 100)).eulerAngles)).to.eq(
-      results.staticFromToRotation02,
-      'staticFromToRotation02'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(-10, -0, 110), new Vector3(4452, 0, 100)).eulerAngles)
+    ).to.eq(results.staticFromToRotation02, 'staticFromToRotation02')
 
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(1230, 10, 0), new Vector3(100, 100, 0)).eulerAngles)).to.eq(
-      results.staticFromToRotation03,
-      'staticFromToRotation03'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(1230, 10, 0), new Vector3(100, 100, 0)).eulerAngles)
+    ).to.eq(results.staticFromToRotation03, 'staticFromToRotation03')
 
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(0, 123, -123), new Vector3(100, 213123, 100)).eulerAngles)).to.eq(
-      results.staticFromToRotation04,
-      'staticFromToRotation04'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(0, 123, -123), new Vector3(100, 213123, 100)).eulerAngles)
+    ).to.eq(results.staticFromToRotation04, 'staticFromToRotation04')
 
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(-10, -10, -10), new Vector3(360, -10, 360)).eulerAngles)).to.eq(
-      results.staticFromToRotation05,
-      'staticFromToRotation05'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(-10, -10, -10), new Vector3(360, -10, 360)).eulerAngles)
+    ).to.eq(results.staticFromToRotation05, 'staticFromToRotation05')
 
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(12, -0, -400), new Vector3(200, 360, -400)).eulerAngles)).to.eq(
-      results.staticFromToRotation06,
-      'staticFromToRotation06'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(12, -0, -400), new Vector3(200, 360, -400)).eulerAngles)
+    ).to.eq(results.staticFromToRotation06, 'staticFromToRotation06')
 
-    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(25, 45, 180), new Vector3(127, 0, 90)).eulerAngles)).to.eq(
-      results.staticFromToRotation07,
-      'staticFromToRotation07'
-    )
+    expect(
+      vector3ToString(Quaternion.FromToRotation(new Vector3(25, 45, 180), new Vector3(127, 0, 90)).eulerAngles)
+    ).to.eq(results.staticFromToRotation07, 'staticFromToRotation07')
 
     expect(vector3ToString(Quaternion.FromToRotation(new Vector3(0, 1, 0), new Vector3(1, 1, 1)).eulerAngles)).to.eq(
       results.staticFromToRotation08,

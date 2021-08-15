@@ -1,4 +1,4 @@
-import { Entity, engine, Vector3, Transform, BoxShape, log } from 'decentraland-ecs/src'
+import { Entity, engine, Vector3, Transform, BoxShape, log } from 'decentraland-ecs'
 
 /// --- Spawner function ---
 

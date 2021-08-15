@@ -1,9 +1,6 @@
-import { Store } from 'redux'
 import { Authenticator } from 'dcl-crypto'
 import { ContentClient } from 'dcl-catalyst-client'
 import { EntityType } from 'dcl-catalyst-commons'
-import { RootState } from 'shared/store/rootTypes'
-import { SceneWorker } from 'shared/world/SceneWorker'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { EMPTY_PARCEL_NAME } from 'shared/atlas/selectors'
@@ -15,8 +12,10 @@ import { defaultLogger } from '../../logger'
 import { ContentMapping, SceneJsonData } from '../../types'
 import { jsonFetch } from '../../../atomicHelpers/jsonFetch'
 import { blobToBuffer } from './SceneStateStorageController'
-import { unityInterface } from 'unity-interface/UnityInterface'
 import { getResourcesURL } from 'shared/location'
+import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
 declare const globalThis: any
 
@@ -49,25 +48,25 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
     })
 
     // Sign entity id and depploy
-    const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
       throw new Error('Identity not found when trying to deploy an entity')
     }
     const authChain = Authenticator.signPayload(identity, entityId)
 
-    const sceneId = await fetchSceneIds([coordinates])
+    const sceneIds = await fetchSceneIds([coordinates])
     await contentClient.deployEntity({ files, entityId, authChain })
 
+    const sceneId = sceneIds && sceneIds[0]
+
     // Reload scene if running. Invalidate it if not
-    if (sceneId && sceneId[0]) {
-      const sceneWorkers = (window as any)['sceneWorkers'] as Map<string, SceneWorker>
-      if (sceneWorkers.get(sceneId[0])) {
-        reloadScene(sceneId[0]).catch((error) =>
+    if (sceneId) {
+      if (getSceneWorkerBySceneID(sceneId)) {
+        reloadScene(sceneId).catch((error) =>
           defaultLogger.error(`Failed reloading scene at coordinates ${coordinates}`, error)
         )
       } else {
-        invalidateScene(sceneId[0]).catch((error) =>
+        invalidateScene(sceneId).catch((error) =>
           defaultLogger.error(`Failed invalidating scene at coordinates ${coordinates}`, error)
         )
       }
@@ -79,7 +78,7 @@ export async function unpublishSceneByCoords(coordinates: string): Promise<Deplo
     defaultLogger.error('Unpublish failed', error)
   }
 
-  unityInterface.SendUnpublishSceneResult(result)
+  getUnityInstance().SendUnpublishSceneResult(result)
 
   return result
 }
@@ -145,7 +144,6 @@ async function getModelsFiles(baseUrl: string, mappings: ContentMapping[]) {
 }
 
 function getContentClient(): ContentClient {
-  const store: Store<RootState> = globalThis['globalStore']
   const contentUrl = getUpdateProfileServer(store.getState())
   return new ContentClient(contentUrl, 'builder in-world')
 }

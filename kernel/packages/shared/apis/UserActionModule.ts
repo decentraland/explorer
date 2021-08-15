@@ -1,15 +1,13 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
-import { StoreContainer } from 'shared/store/rootTypes'
 import defaultLogger from 'shared/logger'
-import { unityInterface } from 'unity-interface/UnityInterface'
 import { getOwnerNameFromJsonData, getThumbnailUrlFromJsonDataAndContent } from 'shared/selectors'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { getSceneNameFromAtlasState, postProcessSceneName } from 'shared/atlas/selectors'
-
-declare const globalThis: StoreContainer
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
 export interface IUserActionModule {
   requestTeleport(destination: string): Promise<void>
@@ -20,7 +18,7 @@ export class UserActionModule extends ExposableAPI implements IUserActionModule 
   @exposeMethod
   async requestTeleport(destination: string): Promise<void> {
     if (destination === 'magic' || destination === 'crowd') {
-      unityInterface.RequestTeleport({ destination })
+      getUnityInstance().RequestTeleport({ destination })
       return
     } else if (!/^\-?\d+\,\-?\d+$/.test(destination)) {
       defaultLogger.error(`teleportTo: invalid destination ${destination}`)
@@ -42,7 +40,7 @@ export class UserActionModule extends ExposableAPI implements IUserActionModule 
       sceneThumbnailUrl = getThumbnailUrlFromJsonDataAndContent(
         mapSceneData.sceneJsonData,
         mapSceneData.mappingsResponse.contents,
-        getUpdateProfileServer(globalThis.globalStore.getState())
+        getUpdateProfileServer(store.getState())
       )
     }
     if (!sceneThumbnailUrl) {
@@ -70,7 +68,7 @@ export class UserActionModule extends ExposableAPI implements IUserActionModule 
       defaultLogger.error(e)
     }
 
-    unityInterface.RequestTeleport({
+    getUnityInstance().RequestTeleport({
       destination,
       sceneEvent,
       sceneData: {
@@ -82,8 +80,7 @@ export class UserActionModule extends ExposableAPI implements IUserActionModule 
   }
 
   private getSceneName(baseCoord: string, sceneJsonData: any): string {
-    const sceneName =
-      getSceneNameFromAtlasState(sceneJsonData) ?? globalThis.globalStore.getState().atlas.tileToScene[baseCoord]?.name
+    const sceneName = getSceneNameFromAtlasState(sceneJsonData) ?? store.getState().atlas.tileToScene[baseCoord]?.name
     return postProcessSceneName(sceneName)
   }
 }

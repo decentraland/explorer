@@ -1,5 +1,5 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator, ActionButton } from 'decentraland-ecs/src'
-import { OnPointerDown, OnPointerUp } from 'decentraland-ecs/src/decentraland/UIEvents'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator, ActionButton } from 'decentraland-ecs'
+import { OnPointerDown, OnPointerUp } from 'decentraland-ecs'
 
 // Add Shark
 let shark = new Entity()
@@ -28,18 +28,25 @@ clipSwim.play()
 
 // Add click interaction
 let onClickComponent = new OnPointerDown(
-  e => {
+  (e) => {
     clipBite.playing = !clipBite.playing
-  }, {
+  },
+  {
     button: ActionButton.POINTER,
-     hoverText: "OnPointerDown!", distance: 100 })
+    hoverText: 'OnPointerDown!',
+    distance: 100
+  }
+)
 
 shark.addComponent(onClickComponent)
 
-shark.addComponent(new OnPointerUp(
-  e => {}, {
+shark.addComponent(
+  new OnPointerUp((e) => {}, {
     button: ActionButton.POINTER,
-     hoverText: "OnPointerUp!", distance: 100 }))
+    hoverText: 'OnPointerUp!',
+    distance: 100
+  })
+)
 
 // Add shark to engine
 engine.addEntity(shark)
@@ -52,14 +59,20 @@ shark2.addComponent(
   })
 )
 shark2.addComponent(new GLTFShape('models/shark.gltf'))
-shark2.addComponent(new OnPointerDown(
-  e => {}, {
+shark2.addComponent(
+  new OnPointerDown((e) => {}, {
     button: ActionButton.POINTER,
-     hoverText: "OnPointerDown!", distance: 100 }))
-shark2.addComponent(new OnPointerUp(
-  e => {}, {
+    hoverText: 'OnPointerDown!',
+    distance: 100
+  })
+)
+shark2.addComponent(
+  new OnPointerUp((e) => {}, {
     button: ActionButton.POINTER,
-      hoverText: "OnPointerUp!", distance: 100 }))
+    hoverText: 'OnPointerUp!',
+    distance: 100
+  })
+)
 engine.addEntity(shark2)
 
 // Add 3D model for scenery

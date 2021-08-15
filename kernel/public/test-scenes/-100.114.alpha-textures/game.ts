@@ -8,7 +8,7 @@ import {
   Billboard,
   Texture,
   BoxShape
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const root = new Entity()
 engine.addEntity(root)

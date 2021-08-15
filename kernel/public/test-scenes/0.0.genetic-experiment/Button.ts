@@ -1,4 +1,4 @@
-import { Component, ISystem, engine } from 'decentraland-ecs/src'
+import { Component, ISystem, engine } from 'decentraland-ecs'
 
 @Component('buttonData')
 export class ButtonData {
@@ -51,4 +51,3 @@ export class PushButton implements ISystem {
     }
   } */
 }
-

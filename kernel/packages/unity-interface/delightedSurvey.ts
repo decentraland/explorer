@@ -1,14 +1,13 @@
-import { setTimeout } from 'timers'
 import { defaultLogger } from 'shared/logger'
 import { getCurrentUserProfile } from 'shared/profiles/selectors'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { store } from 'shared/store/isolatedStore'
 import { ensureRendererEnabled } from 'shared/world/worldState'
 
 const TIMEOUT_MS = 10 * 60 * 1000
 
-declare const globalThis: StoreContainer & { analytics: any; delighted: any }
+declare const globalThis: { analytics: any; delighted: any }
 
-let timer: NodeJS.Timeout | null = null
+let timer: ReturnType<typeof setTimeout> | null = null
 
 export function setDelightedSurveyEnabled(enabled: boolean) {
   if (enabled && !timer) {
@@ -30,7 +29,7 @@ function delightedSurvey() {
       if (!analytics || !delighted) {
         return
       }
-      const profile = getCurrentUserProfile(globalThis.globalStore.getState())
+      const profile = getCurrentUserProfile(store.getState())
       if (profile) {
         const payload = {
           email: profile.userId + '@dcl.gg',

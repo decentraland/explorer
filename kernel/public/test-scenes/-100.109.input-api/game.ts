@@ -13,7 +13,7 @@ import {
   Billboard,
   log,
   Texture
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 declare var dcl: any
 
@@ -137,12 +137,11 @@ class BubbleSystem implements ISystem {
   }
 }
 
-input.subscribe('BUTTON_UP', ActionButton.PRIMARY, true, e => {
+input.subscribe('BUTTON_UP', ActionButton.PRIMARY, true, (e) => {
   log('pointerUp works', e)
-
 })
 
-input.subscribe('BUTTON_DOWN', ActionButton.PRIMARY, true, e => {
+input.subscribe('BUTTON_DOWN', ActionButton.PRIMARY, true, (e) => {
   log('pointerDown works', e)
 })
 

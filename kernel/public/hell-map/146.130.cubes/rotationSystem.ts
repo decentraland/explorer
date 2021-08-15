@@ -1,4 +1,4 @@
-import { ISystem, engine, Transform } from 'decentraland-ecs/src'
+import { ISystem, engine, Transform } from 'decentraland-ecs'
 import { RotationComponent } from './rotationComponent'
 
 const rotEntities = engine.getComponentGroup(RotationComponent)

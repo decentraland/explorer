@@ -28,11 +28,11 @@ const resultsDir = path.resolve(__dirname, '../test/results')
 const tmpDir = path.resolve(__dirname, '../test/tmp')
 const diffDir = path.resolve(__dirname, '../test/diff')
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
+  destination: function (req, file, cb) {
     const destination = path.resolve(tmpDir, file.fieldname)
     cb(null, destination)
   },
-  filename: function(req, file, cb) {
+  filename: function (req, file, cb) {
     cb(null, file.originalname)
   }
 })
@@ -65,7 +65,7 @@ wss.on('connection', function connection(ws, req) {
   const userId = query['identity']
   aliasToUserId.set(alias, userId)
 
-  ws.on('message', message => {
+  ws.on('message', (message) => {
     const data = message as Buffer
     const msgType = proto.CoordinatorMessage.deserializeBinary(data).getType()
 
@@ -84,7 +84,7 @@ wss.on('connection', function connection(ws, req) {
       const topicData = topicFwMessage.serializeBinary()
 
       // Reliable/unreliable data
-      connections.forEach($ => {
+      connections.forEach(($) => {
         if (ws !== $) {
           if (getTopicList($).has(topic)) {
             $.send(topicData)
@@ -106,7 +106,7 @@ wss.on('connection', function connection(ws, req) {
       const topicData = topicFwMessage.serializeBinary()
 
       // Reliable/unreliable data
-      connections.forEach($ => {
+      connections.forEach(($) => {
         if (ws !== $) {
           if (getTopicList($).has(topic)) {
             $.send(topicData)
@@ -120,7 +120,7 @@ wss.on('connection', function connection(ws, req) {
       const set = getTopicList(ws)
 
       set.clear()
-      topics.split(/\s+/g).forEach($ => set.add($))
+      topics.split(/\s+/g).forEach(($) => set.add($))
     }
   })
 
@@ -156,7 +156,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
       imageOutputPath: diffOutputPath
     })
 
-    diff.run(function(error, result) {
+    diff.run(function (error, result) {
       if (error) {
         reject(error)
       } else {
@@ -205,20 +205,23 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
   })
 
   app.use(
-    '/@/artifacts/preview.js',
-    express.static(resolve(__dirname, '../static/dist/preview.js'), {
-      setHeaders: res => {
+    '/@/artifacts/index.js',
+    express.static(resolve(__dirname, '../static/index.js'), {
+      setHeaders: (res) => {
         res.setHeader('Content-Type', 'application/javascript')
       }
     })
   )
 
-  app.use('/@', express.static(resolve(__dirname, '../packages/decentraland-ecs')))
+  app.use('/@/artifacts/unity-renderer', express.static(path.dirname(require.resolve('@dcl/unity-renderer'))))
+
+  app.use('/default-profile', express.static(resolve(__dirname, '../static/default-profile')))
+  app.use('/@', express.static(path.dirname(require.resolve('decentraland-ecs'))))
 
   app.use(
     '/preview.html',
     express.static(resolve(__dirname, '../static/preview.html'), {
-      setHeaders: res => {
+      setHeaders: (res) => {
         res.setHeader('Content-Type', 'text/html')
       }
     })
@@ -230,7 +233,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
 
   function readAllJsonFiles(filenames: string[]) {
     return Promise.all(
-      filenames.map(value => {
+      filenames.map((value) => {
         return new Promise((res, reject) => {
           return fs.readFile(value, (err, data) => {
             if (err) {
@@ -246,7 +249,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
   const sceneEndpoint = async (req, res) => {
     const coords = getAllParcelIdsBetween(req.query)
     const fileData = await readAllJsonFiles(
-      coords.map(coord => resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'scene_mapping', coord)))
+      coords.map((coord) => resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'scene_mapping', coord)))
     )
     const length = coords.length
     const parcelData = []
@@ -254,13 +257,13 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
       if (!fileData[i]) continue
       parcelData.push(fileData[i])
     }
-    const cids = parcelData.map(p => p.root_cid)
+    const cids = parcelData.map((p) => p.root_cid)
     const sceneData: any[] = await readAllJsonFiles(
-      cids.map(_ => resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'parcel_info', _)))
+      cids.map((_) => resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'parcel_info', _)))
     )
     const result = await Promise.all(
-      sceneData.map(async data => {
-        const sceneJsonHash = data.contents.filter($ => $.file === 'scene.json')[0].hash
+      sceneData.map(async (data) => {
+        const sceneJsonHash = data.contents.filter(($) => $.file === 'scene.json')[0].hash
         const download: any[] = await readAllJsonFiles([
           resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'contents', sceneJsonHash))
         ])
@@ -285,11 +288,11 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
   const parcelInfoEndpoint = async (req, res) => {
     const cids = req.query.cids.split(',') as string[]
     const fileData = await readAllJsonFiles(
-      cids.map(_ => resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'parcel_info', _)))
+      cids.map((_) => resolve(__dirname, path.join('..', 'public', 'local-ipfs', 'parcel_info', _)))
     )
     return res.json({
       data: fileData
-        .filter($ => !!$)
+        .filter(($) => !!$)
         .map(($: any) => ({
           root_cid: $.root_cid,
           publisher: $.publisher,
@@ -308,7 +311,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
 
   app.use(express.static(path.resolve(__dirname, '..', 'static')))
 
-  app.post('/upload', upload.any(), function(req, res) {
+  app.post('/upload', upload.any(), function (req, res) {
     const threshold = 0.01
 
     const file = getFile(req.files)
@@ -339,12 +342,12 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
     const promise = checkDiff(resultPath, tmpPath, threshold, outputDiffFile)
 
     promise
-      .then($ => {
+      .then(($) => {
         console.log(`       differences: ${$}`)
         res.writeHead(200)
         res.end()
       })
-      .catch(e => {
+      .catch((e) => {
         console.log(`    generating img: ${shouldGenerateNewImages} `)
         console.log(`             error: ${e} `)
         if (shouldGenerateNewImages) {
@@ -365,7 +368,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
       })
   })
 
-  server.listen(port, function() {
+  server.listen(port, function () {
     console.info('==>     Listening on port %s. Open up http://localhost:%s/test to run tests', port, port)
     console.info('                              Open up http://localhost:%s/ to test the client.', port)
 
@@ -381,7 +384,7 @@ function checkDiff(imageAPath: string, imageBPath: string, threshold: number, di
     if (!singleRun) {
       titere
         .run(options)
-        .then(result => {
+        .then((result) => {
           if (result.coverage) {
             fs.writeFileSync('test/tmp/out.json', JSON.stringify(result.coverage))
           }

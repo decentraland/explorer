@@ -10,14 +10,13 @@ import {
   LOADING_STARTED,
   NOT_STARTED,
   WAITING_FOR_RENDERER,
-  UNITY_CLIENT_LOADED,
-  LOADING_SCENES,
+  METRICS_UNITY_CLIENT_LOADED,
   EXPERIENCE_STARTED,
   TELEPORT_TRIGGERED,
   SCENE_ENTERED,
   UNEXPECTED_ERROR_LOADING_CATALOG,
   UNEXPECTED_ERROR,
-  AUTH_SUCCESSFUL,
+  METRICS_AUTH_SUCCESSFUL,
   NO_WEBGL_COULD_BE_CREATED,
   AUTH_ERROR_LOGGED_OUT,
   CONTENT_SERVER_DOWN,
@@ -31,18 +30,19 @@ import {
   AWAITING_USER_SIGNATURE,
   AVATAR_LOADING_ERROR
 } from '../loading/types'
+import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 
 const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   // lifecycle events
   [NOT_STARTED]: 'session_start',
   [LOADING_STARTED]: 'loading_1_start',
   [AWAITING_USER_SIGNATURE]: 'loading_1_1_awaiting_user_signature',
-  [AUTH_SUCCESSFUL]: 'loading_2_authOK',
+  [METRICS_AUTH_SUCCESSFUL]: 'loading_2_authOK',
   [ESTABLISHING_COMMS]: 'loading_3_init_comms',
   [COMMS_ESTABLISHED]: 'loading_4_comms_established',
   [WAITING_FOR_RENDERER]: 'loading_5_wait_renderer',
-  [UNITY_CLIENT_LOADED]: 'loading_6_unity_ok',
-  [LOADING_SCENES]: 'loading_7_load_scenes',
+  [METRICS_UNITY_CLIENT_LOADED]: 'loading_6_unity_ok',
+  [PARCEL_LOADING_STARTED]: 'loading_7_load_scenes',
   [EXPERIENCE_STARTED]: 'loading_8_finished',
   [TELEPORT_TRIGGERED]: 'teleport_triggered',
   [SCENE_ENTERED]: 'scene_entered',

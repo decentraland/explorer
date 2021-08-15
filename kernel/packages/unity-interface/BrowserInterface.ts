@@ -1,24 +1,17 @@
-import { uuid } from 'decentraland-ecs/src'
+import { uuid } from 'atomicHelpers/math'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, localProfileUUID } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { getCurrentIdentity, getCurrentUserId } from 'shared/session/selectors'
-import {
-  decentralandConfigurations,
-  ethereumConfigurations,
-  parcelLimits,
-  playerConfigurations,
-  WORLD_EXPLORER
-} from 'config'
-import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
+import { getCurrentIdentity, getCurrentUserId, getIsGuestLogin } from 'shared/session/selectors'
+import { ethereumConfigurations, parcelLimits, playerConfigurations, WORLD_EXPLORER } from 'config'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs'
+import { IEventNames } from 'decentraland-ecs'
 import { renderDistanceObservable, sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { identifyEmail, trackEvent } from 'shared/analytics'
+import { trackEvent } from 'shared/analytics'
 import {
-  aborted,
   BringDownClientAndShowError,
   ErrorContext,
   ReportFatalErrorWithUnityPayload
@@ -41,19 +34,17 @@ import {
 } from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
-import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { fetchENSOwner, getAppNetwork } from 'shared/web3'
+import { fetchENSOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
 import { logout, redirectToSignUp, signUp, signUpCancel, signupForm, signUpSetProfile } from 'shared/session/actions'
-import { authenticateWhenItsReady, getIdentity, hasWallet } from 'shared/session'
-import { RootState, StoreContainer } from 'shared/store/rootTypes'
-import { unityInterface } from './UnityInterface'
+import { getIdentity, hasWallet } from 'shared/session'
+import { getUnityInstance } from './IUnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
@@ -63,27 +54,27 @@ import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
-import { isGuest } from '../shared/ethereum/provider'
 import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
+import { AVATAR_LOADING_ERROR, renderingActivated, renderingDectivated } from 'shared/loading/types'
 import { unpublishSceneByCoords } from 'shared/apis/SceneStateStorageController/unpublishScene'
-import { ProviderType } from 'decentraland-connect'
 import { BuilderServerAPIManager } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
-import { Store } from 'redux'
-import { areCandidatesFetched } from 'shared/dao/selectors'
+import { areCandidatesFetched, getSelectedNetwork } from 'shared/dao/selectors'
+import { globalObservable } from 'shared/observables'
+import { renderStateObservable } from 'shared/world/worldState'
 import { realmToString } from 'shared/dao/utils/realmToString'
+import { store } from 'shared/store/isolatedStore'
 
-declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
+declare const globalThis: { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
 
 // ** TODO - move to friends related file - moliva - 15/07/2020
 function toSocialId(userId: string) {
-  const domain = globalThis.globalStore.getState().friends.client?.getDomain()
+  const domain = store.getState().friends.client?.getDomain()
   return `@${userId.toLowerCase()}:${domain}`
 }
 
@@ -105,10 +96,16 @@ type SystemInfoPayload = {
   systemMemorySize: number
 }
 
+function allScenesEvent(data: { eventType: string; payload: any }) {
+  for (const [_key, scene] of loadedSceneWorkers) {
+    scene.emit(data.eventType as IEventNames, data.payload)
+  }
+}
+
+// the BrowserInterface is a visitor for messages received from Unity
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
-  // visitor pattern? anyone?
   /**
    * This is the only method that should be called publically in this class.
    * It dispatches "renderer messages" to the correct handlers.
@@ -123,6 +120,10 @@ export class BrowserInterface {
     } else {
       defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
     }
+  }
+
+  public AllScenesEvent(data: { eventType: string; payload: any }) {
+    allScenesEvent(data)
   }
 
   /** Triggered when the camera moves */
@@ -164,15 +165,8 @@ export class BrowserInterface {
     }
   }
 
-  public AllScenesEvent(data: { eventType: string; payload: any }) {
-    for (const [_key, scene] of loadedSceneWorkers) {
-      scene.emit(data.eventType as IEventNames, data.payload)
-    }
-  }
-
   public OpenWebURL(data: { url: string }) {
-    const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
-    if (newWindow != null) newWindow.opener = null
+    globalObservable.emit('openUrl', data)
   }
 
   public PerformanceReport(data: {
@@ -191,7 +185,7 @@ export class BrowserInterface {
   }
 
   public CrashPayloadResponse(data: { payload: any }) {
-    unityInterface.crashPayloadResponseObservable.notifyObservers(JSON.stringify(data))
+    getUnityInstance().crashPayloadResponseObservable.notifyObservers(JSON.stringify(data))
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -217,7 +211,7 @@ export class BrowserInterface {
       timestamp: data.timestamp
     })
 
-    this.AllScenesEvent({
+    allScenesEvent({
       eventType: 'playerExpression',
       payload: {
         expressionId: data.id
@@ -230,7 +224,7 @@ export class BrowserInterface {
     sendPublicChatMessage(messageId, body)
   }
 
-  public TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
+  public TermsOfServiceResponse(data: { sceneId: string; accepted: boolean; dontShowAgain: boolean }) {
     // TODO
   }
 
@@ -238,7 +232,7 @@ export class BrowserInterface {
     if (hasWallet()) {
       TeleportController.goToNext()
     } else {
-      window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
+      globalObservable.emit('openUrl', { url: 'https://docs.decentraland.org/get-a-wallet/' })
     }
   }
 
@@ -256,11 +250,11 @@ export class BrowserInterface {
   }
 
   public LogOut() {
-    globalThis.globalStore.dispatch(logout())
+    store.dispatch(logout())
   }
 
   public RedirectToSignUp() {
-    globalThis.globalStore.dispatch(redirectToSignUp())
+    store.dispatch(redirectToSignUp())
   }
 
   public SaveUserInterests(interests: string[]) {
@@ -269,7 +263,7 @@ export class BrowserInterface {
     }
     const unique = new Set<string>(interests)
 
-    globalThis.globalStore.dispatch(saveProfileRequest({ interests: Array.from(unique) }))
+    store.dispatch(saveProfileRequest({ interests: Array.from(unique) }))
   }
 
   public SaveUserAvatar(changes: {
@@ -283,49 +277,39 @@ export class BrowserInterface {
     const { face, face128, face256, body, avatar } = changes
     const update = { avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
     if (!changes.isSignUpFlow) {
-      globalThis.globalStore.dispatch(saveProfileRequest(update))
+      store.dispatch(saveProfileRequest(update))
     } else {
-      globalThis.globalStore.dispatch(signUpSetProfile(update))
+      store.dispatch(signUpSetProfile(update))
     }
   }
 
-  public SendAuthentication(data: { rendererAuthenticationType: string }) {
-    const providerType: ProviderType | null = Object.values(ProviderType).includes(
-      data.rendererAuthenticationType as ProviderType
-    )
-      ? (data.rendererAuthenticationType as ProviderType)
-      : null
-
-    authenticateWhenItsReady(providerType)
-  }
-
   public SendPassport(passport: { name: string; email: string }) {
-    unityInterface.DeactivateRendering()
-    globalThis.globalStore.dispatch(signupForm(passport.name, passport.email))
-    globalThis.globalStore.dispatch(signUp())
+    store.dispatch(signupForm(passport.name, passport.email))
+    store.dispatch(signUp())
   }
 
   public RequestOwnProfileUpdate() {
-    const userId = getCurrentUserId(globalThis.globalStore.getState())
-    if (!isGuest() && userId) {
-      globalThis.globalStore.dispatch(profileRequest(userId))
+    const userId = getCurrentUserId(store.getState())
+    const isGuest = getIsGuestLogin(store.getState())
+    if (!isGuest && userId) {
+      store.dispatch(profileRequest(userId))
     }
   }
 
   public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
-    globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
+    store.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
   }
 
   public CloseUserAvatar(isSignUpFlow = false) {
     if (isSignUpFlow) {
-      unityInterface.DeactivateRendering()
-      globalThis.globalStore.dispatch(signUpCancel())
+      getUnityInstance().DeactivateRendering()
+      store.dispatch(signUpCancel())
     }
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
     const update = { tutorialStep: data.tutorialStep }
-    globalThis.globalStore.dispatch(saveProfileRequest(update))
+    store.dispatch(saveProfileRequest(update))
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -335,20 +319,30 @@ export class BrowserInterface {
         sceneLifeCycleObservable.notifyObservers({ sceneId, status: 'ready' })
         break
       }
+      case 'DeactivateRenderingACK': {
+        /**
+         * This event is called everytime the renderer deactivates its camera
+         */
+        store.dispatch(renderingDectivated())
+        renderStateObservable.notifyObservers()
+        break
+      }
       case 'ActivateRenderingACK': {
-        if (!aborted) {
-          renderStateObservable.notifyObservers(true)
-        }
+        /**
+         * This event is called everytime the renderer activates the main camera
+         */
+        store.dispatch(renderingActivated())
+        renderStateObservable.notifyObservers()
         break
       }
       case 'StartStatefulMode': {
         const { sceneId } = payload
         const worker = getSceneWorkerBySceneID(sceneId)!
-        unityInterface.UnloadScene(sceneId) // Maybe unity should do it by itself?
+        getUnityInstance().UnloadScene(sceneId) // Maybe unity should do it by itself?
         const parcelScene = worker.getParcelScene()
         stopParcelSceneWorker(worker)
         const data = parcelScene.data.data as LoadableParcelScene
-        unityInterface.LoadParcelScenes([data]) // Maybe unity should do it by itself?
+        getUnityInstance().LoadParcelScenes([data]) // Maybe unity should do it by itself?
         setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
         break
       }
@@ -398,22 +392,15 @@ export class BrowserInterface {
   }
 
   public BlockPlayer(data: { userId: string }) {
-    globalThis.globalStore.dispatch(blockPlayers([data.userId]))
+    store.dispatch(blockPlayers([data.userId]))
   }
 
   public UnblockPlayer(data: { userId: string }) {
-    globalThis.globalStore.dispatch(unblockPlayers([data.userId]))
-  }
-
-  public ReportUserEmail(data: { userEmail: string }) {
-    const userId = getCurrentUserId(globalThis.globalStore.getState())
-    if (userId) {
-      identifyEmail(data.userEmail, hasWallet() ? userId : undefined)
-    }
+    store.dispatch(unblockPlayers([data.userId]))
   }
 
   public RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {
-    globalThis.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
+    store.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
   }
 
   public SetAudioStream(data: { url: string; play: boolean; volume: number }) {
@@ -421,20 +408,20 @@ export class BrowserInterface {
   }
 
   public SendChatMessage(data: { message: ChatMessage }) {
-    globalThis.globalStore.dispatch(sendMessage(data.message))
+    store.dispatch(sendMessage(data.message))
   }
 
   public SetVoiceChatRecording(recordingMessage: { recording: boolean }) {
-    globalThis.globalStore.dispatch(setVoiceChatRecording(recordingMessage.recording))
+    store.dispatch(setVoiceChatRecording(recordingMessage.recording))
   }
 
   public ToggleVoiceChatRecording() {
-    globalThis.globalStore.dispatch(toggleVoiceChatRecording())
+    store.dispatch(toggleVoiceChatRecording())
   }
 
   public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
-    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
-    globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
+    store.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
+    store.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
@@ -444,12 +431,12 @@ export class BrowserInterface {
     let found = false
     if (action === FriendshipAction.REQUESTED_TO) {
       await ensureFriendProfile(userId)
-      found = hasConnectedWeb3(globalThis.globalStore.getState(), userId)
+      found = hasConnectedWeb3(store.getState(), userId)
     }
 
     if (!found) {
       // if user profile was not found on server -> no connected web3, check if it's a claimed name
-      const net = await getAppNetwork()
+      const net = getSelectedNetwork(store.getState())
       const address = await fetchENSOwner(ethereumConfigurations[net].names, userId)
       if (address) {
         // if an address was found for the name -> set as user id & add that instead
@@ -461,12 +448,12 @@ export class BrowserInterface {
     if (action === FriendshipAction.REQUESTED_TO && !found) {
       // if we still haven't the user by now (meaning the user has never logged and doesn't have a profile in the dao, or the user id is for a non wallet user or name is not correct) -> fail
       // tslint:disable-next-line
-      unityInterface.FriendNotFound(userId)
+      getUnityInstance().FriendNotFound(userId)
       return
     }
 
-    globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
-    globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+    store.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
+    store.dispatch(updateFriendship(action, userId.toLowerCase(), false))
   }
 
   public SearchENSOwner(data: { name: string; maxResults?: number }) {
@@ -474,10 +461,10 @@ export class BrowserInterface {
 
     profilesPromise
       .then((profiles) => {
-        unityInterface.SetENSOwnerQueryResult(data.name, profiles)
+        getUnityInstance().SetENSOwnerQueryResult(data.name, profiles)
       })
       .catch((error) => {
-        unityInterface.SetENSOwnerQueryResult(data.name, undefined)
+        getUnityInstance().SetENSOwnerQueryResult(data.name, undefined)
         defaultLogger.error(error)
       })
   }
@@ -494,7 +481,6 @@ export class BrowserInterface {
 
     const future = candidatesFetched()
 
-    const store: Store<RootState> = (window as any)['globalStore']
     if (!areCandidatesFetched(store.getState())) {
       notifyStatusThroughChat(`Waiting while realms are initialized, this may take a while...`)
     }
@@ -508,25 +494,25 @@ export class BrowserInterface {
         () => {
           const successMessage = `Jumped to ${x},${y} in realm ${realmString}!`
           notifyStatusThroughChat(successMessage)
-          unityInterface.ConnectionToRealmSuccess(data)
+          getUnityInstance().ConnectionToRealmSuccess(data)
           TeleportController.goTo(x, y, successMessage)
         },
         (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           notifyStatusThroughChat('Could not join realm.' + cause)
-          unityInterface.ConnectionToRealmFailed(data)
+          getUnityInstance().ConnectionToRealmFailed(data)
           defaultLogger.error('Error joining realm', e)
         }
       )
     } else {
       notifyStatusThroughChat(`Couldn't find realm ${realmString}.`)
-      unityInterface.ConnectionToRealmFailed(data)
+      getUnityInstance().ConnectionToRealmFailed(data)
     }
   }
 
   public ScenesLoadingFeedback(data: { message: string; loadPercentage: number }) {
     const { message, loadPercentage } = data
-    globalThis.globalStore.dispatch(updateStatusMessage(message, loadPercentage))
+    store.dispatch(updateStatusMessage(message, loadPercentage))
   }
 
   public FetchHotScenes() {
@@ -538,12 +524,12 @@ export class BrowserInterface {
   }
 
   public SetBaseResolution(data: { baseResolution: number }) {
-    unityInterface.SetTargetHeight(data.baseResolution)
+    getUnityInstance().SetTargetHeight(data.baseResolution)
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
     if (!globalThis.gifProcessor) {
-      globalThis.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
+      globalThis.gifProcessor = new GIFProcessor(getUnityInstance().gameInstance, getUnityInstance(), data.isWebGL1)
     }
 
     globalThis.gifProcessor.ProcessGIF(data)
@@ -555,25 +541,27 @@ export class BrowserInterface {
     }
   }
 
-  public async FetchBalanceOfMANA() {
-    const identity = getIdentity()
+  public FetchBalanceOfMANA() {
+    ;(async () => {
+      const identity = getIdentity()
 
-    if (!identity?.hasConnectedWeb3) {
-      return
-    }
-
-    const balance = (await getERC20Balance(identity.address, decentralandConfigurations.paymentTokens.MANA)).toNumber()
-    if (this.lastBalanceOfMana !== balance) {
-      this.lastBalanceOfMana = balance
-      unityInterface.UpdateBalanceOfMANA(`${balance}`)
-    }
+      if (!identity?.hasConnectedWeb3) {
+        return
+      }
+      const net = getSelectedNetwork(store.getState())
+      const balance = (await getERC20Balance(identity.address, ethereumConfigurations[net].MANAToken)).toNumber()
+      if (this.lastBalanceOfMana !== balance) {
+        this.lastBalanceOfMana = balance
+        getUnityInstance().UpdateBalanceOfMANA(`${balance}`)
+      }
+    })().catch((err) => console.error(err))
   }
 
   public SetMuteUsers(data: { usersId: string[]; mute: boolean }) {
     if (data.mute) {
-      globalThis.globalStore.dispatch(mutePlayers(data.usersId))
+      store.dispatch(mutePlayers(data.usersId))
     } else {
-      globalThis.globalStore.dispatch(unmutePlayers(data.usersId))
+      store.dispatch(unmutePlayers(data.usersId))
     }
   }
 
@@ -582,14 +570,13 @@ export class BrowserInterface {
   }
 
   public RequestBIWCatalogHeader() {
-    const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
       let emptyHeader: Record<string, string> = {}
-      unityInterface.SendBuilderCatalogHeaders(emptyHeader)
+      getUnityInstance().SendBuilderCatalogHeaders(emptyHeader)
     } else {
       const headers = BuilderServerAPIManager.authorize(identity, 'get', '/assetpacks')
-      unityInterface.SendBuilderCatalogHeaders(headers)
+      getUnityInstance().SendBuilderCatalogHeaders(headers)
     }
   }
 
@@ -604,15 +591,15 @@ export class BrowserInterface {
     const { filters, context } = data
     const newFilters: WearablesRequestFilters = {
       ownedByUser: filters.ownedByUser ?? undefined,
-      wearableIds: this.arrayCleanup(filters.wearableIds),
-      collectionIds: this.arrayCleanup(filters.collectionIds)
+      wearableIds: arrayCleanup(filters.wearableIds),
+      collectionIds: arrayCleanup(filters.collectionIds)
     }
-    globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
+    store.dispatch(wearablesRequest(newFilters, context))
   }
 
   public RequestUserProfile(userIdPayload: { value: string }) {
     ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
-      .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
+      .then((profile) => getUnityInstance().AddUserProfileToCatalog(profileToRendererFormat(profile)))
       .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
   }
 
@@ -629,10 +616,10 @@ export class BrowserInterface {
   public async NotifyStatusThroughChat(data: { value: string }) {
     notifyStatusThroughChat(data.value)
   }
+}
 
-  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
-    return !array || array.length === 0 ? undefined : array
-  }
+function arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
+  return !array || array.length === 0 ? undefined : array
 }
 
 export let browserInterface: BrowserInterface = new BrowserInterface()

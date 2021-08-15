@@ -14,7 +14,8 @@ import {
   UpdateEntityComponentPayload,
   EntityActionType
 } from 'shared/types'
-import { QueryType } from 'decentraland-ecs/src'
+import { QueryType } from 'decentraland-ecs'
+import type { UnityGame } from '@dcl/unity-renderer/src'
 
 enum RaycastQueryType {
   NONE,
@@ -74,7 +75,7 @@ export class NativeMessagesBridge {
 
   private queryMemBlockPtr: number = 0
 
-  public initNativeMessages(gameInstance: any) {
+  public initNativeMessages(gameInstance: UnityGame) {
     this.unityModule = gameInstance.Module
 
     if (!this.unityModule) {

@@ -25,11 +25,10 @@ import {
   StorableSceneState,
   toBuilderFromStateDefinitionFormat
 } from './StorableSceneStateTranslation'
-import { CLASS_ID, uuid } from 'decentraland-ecs/src'
+import { uuid } from 'atomicHelpers/math'
+import { CLASS_ID } from 'decentraland-ecs'
 import { ParcelIdentity } from '../ParcelIdentity'
-import { Store } from 'redux'
-import { RootState } from 'shared/store/rootTypes'
-import { getUpdateProfileServer } from 'shared/dao/selectors'
+import { getSelectedNetwork, getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
 import { ExplorerIdentity } from 'shared/session/types'
@@ -38,14 +37,23 @@ import { ISceneStateStorageController } from './ISceneStateStorageController'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { getLayoutFromParcels } from './utils'
 import { SceneTransformTranslator } from './SceneTransformTranslator'
-
-declare const globalThis: any
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
-  private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest
   private transformTranslator!: SceneTransformTranslator
+
+  // lazy loading the BuilderServerAPIManager
+  private _builderApiManager?: BuilderServerAPIManager
+  private get builderApiManager(): BuilderServerAPIManager {
+    if (!this._builderApiManager) {
+      const net = getSelectedNetwork(store.getState())
+      this._builderApiManager = new BuilderServerAPIManager(net)
+    }
+    return this._builderApiManager
+  }
 
   @exposeMethod
   async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
@@ -53,7 +61,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
 
     if (!manifest) return undefined
 
-    globalThis.unityInterface.SendBuilderProjectInfo(manifest.project.title, manifest.project.description, false)
+    getUnityInstance().SendBuilderProjectInfo(manifest.project.title, manifest.project.description, false)
     this.builderManifest = manifest
     this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
     const definition = fromBuildertoStateDefinitionFormat(manifest.scene, this.transformTranslator)
@@ -64,7 +72,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
     const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
     if (newProject) {
-      globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description, false)
+      getUnityInstance().SendBuilderProjectInfo(newProject.project.title, newProject.project.description, false)
       this.builderManifest = newProject
       this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
       const translatedManifest = fromBuildertoStateDefinitionFormat(
@@ -79,7 +87,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   @exposeMethod
   async createProjectWithCoords(coordinates: string): Promise<boolean> {
     const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
-    globalThis.unityInterface.SendBuilderProjectInfo(newProject.project.title, newProject.project.description, true)
+    getUnityInstance().SendBuilderProjectInfo(newProject.project.title, newProject.project.description, true)
     this.builderManifest = newProject
     this.transformTranslator = new SceneTransformTranslator(this.parcelIdentity.land.sceneJsonData.source)
     return newProject ? true : false
@@ -205,7 +213,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         })
 
         // Sign entity id
-        const store: Store<RootState> = globalThis['globalStore']
         const identity = getCurrentIdentity(store.getState())
         if (!identity) {
           throw new Error('Identity not found when trying to deploy an entity')
@@ -224,7 +231,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
         result = { ok: false, error: `${error}` }
       }
     }
-    globalThis.unityInterface.SendPublishSceneResult(result)
+    getUnityInstance().SendPublishSceneResult(result)
     return result
   }
 
@@ -313,7 +320,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
           )
 
           // Notify renderer about the project information
-          globalThis.unityInterface.SendBuilderProjectInfo(
+          getUnityInstance().SendBuilderProjectInfo(
             builderManifest.project.title,
             builderManifest.project.description,
             false
@@ -355,7 +362,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   @exposeMethod
   async sendAssetsToRenderer(state: SerializedSceneState): Promise<string> {
     const assets = await this.getAllBuilderAssets(state)
-    globalThis.unityInterface.SendSceneAssets(assets)
+    getUnityInstance().SendSceneAssets(assets)
     return 'OK'
   }
 
@@ -370,7 +377,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   private getIdentity(): ExplorerIdentity {
-    const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
       throw new Error('Identity not found when trying to deploy an entity')
@@ -383,7 +389,6 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   private getContentClient(): ContentClient {
-    const store: Store<RootState> = globalThis['globalStore']
     const contentUrl = getUpdateProfileServer(store.getState())
     return new ContentClient(contentUrl, 'builder in-world')
   }

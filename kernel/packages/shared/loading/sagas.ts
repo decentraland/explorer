@@ -1,53 +1,39 @@
 import { AnyAction } from 'redux'
-import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { fork, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
-import { RENDERER_INITIALIZED } from 'shared/renderer/types'
-import { LOGIN_COMPLETED, USER_AUTHENTIFIED } from 'shared/session/actions'
-import { web3initialized } from 'shared/dao/actions'
+import { PARCEL_LOADING_STARTED, RENDERER_INITIALIZED } from 'shared/renderer/types'
+import { ChangeLoginStateAction, CHANGE_LOGIN_STAGE } from 'shared/session/actions'
 import { trackEvent } from '../analytics'
 import { lastPlayerPosition } from '../world/positionThings'
 
-import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
-import {
-  setLoadingScreen,
-  EXPERIENCE_STARTED,
-  rotateHelpText,
-  TELEPORT_TRIGGERED,
-  unityClientLoaded,
-  authSuccessful
-} from './types'
-import Html from '../Html'
+import { PENDING_SCENES, SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
+import { metricsUnityClientLoaded, metricsAuthSuccessful, experienceStarted } from './types'
 import { getCurrentUserId } from 'shared/session/selectors'
-
-const SECONDS = 1000
-
-export const DELAY_BETWEEN_MESSAGES = 10 * SECONDS
+import { LoginState } from '@dcl/kernel-interface'
+import { call } from 'redux-saga-test-plan/matchers'
+import { RootState } from 'shared/store/rootTypes'
+import { onLoginCompleted } from 'shared/session/sagas'
 
 export function* loadingSaga() {
-  yield fork(translateActions)
-
-  yield fork(initialSceneLoading)
-  yield takeLatest(TELEPORT_TRIGGERED, teleportSceneLoading)
-
   yield takeEvery(SCENE_LOAD, trackLoadTime)
+
+  yield fork(translateActions)
+  yield fork(initialSceneLoading)
 }
 
 function* translateActions() {
   yield takeEvery(RENDERER_INITIALIZED, triggerUnityClientLoaded)
-  yield takeEvery(USER_AUTHENTIFIED, triggerWeb3Initialized)
-  yield takeEvery(LOGIN_COMPLETED, triggerAuthSuccessful)
+  yield takeEvery(CHANGE_LOGIN_STAGE, triggerAuthSuccessful)
 }
 
-function* triggerAuthSuccessful() {
-  yield put(authSuccessful())
-}
-
-function* triggerWeb3Initialized() {
-  yield put(web3initialized())
+function* triggerAuthSuccessful(action: ChangeLoginStateAction) {
+  if (action.payload.stage === LoginState.COMPLETED) {
+    yield put(metricsAuthSuccessful())
+  }
 }
 
 function* triggerUnityClientLoaded() {
-  yield put(unityClientLoaded())
+  yield put(metricsUnityClientLoaded())
 }
 
 export function* trackLoadTime(action: SceneLoad): any {
@@ -68,54 +54,35 @@ export function* trackLoadTime(action: SceneLoad): any {
   })
 }
 
-function* refreshTeleport() {
-  while (true) {
-    yield delay(DELAY_BETWEEN_MESSAGES)
-    yield put(rotateHelpText())
-  }
-}
-
-function* refreshTextInScreen() {
-  while (true) {
-    const status = yield select((state) => state.loading)
-    yield call(() => Html.updateTextInScreen(status))
-    yield delay(200)
-  }
-}
-
-export function* waitForSceneLoads() {
-  while (true) {
-    yield race({
-      started: take(SCENE_START),
-      failed: take(SCENE_FAIL)
-    })
-    if (yield select((state) => state.loading.pendingScenes === 0)) {
-      break
+function* waitForSceneLoads() {
+  function shouldWaitForScenes(state: RootState) {
+    if (!state.renderer.parcelLoadingStarted) {
+      return true
     }
+
+    // in the initial load, we should wait until we have *some* scene to load
+    if (state.loading.initialLoad) {
+      if (state.loading.pendingScenes !== 0 || state.loading.totalScenes === 0) {
+        return true
+      }
+    }
+
+    // otherwise only wait until pendingScenes == 0
+    return state.loading.pendingScenes !== 0
+  }
+
+  while (yield select(shouldWaitForScenes)) {
+    // these are the events that _may_ change the result of shouldWaitForScenes
+    // we are taking any of them, with the race function
+    yield race({
+      pendingScenes: take(PENDING_SCENES),
+      sceneLoading: take(PARCEL_LOADING_STARTED)
+    })
   }
 }
 
-export function* initialSceneLoading() {
-  yield race({
-    refresh: call(refreshTeleport),
-    textInScreen: call(refreshTextInScreen),
-    finish: call(function* () {
-      yield take(EXPERIENCE_STARTED)
-      yield put(setLoadingScreen(false))
-      yield call(Html.hideLoadingTips)
-      yield call(Html.cleanSubTextInScreen)
-    })
-  })
-}
-
-export function* teleportSceneLoading() {
-  Html.cleanSubTextInScreen()
-  yield race({
-    refresh: call(refreshTeleport),
-    textInScreen: call(function* () {
-      yield delay(2000)
-      yield call(refreshTextInScreen)
-    }),
-    finish: call(waitForSceneLoads)
-  })
+function* initialSceneLoading() {
+  yield onLoginCompleted()
+  yield call(waitForSceneLoads)
+  yield put(experienceStarted())
 }

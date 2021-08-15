@@ -1,6 +1,4 @@
-import { UICanvas, UIInputText, UIScrollRect, Color4, UIText, UIContainerRect } from 'decentraland-ecs/src'
-
-import { OnTextSubmit } from 'decentraland-ecs/src/decentraland/UIEvents'
+import { UICanvas, UIInputText, UIScrollRect, Color4, UIText, UIContainerRect, OnTextSubmit } from 'decentraland-ecs'
 
 const ui = new UICanvas()
 
@@ -30,7 +28,7 @@ textInput.positionX = '25px'
 textInput.positionY = '25px'
 textInput.isPointerBlocker = true
 
-textInput.onTextSubmit = new OnTextSubmit(x => {
+textInput.onTextSubmit = new OnTextSubmit((x) => {
   const text = new UIText(container)
   text.value = '<USER-ID> ' + x.text
   text.width = '100%'

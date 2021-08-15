@@ -1,12 +1,11 @@
 import { Script, inject, EventSubscriber } from 'decentraland-rpc'
 
-import { Vector2 } from 'decentraland-ecs/src'
+import { Vector2 } from 'decentraland-ecs'
 import { sleep } from 'atomicHelpers/sleep'
 import future, { IFuture } from 'fp-future'
 
 import type { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-rpc/types'
-import type { QueryType } from 'decentraland-ecs'
-import type { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
+import type { QueryType, DecentralandInterface, IEvents } from 'decentraland-ecs'
 import type { IEngineAPI } from 'shared/apis/IEngineAPI'
 import type { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
 import type {

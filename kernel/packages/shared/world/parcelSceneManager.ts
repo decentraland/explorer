@@ -5,15 +5,14 @@ import {
   renderDistanceObservable
 } from '../../decentraland-loader/lifecycle/controllers/scene'
 import { trackEvent } from '../analytics'
-import { globalSignalSceneFail, globalSignalSceneLoad, globalSignalSceneStart } from '../loading/actions'
-import { clearForegroundTimeout, setForegroundTimeout } from '../timers/index'
+import { informPendingScenes, signalSceneFail, signalSceneLoad, signalSceneStart } from '../loading/actions'
 import { EnvironmentData, ILand, InstancedSpawnPoint, LoadableParcelScene } from '../types'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { parcelObservable, teleportObservable } from './positionThings'
-import { SceneWorker } from './SceneWorker'
+import { SceneWorker, SceneWorkerReadyState } from './SceneWorker'
 import { SceneSystemWorker } from './SceneSystemWorker'
-import { renderStateObservable } from './worldState'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
+import { store } from 'shared/store/isolatedStore'
 
 export type EnableParcelSceneLoadingOptions = {
   parcelSceneClass: { new (x: EnvironmentData<LoadableParcelScene>): ParcelSceneAPI }
@@ -24,9 +23,10 @@ export type EnableParcelSceneLoadingOptions = {
   onPositionUnsettled?(): void
 }
 
+declare const globalThis: any
+
 export const loadedSceneWorkers = new Map<string, SceneWorker>()
-declare var window: any
-window['sceneWorkers'] = loadedSceneWorkers
+globalThis['sceneWorkers'] = loadedSceneWorkers
 
 /**
  * Retrieve the Scene based on it's ID, usually RootCID
@@ -53,6 +53,7 @@ export function forceStopParcelSceneWorker(worker: SceneWorker) {
   const sceneId = worker.getSceneId()
   worker.dispose()
   loadedSceneWorkers.delete(sceneId)
+  reportPendingScenes()
 }
 
 export function loadParcelScene(
@@ -74,7 +75,50 @@ export function loadParcelScene(
 }
 
 export function setNewParcelScene(sceneId: string, worker: SceneWorker) {
+  let parcelSceneWorker = loadedSceneWorkers.get(sceneId)
+
+  if (parcelSceneWorker) {
+    forceStopParcelSceneWorker(parcelSceneWorker)
+  }
+
   loadedSceneWorkers.set(sceneId, worker)
+  globalSignalSceneLoad(sceneId)
+}
+
+function globalSignalSceneLoad(sceneId: string) {
+  store.dispatch(signalSceneLoad(sceneId))
+  reportPendingScenes()
+}
+
+function globalSignalSceneStart(sceneId: string) {
+  store.dispatch(signalSceneStart(sceneId))
+  reportPendingScenes()
+}
+
+function globalSignalSceneFail(sceneId: string) {
+  store.dispatch(signalSceneFail(sceneId))
+  reportPendingScenes()
+}
+
+function reportPendingScenes() {
+  const pendingScenes = new Set<string>()
+
+  let countableScenes = 0
+  for (let [sceneId, sceneWorker] of loadedSceneWorkers) {
+    // avatar scene should not be counted here
+    const shouldBeCounted = !sceneWorker.isPersistent()
+
+    const isPending = (sceneWorker.ready & SceneWorkerReadyState.STARTED) === 0
+    const failedLoading = (sceneWorker.ready & SceneWorkerReadyState.LOADING_FAILED) !== 0
+    if (shouldBeCounted) {
+      countableScenes++
+    }
+    if (shouldBeCounted && isPending && !failedLoading) {
+      pendingScenes.add(sceneId)
+    }
+  }
+
+  store.dispatch(informPendingScenes(pendingScenes.size, countableScenes))
 }
 
 export async function enableParcelSceneLoading(options: EnableParcelSceneLoadingOptions) {
@@ -93,7 +137,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
   ret.on('Scene.shouldStart', async (opts: { sceneId: string }) => {
     const sceneId = opts.sceneId
     const parcelSceneToStart = await ret.getParcelData(sceneId)
-    globalSignalSceneLoad(sceneId)
+
     // create the worker if don't exist
     if (!getSceneWorkerBySceneID(sceneId)) {
       const parcelScene = new options.parcelSceneClass(ILandToLoadableParcelScene(parcelSceneToStart))
@@ -101,12 +145,14 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
       loadParcelScene(parcelScene)
     }
 
-    let timer: any
+    let timer: ReturnType<typeof setTimeout>
 
     const observer = sceneLifeCycleObservable.add((sceneStatus) => {
-      if (sceneStatus.sceneId === sceneId) {
+      const worker = getSceneWorkerBySceneID(sceneId)
+      if (worker && sceneStatus.sceneId === sceneId && (worker.ready & SceneWorkerReadyState.STARTED) === 0) {
         sceneLifeCycleObservable.remove(observer)
-        clearForegroundTimeout(timer)
+        clearTimeout(timer)
+        worker.ready |= SceneWorkerReadyState.STARTED
         ret.notify('Scene.status', sceneStatus)
         globalSignalSceneStart(sceneId)
       }
@@ -114,15 +160,16 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
 
     // tell the engine to load the parcel scene
     if (options.onLoadParcelScenes) {
-      options.onLoadParcelScenes([await ret.getParcelData(sceneId)])
+      options.onLoadParcelScenes([parcelSceneToStart])
     }
 
-    timer = setForegroundTimeout(() => {
+    timer = setTimeout(() => {
       const worker = getSceneWorkerBySceneID(sceneId)
       if (worker && !worker.hasSceneStarted()) {
         sceneLifeCycleObservable.remove(observer)
-        globalSignalSceneFail(sceneId)
+        worker.ready |= SceneWorkerReadyState.LOADING_FAILED
         ret.notify('Scene.status', { sceneId, status: 'failed' })
+        globalSignalSceneFail(sceneId)
       }
     }, 90000)
   })
@@ -134,8 +181,6 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     }
     stopParcelSceneWorker(worker)
     if (options.onUnloadParcelScenes) {
-      const globalStore = (global as any)['globalStore']
-      globalStore.dispatch({ type: 'Unloaded scene', sceneId: opts.sceneId })
       options.onUnloadParcelScenes([await ret.getParcelData(opts.sceneId)])
     }
   })
@@ -150,7 +195,6 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     if (options.onPositionUnsettled) {
       options.onPositionUnsettled()
     }
-    renderStateObservable.notifyObservers(false)
   })
 
   ret.on('Event.track', (event: { name: string; data: any }) => {

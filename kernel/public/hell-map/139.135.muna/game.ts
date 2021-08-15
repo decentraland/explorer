@@ -1,13 +1,4 @@
-import {
-  Entity,
-  GLTFShape,
-  engine,
-  Vector3,
-  Transform,
-  AnimationState,
-  Animator,
-  Quaternion
-} from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator, Quaternion } from 'decentraland-ecs'
 
 function AddGLTF(path: string, position: Vector3, rotation: Vector3, scale?: Vector3, clip?: string) {
   let entity = new Entity()

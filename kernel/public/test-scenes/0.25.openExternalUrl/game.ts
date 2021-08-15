@@ -1,4 +1,4 @@
-import { Entity, engine, Transform, Vector3, BoxShape, OnPointerDown, openExternalURL } from 'decentraland-ecs/src'
+import { Entity, engine, Transform, Vector3, BoxShape, OnPointerDown, openExternalURL } from 'decentraland-ecs'
 
 const entity = new Entity()
 entity.addComponent(new BoxShape())

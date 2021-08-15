@@ -9,7 +9,7 @@ import {
   Material,
   Color3,
   MessageBus
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 export class RotatorSystem implements ISystem {
   group = engine.getComponentGroup(Transform)
@@ -50,7 +50,7 @@ bus.on('click', (evt, sender) => {
   }
 })
 
-cube.addComponentOrReplace(new OnPointerDown(e => bus.emit('click', e)))
+cube.addComponentOrReplace(new OnPointerDown((e) => bus.emit('click', e)))
 
 engine.addEntity(cube)
 
@@ -58,6 +58,6 @@ engine.addSystem(new RotatorSystem())
 
 declare var dcl: any
 
-dcl.onEvent(function(event: any) {
+dcl.onEvent(function (event: any) {
   log('event', event)
 })

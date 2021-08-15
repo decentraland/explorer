@@ -9,7 +9,7 @@ import { getSceneNameFromJsonData } from '../shared/selectors'
 import { parseParcelPosition } from '../atomicHelpers/parcelScenePositions'
 import { UnityPortableExperienceScene } from './UnityParcelScene'
 import { forceStopParcelSceneWorker, getSceneWorkerBySceneID, loadParcelScene } from 'shared/world/parcelSceneManager'
-import { unityInterface } from './UnityInterface'
+import { getUnityInstance } from './IUnityInterface'
 import { resolveUrlFromUrn } from '@dcl/urn-resolver'
 
 declare var window: any
@@ -34,7 +34,7 @@ export async function spawnPortableExperienceScene(
   }
   const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(sceneUrn))
   loadParcelScene(scene, undefined, true)
-  unityInterface.CreateGlobalScene({
+  getUnityInstance().CreateGlobalScene({
     id: sceneUrn,
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
@@ -52,7 +52,7 @@ export async function killPortableExperienceScene(sceneUrn: string): Promise<boo
   if (peWorker) {
     forceStopParcelSceneWorker(peWorker)
     currentPortableExperiences.delete(sceneUrn)
-    unityInterface.UnloadScene(sceneUrn)
+    getUnityInstance().UnloadScene(sceneUrn)
     return true
   } else {
     return false

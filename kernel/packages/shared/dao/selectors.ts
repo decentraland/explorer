@@ -27,8 +27,15 @@ export const areCandidatesFetched = (store: RootDaoState) => store.dao.candidate
 export const getCatalystRealmCommsStatus = (store: RootDaoState) => store.dao.commsStatus
 
 export const isResizeServiceUrl = (store: RootDaoState, url: string | undefined) =>
-  url?.startsWith(getResizeService(store)) || url?.startsWith(getServerConfigurations().fallbackResizeServiceUrl)
+  url?.startsWith(getResizeService(store)) ||
+  url?.startsWith(getServerConfigurations(getSelectedNetwork(store)).fallbackResizeServiceUrl)
 
 export const getHotScenesService = (store: RootDaoState) => store.dao.hotScenesService
 export const getExploreRealmsService = (store: RootDaoState) => store.dao.exploreRealmsService
 export const getPOIService = (store: RootDaoState) => store.dao.poiService
+export const getSelectedNetwork = (store: RootDaoState) => {
+  if (store.dao.network) {
+    return store.dao.network
+  }
+  throw new Error('Missing network')
+}

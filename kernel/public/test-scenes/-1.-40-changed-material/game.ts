@@ -1,4 +1,4 @@
-import { Transform, Vector3, engine, Material, Entity, SphereShape, Color3 } from 'decentraland-ecs/src'
+import { Transform, Vector3, engine, Material, Entity, SphereShape, Color3 } from 'decentraland-ecs'
 
 const mat0 = new Material()
 mat0.albedoColor = Color3.FromHexString('#0000ff')

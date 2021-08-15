@@ -1,4 +1,4 @@
-import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs'
 import { Profile, ProfileType } from 'shared/profiles/types'
 import { ExplorerIdentity } from 'shared/session/types'
 

@@ -1,10 +1,8 @@
 import { AnyAction } from 'redux'
 
-import { LoginStage, SessionState } from './types'
+import { SessionState } from './types'
 import {
   CHANGE_LOGIN_STAGE,
-  SIGNIN_CURRENT_PROVIDER,
-  SIGNIN_SET_SIGNING,
   SIGNUP_CLEAR_DATA,
   SIGNUP_FORM,
   SIGNUP_SET_IDENTITY,
@@ -13,11 +11,13 @@ import {
   SignUpFormAction,
   SignUpSetIdentityAction,
   SignUpSetProfileAction,
-  TOGGLE_WALLET_PROMPT,
-  UPDATE_TOS,
   USER_AUTHENTIFIED,
-  UserAuthentified
+  UserAuthentified,
+  AUTHENTICATE,
+  AuthenticateAction,
+  ChangeLoginStateAction
 } from './actions'
+import { LoginState } from '@dcl/kernel-interface'
 
 const SIGNUP_INITIAL_STATE = {
   stage: '',
@@ -27,20 +27,14 @@ const SIGNUP_INITIAL_STATE = {
 }
 
 const INITIAL_STATE: SessionState = {
-  initialized: false,
   identity: undefined,
-  userId: undefined,
   network: undefined,
-  loginStage: LoginStage.LOADING,
-  tos: true,
-  showWalletPrompt: false,
-  signing: false,
-  currentProvider: null,
+  loginState: LoginState.LOADING,
   isSignUp: false,
   signup: SIGNUP_INITIAL_STATE
 }
 
-export function sessionReducer(state?: SessionState, action?: AnyAction) {
+export function sessionReducer(state?: SessionState, action?: AnyAction): SessionState {
   if (!state) {
     return INITIAL_STATE
   }
@@ -49,16 +43,18 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
   }
   switch (action.type) {
     case USER_AUTHENTIFIED: {
-      return { ...state, initialized: true, ...(action as UserAuthentified).payload }
-    }
-    case UPDATE_TOS: {
-      return { ...state, tos: action.payload }
+      return { ...state, ...(action as UserAuthentified).payload }
     }
     case CHANGE_LOGIN_STAGE: {
-      return { ...state, loginStage: action.payload.stage }
+      return { ...state, loginState: (action as ChangeLoginStateAction).payload.stage }
     }
-    case TOGGLE_WALLET_PROMPT:
-      return { ...state, showWalletPrompt: action.payload.show }
+    case AUTHENTICATE: {
+      return {
+        ...state,
+        isGuestLogin: (action as AuthenticateAction).payload.isGuest,
+        provider: (action as AuthenticateAction).payload.provider
+      }
+    }
     case SIGNUP_FORM:
       const { name, email } = (action as SignUpFormAction).payload
       return {
@@ -85,12 +81,6 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
         }
       }
     }
-    case SIGNIN_SET_SIGNING: {
-      return {
-        ...state,
-        ...action.payload
-      }
-    }
     case SIGNUP_SET_IDENTITY: {
       return {
         ...state,
@@ -110,12 +100,6 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
       return {
         ...state,
         isSignUp: action.payload.isSignUp
-      }
-    }
-    case SIGNIN_CURRENT_PROVIDER: {
-      return {
-        ...state,
-        currentProvider: action.payload.provider
       }
     }
   }

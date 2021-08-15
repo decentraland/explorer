@@ -1,6 +1,6 @@
 import { action } from 'typesafe-actions'
 import { Profile, ProfileType } from './types'
-import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
+import { ProfileForRenderer } from 'decentraland-ecs'
 
 // Profile fetching
 
@@ -8,6 +8,7 @@ export const PROFILE_REQUEST = '[Request] Profile fetch'
 export const PROFILE_SUCCESS = '[Success] Profile fetch'
 export const PROFILE_FAILURE = '[Failure] Profile fetch'
 export const PROFILE_RANDOM = '[?] Profile randomized'
+export const LOCAL_PROFILE_IN_RENDERER = '[RENDERER] Local profile uploaded'
 
 export const profileRequest = (userId: string, profileType?: ProfileType) =>
   action(PROFILE_REQUEST, { userId, profileType })
@@ -15,6 +16,7 @@ export const profileSuccess = (userId: string, profile: Profile, hasConnectedWeb
   action(PROFILE_SUCCESS, { userId, profile, hasConnectedWeb3 })
 export const profileFailure = (userId: string, error: any) => action(PROFILE_FAILURE, { userId, error })
 export const profileRandom = (userId: string, profile: Profile) => action(PROFILE_RANDOM, { userId, profile })
+export const localProfileSentToRenderer = () => action(LOCAL_PROFILE_IN_RENDERER)
 
 export type ProfileRequestAction = ReturnType<typeof profileRequest>
 export type ProfileSuccessAction = ReturnType<typeof profileSuccess>
@@ -27,8 +29,7 @@ export const SAVE_PROFILE_REQUEST = '[Request] Save Profile'
 export const SAVE_PROFILE_SUCCESS = '[Success] Save Profile'
 export const SAVE_PROFILE_FAILURE = '[Failure] Save Profile'
 
-export const saveProfileRequest = (profile: Partial<Profile>, userId?: string) =>
-  action(SAVE_PROFILE_REQUEST, { userId, profile })
+export const saveProfileRequest = (profile: Partial<Profile>) => action(SAVE_PROFILE_REQUEST, { profile })
 export const saveProfileSuccess = (userId: string, version: number, profile: Profile) =>
   action(SAVE_PROFILE_SUCCESS, { userId, version, profile })
 export const saveProfileFailure = (userId: string, error: any) => action(SAVE_PROFILE_FAILURE, { userId, error })

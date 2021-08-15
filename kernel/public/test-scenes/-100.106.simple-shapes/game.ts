@@ -7,7 +7,7 @@ import {
   CylinderShape,
   ConeShape,
   SphereShape
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const shapes = [PlaneShape, BoxShape, CylinderShape, ConeShape, SphereShape]
 

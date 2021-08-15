@@ -3,7 +3,6 @@ import { ExposableAPI } from './ExposableAPI'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { avatarMessageObservable } from 'shared/comms/peers'
 import { AvatarMessage } from 'shared/comms/interface/types'
-import { AVATAR_OBSERVABLE } from 'decentraland-ecs/src/decentraland/Types'
 
 export interface IProfileData {
   displayName: string
@@ -24,7 +23,7 @@ export class SocialController extends ExposableAPI {
     const engineAPI = options.getAPIInstance(EngineAPI)
 
     avatarMessageObservable.add((event: any) => {
-      engineAPI.sendSubscriptionEvent(AVATAR_OBSERVABLE as any, event)
+      engineAPI.sendSubscriptionEvent('AVATAR_OBSERVABLE' as any, event)
     })
   }
 }
@@ -36,4 +35,4 @@ export namespace avatarMock {
 }
 
 // tslint:disable-next-line:semicolon
-;(global as any)['avatarMock'] = avatarMock
+;(globalThis as any)['avatarMock'] = avatarMock

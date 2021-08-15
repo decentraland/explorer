@@ -1,4 +1,4 @@
-import { engine, Camera, Entity, BoxShape, Transform, Quaternion } from 'decentraland-ecs/src'
+import { engine, Camera, Entity, BoxShape, Transform, Quaternion } from 'decentraland-ecs'
 
 declare var dcl: any
 

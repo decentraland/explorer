@@ -1,97 +1,76 @@
-import {
-  DEBUG,
-  EDITOR,
-  ENGINE_DEBUG_PANEL,
-  NO_ASSET_BUNDLES,
-  PREVIEW,
-  SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER
-} from 'config'
-import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, NO_ASSET_BUNDLES, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from 'config'
+import './UnityInterface'
+import { teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
-import {
-  enableParcelSceneLoading,
-  getParcelSceneID,
-  loadParcelScene,
-  stopParcelSceneWorker
-} from 'shared/world/parcelSceneManager'
+import { ILand, SceneJsonData } from 'shared/types'
+import { enableParcelSceneLoading, loadParcelScene } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker } from 'shared/world/SceneWorker'
-import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
-import { renderStateObservable } from 'shared/world/worldState'
-import { StoreContainer } from 'shared/store/rootTypes'
-import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
+import {
+  observeLoadingStateChange,
+  observeRendererStateChange,
+  observeSessionStateChange,
+  renderStateObservable
+} from 'shared/world/worldState'
+import { ILandToLoadableParcelScene } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
-import { loginCompleted } from 'shared/ethereum/provider'
-import { UnityInterface, unityInterface } from './UnityInterface'
+import { getUnityInstance } from './IUnityInterface'
 import { clientDebug, ClientDebug } from './ClientDebug'
-import { BrowserInterface, browserInterface } from './BrowserInterface'
-import { UnityScene } from './UnityScene'
+import { getParcelSceneID, UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
-import Html from '../shared/Html'
-import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
-import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { TeleportController } from 'shared/world/TeleportController'
+import { store } from 'shared/store/isolatedStore'
+import { isLoadingScreenVisible } from 'shared/loading/selectors'
+import type { UnityGame } from '@dcl/unity-renderer/src'
+import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
+import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
+import { signalParcelLoadingStarted } from 'shared/renderer/actions'
 
-declare const globalThis: RendererInterfaces &
-  StoreContainer & { analytics: any; delighted: any; clientDebug: ClientDebug }
+const hudWorkerRaw = require('raw-loader!../../static/systems/decentraland-ui.scene.js')
+const hudWorkerBLOB = new Blob([hudWorkerRaw])
+export const hudWorkerUrl = URL.createObjectURL(hudWorkerBLOB)
 
-export type RendererInterfaces = {
-  unityInterface: UnityInterface
-  browserInterface: BrowserInterface
-}
+declare const globalThis: { clientDebug: ClientDebug }
 
-globalThis.browserInterface = browserInterface
-globalThis.unityInterface = unityInterface
 globalThis.clientDebug = clientDebug
 
-type GameInstance = {
-  SendMessage(object: string, method: string, ...args: (number | string)[]): void
-}
+export function setLoadingScreenBasedOnState() {
+  let state = store.getState()
 
-export let gameInstance!: GameInstance
-export let isTheFirstLoading = true
-
-export function setLoadingScreenVisible(shouldShow: boolean) {
-  globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
-  Html.setLoadingScreen(shouldShow)
-
-  if (!shouldShow && !EDITOR) {
-    isTheFirstLoading = false
-    TeleportController.stopTeleportAnimation()
+  if (!state) {
+    getUnityInstance().SetLoadingScreen({
+      isVisible: true,
+      message: 'Loading...',
+      showTips: true
+    })
+    return
   }
 
-  refreshLoadingScreen()
-}
+  let loading = state.loading
 
-export function refreshLoadingScreen() {
-  let state = globalThis.globalStore.getState()
-  let loading = state?.loading
-  let session = state?.session
-  unityInterface.SetLoadingScreen({
-    isVisible: loading?.showLoadingScreen || false,
-    message: loading?.message || "",
-    showWalletPrompt: session?.showWalletPrompt || false,
-    showTips: loading?.initialLoad || false
+  getUnityInstance().SetLoadingScreen({
+    isVisible: isLoadingScreenVisible(state),
+    message: loading.message || loading.status || '',
+    showTips: loading.initialLoad || !state.renderer.parcelLoadingStarted
   })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function debuggingDecorator(_gameInstance: GameInstance) {
+function debuggingDecorator(gameInstance: UnityGame): UnityGame {
   const debug = false
-  const decorator = {
-    // @ts-ignore
-    SendMessage: (...args) => {
-      defaultLogger.info('gameInstance', ...args)
+
+  if (debug) {
+    return Object.assign(Object.create(gameInstance), {
       // @ts-ignore
-      _gameInstance.SendMessage(...args)
-    }
+      SendMessage: (...args) => {
+        defaultLogger.info('gameInstance', ...args)
+        // @ts-ignore
+        return gameInstance.SendMessage(...args)
+      }
+    })
   }
-  return debug ? decorator : _gameInstance
+
+  return gameInstance
 }
 
 /**
@@ -100,46 +79,55 @@ function debuggingDecorator(_gameInstance: GameInstance) {
  *
  * @param _gameInstance Unity game instance
  */
-export async function initializeEngine(_gameInstance: GameInstance): Promise<void> {
-  gameInstance = debuggingDecorator(_gameInstance)
+export async function initializeEngine(_gameInstance: UnityGame): Promise<void> {
+  const gameInstance = debuggingDecorator(_gameInstance)
 
-  unityInterface.Init(_gameInstance)
+  getUnityInstance().Init(gameInstance)
 
-  unityInterface.DeactivateRendering()
+  getUnityInstance().DeactivateRendering()
 
-  unityInterface.SetKernelConfiguration(kernelConfigForRenderer())
+  getUnityInstance().SetKernelConfiguration(kernelConfigForRenderer())
 
   if (DEBUG) {
-    unityInterface.SetDebug()
+    getUnityInstance().SetDebug()
   }
 
   if (SCENE_DEBUG_PANEL) {
-    unityInterface.SetSceneDebugPanel()
+    getUnityInstance().SetSceneDebugPanel()
   }
 
   if (NO_ASSET_BUNDLES) {
-    unityInterface.SetDisableAssetBundles()
+    getUnityInstance().SetDisableAssetBundles()
   }
 
   if (SHOW_FPS_COUNTER) {
-    unityInterface.ShowFPSPanel()
+    getUnityInstance().ShowFPSPanel()
   }
 
   if (ENGINE_DEBUG_PANEL) {
-    unityInterface.SetEngineDebugPanel()
+    getUnityInstance().SetEngineDebugPanel()
   }
 
+  observeLoadingStateChange(() => {
+    setLoadingScreenBasedOnState()
+  })
+  observeSessionStateChange(() => {
+    setLoadingScreenBasedOnState()
+  })
+  observeRendererStateChange(() => {
+    setLoadingScreenBasedOnState()
+  })
+  renderStateObservable.add(() => {
+    setLoadingScreenBasedOnState()
+  })
+  setLoadingScreenBasedOnState()
+
   if (!EDITOR) {
-    await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
+    await startGlobalScene('dcl-gs-avatars', 'Avatars', hudWorkerUrl)
   }
 }
 
-export async function startGlobalScene(
-  unityInterface: UnityInterface,
-  cid: string,
-  title: string,
-  fileContentUrl: string
-) {
+export async function startGlobalScene(cid: string, title: string, fileContentUrl: string) {
   const scene = new UnityScene({
     sceneId: cid,
     name: title,
@@ -154,7 +142,7 @@ export async function startGlobalScene(
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateGlobalScene({
+  getUnityInstance().CreateGlobalScene({
     id: getParcelSceneID(scene),
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
@@ -164,8 +152,6 @@ export async function startGlobalScene(
 }
 
 export async function startUnitySceneWorkers() {
-  globalThis.globalStore.dispatch(loadingScenes())
-
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
     preloadScene: async (_land) => {
@@ -175,7 +161,7 @@ export async function startUnitySceneWorkers() {
       // 3) return
     },
     onLoadParcelScenes: (lands) => {
-      unityInterface.LoadParcelScenes(
+      getUnityInstance().LoadParcelScenes(
         lands.map(($) => {
           const x = Object.assign({}, ILandToLoadableParcelScene($).data)
           delete x.land
@@ -185,135 +171,96 @@ export async function startUnitySceneWorkers() {
     },
     onUnloadParcelScenes: (lands) => {
       lands.forEach(($) => {
-        unityInterface.UnloadScene($.sceneId)
+        getUnityInstance().UnloadScene($.sceneId)
       })
     },
     onPositionSettled: (spawnPoint) => {
-      if (!aborted) {
-        unityInterface.Teleport(spawnPoint)
-        unityInterface.ActivateRendering()
-      }
+      getUnityInstance().Teleport(spawnPoint)
+      getUnityInstance().ActivateRendering()
     },
     onPositionUnsettled: () => {
-      unityInterface.DeactivateRendering()
+      getUnityInstance().DeactivateRendering()
     }
   })
+  store.dispatch(signalParcelLoadingStarted())
 }
 
-// Builder functions
-let currentLoadedScene: SceneWorker | null
-
-export async function loadPreviewScene(ws?: string): Promise<ILand> {
+export async function loadPreviewScene(ws?: string) {
   const result = await fetch('/scene.json?nocache=' + Math.random())
 
-  let lastId: string | null = null
-
-  if (currentLoadedScene) {
-    lastId = currentLoadedScene.getSceneId()
-    stopParcelSceneWorker(currentLoadedScene)
-  }
-
   if (result.ok) {
-    // we load the scene to get the metadata
-    // about rhe bounds and position of the scene
-    // TODO(fmiras): Validate scene according to https://github.com/decentraland/proposals/blob/master/dsp/0020.mediawiki
     const scene = (await result.json()) as SceneJsonData
-    const mappingsFetch = await fetch('/mappings')
-    const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
-    let defaultScene: ILand = {
-      sceneId: 'previewScene',
-      baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
-      baseUrlBundles: '',
-      sceneJsonData: scene,
-      mappingsResponse: mappingsResponse
+    const [sceneId] = await fetchSceneIds([scene.scene.base])
+
+    if (sceneId) {
+      await reloadScene(sceneId)
+    } else {
+      console.log(`Unable to load sceneId of ${scene.scene.base}`)
+      debugger
     }
 
-    const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(defaultScene))
+    // let transport: undefined | ScriptingTransport = undefined
 
-    let transport: undefined | ScriptingTransport = undefined
-
-    if (ws) {
-      transport = WebSocketTransport(new WebSocket(ws, ['dcl-scene']))
-    }
-
-    currentLoadedScene = loadParcelScene(parcelScene, transport)
-
-    const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(defaultScene).data }
-    delete target.land
-
-    defaultLogger.info('Reloading scene...')
-
-    if (lastId) {
-      unityInterface.UnloadScene(lastId)
-    }
-
-    unityInterface.LoadParcelScenes([target])
-
-    defaultLogger.info('finish...')
-
-    return defaultScene
+    // if (ws) {
+    //   transport = WebSocketTransport(new WebSocket(ws, ['dcl-scene']))
+    // }
   } else {
     throw new Error('Could not load scene.json')
   }
 }
 
-export function loadBuilderScene(sceneData: ILand) {
-  unloadCurrentBuilderScene()
+export function loadBuilderScene(sceneData: ILand): UnityParcelScene | undefined {
+  throw new Error('Not implemented')
+  // unloadCurrentBuilderScene()
 
-  const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
-  currentLoadedScene = loadParcelScene(parcelScene)
+  // const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
 
-  const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(sceneData).data }
-  delete target.land
+  // const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(sceneData).data }
+  // delete target.land
 
-  unityInterface.LoadParcelScenes([target])
-  return parcelScene
+  // getUnityInstance().LoadParcelScenes([target])
+  // return parcelScene
 }
 
 export function unloadCurrentBuilderScene() {
-  if (currentLoadedScene) {
-    unityInterface.DeactivateRendering()
-    currentLoadedScene.emit('builderSceneUnloaded', {})
+  throw new Error('Not implemented')
+  // if (currentLoadedScene) {
+  //   getUnityInstance().DeactivateRendering()
+  //   currentLoadedScene.emit('builderSceneUnloaded', {})
 
-    stopParcelSceneWorker(currentLoadedScene)
-    unityInterface.SendBuilderMessage('UnloadBuilderScene', currentLoadedScene.getSceneId())
-    currentLoadedScene = null
-  }
+  //   stopParcelSceneWorker(currentLoadedScene)
+  //   getUnityInstance().SendBuilderMessage('UnloadBuilderScene', currentLoadedScene.getSceneId())
+  //   currentLoadedScene = null
+  // }
 }
 
 export function updateBuilderScene(sceneData: ILand) {
-  if (currentLoadedScene) {
-    const target: LoadableParcelScene = { ...ILandToLoadableParcelSceneUpdate(sceneData).data }
-    delete target.land
-    unityInterface.UpdateParcelScenes([target])
-  }
+  throw new Error('Not implemented')
+  // if (currentLoadedScene) {
+  //   const target: LoadableParcelScene = { ...ILandToLoadableParcelSceneUpdate(sceneData).data }
+  //   delete target.land
+  //   getUnityInstance().UpdateParcelScenes([target])
+  // }
 }
 
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
-  setLoadingScreenVisible(true)
-  globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
+  store.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-renderStateObservable.add(async (isRunning) => {
-  if (isRunning) {
-    if (PREVIEW) {
-      await loginCompleted
+{
+  // TODO: move to unity-renderer
+  let isPointerLocked: boolean = false
+
+  function pointerLockChange() {
+    const doc: any = document
+    const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null
+    if (isPointerLocked !== isLocked && getUnityInstance()) {
+      getUnityInstance().SetCursorState(isLocked)
     }
-    setLoadingScreenVisible(false)
+    isPointerLocked = isLocked
   }
-})
 
-document.addEventListener('pointerlockchange', pointerLockChange, false)
-
-let isPointerLocked: boolean = false
-
-function pointerLockChange() {
-  const doc: any = document
-  const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null
-  if (isPointerLocked !== isLocked) {
-    unityInterface.SetCursorState(isLocked)
-  }
-  isPointerLocked = isLocked
+  document.addEventListener('pointerlockchange', pointerLockChange, false)
 }

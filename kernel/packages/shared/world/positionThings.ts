@@ -1,12 +1,6 @@
 import * as qs from 'query-string'
-import {
-  Vector3,
-  ReadOnlyVector3,
-  ReadOnlyQuaternion,
-  Vector2,
-  ReadOnlyVector2
-} from 'decentraland-ecs/src/decentraland/math'
-import { Observable } from 'decentraland-ecs/src/ecs/Observable'
+import { Vector3, ReadOnlyVector3, ReadOnlyQuaternion, Vector2, ReadOnlyVector2 } from 'decentraland-ecs'
+import { Observable } from 'mz-observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
 import {
@@ -15,7 +9,7 @@ import {
   parseParcelPosition,
   isWorldPositionInsideParcels
 } from 'atomicHelpers/parcelScenePositions'
-import { DEBUG } from "../../config"
+import { DEBUG } from '../../config'
 import { isInsideWorldLimits } from '@dcl/schemas'
 
 declare var location: any
@@ -46,7 +40,7 @@ export const positionObservable = new Observable<Readonly<PositionReport>>()
 // Called each time the user changes  parcel
 export const parcelObservable = new Observable<ParcelReport>()
 
-export const teleportObservable = new Observable<ReadOnlyVector2>()
+export const teleportObservable = new Observable<ReadOnlyVector2 & { text?: string }>()
 
 export const lastPlayerPosition = new Vector3()
 export let lastPlayerParcel: Vector2
@@ -165,7 +159,10 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   // 5 - If the final position is outside the scene limits, we zero it
   if (!DEBUG) {
     const sceneBaseParcelCoords = land.sceneJsonData.scene.base.split(',')
-    const sceneBaseParcelWorldPos = gridToWorld(parseInt(sceneBaseParcelCoords[0], 10), parseInt(sceneBaseParcelCoords[1], 10))
+    const sceneBaseParcelWorldPos = gridToWorld(
+      parseInt(sceneBaseParcelCoords[0], 10),
+      parseInt(sceneBaseParcelCoords[1], 10)
+    )
     let finalWorldPosition = {
       x: sceneBaseParcelWorldPos.x + finalPosition.x,
       y: finalPosition.y,

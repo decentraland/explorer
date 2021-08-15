@@ -1,12 +1,10 @@
-import { call, put, select, take, takeEvery } from 'redux-saga/effects'
+import { call, put, select, takeEvery } from 'redux-saga/effects'
 
-import { WSS_ENABLED, WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl } from 'config'
+import { WITH_FIXED_COLLECTIONS, getAssetBundlesBaseUrl, getTLD, PREVIEW, DEBUG, ETHEREUM_NETWORK } from 'config'
 
 import defaultLogger from 'shared/logger'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
-  catalogLoaded,
-  CATALOG_LOADED,
   WearablesFailure,
   wearablesFailure,
   WearablesRequest,
@@ -16,7 +14,6 @@ import {
   WEARABLES_REQUEST,
   WEARABLES_SUCCESS
 } from './actions'
-import { baseCatalogsLoaded, getPlatformCatalog } from './selectors'
 import {
   WearablesRequestFilters,
   WearableV2,
@@ -24,24 +21,20 @@ import {
   PartialWearableV2,
   UnpublishedWearable
 } from './types'
-import { WORLD_EXPLORER } from '../../config/index'
-import { getResourcesURL } from '../location'
-import { RendererInterfaces } from 'unity-interface/dcl'
-import { StoreContainer } from '../store/rootTypes'
-import { ensureRealmInitialized } from 'shared/dao/sagas'
-import { ensureRenderer } from 'shared/renderer/sagas'
+import { waitForRealmInitialized } from 'shared/dao/sagas'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
 import { fetchJson } from 'dcl-catalyst-commons'
-import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
+import { getCatalystServer, getFetchContentServer, getSelectedNetwork } from 'shared/dao/selectors'
 import {
   BASE_BUILDER_SERVER_URL,
   BASE_DOWNLOAD_URL,
   BuilderServerAPIManager
 } from 'shared/apis/SceneStateStorageController/BuilderServerAPIManager'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { userAuthentified } from 'shared/session'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { onLoginCompleted } from 'shared/session/sagas'
 
-declare const globalThis: Window & RendererInterfaces & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
 export const WRONG_FILTERS_ERROR = `You must set one and only one filter for V1. Also, the only collection id allowed is '${BASE_AVATARS_COLLECTION_ID}'`
 
@@ -62,26 +55,7 @@ export function* catalogsSaga(): any {
 }
 
 function* initialLoad() {
-  yield call(ensureRealmInitialized)
-
-  if (!WORLD_EXPLORER) {
-    let baseCatalog = []
-    try {
-      const catalogPath = '/default-profile/basecatalog.json'
-      const response = yield fetch(getResourcesURL(catalogPath))
-      baseCatalog = yield response.json()
-
-      if (WSS_ENABLED) {
-        for (let item of baseCatalog) {
-          item.baseUrl = `http://localhost:8000${item.baseUrl}`
-        }
-      }
-    } catch (e) {
-      defaultLogger.warn(`Could not load base catalog`)
-    }
-    yield put(catalogLoaded('base-avatars', baseCatalog))
-    yield put(catalogLoaded('base-exclusive', []))
-  }
+  yield call(waitForRealmInitialized)
 }
 
 export function* handleWearablesRequest(action: WearablesRequest) {
@@ -90,14 +64,11 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   const valid = areFiltersValid(filters)
   if (valid) {
     try {
-      const shouldUseLocalCatalog = WORLD_EXPLORER
-      const downloadUrl = yield select(getFetchContentServer)
+      const downloadUrl: string = yield select(getFetchContentServer)
 
-      const response: PartialWearableV2[] = shouldUseLocalCatalog
-        ? yield call(fetchWearablesFromCatalyst, filters)
-        : yield call(fetchWearablesFromLocalCatalog, filters)
-
-      const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl() + '/'
+      const response: PartialWearableV2[] = yield call(fetchWearablesFromCatalyst, filters)
+      const net: ETHEREUM_NETWORK = yield select(getSelectedNetwork)
+      const assetBundlesBaseUrl: string = getAssetBundlesBaseUrl(net) + '/'
 
       const v2Wearables: WearableV2[] = response.map((wearable) => ({
         ...wearable,
@@ -120,7 +91,8 @@ function* fetchWearablesFromCatalyst(filters: WearablesRequestFilters) {
 
   const result: any[] = []
   if (filters.ownedByUser) {
-    if (WITH_FIXED_COLLECTIONS) {
+    const COLLECTIONS_ALLOWED = PREVIEW || DEBUG || getTLD() !== 'org'
+    if (WITH_FIXED_COLLECTIONS && COLLECTIONS_ALLOWED) {
       // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
       // That's why we are also querying a prod catalyst for the given collections
       const collectionIds: string[] = WITH_FIXED_COLLECTIONS.split(',')
@@ -137,7 +109,7 @@ function* fetchWearablesFromCatalyst(filters: WearablesRequestFilters) {
       // Fetch unpublished collections from builder server
       const uuidCollections = collectionIds.filter((collectionId) => !collectionId.startsWith('urn'))
       if (uuidCollections.length > 0) {
-        yield userAuthentified()
+        yield onLoginCompleted()
         const identity = yield select(getCurrentIdentity)
         for (const collectionUuid of uuidCollections) {
           const path = `collections/${collectionUuid}/items`
@@ -241,28 +213,10 @@ function mapCatalystWearableIntoV2(v2Wearable: any): PartialWearableV2 {
   }
 }
 
-function* fetchWearablesFromLocalCatalog(filters: WearablesRequestFilters) {
-  yield call(ensureBaseCatalogs)
-
-  const platformCatalog = yield select(getPlatformCatalog)
-
-  let response: PartialWearableV2[]
-  if (filters.wearableIds) {
-    // Filtering by ids
-    response = filters.wearableIds.map((wearableId) => platformCatalog[wearableId]).filter((wearable) => !!wearable)
-  } else if (filters.collectionIds) {
-    // We assume that the only collection id used is base-avatars
-    response = Object.values(platformCatalog)
-  } else {
-    throw new Error('Unknown filter')
-  }
-  return response
-}
-
 export function* handleWearablesSuccess(action: WearablesSuccess) {
   const { wearables, context } = action.payload
 
-  yield call(ensureRenderer)
+  yield call(waitForRendererInstance)
   yield call(sendWearablesCatalog, wearables, context)
 }
 
@@ -271,7 +225,7 @@ export function* handleWearablesFailure(action: WearablesFailure) {
 
   defaultLogger.error(`Failed to fetch wearables for context '${context}'`, error)
 
-  yield call(ensureRenderer)
+  yield call(waitForRendererInstance)
   yield call(informRequestFailure, error, context)
 }
 
@@ -297,15 +251,9 @@ function areFiltersValid(filters: WearablesRequestFilters) {
 }
 
 export function informRequestFailure(error: string, context: string | undefined) {
-  globalThis.unityInterface.WearablesRequestFailed(error, context)
+  getUnityInstance().WearablesRequestFailed(error, context)
 }
 
 export function sendWearablesCatalog(wearables: WearableV2[], context: string | undefined) {
-  globalThis.unityInterface.AddWearablesToCatalog(wearables, context)
-}
-
-export function* ensureBaseCatalogs() {
-  while (!WORLD_EXPLORER && !(yield select(baseCatalogsLoaded))) {
-    yield take(CATALOG_LOADED)
-  }
+  getUnityInstance().AddWearablesToCatalog(wearables, context)
 }

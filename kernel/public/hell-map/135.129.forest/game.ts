@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform } from 'decentraland-ecs'
 
 let entity = new Entity()
 

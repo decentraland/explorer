@@ -1,7 +1,7 @@
 import { analizeColorPart, stripAlpha } from './analizeColorPart'
 import { isValidBodyShape } from './isValidBodyShape'
 import { Profile, Snapshots } from '../types'
-import { WearableId } from 'decentraland-ecs/src'
+import { WearableId } from 'decentraland-ecs'
 
 export function ensureServerFormat(profile: Profile): ServerFormatProfile {
   const { avatar } = profile
@@ -54,7 +54,7 @@ export function buildServerMetadata(profile: Profile) {
   return metadata
 }
 
-type ServerFormatProfile = Omit<Profile, 'avatar'> & {
+export type ServerFormatProfile = Omit<Profile, 'avatar'> & {
   avatar: ServerProfileAvatar
 }
 

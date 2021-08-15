@@ -5,20 +5,13 @@ import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThi
 import { POIs } from 'shared/comms/POIs'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
-import { ensureUnityInterface } from 'shared/renderer'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 
-import { StoreContainer } from '../store/rootTypes'
-import { WORLD_EXPLORER } from '../../config/index'
-import { isInitialLoading, isWaitingTutorial } from '../loading/selectors'
-import Html from '../Html'
-import { isLoginStageCompleted, isSignUp } from '../session/selectors'
 import { getCommsServer, getRealm } from 'shared/dao/selectors'
 import { LayerUserInfo } from 'shared/dao/types'
-
-declare const globalThis: StoreContainer
+import { store } from 'shared/store/isolatedStore'
 
 export const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -3, y: -33 },
@@ -73,26 +66,6 @@ export const CAMPAIGN_PARCEL_SEQUENCE = [
 
 // TODO: don't do classess if it holds no state. Use namespaces or functions instead.
 export class TeleportController {
-  public static ensureTeleportAnimation() {
-    if (
-      !isInitialLoading(globalThis.globalStore.getState()) &&
-      isLoginStageCompleted(globalThis.globalStore.getState())
-    ) {
-      Html.showTeleportAnimation()
-    }
-  }
-
-  public static stopTeleportAnimation() {
-    if (!isSignUp(globalThis.globalStore.getState()) && !isWaitingTutorial(globalThis.globalStore.getState())) {
-      Html.hideTeleportAnimation()
-      if (WORLD_EXPLORER) {
-        ensureUnityInterface()
-          .then((unity) => unity.unityInterface.ShowWelcomeNotification())
-          .catch(defaultLogger.error)
-      }
-    }
-  }
-
   public static goToMagic(): { message: string; success: boolean } {
     const target = POIs[Math.floor(Math.random() * POIs.length)]
     const { x, y } = target
@@ -158,9 +131,7 @@ export class TeleportController {
         x: x,
         y: y,
         text: tpMessage
-      } as any)
-
-      TeleportController.ensureTeleportAnimation()
+      })
 
       return { message: tpMessage, success: true }
     } else {
@@ -171,8 +142,8 @@ export class TeleportController {
 }
 
 async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
-  const realm = getRealm(globalThis.globalStore.getState())
-  const commsUrl = getCommsServer(globalThis.globalStore.getState())
+  const realm = getRealm(store.getState())
+  const commsUrl = getCommsServer(store.getState())
 
   if (realm && commsUrl) {
     if (realm.layer) {

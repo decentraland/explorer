@@ -1,5 +1,5 @@
-import { Component } from 'decentraland-ecs/src'
-import { MutationProb, MutationMaxSpreads } from './Params';
+import { Component } from 'decentraland-ecs'
+import { MutationProb, MutationMaxSpreads } from './Params'
 
 export enum GeneType {
   speed,
@@ -14,8 +14,7 @@ export enum GeneType {
   COUNT
 }
 
-
-@Component("genome")
+@Component('genome')
 export class Genome {
   genes: number[]
 

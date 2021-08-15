@@ -1,13 +1,4 @@
-import {
-  NFTShape,
-  Entity,
-  engine,
-  Transform,
-  Vector3,
-  Color3,
-  OnPointerDown,
-  openNFTDialog
-} from 'decentraland-ecs/src'
+import { NFTShape, Entity, engine, Transform, Vector3, Color3, OnPointerDown, openNFTDialog } from 'decentraland-ecs'
 
 const entity = new Entity()
 const shapeComponent = new NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/558536')

@@ -8,7 +8,7 @@ import {
   OnPointerDown,
   getComponentId,
   log
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const box = new BoxShape()
 

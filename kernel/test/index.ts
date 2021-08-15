@@ -1,4 +1,4 @@
-global['isRunningTests'] = true
+globalThis['isRunningTests'] = true
 
 /**
  * Hello, this file is the tests entry point.
@@ -26,6 +26,6 @@ import './unityIntegration/ecs/math/quaternion.test'
 import './unityIntegration/ecs/math/vector3.test'
 
 declare var mocha: any
-declare var global: any
+declare var globalThis: any
 
 mocha.run()

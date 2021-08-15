@@ -12,58 +12,41 @@ import {
   AVATAR_LOADING_ERROR,
   ExecutionLifecycleEventsList
 } from './types'
-import { StoreContainer } from 'shared/store/rootTypes'
-import Html from '../Html'
 import { trackEvent } from '../analytics'
 import { action } from 'typesafe-actions'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { globalObservable } from '../observables'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
 
-declare const globalThis: StoreContainer
-
-export let aborted = false
-
-// once this function is called, no more errors will be tracked neither reported to rollbar
 export function BringDownClientAndShowError(event: ExecutionLifecycleEvent) {
-  if (aborted) {
-    return
-  }
-
   if (ExecutionLifecycleEventsList.includes(event)) {
-    globalThis.globalStore.dispatch(action(event))
+    store.dispatch(action(event))
   }
-
-  const body = document.body
-  const container = document.getElementById('gameContainer')
-  container!.setAttribute('style', 'display: none !important')
-
-  Html.hideProgressBar()
-
-  body.setAttribute('style', 'background-image: none !important;')
 
   const targetError =
     event === COMMS_COULD_NOT_BE_ESTABLISHED
       ? 'comms'
       : event === NOT_INVITED
-        ? 'notinvited'
-        : event === NO_WEBGL_COULD_BE_CREATED
-          ? 'notsupported'
-          : event === MOBILE_NOT_SUPPORTED
-            ? 'nomobile'
-            : event === NEW_LOGIN
-              ? 'newlogin'
-              : event === NETWORK_MISMATCH
-                ? 'networkmismatch'
-                : event === AVATAR_LOADING_ERROR
-                  ? 'avatarerror'
-                  : 'fatal'
+      ? 'notinvited'
+      : event === NO_WEBGL_COULD_BE_CREATED
+      ? 'notsupported'
+      : event === MOBILE_NOT_SUPPORTED
+      ? 'nomobile'
+      : event === NEW_LOGIN
+      ? 'newlogin'
+      : event === NETWORK_MISMATCH
+      ? 'networkmismatch'
+      : event === AVATAR_LOADING_ERROR
+      ? 'avatarerror'
+      : 'fatal'
 
-  globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
-  Html.showErrorModal(targetError)
-  aborted = true
+  store.dispatch(fatalError(targetError))
 
-  if (window.Rollbar) {
-    window.Rollbar.configure({ enabled: false })
-  }
+  globalObservable.emit('error', {
+    error: new Error(event),
+    code: targetError,
+    level: targetError as any
+  })
 }
 
 export namespace ErrorContext {
@@ -107,7 +90,7 @@ export function ReportFatalErrorWithUnityPayload(error: Error, context: ErrorCon
 
 export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, context: ErrorContextTypes) {
   try {
-    let payload = await unityInterface.CrashPayloadRequest()
+    let payload = await getUnityInstance().CrashPayloadRequest()
     ReportFatalError(error, context, { rendererPayload: payload })
   } catch (e) {
     ReportFatalError(error, context)
@@ -115,10 +98,6 @@ export async function ReportFatalErrorWithUnityPayloadAsync(error: Error, contex
 }
 
 export function ReportFatalError(error: Error, context: ErrorContextTypes, payload: Record<string, any> = {}) {
-  if (aborted) {
-    return
-  }
-
   let sagaStack: string | undefined = payload['sagaStack']
 
   if (sagaStack) {
@@ -138,8 +117,11 @@ export function ReportFatalError(error: Error, context: ErrorContextTypes, paylo
     saga_stack: sagaStack
   })
 
-  // we only add the context to rollbar event
-  ReportRollbarError(error, { context, ...payload })
+  globalObservable.emit('error', {
+    error,
+    level: 'fatal',
+    extra: { context, ...payload }
+  })
 }
 
 function getStack(error?: any) {
@@ -151,11 +133,5 @@ function getStack(error?: any) {
     } catch (e) {
       return e.stack || '' + error
     }
-  }
-}
-
-function ReportRollbarError(error: Error, payload: any) {
-  if (window.Rollbar) {
-    window.Rollbar.critical(error, payload)
   }
 }

@@ -4,16 +4,15 @@ import { fetchENSOwnersContains, getAppNetwork } from 'shared/web3'
 import { Profile, ProfileType } from 'shared/profiles/types'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 
-export function fetchENSOwnerProfile(name: string, maxResults: number = 1): Promise<Profile[]> {
-  let userIds: Promise<string[]>
+export async function fetchENSOwnerProfile(name: string, maxResults: number = 1): Promise<Profile[]> {
+  let userIds: string[]
 
   if (isAddress(name)) {
-    userIds = Promise.resolve([name])
+    userIds = [name]
   } else {
-    userIds = getAppNetwork().then((net) => fetchENSOwnersContains(ethereumConfigurations[net].names, name, maxResults))
+    const net = await getAppNetwork()
+    userIds = await fetchENSOwnersContains(ethereumConfigurations[net].names, name, maxResults)
   }
 
-  return userIds.then((userIds) =>
-    Promise.all(userIds.map((userId) => ProfileAsPromise(userId, undefined, ProfileType.DEPLOYED)))
-  )
+  return Promise.all(userIds.map((userId) => ProfileAsPromise(userId, undefined, ProfileType.DEPLOYED)))
 }

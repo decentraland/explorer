@@ -1,4 +1,4 @@
-import { Entity, Transform, engine, BoxShape, Vector3, Quaternion } from 'decentraland-ecs/src'
+import { Entity, Transform, engine, BoxShape, Vector3, Quaternion } from 'decentraland-ecs'
 
 const ent = new Entity()
 ent.addComponentOrReplace(new BoxShape())

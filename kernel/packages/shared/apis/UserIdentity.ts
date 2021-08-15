@@ -1,15 +1,11 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 
 import { UserData } from 'shared/types'
-import { getIdentity } from 'shared/session'
-import { StoreContainer } from 'shared/store/rootTypes'
 import { calculateDisplayName } from 'shared/profiles/transformations/processServerProfile'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
-import { loginCompleted } from 'shared/ethereum/provider'
 
 import { ExposableAPI } from './ExposableAPI'
-
-declare const globalThis: StoreContainer
+import { onLoginCompleted } from 'shared/session/sagas'
 
 export interface IUserIdentity {
   /**
@@ -27,17 +23,22 @@ export interface IUserIdentity {
 export class UserIdentity extends ExposableAPI implements IUserIdentity {
   @exposeMethod
   async getUserPublicKey(): Promise<string | null> {
-    await loginCompleted
-    const identity = getIdentity()
-
+    const { identity } = await onLoginCompleted()
+    if (!identity || !identity.address) {
+      debugger
+    }
     return identity && identity.hasConnectedWeb3 ? identity.address : null
   }
 
   @exposeMethod
   async getUserData(): Promise<UserData | null> {
-    await loginCompleted
-    const identity = getIdentity()
-    if (!identity || !identity.address) return null
+    const { identity } = await onLoginCompleted()
+
+    if (!identity || !identity.address) {
+      debugger
+      return null
+    }
+
     const profile = await EnsureProfile(identity?.address)
 
     return {

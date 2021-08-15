@@ -1,9 +1,9 @@
-import { Vector3, Transform, Entity, PlaneShape, Component, IEntity, Scalar } from 'decentraland-ecs/src'
-import { greenMaterial } from './Params';
+import { Vector3, Transform, Entity, PlaneShape, Component, IEntity, Scalar } from 'decentraland-ecs'
+import { greenMaterial } from './Params'
 
 let planeShape = new PlaneShape()
 
-@Component("progressBar")
+@Component('progressBar')
 export class ProgressBar {
   value: number = 0
   fullLength: number = 1

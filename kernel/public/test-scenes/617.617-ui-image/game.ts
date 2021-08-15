@@ -1,29 +1,20 @@
-import {
-  UICanvas
-  , UIContainerRect
-  , UIImage
-  , Color4, Texture
-} from 'decentraland-ecs/src'
+import { UICanvas, UIContainerRect, UIImage, Color4, Texture } from 'decentraland-ecs'
 
-const ui = new UICanvas
-  ()
+const ui = new UICanvas()
 
-const container = new UIContainerRect
-  (ui)
+const container = new UIContainerRect(ui)
 container.name = 'testRectContainer'
 container.color = Color4.Green()
 container.width = '50%'
 container.height = '50%'
 
-const imageBack = new UIContainerRect
-  (container)
+const imageBack = new UIContainerRect(container)
 imageBack.name = 'imageBack'
 imageBack.color = Color4.Red()
 imageBack.width = '128px'
 imageBack.height = '128px'
 
-const image = new UIImage
-  (container, new Texture('img.png'))
+const image = new UIImage(container, new Texture('img.png'))
 image.name = 'testUIImage'
 image.width = '128px'
 image.height = '128px'

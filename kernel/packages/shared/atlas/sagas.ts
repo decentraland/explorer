@@ -1,10 +1,14 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
+import { MinimapSceneInfo } from 'decentraland-ecs'
 import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redux-saga/effects'
 import { parcelLimits } from 'config'
 import { fetchSceneJson } from '../../decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { fetchSceneIds } from '../../decentraland-loader/lifecycle/utils/fetchSceneIds'
-import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData, getThumbnailUrlFromJsonDataAndContent } from 'shared/selectors'
+import {
+  getOwnerNameFromJsonData,
+  getSceneDescriptionFromJsonData,
+  getThumbnailUrlFromJsonDataAndContent
+} from 'shared/selectors'
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
@@ -39,14 +43,10 @@ import { getPois } from '../meta/selectors'
 import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
 import { retrieve, store as cacheStore } from 'shared/cache'
 import { getPOIService, getUpdateProfileServer } from 'shared/dao/selectors'
-import { store } from 'shared/store/store'
+import { store } from 'shared/store/isolatedStore'
 import { realmInitialized } from 'shared/dao'
-
-declare const window: {
-  unityInterface: {
-    UpdateMinimapSceneInformation: (data: MinimapSceneInfo[]) => void
-  }
-}
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 const tiles = {
   id: 'tiles',
@@ -59,8 +59,6 @@ type MarketplaceConfig = typeof tiles
 type CachedMarketplaceTiles = { version: string; data: string }
 
 export function* atlasSaga(): any {
-  yield fork(loadMarketplace, tiles)
-
   yield takeEvery(SCENE_LOAD, checkAndReportAround)
 
   yield takeLatest(META_CONFIGURATION_INITIALIZED, initializePois)
@@ -69,6 +67,8 @@ export function* atlasSaga(): any {
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
   yield takeLatest(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcelAction)
   yield takeEvery(REPORT_SCENES_FROM_TILES, reportScenesFromTilesAction)
+
+  yield fork(loadMarketplace, tiles)
 }
 
 function* loadMarketplace(config: MarketplaceConfig) {
@@ -170,10 +170,14 @@ function* initializePois() {
 
 type stringOrNull = string | null
 
-function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
+function* waitForMarketInitialized() {
   while (!(yield select(isMarketDataInitialized))) {
     yield take(MARKET_DATA)
   }
+}
+
+function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
+  yield call(waitForMarketInitialized)
 
   const tiles = action.payload.tiles
   const result: stringOrNull[] = yield call(fetchSceneIds, tiles)
@@ -239,7 +243,8 @@ function* reportScenes(sceneIds: string[]): any {
       })
     })
 
-  window.unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
+  yield call(waitForRendererInstance)
+  getUnityInstance().UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }
 
 async function fetchPOIsFromDAO(): Promise<string[] | undefined> {

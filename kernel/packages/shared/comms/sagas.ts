@@ -1,12 +1,12 @@
 import { put, takeEvery, select, call, takeLatest } from 'redux-saga/effects'
 
-import { STATIC_WORLD } from 'config'
+import { EDITOR } from 'config'
 
 import { establishingComms, FATAL_ERROR } from 'shared/loading/types'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { setWorldContext } from 'shared/protocol/actions'
-import { ensureRealmInitialized, selectRealm } from 'shared/dao/sagas'
+import { waitForRealmInitialized, selectRealm } from 'shared/dao/sagas'
 import { getRealm } from 'shared/dao/selectors'
 import { CATALYST_REALMS_SCAN_SUCCESS, setCatalystRealm } from 'shared/dao/actions'
 import { Realm } from 'shared/dao/types'
@@ -15,6 +15,7 @@ import { createLogger } from 'shared/logger'
 
 import {
   connect,
+  Context,
   disconnect,
   updatePeerVoicePlaying,
   updateVoiceCommunicatorMute,
@@ -35,35 +36,18 @@ import {
 } from './actions'
 
 import { isVoiceChatRecording } from './selectors'
-import { unityInterface } from 'unity-interface/UnityInterface'
-import { ensureMetaConfigurationInitialized } from 'shared/meta'
-import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { userAuthentified } from 'shared/session'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { sceneObservable } from 'shared/world/sceneState'
 import { SceneFeatureToggles } from 'shared/types'
 import { isFeatureToggleEnabled } from 'shared/selectors'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
 
 export function* commsSaga() {
-  yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
+  yield takeEvery(USER_AUTHENTIFIED, userAuthentified)
   yield takeLatest(CATALYST_REALMS_SCAN_SUCCESS, changeRealm)
-  yield ensureMetaConfigurationInitialized()
-  yield userAuthentified()
-
-  const identity = yield select(getCurrentIdentity)
-
-  if (yield select(isVoiceChatEnabledFor, identity.address)) {
-    yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
-    yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
-    yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
-    yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
-    yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
-    yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
-    yield listenToWhetherSceneSupportsVoiceChat()
-  }
-
   yield takeEvery(FATAL_ERROR, bringDownComms)
 }
 
@@ -80,7 +64,7 @@ function* listenToWhetherSceneSupportsVoiceChat() {
       ? isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
       : undefined
     if (previouslyEnabled !== nowEnabled && nowEnabled !== undefined) {
-      unityInterface.SetVoiceChatEnabledByScene(nowEnabled)
+      getUnityInstance().SetVoiceChatEnabledByScene(nowEnabled)
       if (!nowEnabled) {
         // We want to stop any potential recordings when a user enters a new scene
         updateVoiceRecordingStatus(false)
@@ -89,17 +73,25 @@ function* listenToWhetherSceneSupportsVoiceChat() {
   })
 }
 
-function* establishCommunications() {
-  if (STATIC_WORLD) {
+function* userAuthentified() {
+  if (EDITOR) {
     return
   }
 
-  yield call(ensureRealmInitialized)
+  yield call(waitForRealmInitialized)
 
   const identity = yield select(getCurrentIdentity)
 
+  yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+  yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+  yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
+  yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
+  yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
+  yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
+  yield listenToWhetherSceneSupportsVoiceChat()
+
   yield put(establishingComms())
-  const context = yield connect(identity.address)
+  const context: Context | undefined = yield call(connect, identity.address)
   if (context !== undefined) {
     yield put(setWorldContext(context))
   }
@@ -123,7 +115,8 @@ function* updateVoiceChatMute(action: SetVoiceMute) {
 }
 
 function* updatePlayerVoiceRecording(action: VoiceRecordingUpdate) {
-  unityInterface.SetPlayerTalking(action.payload.recording)
+  yield call(waitForRendererInstance)
+  getUnityInstance().SetPlayerTalking(action.payload.recording)
 }
 
 function* changeRealm() {

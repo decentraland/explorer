@@ -2,6 +2,7 @@
 
 NODE = node
 COMPILER = $(NODE) --max-old-space-size=4096 node_modules/.bin/decentraland-compiler
+BUILD_ECS = $(NODE) --max-old-space-size=4096 node_modules/.bin/build-ecs
 CWD = $(shell pwd)
 
 # Remove default Makefile rules
@@ -13,32 +14,16 @@ CWD = $(shell pwd)
 SOURCE_SUPPORT_TS_FILES := $(wildcard scripts/*.ts)
 COMPILED_SUPPORT_JS_FILES := $(subst .ts,.js,$(SOURCE_SUPPORT_TS_FILES))
 
-ECS_CONFIG_DEPENDENCIES := packages/decentraland-ecs/package.json packages/decentraland-ecs/tsconfig.json
-
-DECENTRALAND_ECS_SOURCES := $(wildcard packages/decentraland-ecs/src/**/*.ts)
-DECENTRALAND_ECS_COMPILED_FILES := packages/decentraland-ecs/dist/src/index.js
-
-DECENTRALAND_ECS_TYPEDEF_FILE := packages/decentraland-ecs/types/dcl/index.d.ts
-
 SCENE_SYSTEM_SOURCES := $(wildcard static/systems/**/*.ts)
 SCENE_SYSTEM := static/systems/scene.system.js
 DECENTRALAND_LOADER := static/loader/lifecycle/worker.js
 GIF_PROCESSOR := static/gif-processor/worker.js
 INTERNAL_SCENES := static/systems/decentraland-ui.scene.js
-BUILD_ECS := packages/build-ecs/index.js
 VOICE_CHAT_CODEC_WORKER := static/voice-chat-codec/worker.js static/voice-chat-codec/audioWorkletProcessors.js
 
-config-contracts:
-	@echo 'Updating contracts...'
-	@node ./scripts/updateContracts.js
-	@echo 'Contracts updated!'
 
-scripts/%.js: $(SOURCE_SUPPORT_TS_FILES) scripts/tsconfig.json config-contracts
+scripts/%.js: $(SOURCE_SUPPORT_TS_FILES) scripts/tsconfig.json
 	@npx tsc --build scripts/tsconfig.json
-
-packages/build-ecs/%.js: packages/build-ecs/%.ts packages/build-ecs/tsconfig.json
-	@npx tsc --build packages/build-ecs/tsconfig.json
-	@chmod +x packages/build-ecs/index.js
 
 static/loader/lifecycle/worker.js: packages/decentraland-loader/**/*.ts
 	@$(COMPILER) targets/engine/loader.json
@@ -52,29 +37,16 @@ static/voice-chat-codec/worker.js: packages/voice-chat-codec/*.ts
 static/default-profile/contents:
 	@node ./static/default-profile/download_all.js
 
-static/systems/scene.system.js: $(DECENTRALAND_ECS_TYPEDEF_FILE) $(SCENE_SYSTEM_SOURCES) packages/scene-system/scene.system.ts
+static/systems/scene.system.js: $(SCENE_SYSTEM_SOURCES) packages/scene-system/scene.system.ts
 	@$(COMPILER) targets/engine/scene-system.json
 
 static/systems/decentraland-ui.scene.js: $(SCENE_SYSTEM) packages/ui/tsconfig.json packages/ui/decentraland-ui.scene.ts
 	@$(COMPILER) targets/engine/internal-scenes.json
 
-packages/decentraland-ecs/dist/src/index.js: $(DECENTRALAND_ECS_SOURCES) $(ECS_CONFIG_DEPENDENCIES)
-	@$(COMPILER) targets/engine/ecs.json
-
-packages/decentraland-ecs/types/dcl/index.d.ts: $(COMPILED_SUPPORT_JS_FILES) $(DECENTRALAND_ECS_COMPILED_FILES) $(ECS_CONFIG_DEPENDENCIES)
-	@cd $(PWD)/packages/decentraland-ecs; $(PWD)/node_modules/.bin/api-extractor run --typescript-compiler-folder "$(PWD)/node_modules/typescript" --local
-	@node ./scripts/buildEcsTypes.js
-	@npx prettier --write 'packages/decentraland-ecs/types/dcl/index.d.ts'
-	@touch $(DECENTRALAND_ECS_TYPEDEF_FILE)
-
-docs: $(DECENTRALAND_ECS_TYPEDEF_FILE) ## Generate `decentraland-ecs` documentation using @microsoft/api-documenter
-	@cd $(PWD)/packages/decentraland-ecs; $(PWD)/node_modules/.bin/api-documenter markdown -i types/dcl -o docs
-	@echo "\nAPI Documentation was generated in the packages/decentraland-ecs/docs folder"
-
 empty-parcels:
 	cd static/loader/empty-scenes && node generate_all.js
 
-build-essentials: $(COMPILED_SUPPORT_JS_FILES) dcl-amd $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(GIF_PROCESSOR) $(VOICE_CHAT_CODEC_WORKER) empty-parcels generate-mocks ## Build the basic required files for the explorer
+build-essentials: $(COMPILED_SUPPORT_JS_FILES) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(GIF_PROCESSOR) $(VOICE_CHAT_CODEC_WORKER) empty-parcels generate-mocks ## Build the basic required files for the explorer
 # Hellmap scenes
 
 HELLMAP_SOURCE_FILES := $(wildcard public/hell-map/*/game.ts)
@@ -109,7 +81,7 @@ public/ecs-scenes/%/game.js: $(ECS_LIBRARY) $(SCENE_SYSTEM) public/ecs-scenes/%/
 
 # All scenes together
 
-ecs-scenes: $(TEST_ECS_SCENE_GAMEJS_FILES) $(BUILD_ECS)
+ecs-scenes: $(TEST_ECS_SCENE_GAMEJS_FILES)
 	$(MAKE) generate-mocks
 
 test-scenes: $(TEST_SCENES_GAMEJS_FILES) $(HELLMAP_GAMEJS_FILES) $(TEST_ECS_SCENE_GAMEJS_FILES) ## Build the test scenes
@@ -117,24 +89,18 @@ test-scenes: $(TEST_SCENES_GAMEJS_FILES) $(HELLMAP_GAMEJS_FILES) $(TEST_ECS_SCEN
 
 # Entry points
 
-static/dist/%.js: build-essentials packages/entryPoints/%.ts
+static/%.js: build-essentials packages/entryPoints/%.ts
 	@$(COMPILER) $(word 2,$^)
 
 # Release
 
-DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/website.js
-DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/default-profile/contents
-DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
+DIST_ENTRYPOINTS := static/editor.js static/index.js
+DIST_STATIC_FILES := static/export.html static/preview.html static/default-profile/contents
 
 build-deploy: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(SCENE_SYSTEM) $(INTERNAL_SCENES) ## Build all the entrypoints needed for a deployment
 
 build-release: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(DIST_PACKAGE_JSON) ## Build all the entrypoints and run the `scripts/prepareDist` script
 	@node ./scripts/prepareDist.js
-
-publish: | build-release ## Release a new version, using the `scripts/npmPublish` script
-	@cd $(PWD)/packages/decentraland-ecs; node $(PWD)/scripts/npmPublish.js
-	@cd $(PWD)/packages/build-ecs; node $(PWD)/scripts/npmPublish.js
-	@cd $(PWD)/static; node $(PWD)/scripts/npmPublish.js
 
 # Testing
 
@@ -190,36 +156,12 @@ SCENE_JSONS := $(PARCEL_SCENE_JSONS) $(ECS_SCENE_JSONS) $(HELLMAP_SCENE_JSONS)
 
 # CLI
 
-dcl-amd:
-	cd $(CWD)/packages/decentraland-amd; npm install; make build
-	mkdir -p packages/decentraland-ecs/artifacts
-	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
-	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
-	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
-
-npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
-	rm -rf packages/decentraland-ecs/artifacts || true
-	mkdir packages/decentraland-ecs/artifacts
-	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
-	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
-	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
-	ln -sf $(CWD)/packages/build-ecs/index.js packages/decentraland-ecs/artifacts/build-ecs.js
-	ln -sf $(CWD)/static/dist/preview.js packages/decentraland-ecs/artifacts/preview.js
-	ln -sf $(CWD)/static/dist/unityPreview.js packages/decentraland-ecs/artifacts/unityPreview.js
-	ln -sf $(CWD)/static/dist/editor.js packages/decentraland-ecs/artifacts/editor.js
-	ln -sf $(CWD)/static/preview.html packages/decentraland-ecs/artifacts/preview.html
-	ln -sf $(CWD)/static/fonts packages/decentraland-ecs/artifacts/fonts
-	ln -sf $(CWD)/static/images packages/decentraland-ecs/artifacts/images
-	ln -sf $(CWD)/node_modules/@dcl/unity-renderer packages/decentraland-ecs/artifacts/unity-renderer
-	ln -sf $(CWD)/static/default-profile packages/decentraland-ecs/artifacts/default-profile
-	ln -sf $(CWD)/static/unity-preview.html packages/decentraland-ecs/artifacts/unity-preview.html
-	cd packages/decentraland-ecs; npm link
+npm-link: build-essentials static/editor.js ## Run `npm link` to develop local scenes against this project
 	cd static; npm link
 
-watch-builder: build-essentials static/dist/editor.js ## Watch the files required for hacking with the builder
+watch-builder: build-essentials static/editor.js ## Watch the files required for hacking with the builder
 	@node_modules/.bin/concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,preview,unity,builder,server" \
-			"$(COMPILER) targets/engine/ecs.json --watch" \
+		-n "scene-system,internal-scenes,loader,builder,server" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
@@ -228,19 +170,17 @@ watch-builder: build-essentials static/dist/editor.js ## Watch the files require
 
 watch-cli: build-essentials ## Watch the files required for building the CLI
 	@node_modules/.bin/concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,preview,website,server" \
-			"$(COMPILER) targets/engine/ecs.json --watch" \
+		-n "scene-system,internal-scenes,loader,kernel,server" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
-			"$(COMPILER) targets/entryPoints/preview.json --watch" \
-			"$(COMPILER) targets/entryPoints/website.json --watch" \
+			"$(COMPILER) targets/entryPoints/index.json --watch" \
 			"node ./scripts/runTestServer.js --keep-open"
 
 # Aesthetics
 
 lint: ## Validate correct formatting and circular dependencies
-	@node_modules/.bin/madge packages/entryPoints/website.ts --circular --warning
+	@node_modules/.bin/madge packages/entryPoints/index.ts --circular --warning
 	@node_modules/.bin/madge packages --orphans --extensions ts --exclude '.+\.d.ts|.+/dist\/.+'
 	@node_modules/.bin/tslint --project tsconfig.json
 
@@ -250,17 +190,14 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 
 # Development
 
-watch: $(SOME_MAPPINGS) build-essentials static/dist/website.js ## Watch the files required for hacking the explorer
-	cd ../website && npm run start &
-	cd $(PWD);
+watch: $(SOME_MAPPINGS) build-essentials static/index.js ## Watch the files required for hacking the explorer
 	@NODE_ENV=development npx concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,website,test,simulator,server" \
-			"$(COMPILER) targets/engine/ecs.json --watch" \
+		-n "scene-system,internal-scenes,loader,basic-scenes,kernel,test,simulator,server" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
 			"$(COMPILER) targets/engine/loader.json --watch" \
 			"$(COMPILER) targets/scenes/basic-scenes.json --watch" \
-			"$(COMPILER) targets/entryPoints/website.json --watch" \
+			"$(COMPILER) targets/entryPoints/index.json --watch" \
 			"$(COMPILER) targets/test.json --watch" \
 			"node ./scripts/runPathSimulator.js" \
 			"node ./scripts/runTestServer.js --keep-open"
@@ -274,11 +211,9 @@ clean: ## Clean all generated files
 update-renderer:  ## Update the renderer
 	npm install @dcl/unity-renderer@latest
 
-post-install:  ## Link necessary files
-	cp -r node_modules/@dcl/unity-renderer static
 # Makefile
 
-.PHONY: help docs clean watch watch-builder watch-cli lint lint-fix generate-images test-ci test-docker update build-essentials build-deploy build-release update-renderer post-install config-contracts
+.PHONY: help docs clean watch watch-builder watch-cli lint lint-fix generate-images test-ci test-docker update build-essentials build-deploy build-release update-renderer
 .DEFAULT_GOAL := help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

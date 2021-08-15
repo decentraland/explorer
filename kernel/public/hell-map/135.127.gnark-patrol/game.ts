@@ -8,7 +8,7 @@ import {
   Animator,
   Component,
   Camera
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 // Coordinates of path to patrol
 const point1 = new Vector3(5, 0, 5)

@@ -9,7 +9,7 @@ import {
   Material,
   Color3,
   SphereShape
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const entity = new Entity()
 const mat1 = new Material()

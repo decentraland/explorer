@@ -1,6 +1,7 @@
-import { LifecycleManager, getServer } from '../manager'
+import { getServer } from '../manager'
 
-export function reloadScene(sceneId: string) {
-  const server: LifecycleManager = getServer()
+export async function reloadScene(sceneId: string) {
+  const server = getServer()
+  if (!server) return
   return server.reloadScene(sceneId)
 }

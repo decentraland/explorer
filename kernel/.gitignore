@@ -53,12 +53,7 @@ public/local-ipfs
 # ================================== #
 # Do not keep built definition types #
 # ================================== #
-packages/decentraland-ecs/types/dcl/*
-packages/decentraland-ecs/artifacts
-packages/decentraland-ecs/package-lock.json
 .tsbuildinfo
 
 **/*.js.lib
-public/build-ecs-libraries/**/*.d.ts
-public/build-ecs-libraries/**/*.js
 static/package-lock.json

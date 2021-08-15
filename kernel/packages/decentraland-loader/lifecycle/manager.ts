@@ -6,19 +6,17 @@ import future, { IFuture } from 'fp-future'
 import { TransportBasedServer } from 'decentraland-rpc/lib/host/TransportBasedServer'
 import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWorker'
 
-import { resolveUrl } from 'atomicHelpers/parseUrl'
-
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { getResourcesURL } from 'shared/location'
 
-import { DEBUG, parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
+import { parcelLimits, ENABLE_EMPTY_SCENES, LOS, getAssetBundlesBaseUrl } from 'config'
 
 import { ILand } from 'shared/types'
-import { getFetchContentServer, getCatalystServer } from 'shared/dao/selectors'
+import { getFetchContentServer, getCatalystServer, getSelectedNetwork } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { store } from 'shared/store/isolatedStore'
 
-declare const globalThis: StoreContainer & { workerManager: LifecycleManager }
+declare const globalThis: { workerManager: LifecycleManager }
 
 /*
  * The worker is set up on the first require of this file
@@ -67,14 +65,14 @@ export class LifecycleManager extends TransportBasedServer {
     const futures: IFuture<string>[] = []
     const missing: string[] = []
 
-    for (let id of parcels) {
-      let theFuture = this.positionToRequest.get(id)
+    for (let parcel of parcels) {
+      let theFuture = this.positionToRequest.get(parcel)
 
       if (!theFuture) {
         theFuture = future<string>()
-        this.positionToRequest.set(id, theFuture)
+        this.positionToRequest.set(parcel, theFuture)
 
-        missing.push(id)
+        missing.push(parcel)
       }
 
       futures.push(theFuture)
@@ -110,7 +108,7 @@ export class LifecycleManager extends TransportBasedServer {
 }
 
 let server: LifecycleManager
-export const getServer = () => server
+export const getServer = (): LifecycleManager | void => server
 
 export async function initParcelSceneWorker() {
   await ensureMetaConfigurationInitialized()
@@ -121,15 +119,14 @@ export async function initParcelSceneWorker() {
 
   server.enable()
 
-  const state = globalThis.globalStore.getState()
-  const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
+  const state = store.getState()
 
   const fullRootUrl = getResourcesURL('.')
 
   server.notify('Lifecycle.initialize', {
-    contentServer: DEBUG ? localServer : getFetchContentServer(state),
-    catalystServer: DEBUG ? localServer : getCatalystServer(state),
-    contentServerBundles: getAssetBundlesBaseUrl() + '/',
+    contentServer: getFetchContentServer(state),
+    catalystServer: getCatalystServer(state),
+    contentServerBundles: getAssetBundlesBaseUrl(getSelectedNetwork(state)) + '/',
     rootUrl: fullRootUrl,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],

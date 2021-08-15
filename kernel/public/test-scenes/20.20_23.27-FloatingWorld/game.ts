@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, Transform, Vector3, Quaternion, engine } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, Transform, Vector3, Quaternion, engine } from 'decentraland-ecs'
 
 const Bush_02 = new Entity()
 const gltfShape = new GLTFShape('models/Bush_02/Bush_02.glb')
@@ -12591,7 +12591,12 @@ const RockLarge_02_280 = new Entity()
 RockLarge_02_280.addComponentOrReplace(gltfShape_2)
 const transform_1258 = new Transform({
   position: new Vector3(47.459981933926684, 10.532292498501988, 13.909747402838487),
-  rotation: new Quaternion(-0.000009301408079743362, -0.000011333798537494465, -0.6343932840954575, -0.7730104532796498),
+  rotation: new Quaternion(
+    -0.000009301408079743362,
+    -0.000011333798537494465,
+    -0.6343932840954575,
+    -0.7730104532796498
+  ),
   scale: new Vector3(1, 1, 1)
 })
 RockLarge_02_280.addComponentOrReplace(transform_1258)
@@ -25113,7 +25118,12 @@ const FencePicketEnd_01_341 = new Entity()
 FencePicketEnd_01_341.addComponentOrReplace(gltfShape_61)
 const transform_2505 = new Transform({
   position: new Vector3(37.987726852920005, 19.480557640321987, 94.15189339885391),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_341.addComponentOrReplace(transform_2505)
@@ -25123,7 +25133,12 @@ const FencePicketEnd_01_342 = new Entity()
 FencePicketEnd_01_342.addComponentOrReplace(gltfShape_61)
 const transform_2506 = new Transform({
   position: new Vector3(37.987726852920005, 19.430213611326156, 94.22960137046736),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_342.addComponentOrReplace(transform_2506)
@@ -25133,7 +25148,12 @@ const FencePicketEnd_01_343 = new Entity()
 FencePicketEnd_01_343.addComponentOrReplace(gltfShape_61)
 const transform_2507 = new Transform({
   position: new Vector3(37.987726852920005, 19.364705000326246, 94.32997734207187),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_343.addComponentOrReplace(transform_2507)
@@ -25143,7 +25163,12 @@ const FencePicketEnd_01_344 = new Entity()
 FencePicketEnd_01_344.addComponentOrReplace(gltfShape_61)
 const transform_2508 = new Transform({
   position: new Vector3(37.987726852920005, 19.30061957648596, 94.41527901836507),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_344.addComponentOrReplace(transform_2508)
@@ -25153,7 +25178,12 @@ const FencePicketEnd_01_345 = new Entity()
 FencePicketEnd_01_345.addComponentOrReplace(gltfShape_61)
 const transform_2509 = new Transform({
   position: new Vector3(37.987726852920005, 19.22603230012535, 94.54774469074027),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_345.addComponentOrReplace(transform_2509)
@@ -25163,7 +25193,12 @@ const FencePicketEnd_01_346 = new Entity()
 FencePicketEnd_01_346.addComponentOrReplace(gltfShape_61)
 const transform_2510 = new Transform({
   position: new Vector3(37.987726852920005, 19.15636570167078, 94.6254266334228),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_346.addComponentOrReplace(transform_2510)
@@ -25173,7 +25208,12 @@ const FencePicketEnd_01_347 = new Entity()
 FencePicketEnd_01_347.addComponentOrReplace(gltfShape_61)
 const transform_2511 = new Transform({
   position: new Vector3(37.987726852920005, 19.42071032008178, 94.05308370331754),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_347.addComponentOrReplace(transform_2511)
@@ -25183,7 +25223,12 @@ const FencePicketEnd_01_348 = new Entity()
 FencePicketEnd_01_348.addComponentOrReplace(gltfShape_61)
 const transform_2512 = new Transform({
   position: new Vector3(37.987726852920005, 19.36477241928031, 93.96102728887007),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_348.addComponentOrReplace(transform_2512)
@@ -25193,7 +25238,12 @@ const FencePicketEnd_01_349 = new Entity()
 FencePicketEnd_01_349.addComponentOrReplace(gltfShape_61)
 const transform_2513 = new Transform({
   position: new Vector3(37.987726852920005, 19.285387407504068, 93.84734567554287),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_349.addComponentOrReplace(transform_2513)
@@ -25203,7 +25253,12 @@ const FencePicketEnd_01_350 = new Entity()
 FencePicketEnd_01_350.addComponentOrReplace(gltfShape_61)
 const transform_2514 = new Transform({
   position: new Vector3(37.987726852920005, 19.227685031108326, 93.76500063438709),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_350.addComponentOrReplace(transform_2514)
@@ -25213,7 +25268,12 @@ const FencePicketEnd_01_351 = new Entity()
 FencePicketEnd_01_351.addComponentOrReplace(gltfShape_61)
 const transform_2515 = new Transform({
   position: new Vector3(37.987726852920005, 19.167585686580214, 93.68000383323265),
-  rotation: new Quaternion(-6.123233995736766e-17, -0.9999999999999999, -1.3877787807814457e-17, 1.3866695599588098e-32),
+  rotation: new Quaternion(
+    -6.123233995736766e-17,
+    -0.9999999999999999,
+    -1.3877787807814457e-17,
+    1.3866695599588098e-32
+  ),
   scale: new Vector3(1, 1, 1)
 })
 FencePicketEnd_01_351.addComponentOrReplace(transform_2515)

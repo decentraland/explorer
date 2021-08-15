@@ -44,6 +44,7 @@ export type ProfileState = {
   userInfo: {
     [key: string]: ProfileUserInfo
   }
+  localProfileUploaded: boolean
 }
 
 export type RootProfileState = {

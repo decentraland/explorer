@@ -1,4 +1,4 @@
-import { UICanvas, UIContainerRect, Color4 } from 'decentraland-ecs/src'
+import { UICanvas, UIContainerRect, Color4 } from 'decentraland-ecs'
 
 //const SEND_ICON = './images/send-icon.png'
 

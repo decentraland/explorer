@@ -1,12 +1,10 @@
 // This file decides and loads the renderer of choice
 
-import { initShared } from 'shared'
-import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
 import { initializeRenderer } from 'shared/renderer/actions'
-import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
 import { CommonRendererOptions, loadUnity } from './loader'
 import type { UnityGame } from '@dcl/unity-renderer/src/index'
+import type { KernelOptions } from '@dcl/kernel-interface'
 
 import { initializeUnityEditor } from './wsEditorAdapter'
 import {
@@ -15,22 +13,39 @@ import {
   ReportFatalErrorWithUnityPayload
 } from 'shared/loading/ReportFatalError'
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
-
-declare const globalThis: StoreContainer & { Hls: any }
-// HLS is required to make video texture and streaming work in Unity
-globalThis.Hls = require('hls.js')
+import { store } from 'shared/store/isolatedStore'
+import defaultLogger from 'shared/logger'
+import { browserInterface } from './BrowserInterface'
 
 export type InitializeUnityResult = {
   container: HTMLElement
 }
 
-async function loadInjectedUnityDelegate(container: HTMLElement, options: CommonRendererOptions): Promise<UnityGame> {
-  const queryParams = new URLSearchParams(document.location.search)
+const rendererOptions: Partial<KernelOptions['rendererOptions']> = {}
 
-  ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
+const defaultOptions: CommonRendererOptions = {
+  onMessage(type: string, jsonEncodedMessage: string) {
+    let parsedJson = null
+    try {
+      parsedJson = JSON.parse(jsonEncodedMessage)
+    } catch (e) {
+      // we log the whole message to gain visibility
+      defaultLogger.error(e.message + ' messageFromEngine: ' + type + ' ' + jsonEncodedMessage)
+      throw e
+    }
+    // this is outside of the try-catch to enable V8 path optimizations
+    // keep the following line outside the `try`
+    browserInterface.handleUnityMessage(type, parsedJson)
+  }
+}
+
+async function loadInjectedUnityDelegate(container: HTMLElement): Promise<UnityGame> {
+  // Remove the following line after https://github.com/decentraland/unity-renderer/pull/974 gets merged
+  ;(globalThis as any).USE_UNITY_INDEXED_DB_CACHE = Promise.resolve(false)
 
   // inject unity loader
-  const { createWebRenderer } = await loadUnity(queryParams.get('renderer') || null, options)
+  const rootArtifactsUrl = rendererOptions.baseUrl || ''
+  const { createWebRenderer } = await loadUnity(rootArtifactsUrl, defaultOptions)
 
   preventUnityKeyboardLock()
 
@@ -62,24 +77,25 @@ async function loadInjectedUnityDelegate(container: HTMLElement, options: Common
 }
 
 /** Initialize engine using WS transport (UnityEditor) */
-async function loadWsEditorDelegate(container: HTMLElement, options: CommonRendererOptions): Promise<UnityGame> {
+async function loadWsEditorDelegate(container: HTMLElement): Promise<UnityGame> {
   const queryParams = new URLSearchParams(document.location.search)
 
-  return initializeUnityEditor(queryParams.get('ws')!, container, options)
+  return initializeUnityEditor(queryParams.get('ws')!, container, defaultOptions)
 }
 
 /** Initialize the injected engine in a container */
-export async function initializeUnity(container: HTMLElement): Promise<InitializeUnityResult> {
+export async function initializeUnity(options: KernelOptions['rendererOptions']): Promise<InitializeUnityResult> {
   const queryParams = new URLSearchParams(document.location.search)
 
-  initShared()
+  Object.assign(rendererOptions, options)
+  const { container } = rendererOptions
 
   if (queryParams.has('ws')) {
     // load unity renderer using WebSocket
-    globalThis.globalStore.dispatch(initializeRenderer(loadWsEditorDelegate, container))
+    store.dispatch(initializeRenderer(loadWsEditorDelegate, container))
   } else {
     // load injected renderer
-    globalThis.globalStore.dispatch(initializeRenderer(loadInjectedUnityDelegate, container))
+    store.dispatch(initializeRenderer(loadInjectedUnityDelegate, container))
   }
 
   await ensureUnityInterface()

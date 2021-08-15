@@ -1,9 +1,8 @@
 import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
 import defaultLogger from '../logger'
-import { unityInterface } from 'unity-interface/UnityInterface'
 import { ParcelIdentity } from './ParcelIdentity'
-import { Quaternion, Vector3 } from 'decentraland-ecs/src'
+import { Quaternion, Vector3 } from 'decentraland-ecs'
 import {
   gridToWorld,
   isWorldPositionInsideParcels,
@@ -11,6 +10,7 @@ import {
 } from '../../atomicHelpers/parcelScenePositions'
 import { lastPlayerPosition } from '../world/positionThings'
 import { browserInterface } from '../../unity-interface/BrowserInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 
 export enum Permission {
   ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE',
@@ -29,7 +29,7 @@ export class RestrictedActions extends ExposableAPI {
       return
     }
 
-    const base = parseParcelPosition(this.parcelIdentity.isPortableExperience ? "0,0" : this.getSceneData().scene.base)
+    const base = parseParcelPosition(this.parcelIdentity.isPortableExperience ? '0,0' : this.getSceneData().scene.base)
     const basePosition = new Vector3()
     gridToWorld(base.x, base.y, basePosition)
 
@@ -45,7 +45,7 @@ export class RestrictedActions extends ExposableAPI {
       return
     }
 
-    unityInterface.Teleport(
+    getUnityInstance().Teleport(
       {
         position,
         cameraTarget: cameraTarget ? basePosition.add(cameraTarget) : undefined
@@ -75,7 +75,7 @@ export class RestrictedActions extends ExposableAPI {
       return
     }
 
-    unityInterface.TriggerSelfUserExpression(emote.predefined)
+    getUnityInstance().TriggerSelfUserExpression(emote.predefined)
   }
 
   private getSceneData() {
@@ -93,7 +93,10 @@ export class RestrictedActions extends ExposableAPI {
   }
 
   private isPositionValid(position: Vector3) {
-    return this.parcelIdentity.isPortableExperience || isWorldPositionInsideParcels(this.getSceneData().scene.parcels, position)
+    return (
+      this.parcelIdentity.isPortableExperience ||
+      isWorldPositionInsideParcels(this.getSceneData().scene.parcels, position)
+    )
   }
 }
 

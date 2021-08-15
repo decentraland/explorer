@@ -1,7 +1,6 @@
-import { takeEvery, put, select } from 'redux-saga/effects'
+import { takeEvery, put, select, call } from 'redux-saga/effects'
 import { PayloadAction } from 'typesafe-actions'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
-import { RendererInterfaces } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -22,18 +21,17 @@ import { notifyStatusThroughChat } from 'shared/comms/chat'
 import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
 import { isValidExpression, validExpressions } from 'shared/apis/expressionExplainer'
-import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
-import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { findProfileByName, getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
 import { isFriend } from 'shared/friends/selectors'
 import { fetchHotScenes } from 'shared/social/hotScenes'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { realmToString } from 'shared/dao/utils/realmToString'
-
-declare const globalThis: RendererInterfaces & StoreContainer
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
+import { store } from 'shared/store/isolatedStore'
+import { waitForRendererInstance } from 'shared/renderer/sagas'
 
 interface IChatCommand {
   name: string
@@ -100,7 +98,8 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
 }
 
 function* handleReceivedMessage(action: MessageReceived) {
-  globalThis.unityInterface.AddMessageToChatWindow(action.payload)
+  yield call(waitForRendererInstance)
+  getUnityInstance().AddMessageToChatWindow(action.payload)
 }
 
 function* handleSendMessage(action: SendMessage) {
@@ -112,7 +111,8 @@ function* handleSendMessage(action: SendMessage) {
   if (message[0] === '/') {
     entry = handleChatCommand(message)
 
-    if (entry && entry.body.length === 0) { // Command is found but has no feedback message
+    if (entry && entry.body.length === 0) {
+      // Command is found but has no feedback message
       return
     }
 
@@ -142,7 +142,8 @@ function* handleSendMessage(action: SendMessage) {
     sendPublicChatMessage(entry.messageId, entry.body)
   }
 
-  globalThis.unityInterface.AddMessageToChatWindow(entry)
+  yield call(waitForRendererInstance)
+  getUnityInstance().AddMessageToChatWindow(entry)
 }
 
 function handleChatCommand(message: string) {
@@ -226,9 +227,7 @@ function initChatCommands() {
       changeToCrowdedRealm().then(
         ([changed, realm]) => {
           if (changed) {
-            notifyStatusThroughChat(
-              `Found a crowded realm to join. Welcome to the realm ${realmToString(realm)}!`
-            )
+            notifyStatusThroughChat(`Found a crowded realm to join. Welcome to the realm ${realmToString(realm)}!`)
           } else {
             notifyStatusThroughChat(`Already on most crowded realm for location. Nothing changed.`)
           }
@@ -246,10 +245,7 @@ function initChatCommands() {
         response = `Changing to Realm ${realmToString(realm)}...`
         // TODO: This status should be shown in the chat window
         catalystRealmConnected().then(
-          () =>
-            notifyStatusThroughChat(
-              `Changed realm successfuly. Welcome to the realm ${realmToString(realm)}!`
-            ),
+          () => notifyStatusThroughChat(`Changed realm successfuly. Welcome to the realm ${realmToString(realm)}!`),
           (e) => {
             const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
             notifyStatusThroughChat('Could not join realm.' + cause)
@@ -277,7 +273,7 @@ function initChatCommands() {
       .filter(([_, value]) => !!(value && value.user && value.user.userId))
       .filter(([uuid]) => userPose[uuid])
       .map(function ([uuid, value]) {
-        const name = getProfile(getGlobalState(), value.user?.userId!)?.name ?? 'unknown'
+        const name = getProfile(store.getState(), value.user?.userId!)?.name ?? 'unknown'
         const pos = { x: 0, y: 0 }
         worldToGrid(userPose[uuid], pos)
         return `  ${name}: ${pos.x}, ${pos.y}`
@@ -295,8 +291,7 @@ function initChatCommands() {
 
   addChatCommand('showfps', 'Show FPS counter', (message) => {
     fpsConfiguration.visible = !fpsConfiguration.visible
-    const unityWindow: any = window
-    fpsConfiguration.visible ? unityWindow.unityInterface.ShowFPSPanel() : unityWindow.unityInterface.HideFPSPanel()
+    fpsConfiguration.visible ? getUnityInstance().ShowFPSPanel() : getUnityInstance().HideFPSPanel()
 
     return {
       messageId: uuid(),
@@ -308,7 +303,7 @@ function initChatCommands() {
   })
 
   addChatCommand('getname', 'Gets your username', (message) => {
-    const currentUserProfile = getCurrentUserProfile(getGlobalState())
+    const currentUserProfile = getCurrentUserProfile(store.getState())
     if (!currentUserProfile) throw new Error('profileNotInitialized')
     return {
       messageId: uuid(),
@@ -337,14 +332,14 @@ function initChatCommands() {
 
       sendPublicChatMessage(uuid(), `␐${expression} ${time}`)
 
-      globalThis.unityInterface.TriggerSelfUserExpression(expression)
+      getUnityInstance().TriggerSelfUserExpression(expression)
 
       return {
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: ""
+        body: ''
       }
     }
   )
@@ -352,10 +347,10 @@ function initChatCommands() {
   let whisperFn = (expression: string) => {
     const [userName, message] = parseWhisperExpression(expression)
 
-    const currentUserId = getCurrentUserId(getGlobalState())
+    const currentUserId = getCurrentUserId(store.getState())
     if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(getGlobalState(), userName)
+    const user = findProfileByName(store.getState(), userName)
 
     if (!user || !user.userId) {
       return {
@@ -367,7 +362,7 @@ function initChatCommands() {
       }
     }
 
-    const _isFriend: ReturnType<typeof isFriend> = isFriend(globalThis.globalStore.getState(), user.userId)
+    const _isFriend: ReturnType<typeof isFriend> = isFriend(store.getState(), user.userId)
     if (!_isFriend) {
       return {
         messageId: uuid(),
@@ -378,7 +373,7 @@ function initChatCommands() {
       }
     }
 
-    globalThis.globalStore.dispatch(sendPrivateMessage(user.userId, message))
+    store.dispatch(sendPrivateMessage(user.userId, message))
 
     return {
       messageId: uuid(),
@@ -394,28 +389,16 @@ function initChatCommands() {
 
   addChatCommand('w', 'Send a private message to a friend', whisperFn)
 
-  addChatCommand('airdrop', 'fake an airdrop', () => {
-    const unityWindow: any = window
-    unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
-    return {
-      messageId: uuid(),
-      messageType: ChatMessageType.SYSTEM,
-      sender: 'Decentraland',
-      timestamp: Date.now(),
-      body: 'Faking airdrop...'
-    }
-  })
-
   function performSocialActionOnPlayer(
     username: string,
     actionBuilder: (usersId: string[]) => { type: string; payload: { playersId: string[] } },
     actionName: 'mute' | 'block' | 'unmute' | 'unblock'
   ) {
     let pastTense: string = actionName === 'mute' || actionName === 'unmute' ? actionName + 'd' : actionName + 'ed'
-    const currentUserId = getCurrentUserId(getGlobalState())
+    const currentUserId = getCurrentUserId(store.getState())
     if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(getGlobalState(), username)
+    const user = findProfileByName(store.getState(), username)
     if (user && user.userId) {
       // Cannot mute yourself
       if (username === currentUserId) {
@@ -428,7 +411,7 @@ function initChatCommands() {
         }
       }
 
-      globalThis.globalStore.dispatch(actionBuilder([user.userId]))
+      store.dispatch(actionBuilder([user.userId]))
 
       return {
         messageId: uuid(),
@@ -488,11 +471,12 @@ function initChatCommands() {
         let body = ''
         $.slice(0, 5).forEach((sceneInfo) => {
           const count = sceneInfo.realms.reduce((a, b) => a + b.usersCount, 0)
-          body += `${count} ${count > 1 ? 'users' : 'user'} @ ${sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
-            } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
-              (a, b) => a + `\n\t realm: ${realmToString(b)} users: ${b.usersCount}`,
-              ''
-            )}\n`
+          body += `${count} ${count > 1 ? 'users' : 'user'} @ ${
+            sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
+          } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
+            (a, b) => a + `\n\t realm: ${realmToString(b)} users: ${b.usersCount}`,
+            ''
+          )}\n`
         })
         notifyStatusThroughChat(body)
       },
@@ -509,10 +493,6 @@ function initChatCommands() {
       body: 'Looking for other players...'
     }
   })
-}
-
-function getGlobalState(): RootState {
-  return globalThis.globalStore.getState()
 }
 
 function parseWhisperExpression(expression: string) {

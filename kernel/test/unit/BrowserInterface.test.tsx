@@ -1,10 +1,7 @@
 import * as sinon from 'sinon'
 import { browserInterface } from '../../packages/unity-interface/BrowserInterface'
-import { StoreContainer } from '../../packages/shared/store/rootTypes'
 import * as actions from '../../packages/shared/profiles/actions'
 import { buildStore } from '../../packages/shared/store/store'
-
-declare const globalThis: StoreContainer
 
 describe('BrowserInterface tests', () => {
   describe('User profile tests', () => {

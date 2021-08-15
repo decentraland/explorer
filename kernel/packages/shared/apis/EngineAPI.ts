@@ -1,4 +1,4 @@
-import { IEventNames, IEvents } from 'decentraland-ecs/src/decentraland/Types'
+import { IEventNames, IEvents } from 'decentraland-ecs'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { ParcelSceneAPI } from '../../shared/world/ParcelSceneAPI'
 import { EntityAction } from '../types'

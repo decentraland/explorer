@@ -23,6 +23,10 @@ export const getCurrentUserProfile = (store: RootProfileState & RootSessionState
   return currentUserId ? getProfile(store, currentUserId) : null
 }
 
+export const isProfileUploadedToRenderer = (store: RootProfileState): boolean => {
+  return store.profiles.localProfileUploaded
+}
+
 export const getCurrentUserProfileStatusAndData = (
   store: RootProfileState & RootSessionState
 ): [ProfileStatus | undefined, Profile | undefined] => {

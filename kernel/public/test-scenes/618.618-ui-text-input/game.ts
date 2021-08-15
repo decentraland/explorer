@@ -1,4 +1,4 @@
-import { UICanvas, UIContainerRect, Color4, UIInputText, log, OnTextSubmit, OnChanged } from 'decentraland-ecs/src'
+import { UICanvas, UIContainerRect, Color4, UIInputText, log, OnTextSubmit, OnChanged } from 'decentraland-ecs'
 
 const ui = new UICanvas()
 
@@ -19,10 +19,10 @@ textInput.placeholder = 'Write message here'
 textInput.placeholderColor = Color4.Gray()
 textInput.positionX = '10%'
 textInput.positionY = '10px'
-textInput.onTextSubmit = new OnTextSubmit(x => {
+textInput.onTextSubmit = new OnTextSubmit((x) => {
   container.color = Color4.Red()
   log('submitted text! ' + x.text)
 })
-textInput.onChanged = new OnChanged(x => {
+textInput.onChanged = new OnChanged((x) => {
   log('text changed: ' + x.value)
 })

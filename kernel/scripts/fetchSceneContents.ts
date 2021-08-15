@@ -3,7 +3,7 @@
  *
  * Example: PARCEL='0,0' make fetchSceneContents
  *
- * The scene will be downloaded from https://peer.decentraland.org. This can be overriden with the CONTENT_SERVER_URL variable
+ * The scene will be downloaded from https://peer-lb.decentraland.org. This can be overriden with the CONTENT_SERVER_URL variable
  * The scene will be downloaded in the public/downloaded-scenes folder. This can be overriden with the OUTPUT_DIR variable
  */
 
@@ -14,7 +14,7 @@ import * as fs from 'fs'
 
 const sceneId = process.env.SCENE_ID
 const parcel = process.env.PARCEL
-const contentServerUrl = process.env.CONTENT_SERVER_URL ?? 'https://peer.decentraland.org'
+const contentServerUrl = process.env.CONTENT_SERVER_URL ?? 'https://peer-lb.decentraland.org'
 const outputRoot = process.env.OUTPUT_DIR ?? 'public/downloaded-scenes'
 
 const maxDownloads = parseInt(process.env.MAX_DOWNLOADS ?? '50')

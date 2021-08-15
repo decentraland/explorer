@@ -1,4 +1,19 @@
-import { Entity, BoxShape, engine, Vector3, Transform, Component, ISystem, Shape, GLTFShape, Animator, AnimationState, OnClick, NFTShape, Scalar} from 'decentraland-ecs/src'
+import {
+  Entity,
+  BoxShape,
+  engine,
+  Vector3,
+  Transform,
+  Component,
+  ISystem,
+  Shape,
+  GLTFShape,
+  Animator,
+  AnimationState,
+  OnClick,
+  NFTShape,
+  Scalar
+} from 'decentraland-ecs'
 
 @Component('Movement')
 export class PathMovement {
@@ -17,29 +32,32 @@ export class PathMovement {
 
 const movingCubes = engine.getComponentGroup(PathMovement)
 
-export class PingPongMovementSystem implements ISystem
-{
+export class PingPongMovementSystem implements ISystem {
   update(dt: number) {
     for (let cubeEntity of movingCubes.entities) {
       let transform = cubeEntity.getComponent(Transform)
       let movementData = cubeEntity.getComponent(PathMovement)
 
-      if(movementData.speed == 0 || movementData.waypoints.length < 2) continue
+      if (movementData.speed == 0 || movementData.waypoints.length < 2) continue
 
       movementData.lerpTime += dt * movementData.speed
 
       let reachedDestination = movementData.lerpTime >= 1
-      if(reachedDestination){
+      if (reachedDestination) {
         movementData.lerpTime = 1
       }
 
-      transform.position = Vector3.Lerp(movementData.waypoints[movementData.currentWaypoint], movementData.waypoints[movementData.targetWaypoint], movementData.lerpTime)
+      transform.position = Vector3.Lerp(
+        movementData.waypoints[movementData.currentWaypoint],
+        movementData.waypoints[movementData.targetWaypoint],
+        movementData.lerpTime
+      )
 
-      if(reachedDestination) {
+      if (reachedDestination) {
         movementData.lerpTime = 0
         movementData.currentWaypoint = movementData.targetWaypoint
 
-        if(this.shouldSwitchDirection(movementData)) {
+        if (this.shouldSwitchDirection(movementData)) {
           movementData.goingForward = !movementData.goingForward
         }
 
@@ -48,9 +66,11 @@ export class PingPongMovementSystem implements ISystem
     }
   }
 
-  shouldSwitchDirection (movementData: PathMovement) {
-    return  (movementData.goingForward && movementData.currentWaypoint == movementData.waypoints.length - 1) ||
-            (!movementData.goingForward && movementData.currentWaypoint == 0)
+  shouldSwitchDirection(movementData: PathMovement) {
+    return (
+      (movementData.goingForward && movementData.currentWaypoint == movementData.waypoints.length - 1) ||
+      (!movementData.goingForward && movementData.currentWaypoint == 0)
+    )
   }
 }
 let movementSystem = new PingPongMovementSystem()
@@ -62,7 +82,8 @@ export function configureShapeEntityPositions(waypointsPath: Vector3[], speed: n
   entity.addComponentOrReplace(
     new Transform({
       position: waypointsPath[0]
-    }))
+    })
+  )
 
   entity.addComponentOrReplace(new PathMovement(waypointsPath, speed))
 
@@ -70,20 +91,29 @@ export function configureShapeEntityPositions(waypointsPath: Vector3[], speed: n
   return entity
 }
 
-configureShapeEntityPositions([new Vector3(-3, 1, -8), new Vector3(35, 1, -8)], 0.2, new NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/558536'))
+configureShapeEntityPositions(
+  [new Vector3(-3, 1, -8), new Vector3(35, 1, -8)],
+  0.2,
+  new NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/558536')
+)
 configureShapeEntityPositions([new Vector3(8, 50, 8)], 0, new BoxShape())
 configureShapeEntityPositions([new Vector3(16, 1, 16)], 0, new BoxShape())
 configureShapeEntityPositions([new Vector3(-1, 1, 8), new Vector3(17, 1, 8)], 0.8, new BoxShape())
-configureShapeEntityPositions([new Vector3(8, 1, 16),
-          new Vector3(8, 1, 0),
-          new Vector3(8, 1, -16),
-          new Vector3(8, 1, -24),
-          new Vector3(24, 1, -24),
-          new Vector3(40, 1, -24),
-          new Vector3(40, 1, -40),
-          new Vector3(24, 1, -40),
-          new Vector3(24, 1, -24)
-        ], 0.7, new BoxShape())
+configureShapeEntityPositions(
+  [
+    new Vector3(8, 1, 16),
+    new Vector3(8, 1, 0),
+    new Vector3(8, 1, -16),
+    new Vector3(8, 1, -24),
+    new Vector3(24, 1, -24),
+    new Vector3(40, 1, -24),
+    new Vector3(40, 1, -40),
+    new Vector3(24, 1, -40),
+    new Vector3(24, 1, -24)
+  ],
+  0.7,
+  new BoxShape()
+)
 
 // PUSHABLE ANIMATED SHARK
 let sharkEntity = configureShapeEntityPositions([new Vector3(31.5, 1.2, -16)], 0.7, new GLTFShape('models/shark.gltf'))
@@ -94,7 +124,7 @@ sharkEntity.addComponent(animator)
 clipSwim.play()
 
 let sharkLeftMovementTrigger = new Entity()
-sharkLeftMovementTrigger.addComponentOrReplace(new BoxShape());
+sharkLeftMovementTrigger.addComponentOrReplace(new BoxShape())
 sharkLeftMovementTrigger.setParent(sharkEntity)
 sharkLeftMovementTrigger.addComponent(
   new Transform({
@@ -103,14 +133,14 @@ sharkLeftMovementTrigger.addComponent(
   })
 )
 sharkLeftMovementTrigger.addComponent(
-  new OnClick(e => {
+  new OnClick((e) => {
     sharkEntity.getComponent(Transform).position.x += 1
   })
 )
 engine.addEntity(sharkLeftMovementTrigger)
 
 let sharkRightMovementTrigger = new Entity()
-sharkRightMovementTrigger.addComponentOrReplace(new BoxShape());
+sharkRightMovementTrigger.addComponentOrReplace(new BoxShape())
 sharkRightMovementTrigger.setParent(sharkEntity)
 sharkRightMovementTrigger.addComponent(
   new Transform({
@@ -119,14 +149,14 @@ sharkRightMovementTrigger.addComponent(
   })
 )
 sharkRightMovementTrigger.addComponent(
-  new OnClick(e => {
+  new OnClick((e) => {
     sharkEntity.getComponent(Transform).position.x -= 1
   })
 )
 engine.addEntity(sharkRightMovementTrigger)
 
 let sharkVisibilityTrigger = new Entity()
-sharkVisibilityTrigger.addComponentOrReplace(new BoxShape());
+sharkVisibilityTrigger.addComponentOrReplace(new BoxShape())
 sharkVisibilityTrigger.setParent(sharkEntity)
 sharkVisibilityTrigger.addComponent(
   new Transform({
@@ -135,7 +165,7 @@ sharkVisibilityTrigger.addComponent(
   })
 )
 sharkVisibilityTrigger.addComponent(
-  new OnClick(e => {
+  new OnClick((e) => {
     let shapeComponent = sharkEntity.getComponent(GLTFShape)
     shapeComponent.visible = !shapeComponent.visible
   })
@@ -146,7 +176,7 @@ engine.addEntity(sharkVisibilityTrigger)
 let npcEntity = configureShapeEntityPositions([new Vector3(16, 0, 0)], 0.7, new GLTFShape('models/Avatar_Idle.glb'))
 
 let npcLeftMovementTrigger = new Entity()
-npcLeftMovementTrigger.addComponentOrReplace(new BoxShape());
+npcLeftMovementTrigger.addComponentOrReplace(new BoxShape())
 npcLeftMovementTrigger.setParent(npcEntity)
 npcLeftMovementTrigger.addComponent(
   new Transform({
@@ -155,14 +185,14 @@ npcLeftMovementTrigger.addComponent(
   })
 )
 npcLeftMovementTrigger.addComponent(
-  new OnClick(e => {
+  new OnClick((e) => {
     npcEntity.getComponent(Transform).position.x += 1
   })
 )
 engine.addEntity(npcLeftMovementTrigger)
 
 let npcRightMovementTrigger = new Entity()
-npcRightMovementTrigger.addComponentOrReplace(new BoxShape());
+npcRightMovementTrigger.addComponentOrReplace(new BoxShape())
 npcRightMovementTrigger.setParent(npcEntity)
 npcRightMovementTrigger.addComponent(
   new Transform({
@@ -171,14 +201,14 @@ npcRightMovementTrigger.addComponent(
   })
 )
 npcRightMovementTrigger.addComponent(
-  new OnClick(e => {
+  new OnClick((e) => {
     npcEntity.getComponent(Transform).position.x -= 1
   })
 )
 engine.addEntity(npcRightMovementTrigger)
 
 let npcVisibilityTrigger = new Entity()
-npcVisibilityTrigger.addComponentOrReplace(new BoxShape());
+npcVisibilityTrigger.addComponentOrReplace(new BoxShape())
 npcVisibilityTrigger.setParent(npcEntity)
 npcVisibilityTrigger.addComponent(
   new Transform({
@@ -187,7 +217,7 @@ npcVisibilityTrigger.addComponent(
   })
 )
 npcVisibilityTrigger.addComponent(
-  new OnClick(e => {
+  new OnClick((e) => {
     let shapeComponent = npcEntity.getComponent(GLTFShape)
     shapeComponent.visible = !shapeComponent.visible
   })

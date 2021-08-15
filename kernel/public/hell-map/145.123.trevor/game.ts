@@ -14,7 +14,7 @@ import {
   Material,
   PlaneShape,
   Color3
-} from 'decentraland-ecs/src'
+} from 'decentraland-ecs'
 
 const colors = ['#1dccc7', '#ffce00', '#9076ff', '#fe3e3e', '#3efe94', '#3d30ec', '#6699cc']
 
@@ -22,7 +22,7 @@ const colors = ['#1dccc7', '#ffce00', '#9076ff', '#fe3e3e', '#3efe94', '#3d30ec'
 // Custom components
 
 @Component('tileFlag')
-export class TileFlag { }
+export class TileFlag {}
 
 @Component('beat')
 export class Beat {
@@ -71,9 +71,9 @@ for (let i = 0; i < colors.length; i++) {
 
 // Add Tiles
 // tslint:disable-next-line:semicolon
-;[0, 1, 2, 3, 4].forEach(x => {
+;[0, 1, 2, 3, 4].forEach((x) => {
   // tslint:disable-next-line:semicolon
-  ;[0, 1, 2, 3, 4].forEach(z => {
+  ;[0, 1, 2, 3, 4].forEach((z) => {
     const tile = new Entity()
     tile.addComponent(new PlaneShape())
     tile.addComponent(

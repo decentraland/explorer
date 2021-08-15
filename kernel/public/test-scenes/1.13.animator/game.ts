@@ -1,6 +1,17 @@
-import { engine, BoxShape, Entity, Animator, ActionButton, OnPointerDown, Transform, Vector3, GLTFShape, AnimationState } from 'decentraland-ecs/src'
+import {
+  engine,
+  BoxShape,
+  Entity,
+  Animator,
+  ActionButton,
+  OnPointerDown,
+  Transform,
+  Vector3,
+  GLTFShape,
+  AnimationState
+} from 'decentraland-ecs'
 
-const createButton = (pos : number, hoverText : string, onClick : Function) => {
+const createButton = (pos: number, hoverText: string, onClick: Function) => {
   // Create box shape
   const boxShapeEntity = new Entity()
 
@@ -8,7 +19,7 @@ const createButton = (pos : number, hoverText : string, onClick : Function) => {
 
   boxShapeEntity.addComponent(
     new OnPointerDown(
-      e => {
+      (e) => {
         onClick()
       },
       { button: ActionButton.POINTER, hoverText: hoverText }

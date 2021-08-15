@@ -1,4 +1,3 @@
-import { setInterval } from 'timers'
 import {
   commConfigurations,
   parcelLimits,
@@ -54,8 +53,8 @@ import {
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
+import { ProfileForRenderer } from 'decentraland-ecs'
+import { renderStateObservable, isRendererEnabled, ensureRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseConnectionConfig, LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
@@ -65,7 +64,7 @@ import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selec
 import { Realm } from 'shared/dao/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
-import { store } from 'shared/store/store'
+import { store } from 'shared/store/isolatedStore'
 import {
   setCatalystRealmCommsStatus,
   setCatalystRealm,
@@ -79,7 +78,7 @@ import { realmToString } from '../dao/utils/realmToString'
 import { trackEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getBannedUsers, getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { getBannedUsers, getCommsConfig } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import {
   BringDownClientAndShowError,
@@ -103,7 +102,7 @@ import future, { IFuture } from 'fp-future'
 import { getProfileType } from 'shared/profiles/getProfileType'
 import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { isURL } from 'atomicHelpers/isURL'
 import { RootCommsState, VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
@@ -205,11 +204,11 @@ export class Context {
 
   public worldInstanceConnection: WorldInstanceConnection | null = null
 
-  profileInterval?: NodeJS.Timer
+  profileInterval?: ReturnType<typeof setInterval>
   positionObserver: any
   worldRunningObserver: any
-  infoCollecterInterval?: NodeJS.Timer
-  analyticsInterval?: NodeJS.Timer
+  infoCollecterInterval?: ReturnType<typeof setInterval>
+  analyticsInterval?: ReturnType<typeof setInterval>
 
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
 
@@ -308,7 +307,7 @@ export function updatePeerVoicePlaying(userId: string, playing: boolean) {
       }
     }
   }
-  unityInterface.SetUserTalking(userId, playing)
+  getUnityInstance().SetUserTalking(userId, playing)
 }
 
 export function updateVoiceCommunicatorVolume(volume: number) {
@@ -532,28 +531,28 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (context.sendingProfileResponse) return
 
   context.sendingProfileResponse = true
-    ; (async () => {
-      const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+  ;(async () => {
+    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
-      // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
-      if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
-        await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
-      }
+    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+    }
 
-      const profile = await ProfileAsPromise(
-        myAddress,
-        message.data.version ? parseInt(message.data.version, 10) : undefined,
-        getProfileType(myIdentity)
-      )
+    const profile = await ProfileAsPromise(
+      myAddress,
+      message.data.version ? parseInt(message.data.version, 10) : undefined,
+      getProfileType(myIdentity)
+    )
 
-      if (context.currentPosition) {
-        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
-      }
+    if (context.currentPosition) {
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+    }
 
-      context.lastProfileResponseTime = Date.now()
-    })()
-      .finally(() => (context.sendingProfileResponse = false))
-      .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+    context.lastProfileResponseTime = Date.now()
+  })()
+    .finally(() => (context.sendingProfileResponse = false))
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
@@ -578,7 +577,7 @@ function isBlockedOrBanned(profile: Profile, bannedUsers: BannedUsers, userId: s
 
 function isBannedFromChat(bannedUsers: BannedUsers, userId: string): boolean {
   const bannedUser = bannedUsers[userId]
-  return bannedUser && bannedUser.some(it => it.type === 'VOICE_CHAT_AND_CHAT' && it.expiration > Date.now())
+  return bannedUser && bannedUser.some((it) => it.type === 'VOICE_CHAT_AND_CHAT' && it.expiration > Date.now())
 }
 
 function isBlocked(profile: Profile, userId: string): boolean {
@@ -1051,20 +1050,14 @@ export async function connect(userId: string) {
     context = new Context(userInfo)
     context.worldInstanceConnection = connection
 
-    if (isRendererEnabled()) {
-      await startCommunications(context)
-    } else {
-      onNextRendererEnabled(async () => {
-        try {
-          await startCommunications(context!)
-        } catch (e) {
-          disconnect()
-          defaultLogger.error(`error while trying to establish communications `, e)
-          ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
-          BringDownClientAndShowError(ESTABLISHING_COMMS)
-        }
+    ensureRendererEnabled()
+      .then(() => startCommunications(context!))
+      .catch((e) => {
+        disconnect()
+        defaultLogger.error(`error while trying to establish communications `, e)
+        ReportFatalErrorWithCommsPayload(e, ErrorContext.COMMS_INIT)
+        BringDownClientAndShowError(ESTABLISHING_COMMS)
       })
-    }
 
     return context
   } catch (e) {
@@ -1170,8 +1163,8 @@ async function doStartCommunications(context: Context) {
       }, 60000) // Once per minute
     }
 
-    context.worldRunningObserver = renderStateObservable.add((isRunning) => {
-      onWorldRunning(isRunning)
+    context.worldRunningObserver = renderStateObservable.add(() => {
+      onWorldRunning(isRendererEnabled())
     })
 
     context.positionObserver = positionObservable.add((obj: Readonly<PositionReport>) => {
@@ -1202,7 +1195,7 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && isVoiceChatEnabledFor(store.getState(), context.userInfo.userId!)) {
+    if (!voiceCommunicator) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
@@ -1227,7 +1220,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
-        ; (globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
+      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     throw new ConnectionEstablishmentError(e.message)
@@ -1284,8 +1277,8 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
   }
 }
 
-export function sendToMordor(_context: Context | null = context) {
-  sendToMordorAsync().catch((e) => defaultLogger.warn(`error while sending message `, e))
+export async function sendToMordor(_context: Context | null = context) {
+  await sendToMordorAsync().catch((e) => defaultLogger.warn(`error while sending message `, e))
 }
 
 async function sendToMordorAsync(_context: Context | null = context) {

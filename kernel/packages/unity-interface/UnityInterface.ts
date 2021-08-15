@@ -1,8 +1,8 @@
-import { TeleportController } from 'shared/world/TeleportController'
 import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
-import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
+import { Vector3 } from 'decentraland-ecs'
+import { ProfileForRenderer, MinimapSceneInfo } from 'decentraland-ecs'
 import { AirdropInfo } from 'shared/airdrops/interface'
+import { HotSceneInfo, IUnityInterface, setUnityInstance } from './IUnityInterface'
 import {
   HUDConfiguration,
   InstancedSpawnPoint,
@@ -23,15 +23,14 @@ import {
   WorldPosition
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
-import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
-import { renderStateObservable } from '../shared/world/worldState'
 import { BuilderAsset, DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { QuestForRenderer } from '@dcl/ecs-quests/@dcl/types'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { WearableV2 } from 'shared/catalogs/types'
-import { Observable } from 'decentraland-ecs/src'
+import { Observable } from 'mz-observable'
+import type { UnityGame } from '@dcl/unity-renderer/src'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -56,9 +55,8 @@ function resizeCanvas(targetHeight: number) {
   }
 }
 
-export class UnityInterface {
-  public debug: boolean = false
-  public gameInstance: any
+export class UnityInterface implements IUnityInterface {
+  public gameInstance!: UnityGame
   public Module: any
   public currentHeight: number = -1
   public crashPayloadResponseObservable: Observable<string> = new Observable<string>()
@@ -76,7 +74,7 @@ export class UnityInterface {
     resizeCanvas(height)
   }
 
-  public Init(gameInstance: any): void {
+  public Init(gameInstance: UnityGame): void {
     if (!WSS_ENABLED) {
       nativeMsgBridge.initNativeMessages(gameInstance)
     }
@@ -138,7 +136,6 @@ export class UnityInterface {
   ) {
     const theY = y <= 0 ? 2 : y
 
-    TeleportController.ensureTeleportAnimation()
     this.SendMessageToUnity('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
     if (cameraTarget || rotateIfTargetIsNotSet) {
       this.SendMessageToUnity('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
@@ -215,21 +212,15 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'ActivateRendering')
   }
 
-  public SetLoadingScreen(data: {
-    isVisible: Boolean,
-    message: string,
-    showWalletPrompt: boolean,
-    showTips: boolean
-  }) {
-    if (this.gameInstance === undefined) {
+  public SetLoadingScreen(data: { isVisible: boolean; message: string; showTips: boolean }) {
+    if (!this.gameInstance) {
       return
     }
 
-    this.SendMessageToUnity('Bridges', "SetLoadingScreen", JSON.stringify(data))
+    this.SendMessageToUnity('Bridges', 'SetLoadingScreen', JSON.stringify(data))
   }
 
   public DeactivateRendering() {
-    renderStateObservable.notifyObservers(false)
     this.SendMessageToUnity('Main', 'DeactivateRendering')
   }
 
@@ -428,7 +419,11 @@ export class UnityInterface {
   }
 
   public SendBuilderProjectInfo(projectName: string, projectDescription: string, isNewEmptyProject: boolean) {
-    this.SendMessageToUnity('Main', 'BuilderProjectInfo', JSON.stringify({ title: projectName, description: projectDescription, isNewEmptyProject: isNewEmptyProject }))
+    this.SendMessageToUnity(
+      'Main',
+      'BuilderProjectInfo',
+      JSON.stringify({ title: projectName, description: projectDescription, isNewEmptyProject: isNewEmptyProject })
+    )
   }
 
   public SendBuilderCatalogHeaders(headers: Record<string, string>) {
@@ -586,4 +581,4 @@ export class UnityInterface {
   }
 }
 
-export let unityInterface: UnityInterface = new UnityInterface()
+setUnityInstance(new UnityInterface())

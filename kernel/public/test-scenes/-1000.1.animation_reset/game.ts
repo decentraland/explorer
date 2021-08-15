@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs'
 
 function makeGLTF(src: string, position: Vector3) {
   const ent = new Entity()
@@ -25,10 +25,9 @@ const clip2 = new AnimationState('shark_skeleton_swim', {
 const animator = m1.getComponentOrCreate(Animator)
 animator.addClip(clip1)
 animator.addClip(clip2)
-clip1.reset();
+clip1.reset()
 clip1.play()
 clip2.play()
-
 
 let totalTime = 0
 
@@ -39,9 +38,9 @@ class AWaiterSystem {
     totalTime += dt
 
     if (totalTime > 2) {
-      clip1.reset();
-      clip2.reset();
-	  totalTime = 0;
+      clip1.reset()
+      clip2.reset()
+      totalTime = 0
     }
   }
 }

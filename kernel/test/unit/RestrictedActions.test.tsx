@@ -1,12 +1,11 @@
 import * as sinon from 'sinon'
-import { Vector3 } from 'decentraland-ecs/src'
-import { unityInterface } from '../../packages/unity-interface/UnityInterface'
+import { Vector3 } from 'decentraland-ecs'
+import { getUnityInstance } from '../../packages/unity-interface/IUnityInterface'
 import defaultLogger from '../../packages/shared/logger'
 import { Permission, RestrictedActions } from '../../packages/shared/apis/RestrictedActions'
 import { lastPlayerPosition } from '../../packages/shared/world/positionThings'
 
 describe('RestrictedActions tests', () => {
-
   afterEach(() => sinon.restore())
 
   const options = {
@@ -15,7 +14,7 @@ describe('RestrictedActions tests', () => {
     expose: sinon.stub(),
     notify: sinon.stub(),
     on: sinon.stub(),
-    getAPIInstance(name): any { }
+    getAPIInstance(name): any {}
   }
 
   describe('TriggerEmote tests', () => {
@@ -24,22 +23,17 @@ describe('RestrictedActions tests', () => {
     it('should trigger emote', async () => {
       mockLastPlayerPosition()
       mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
-      sinon
-        .mock(unityInterface)
-        .expects('TriggerSelfUserExpression')
-        .once()
-        .withExactArgs(emote)
+      sinon.mock(getUnityInstance()).expects('TriggerSelfUserExpression').once().withExactArgs(emote)
 
       const module = new RestrictedActions(options)
       await module.triggerEmote({ predefined: emote })
       sinon.verify()
     })
 
-
     it('should fail when scene does not have permissions', async () => {
       mockLastPlayerPosition()
       mockPermissionsWith()
-      sinon.mock(unityInterface).expects('TriggerSelfUserExpression').never()
+      sinon.mock(getUnityInstance()).expects('TriggerSelfUserExpression').never()
       sinon
         .mock(defaultLogger)
         .expects('error')
@@ -55,7 +49,7 @@ describe('RestrictedActions tests', () => {
       mockLastPlayerPosition(false)
       mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
 
-      sinon.mock(unityInterface).expects('TriggerSelfUserExpression').never()
+      sinon.mock(getUnityInstance()).expects('TriggerSelfUserExpression').never()
 
       sinon
         .mock(defaultLogger)
@@ -70,12 +64,11 @@ describe('RestrictedActions tests', () => {
   })
 
   describe('MovePlayerTo tests', () => {
-
     it('should move the player', async () => {
       mockLastPlayerPosition()
       mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
       sinon
-        .mock(unityInterface)
+        .mock(getUnityInstance())
         .expects('Teleport')
         .once()
         .withExactArgs({ position: { x: 8, y: 0, z: 1624 }, cameraTarget: undefined }, false)
@@ -95,7 +88,7 @@ describe('RestrictedActions tests', () => {
         .once()
         .withExactArgs('Error: Position is out of scene', { x: 21, y: 0, z: 1648 })
 
-      sinon.mock(unityInterface).expects('Teleport').never()
+      sinon.mock(getUnityInstance()).expects('Teleport').never()
 
       const module = new RestrictedActions(options)
 
@@ -106,7 +99,7 @@ describe('RestrictedActions tests', () => {
     it('should fail when scene does not have permissions', async () => {
       mockLastPlayerPosition()
       mockPermissionsWith()
-      sinon.mock(unityInterface).expects('Teleport').never()
+      sinon.mock(getUnityInstance()).expects('Teleport').never()
       sinon
         .mock(defaultLogger)
         .expects('error')
@@ -123,7 +116,7 @@ describe('RestrictedActions tests', () => {
       mockLastPlayerPosition(false)
       mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
 
-      sinon.mock(unityInterface).expects('Teleport').never()
+      sinon.mock(getUnityInstance()).expects('Teleport').never()
 
       sinon
         .mock(defaultLogger)
@@ -148,12 +141,7 @@ describe('RestrictedActions tests', () => {
   }
 
   function mockPermissionsWith(...permissions: Permission[]) {
-    sinon
-      .mock(options)
-      .expects('getAPIInstance')
-      .withArgs()
-      .once()
-      .returns(buildParcelIdentity(permissions))
+    sinon.mock(options).expects('getAPIInstance').withArgs().once().returns(buildParcelIdentity(permissions))
   }
 
   function buildParcelIdentity(permissions: Permission[] = []) {
@@ -176,5 +164,4 @@ describe('RestrictedActions tests', () => {
       }
     }
   }
-
 })
