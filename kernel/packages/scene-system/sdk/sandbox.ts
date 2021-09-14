@@ -1,3 +1,5 @@
+import { createRealmRec, createNewUnsafeRec } from '@dcl/es5-context'
+
 const whitelistES5: Array<keyof typeof global> = [
   'eval',
   'parseInt',
@@ -32,26 +34,42 @@ const whitelistES5: Array<keyof typeof global> = [
   'Infinity'
 ]
 
-const defer: (fn: Function) => void = (Promise.resolve().then as any).bind(Promise.resolve() as any)
+export const defer: (fn: Function) => void = (Promise.resolve().then as any).bind(Promise.resolve() as any)
 
-export async function customEval(code: string, context: any) {
-  let sandbox: any = {}
+export async function customEval(code: string, env: any, isPreview: boolean) {
+  // 1 if (!isPreview /* IN PROD WE RUN A FULL RUNTIME */) {
+  // 1   let sandbox: any = {}
+  // 1
+  // 1   let resultKey = 'SAFE_EVAL_' + Math.floor(Math.random() * 1000000)
+  // 1   sandbox[resultKey] = {}
+  // 1
+  // 1   const context = getES5Context(env)
+  // 1
+  // 1   Object.keys(context).forEach(function (key) {
+  // 1     sandbox[key] = context[key]
+  // 1   })
+  // 1
+  // 1   sandbox.window = sandbox
+  // 1   sandbox.self = sandbox
+  // 1
+  // 1   return defer(() => new Function('code', `with (this) { ${code} }`).call(sandbox, code))
+  // 1 } else {
 
-  let resultKey = 'SAFE_EVAL_' + Math.floor(Math.random() * 1000000)
-  sandbox[resultKey] = {}
+  const rec = createRealmRec(createNewUnsafeRec(globalThis))
 
-  Object.keys(context).forEach(function(key) {
-    sandbox[key] = context[key]
-  })
+  rec.safeGlobal.globalThis = rec.safeGlobal
+  rec.safeGlobal.global = rec.safeGlobal
 
-  sandbox.window = sandbox
-  sandbox.self = sandbox
+  Object.assign(rec.safeGlobal, env)
 
-  return defer(() => new Function('code', `with (this) { ${code} }`).call(sandbox, code))
+  const newCode = code + ';\n//# sourceURL=game.js'
+
+  rec.safeEval(newCode)
+  // 1 }
 }
 
 export function getES5Context(base: Record<string, any>) {
-  whitelistES5.forEach($ => (base[$] = global[$]))
+  whitelistES5.forEach(($) => (base[$] = global[$]))
 
   return base
 }

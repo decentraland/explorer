@@ -18,7 +18,7 @@ export class DevToolsAdapter {
       type: 'log',
       timestamp: this.now,
       executionContextId: 0,
-      args: args.map($ => {
+      args: args.map(($) => {
         let value = undefined
         let unserializableValue = undefined
         const type = typeof $
@@ -56,13 +56,8 @@ export class DevToolsAdapter {
 
     try {
       value = JSON.stringify(e)
-      if (value === "{}" && e instanceof Error) {
-        // most Error objects serialize to empty objects
-        value = JSON.stringify({
-          message: e.message,
-          name: e.name,
-          stack: e.stack
-        })
+      if (value === '{}' && e instanceof Error) {
+        unserializableValue = e.stack
       }
     } catch (error) {
       unserializableValue = e.toString()
@@ -77,7 +72,7 @@ export class DevToolsAdapter {
     const param: Protocol.Runtime.ExceptionThrownEvent = {
       timestamp: this.now,
       exceptionDetails: {
-        text: e.toString() + '\n' + e.stack,
+        text: e.stack || e.toString(),
         exceptionId,
         columnNumber: 0,
         lineNumber: 0,

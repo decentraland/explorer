@@ -26,6 +26,7 @@ import type {
   OpenNFTDialogPayload
 } from 'shared/types'
 import { generatePBObject } from './Utils'
+import { getDclEnvironment } from './environment'
 
 const dataUrlRE = /^data:[^/]+\/[^;]+;base64,/
 const blobRE = /^blob:http/
@@ -531,7 +532,7 @@ export abstract class SceneRuntime extends Script {
       }
 
       try {
-        await this.runCode((source as any) as string, { dcl })
+        await this.runCode(source, getDclEnvironment(dcl))
 
         let modulesNotLoaded: string[] = []
 
